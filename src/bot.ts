@@ -1,5 +1,3 @@
-// @ts-ignore
-
 const {Client, Intents} = require("discord.js");
 
 export class Bot {
@@ -15,4 +13,5 @@ export class Bot {
         // Login to Discord with your client's token
          await client.login(process.env.TOKEN);
     }
+
 }
