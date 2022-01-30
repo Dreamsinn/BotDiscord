@@ -25,6 +25,7 @@
     "test": "jest --runInBand",
     "test:silent": "jest --silent --runInBand",
     "serve": "ts-node-dev --respawn ./src/main.ts",
+    "down": "ts-node-dev --respawn ./src/disconect.ts",
     "pritier": "pretty-quick --pattern '**/*.*(js|ts|json|yaml)'"
   },
   "devDependencies": {
