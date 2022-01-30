@@ -4,6 +4,7 @@ export class Bot {
      client: any;
      async CreateClient() {
         // Create a new client instance
+        // intents -> BOTS PERMISSIONS IN SERVER
          this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] });
 
         // When the client is ready, run this code (only once)

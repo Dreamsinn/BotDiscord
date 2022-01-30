@@ -4,15 +4,19 @@ import {CommandOutput} from "../domain/interfaces/commandOutput";
 import {MessageEmbed} from "discord.js";
 
 export class ReplyCommand {
-    schema: DiscordRequestRepo = replyCommandSchema;
+    replySchema: DiscordRequestRepo = replyCommandSchema;
 
-    public async call (event) : Promise<any> {
-        console.log('ReplyCommand se ha ejecutado')
-        this.schema.aliases.forEach(alias => {
+    public async call (event) : Promise<CommandOutput> {
+        console.log('ReplyCommand executed')
+        this.replySchema.aliases.forEach(alias => {
             if (event.content.startsWith(alias) || event.content.includes( ` ${alias} `)){
-                console.log('se ha encontrado alias')
+
+                console.log('alias founded')
+
                 const embed = this.embedConstructor(event, alias);
-                console.log('embed construido')
+
+                console.log('embed builded')
+
                 const output: CommandOutput = {
                     content: `${event.author.username} a dicho: ${event.content}!`,
                     embeds: [embed],
@@ -36,13 +40,10 @@ export class ReplyCommand {
     private mapAliases(alias){
         console.log(alias)
         if (alias.charAt(alias.length -1) === ' '){
-            console.log('alias con espacio', alias)
             const aliasModified = alias.slice(0, -1);
-            console.log('alias modificado', aliasModified)
             return replyCommandOptions[aliasModified];
         }
 
-        console.log('cinco', replyCommandOptions['cinco'])
         return replyCommandOptions[alias];
     }
 }

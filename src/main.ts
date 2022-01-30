@@ -1,13 +1,12 @@
 import {Bot} from "./bot";
 import * as dotenv from 'dotenv';
-import {MessageEmbed} from "discord.js";
 import {CommandHandler} from "./commands/commandHandler";
 
 dotenv.config();
 
 async function server () {
     // TODO crear 1 cliente por servidor (a futuro)
-    console.log('inicia')
+    console.log('start')
     const client = new Bot();
     await client.CreateClient();
     console.log('client created')
