@@ -1,6 +1,6 @@
 export interface DiscordRequestRepo {
     aliases: string[],
-    cooldown?: number,
+    coolDown?: number,
     devOnly?: boolean,
     description: string,
     category: string,

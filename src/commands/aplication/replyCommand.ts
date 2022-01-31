@@ -2,14 +2,23 @@ import {DiscordRequestRepo} from "../domain/interfaces/discordRequestRepo";
 import {replyCommandSchema} from "../domain/commandSchema/replyCommandSchema";
 import {CommandOutput} from "../domain/interfaces/commandOutput";
 import {MessageEmbed} from "discord.js";
+import {CoolDown} from "./utils/coolDown";
 
 export class ReplyCommand {
     replySchema: DiscordRequestRepo = replyCommandSchema;
+    coolDown = new CoolDown();
 
     public async call (event) : Promise<CommandOutput> {
         console.log('ReplyCommand executed')
         this.replySchema.aliases.forEach(alias => {
             if (event.content.startsWith(alias) || event.content.includes( ` ${alias} `)){
+                if (this.replySchema.coolDown !== 0){
+                    const interrupt = this.coolDown.call(this.replySchema.coolDown);
+                    if(interrupt){
+                        console.log('command interrupted by cooldown')
+                        return
+                    }
+                }
 
                 console.log('alias founded')
 

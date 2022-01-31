@@ -11,12 +11,11 @@ async function server () {
     await client.CreateClient();
     console.log('client created')
 
+    const commandHandler = new CommandHandler();
+
     client.client.on('messageCreate', async event => {
         if (event.author.bot) return false;
-
-        const commandHandler = new CommandHandler();
         return await commandHandler.isCommand(event);
-
     });
 }
 

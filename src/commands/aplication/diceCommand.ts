@@ -2,13 +2,23 @@ import {DiscordRequestRepo} from "../domain/interfaces/discordRequestRepo";
 import {DiceCommandSchema} from "../domain/commandSchema/diceCommandSchema";
 import {MessageEmbed} from "discord.js";
 import {CommandOutput} from "../domain/interfaces/commandOutput";
+import {CoolDown} from "./utils/coolDown";
 
 export class DiceCommand {
     diceSchema: DiscordRequestRepo = DiceCommandSchema;
+    coolDown = new CoolDown();
 
     public async call (event){
         const D_position = event.content.search(`${this.diceSchema.aliases[0]}`);
         if (Number(event.content.substring(D_position +1))){
+            if (this.diceSchema.coolDown !== 0){
+                const interrupt = this.coolDown.call(this.diceSchema.coolDown);
+                if(interrupt){
+                    console.log('command interrupted by cooldown')
+                    return
+                }
+            }
+
             let diceNumber: number = 1;
             if (Number(event.content.substring(0, D_position))){
                 diceNumber = event.content.substring(0, D_position);
@@ -21,7 +31,6 @@ export class DiceCommand {
             }
 
             const embed = this.mapRollString(diceNumber, diceFaces);
-
             const output: CommandOutput = {
                 content: `${event.author.username} a lanzado: ${diceNumber} dados de ${diceFaces} caras`,
                 embeds: [embed],
@@ -32,27 +41,27 @@ export class DiceCommand {
     }
 
     private mapRollString (diceNumber, diceFaces) {
-        let rollString = `${diceNumber} D${diceFaces}= `;
+        let rollString: string;
+        if(diceNumber = 1) {
+            rollString = ` D${diceFaces}= `;
+        } else {
+             rollString = `${diceNumber} D${diceFaces}= `;
+        }
 
         let diceTotal:number;
 
-        console.log('diceNumber', diceNumber)
         for (let i = 0; i <= diceNumber -1; i++){
             const roll = Math.floor(Math.random() * Number(`${diceFaces}`)) +1;
             if (i === 0){
-                console.log('se ejecuta una vez')
                 diceTotal = roll
                 rollString = rollString + (`${roll}`);
 
             } else {
-                console.log(`se executa ${i} veces`)
                 diceTotal = diceTotal + roll
                 rollString = rollString + (` + ${roll}`);
             }
 
         }
-
-        console.log('rollString', rollString)
 
         return this.embedConstructor(diceTotal, rollString);
     }
