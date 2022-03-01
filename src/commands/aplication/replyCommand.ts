@@ -57,11 +57,8 @@ export class ReplyCommand {
     }
 }
 
-
-
-
-
-
+//TODO 13 da undefined
+//TODO hacerlo un enum
 
 export const replyCommandOptions = {
     cinco: 'POR EL CULO TE LA HINCO',

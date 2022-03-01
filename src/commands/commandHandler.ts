@@ -1,12 +1,14 @@
 import {ReplyCommand, replyCommandOptions} from "./aplication/replyCommand";
 import {DiceCommand} from "./aplication/diceCommand";
+import {Route, routes} from "./routes";
 
 export class CommandHandler {
     diceCommand = new DiceCommand();
-    public async isCommand(event){
+    public async isCommand(event) {
         if (event.content.startsWith(`${process.env.PREFIX}`)){
             console.log('prefix founded')
-            return
+
+            return this.isPrefixCommand(event);
         }
 
         if (event.content.includes(`D`)){
@@ -22,8 +24,24 @@ export class CommandHandler {
                 return await replyCommand.call(event);
             }
         }
-
-        console.log('it is not a command', new Date)
+        console.log('it is not a command')
         return
+    }
+
+    private async isPrefixCommand(event){
+        let command: string;
+        if(event.content.includes(' ')){
+            const endCommandPosition = event.content.search(' ');
+            command = event.content.substring(1, endCommandPosition);
+        } else {
+            command = event.content.substring(1);
+        }
+        console.log(command)
+        for (const route of routes) {
+            if (route.alias.find(alias => alias === command)){
+                return route.command(event);
+            }
+        }
+        console.log('its not a command')
     }
 }

@@ -15,5 +15,4 @@ export class CoolDown {
         }
         this.lastCall = new Date();
     }
-
 }

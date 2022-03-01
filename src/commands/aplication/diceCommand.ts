@@ -8,7 +8,7 @@ export class DiceCommand {
     diceSchema: DiscordRequestRepo = DiceCommandSchema;
     coolDown = new CoolDown();
 
-    public async call (event){
+    public async call (event): Promise<CommandOutput> {
         const D_position = event.content.search(`${this.diceSchema.aliases[0]}`);
         if (Number(event.content.substring(D_position +1))){
             if (this.diceSchema.coolDown !== 0){
@@ -26,7 +26,7 @@ export class DiceCommand {
 
             const diceFaces: number = event.content.substring(D_position +1);
 
-            if (diceNumber >= 30 || diceFaces >= 10000){
+            if (diceNumber > 30 || diceFaces > 10000){
                 return this.rollLimitation(diceNumber, diceFaces, event);
             }
 
@@ -42,7 +42,7 @@ export class DiceCommand {
 
     private mapRollString (diceNumber, diceFaces) {
         let rollString: string;
-        if(diceNumber = 1) {
+        if(diceNumber === 1) {
             rollString = ` D${diceFaces}= `;
         } else {
              rollString = `${diceNumber} D${diceFaces}= `;
