@@ -5,10 +5,8 @@ Estructura del bot
 
 
 ======== Infrastructure ========
- - Conexion con la Api de discord
  - Conexion con otras API
  - Conexion con bd, si necesario
- - Ejecucion de comandos
 
 ========== Aplication ==========
  - Aplicacion de los comandos
@@ -21,4 +19,4 @@ Estructura del bot
 
 
 ========= ENCENDER BOT =========
-           yarn serve
+ - yarn serve
