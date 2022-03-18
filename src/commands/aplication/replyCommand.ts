@@ -16,13 +16,12 @@ export class ReplyCommand {
         this.replySchema.aliases.forEach(alias => {
             // mirar si se encuntra el alias al principio, o ente ' '
             if (event.content.startsWith(alias) || event.content.includes( ` ${alias} `)){
+
                 // mirar si cumple la condicion de coolDown
-                if (this.replySchema.coolDown !== 0){
-                    const interrupt = this.coolDown.call(this.replySchema.coolDown);
-                    if(interrupt){
-                        console.log('command interrupted by cooldown')
-                        return
-                    }
+                const interrupt = this.coolDown.call(this.replySchema.coolDown);
+                if(interrupt === 1){
+                    console.log('command interrupted by cooldown')
+                    return
                 }
 
                 console.log('alias founded')
@@ -63,13 +62,12 @@ export class ReplyCommand {
 }
 
 //TODO 13 da undefined
-//TODO hacerlo un enum
 
 export const replyCommandOptions = {
     cinco: 'POR EL CULO TE LA HINCO',
     5: 'POR EL CULO TE LA HINCO',
     trece: 'AGARRAMELA QUE ME CRECE',
-    3: 'AGARRAMELA QUE ME CRECE',
+    13: 'AGARRAMELA QUE ME CRECE',
     javi: 'HAMBURGESSA',
     // ino: 'PEPINO',
     // ano: 'AGARRAMELA CON LA MANO'

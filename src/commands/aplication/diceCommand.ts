@@ -14,12 +14,11 @@ export class DiceCommand {
         // si despues de la D es un numero
         if (Number(event.content.substring(D_position +1))){
             //comprobar coolDown
-            if (this.diceSchema.coolDown !== 0){
-                const interrupt = this.coolDown.call(this.diceSchema.coolDown);
-                if(interrupt){
-                    console.log('command interrupted by cooldown')
-                    return
-                }
+
+            const interrupt = this.coolDown.call(this.diceSchema.coolDown);
+            if(interrupt === 1){
+                console.log('command interrupted by cooldown')
+                return
             }
 
             let diceNumber: number = 1;
