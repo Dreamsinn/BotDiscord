@@ -10,8 +10,13 @@ export class ReplyCommand {
 
     public async call (event) : Promise<CommandOutput> {
         console.log('ReplyCommand executed')
+        // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
+        // per el cooldawn una funcio, o metodo que comprobes si te en ves de un if,
+        // concatenar if fa que sigui lios
         this.replySchema.aliases.forEach(alias => {
+            // mirar si se encuntra el alias al principio, o ente ' '
             if (event.content.startsWith(alias) || event.content.includes( ` ${alias} `)){
+                // mirar si cumple la condicion de coolDown
                 if (this.replySchema.coolDown !== 0){
                     const interrupt = this.coolDown.call(this.replySchema.coolDown);
                     if(interrupt){
@@ -21,7 +26,7 @@ export class ReplyCommand {
                 }
 
                 console.log('alias founded')
-
+                // construir el cuadro del mensaje
                 const embed = this.embedConstructor(event, alias);
 
                 console.log('embed builded')
