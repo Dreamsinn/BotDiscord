@@ -9,8 +9,11 @@ export class DiceCommand {
     coolDown = new CoolDown();
 
     public async call (event): Promise<CommandOutput> {
+        // buscar la posicion de la D
         const D_position = event.content.search(`${this.diceSchema.aliases[0]}`);
+        // si despues de la D es un numero
         if (Number(event.content.substring(D_position +1))){
+            //comprobar coolDown
             if (this.diceSchema.coolDown !== 0){
                 const interrupt = this.coolDown.call(this.diceSchema.coolDown);
                 if(interrupt){
@@ -20,16 +23,20 @@ export class DiceCommand {
             }
 
             let diceNumber: number = 1;
+            //mirar si antes de la D es nu numero
             if (Number(event.content.substring(0, D_position))){
+                // ese numero = numero dados
                 diceNumber = event.content.substring(0, D_position);
             }
 
             const diceFaces: number = event.content.substring(D_position +1);
 
+            // limire de cadas y dados
             if (diceNumber > 30 || diceFaces > 10000){
                 return this.rollLimitation(diceNumber, diceFaces, event);
             }
 
+            // construir mensaje
             const embed = this.mapRollString(diceNumber, diceFaces);
             const output: CommandOutput = {
                 content: `${event.author.username} a lanzado: ${diceNumber} dados de ${diceFaces} caras`,

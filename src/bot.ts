@@ -2,7 +2,7 @@ const {Client, Intents} = require("discord.js");
 
 export class Bot {
      client: any;
-     async CreateClient() {
+     async createClient() {
         // Create a new client instance
         // intents -> BOTS PERMISSIONS IN SERVER
          this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] });
