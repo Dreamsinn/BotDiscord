@@ -37,6 +37,7 @@ export class DiceCommand {
 
             // construir mensaje
             const embed = this.mapRollString(diceNumber, diceFaces);
+
             const output: CommandOutput = {
                 content: `${event.author.username} a lanzado: ${diceNumber} dados de ${diceFaces} caras`,
                 embeds: [embed],

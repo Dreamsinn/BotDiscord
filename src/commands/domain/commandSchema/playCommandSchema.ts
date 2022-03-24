@@ -3,7 +3,7 @@ const PlayCommandSchema = {
     coolDown: 0,
     devOnly: false,
     description: 'when run select the rest of the string and search it in youtube',
-    category: 'music',
+    category: 'prefix',
     name: 'play',
     usage: 'p',
     slash: {},

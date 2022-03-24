@@ -53,7 +53,7 @@ export class CommandHandler {
         for (const route of routes) {
             if (route.alias.find(alias => alias === command)){
                 // mirar si se encuentra el comando en los alias
-                return route.command(event);
+                return route.command.call(event);
             }
         }
         console.log('its not a command')

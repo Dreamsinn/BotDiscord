@@ -1,11 +1,11 @@
 import {DiscordRequestRepo} from "../domain/interfaces/discordRequestRepo";
-import {replyCommandSchema} from "../domain/commandSchema/replyCommandSchema";
+import {ReplyCommandSchema} from "../domain/commandSchema/replyCommandSchema";
 import {CommandOutput} from "../domain/interfaces/commandOutput";
 import {MessageEmbed} from "discord.js";
 import {CoolDown} from "./utils/coolDown";
 
 export class ReplyCommand {
-    replySchema: DiscordRequestRepo = replyCommandSchema;
+    replySchema: DiscordRequestRepo = ReplyCommandSchema;
     coolDown = new CoolDown();
 
     public async call (event) : Promise<CommandOutput> {
