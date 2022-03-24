@@ -2,7 +2,7 @@ const DiceCommandSchema = {
     aliases: ['D'],
     coolDown: 120,
     devOnly: false,
-    description: 'when YDX or DX, being Y and X a numbers, is written in discord chat it roles Y dice of X faces',
+    description: 'cuando YDX o DX, siendo Y e X numeros, es escrito en el chat se lanzan Y dados de X caras',
     category: 'dice',
     name: 'dice',
     usage: 'D',

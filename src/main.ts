@@ -23,6 +23,12 @@ async function server () {
         // si el autor del mensaje no es el bot
         return await commandHandler.isCommand(event);
     });
+
+    // client.client.on('messageReactionAdd', event => {
+    //     if(event.message.author.username === process.env.BOT_NAME){
+    //         console.log(event.message.embeds)
+    //     }
+    // });
 }
 
 server();

@@ -1,8 +1,8 @@
-const replyCommandSchema = {
+const ReplyCommandSchema = {
     aliases: ['cinco', '5', 'trece', '13', 'javi', 'ino ', 'ano '],
     coolDown: 0,
     devOnly: false,
-    description: 'when a alias is written in discord chat it makes a reply',
+    description: 'ofrece una respuesta cuando uno de los alias es escrito en el chat',
     category: 'test',
     name: 'reply',
     usage: 'cinco',
@@ -12,5 +12,5 @@ const replyCommandSchema = {
 }
 
 export {
-    replyCommandSchema
+    ReplyCommandSchema
 }

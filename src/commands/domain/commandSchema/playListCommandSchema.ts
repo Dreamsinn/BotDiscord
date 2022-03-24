@@ -3,7 +3,7 @@ const PlayListCommandSchema = {
     coolDown: 0,
     devOnly: false,
     description: 'show up list of music requested, paginated',
-    category: 'music',
+    category: 'prefix',
     name: 'playList',
     usage: 'playlist',
     slash: {},
