@@ -1,13 +1,17 @@
 import {ReplyCommand, replyCommandOptions} from "./aplication/replyCommand";
 import {DiceCommand} from "./aplication/diceCommand";
 import {Route, routes} from "./routes";
+import { DiceCommandSchema } from "./domain/commandSchema/diceCommandSchema";
 
 export class CommandHandler {
     diceCommand: DiceCommand
+    replyCommand: ReplyCommand
     constructor(
-         diceCommand: DiceCommand
+         diceCommand: DiceCommand,
+         replyCommand: ReplyCommand
     ) {
-        this.diceCommand = diceCommand
+        this.diceCommand = diceCommand;
+        this.replyCommand = replyCommand;
     }
     // per inversio de dependencies, pases la dependencia al constructor, la creas fora y poses una = la mateixa,
     // tambes necesitas crearlo a la primera pagian, ya que la inversio es recursiva fins al principi
@@ -20,7 +24,7 @@ export class CommandHandler {
             return this.isPrefixCommand(event);
         }
 
-        if (event.content.includes(`D`)){
+        if (event.content.includes(`${DiceCommandSchema.aliases[0]}`)){
             // si el comando tien D para dados
             console.log('contains D')
             return await this.diceCommand.call(event);
@@ -31,8 +35,7 @@ export class CommandHandler {
             console.log(event.content.includes(`${key}`), key)
             if(event.content.includes(`${key}`)){
                 console.log('is in replyCommandOptions')
-                const replyCommand = new ReplyCommand();
-                return await replyCommand.call(event);
+                return await this.replyCommand.call(event);
             }
         }
         console.log('it is not a command')
