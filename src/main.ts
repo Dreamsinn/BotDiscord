@@ -2,10 +2,12 @@ import {Bot} from "./bot";
 import * as dotenv from 'dotenv';
 import {CommandHandler} from "./commands/commandHandler";
 import {DiceCommand} from "./commands/aplication/diceCommand";
+import {ReplyCommand} from "./commands/aplication/replyCommand";
 
 dotenv.config();
 
 const diceCommand = new DiceCommand();
+const replyCommand = new ReplyCommand();
 
 async function server () {
     // TODO crear 1 cliente por servidor (a futuro)
@@ -15,7 +17,7 @@ async function server () {
     await client.createClient();
     console.log('client created')
 
-    const commandHandler = new CommandHandler(diceCommand);
+    const commandHandler = new CommandHandler(diceCommand, replyCommand);
 
 
     client.client.on('messageCreate', async event => {

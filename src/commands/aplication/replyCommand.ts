@@ -69,6 +69,7 @@ export const replyCommandOptions = {
     trece: 'AGARRAMELA QUE ME CRECE',
     13: 'AGARRAMELA QUE ME CRECE',
     javi: 'HAMBURGESSA',
+    hamburgessa: 'AMBULANCIA',
     // ino: 'PEPINO',
     // ano: 'AGARRAMELA CON LA MANO'
 }
