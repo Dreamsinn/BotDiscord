@@ -1,25 +1,25 @@
-import {DiscordRequestRepo} from "../domain/interfaces/discordRequestRepo";
-import {DiceCommandSchema} from "../domain/commandSchema/diceCommandSchema";
-import {MessageEmbed} from "discord.js";
-import {CommandOutput} from "../domain/interfaces/commandOutput";
-import {CoolDown} from "./utils/coolDown";
+import { DiscordRequestRepo } from "../domain/interfaces/discordRequestRepo";
+import { DiceCommandSchema } from "../domain/commandSchema/diceCommandSchema";
+import { MessageEmbed } from "discord.js";
+import { CommandOutput } from "../domain/interfaces/commandOutput";
+import { CoolDown } from "./utils/coolDown";
 
 export class DiceCommand {
     diceSchema: DiscordRequestRepo = DiceCommandSchema;
     coolDown = new CoolDown();
 
-    public async call (event): Promise<CommandOutput> {
+    public async call(event): Promise<CommandOutput> {
         // buscar la posicion de la D, y la de la , (-1 si no hay)
-        const {D_position, comma_position} = this.searchDandCommaPosition(event.content);
+        const { D_position, comma_position } = this.searchDandCommaPosition(event.content);
 
         // valida que la tirada sea correcta
-        if(this.checkValidRoll(event.content, D_position, comma_position)){
+        if (this.checkValidRoll(event.content, D_position, comma_position)) {
             return;
         }
 
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.diceSchema.coolDown);
-        if(interrupt === 1){
+        if (interrupt === 1) {
             console.log('command interrupted by cooldown')
             return;
         }
@@ -39,27 +39,27 @@ export class DiceCommand {
         const D_position = message.search(this.diceSchema.aliases[0]);
         const comma_position = message.search(this.diceSchema.usage);
 
-        return {D_position, comma_position}
+        return { D_position, comma_position }
     }
 
-    private checkValidRoll(message: string, D_position: number, comma_position: number){
+    private checkValidRoll(message: string, D_position: number, comma_position: number) {
         // que comience por D o numero
-        if(!Number(message.charAt(0)) && message.charAt(0) != 'D'){
+        if (!Number(message.charAt(0)) && message.charAt(0) != 'D') {
             return true;
         }
 
         // si incluye una , comprobar si antes de la coma hay un numero, repite el metodo para ver si el siguiente esta bien
-        if(comma_position != -1){
-            if(!Number(message.substring(D_position +1, comma_position))){
+        if (comma_position != -1) {
+            if (!Number(message.substring(D_position + 1, comma_position))) {
                 return true
             }
-            const modifiedMessage = message.substring(comma_position +2);
+            const modifiedMessage = message.substring(comma_position + 2);
             const newPossition = this.searchDandCommaPosition(modifiedMessage);
             return this.checkValidRoll(modifiedMessage, newPossition.D_position, newPossition.comma_position);
         }
 
         // despues de la D sea un numero
-        if (!Number(message.substring(D_position +1))){
+        if (!Number(message.substring(D_position + 1))) {
             return true;
         }
         return false;
@@ -72,9 +72,9 @@ export class DiceCommand {
         let modifiedMessage = message;
         let dice: string;
 
-        if(comma_position === -1){
+        if (comma_position === -1) {
             // sino hay ,
-            const {diceNumber, diceFaces} = this.numberOfDicesAndDicesFaces(message, D_position);
+            const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(message, D_position);
             diceNumberArray.push(diceNumber)
             diceFacesArray.push(diceFaces)
         } else {
@@ -94,46 +94,46 @@ export class DiceCommand {
     private numberOfDicesAndDicesFaces(message, D_position) {
         let diceNumber: number = 1;
         //mirar si antes de la D es un numero
-        if (Number(message.substring(0, D_position))){
+        if (Number(message.substring(0, D_position))) {
             // ese numero = numero dados
             diceNumber = Number(message.substring(0, D_position));
         }
 
-        const diceFaces: number = message.substring(D_position +1);
+        const diceFaces: number = message.substring(D_position + 1);
 
-        return {diceNumber, diceFaces}
+        return { diceNumber, diceFaces }
     }
 
-    private rolMultipleDices(message: string){
+    private rolMultipleDices(message: string) {
         // numero de comas
-        const numberOfCommas = message.split(this.diceSchema.usage).length -1;
+        const numberOfCommas = message.split(this.diceSchema.usage).length - 1;
         let modifiedMessage = message;
         let dice: string;
         const diceNumberArray: number[] = [];
         const diceFacesArray: number[] = [];
-        for(let i = 0; i <= numberOfCommas; i++){
-            if(i != numberOfCommas){
-                const {D_position, comma_position} = this.searchDandCommaPosition(modifiedMessage);
+        for (let i = 0; i <= numberOfCommas; i++) {
+            if (i != numberOfCommas) {
+                const { D_position, comma_position } = this.searchDandCommaPosition(modifiedMessage);
                 // dado = lo que haya antes de la coma
                 dice = modifiedMessage.substring(0, comma_position);
                 // nuevo mensage = todo lo que haya despues de la coma
-                modifiedMessage = modifiedMessage.substring(comma_position +1);
-                const {diceNumber, diceFaces} = this.numberOfDicesAndDicesFaces(dice, D_position);
+                modifiedMessage = modifiedMessage.substring(comma_position + 1);
+                const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(dice, D_position);
                 diceNumberArray.push(diceNumber)
                 diceFacesArray.push(diceFaces)
             } else {
                 // ultimo dado, destras de la ultima ,
-                const {D_position, comma_position} = this.searchDandCommaPosition(modifiedMessage);
+                const { D_position, comma_position } = this.searchDandCommaPosition(modifiedMessage);
                 dice = modifiedMessage;
-                const {diceNumber, diceFaces} = this.numberOfDicesAndDicesFaces(dice, D_position);
+                const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(dice, D_position);
                 diceNumberArray.push(diceNumber)
                 diceFacesArray.push(diceFaces)
             }
         }
-        return {diceNumberArray, diceFacesArray}
+        return { diceNumberArray, diceFacesArray }
     }
 
-    private rollLimitation (diceNumberArray: number[], diceFacesArray: number[], event){
+    private rollLimitation(diceNumberArray: number[], diceFacesArray: number[], event) {
         let numberOfFaces = 0;
         for (const value of diceNumberArray) {
             numberOfFaces += value;
@@ -141,7 +141,7 @@ export class DiceCommand {
 
         const maxNumberOfFaces = Math.max(...diceFacesArray)
 
-        if(numberOfFaces > 30 || maxNumberOfFaces > 10000){
+        if (numberOfFaces > 30 || maxNumberOfFaces > 10000) {
             const embed = new MessageEmbed()
                 .setColor('#0099ff')
                 .setTitle(`Tirada no permitida`)
@@ -154,24 +154,24 @@ export class DiceCommand {
         }
     }
 
-    private mapRollString (diceNumberArray: number[], diceFacesArray: number[]) {
+    private mapRollString(diceNumberArray: number[], diceFacesArray: number[]) {
         let total: number = 0;
         let rollStringSum: string;
 
         // mapear a string todos dados
-        for(let i = 0; i <= diceNumberArray.length -1; i++){
+        for (let i = 0; i <= diceNumberArray.length - 1; i++) {
             // numero de dados y caras a string
             let diceString: string;
-            if(diceNumberArray[i] === 1) {
+            if (diceNumberArray[i] === 1) {
                 diceString = `D${diceFacesArray[i]}= `;
             } else {
                 diceString = `${diceNumberArray[i]} D${diceFacesArray[i]}= `;
             }
 
             // numeros randoms, suma de estos, y el estring de las tiradas
-            const {rollString, diceTotal} = this.mapRandomNumberString(diceNumberArray[i], diceFacesArray[i], diceString);
+            const { rollString, diceTotal } = this.mapRandomNumberString(diceNumberArray[i], diceFacesArray[i], diceString);
 
-            if(i ===0 ){
+            if (i === 0) {
                 rollStringSum = `${rollString}\n`
             } else {
                 rollStringSum += `${rollString}\n`
@@ -184,9 +184,9 @@ export class DiceCommand {
 
     private mapRandomNumberString(diceNumber: number, diceFaces: number, rollString: string) {
         let diceTotal: number;
-        for (let i = 0; i <= diceNumber -1; i++){
-            const roll = Math.floor(Math.random() * Number(diceFaces)) +1;
-            if (i === 0){
+        for (let i = 0; i <= diceNumber - 1; i++) {
+            const roll = Math.floor(Math.random() * Number(diceFaces)) + 1;
+            if (i === 0) {
                 diceTotal = roll
                 rollString = rollString + (`${roll}`);
 
@@ -195,10 +195,10 @@ export class DiceCommand {
                 rollString = rollString + (` + ${roll}`);
             }
         }
-        return {rollString, diceTotal}
+        return { rollString, diceTotal }
     }
 
-    private embedConstructor(diceTotal, rollStringArray){
+    private embedConstructor(diceTotal, rollStringArray) {
         // construir embed
         const embed = new MessageEmbed()
             .setColor('#0099ff')
