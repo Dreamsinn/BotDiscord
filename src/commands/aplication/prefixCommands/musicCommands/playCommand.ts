@@ -7,10 +7,12 @@ import { CommandOutput } from "../../../domain/interfaces/commandOutput";
 import { discordEmojis } from "../../../domain/discordEmojis";
 import { playListRepository } from "../../../domain/interfaces/playListRepository";
 import { PlayListHandler } from "../../playListHandler"
+import { CoolDown } from "../../utils/coolDown";
 
 
 export class PlayCommand extends Command {
-    static playSchema: DiscordRequestRepo = PlayCommandSchema;
+    playSchema: DiscordRequestRepo = PlayCommandSchema;
+    coolDown = new CoolDown();
     youtubeSearch: YoutubeSearch;
     playListHandler: PlayListHandler;
 
@@ -29,11 +31,19 @@ export class PlayCommand extends Command {
             return;
         }
 
+        //comprobar coolDown
+        const interrupt = this.coolDown.call(this.playSchema.coolDown);
+        if (interrupt === 1) {
+            console.log('command interrupted by cooldown')
+            return;
+        }
+
         const song = event.content.substring(3)
 
         // si buscas por enlace
-        if (song.includes('https://www.youtube.com/watch?v') || song.includes('www.youtube.com/watch?v') || song.includes('youtube.com/watch?v')) {
+        if (song.includes('youtube.com/watch?v=')) {
             // TODO: que busque por enlace
+            return;
         } else {
             // si buscas por nombre de cancion
             return this.searchBySongName(song, event);
@@ -66,7 +76,7 @@ export class PlayCommand extends Command {
 
         const filter = (reaction) => {
             // si el autor es el mismo, y el mensaje contiene X, 0 o un numero entre 0 y las numero de opciones
-            return event.author.id === reaction.author.id && (reaction.content === 'x' || reaction.content === '0' || (Number(reaction.content) && Number(reaction.content) > 0 && Number(reaction.content) < numberChoices));
+            return event.author.id === reaction.author.id && (reaction.content === 'x' || (Number(reaction.content) && Number(reaction.content) > 0 && Number(reaction.content) < numberChoices));
         };
 
         message.channel.awaitMessages({ filter, time: 20000, max: 1 })
@@ -112,7 +122,7 @@ export class PlayCommand extends Command {
         let embedContent = '```js\n';
 
         data.forEach((item, i) => {
-            embedContent += `${i} - ${item.snippet.title}\n`
+            embedContent += `${i + 1} - ${item.snippet.title}\n`
         })
 
         embedContent += `${discordEmojis.x} - Cancel\n` + '```'
@@ -126,11 +136,16 @@ export class PlayCommand extends Command {
     }
 
     private updateToPlayList(collectedMessage, event, response) {
+        // numero marcado -1
+        const numberSelected = Number((collectedMessage.content) - 1)
+
         const newSong: playListRepository = {
-            songName: response.data.items[collectedMessage.content].snippet.title,
-            songId: response.data.items[collectedMessage.content].id.videoId,
-            channel: event.channel
+            songName: response.data.items[numberSelected].snippet.title,
+            songId: response.data.items[numberSelected].id.videoId,
+            channel: event.channel,
+            user: event.author
         }
+
         this.playListHandler.update(newSong);
     }
 }

@@ -6,7 +6,7 @@ export class YoutubeSearch implements YoutubeSearchRepository {
         const order = 'relevance';
         const part = 'snippet';
         // se le tendria que anyadir id a PART
-        const maxResults = '10';
+        const maxResults = '9';
         // se pone con coma
         const type = 'video,playlist'
 

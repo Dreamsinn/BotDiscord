@@ -44,9 +44,12 @@ export class PlayListHandler {
 
     private newSongToPlayListEmbed(newSong: playListRepository) {
 
+        console.log(newSong.user)
+
         const embed = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`${newSong.songName}`)
+            .setAuthor({ name: `${newSong.user.username}`, iconURL: `${newSong.user.displayAvatarURL()}` })
             .setURL(`https://www.youtube.com/watch?v=${newSong.songId}`)
 
         console.log(newSong.songId)
