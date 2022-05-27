@@ -1,25 +1,25 @@
-import {DiscordRequestRepo} from "../domain/interfaces/discordRequestRepo";
-import {ReplyCommandSchema} from "../domain/commandSchema/replyCommandSchema";
-import {CommandOutput} from "../domain/interfaces/commandOutput";
-import {MessageEmbed} from "discord.js";
-import {CoolDown} from "./utils/coolDown";
+import { DiscordRequestRepo } from "../domain/interfaces/discordRequestRepo";
+import { ReplyCommandSchema } from "../domain/commandSchema/replyCommandSchema";
+import { CommandOutput } from "../domain/interfaces/commandOutput";
+import { MessageEmbed } from "discord.js";
+import { CoolDown } from "./utils/coolDown";
 
 export class ReplyCommand {
     replySchema: DiscordRequestRepo = ReplyCommandSchema;
     coolDown = new CoolDown();
 
-    public async call (event) : Promise<CommandOutput> {
+    public async call(event): Promise<CommandOutput> {
         console.log('ReplyCommand executed')
         // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
         // per el cooldawn una funcio, o metodo que comprobes si te en ves de un if,
         // concatenar if fa que sigui lios
         this.replySchema.aliases.forEach(alias => {
             // mirar si se encuntra el alias al principio, o ente ' '
-            if (event.content.startsWith(alias) || event.content.includes( ` ${alias} `)){
+            if (event.content.startsWith(alias) || event.content.includes(` ${alias} `)) {
 
                 // mirar si cumple la condicion de coolDown
                 const interrupt = this.coolDown.call(this.replySchema.coolDown);
-                if(interrupt === 1){
+                if (interrupt === 1) {
                     console.log('command interrupted by cooldown')
                     return
                 }
@@ -40,7 +40,7 @@ export class ReplyCommand {
         return
     }
 
-    private embedConstructor(event, alias){
+    private embedConstructor(event, alias) {
         const replay = this.mapAliases(alias);
         const embed = new MessageEmbed()
             .setColor('#0099ff')
@@ -50,9 +50,9 @@ export class ReplyCommand {
         return embed
     }
 
-    private mapAliases(alias){
+    private mapAliases(alias) {
         console.log(alias)
-        if (alias.charAt(alias.length -1) === ' '){
+        if (alias.charAt(alias.length - 1) === ' ') {
             const aliasModified = alias.slice(0, -1);
             return replyCommandOptions[aliasModified];
         }

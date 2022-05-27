@@ -1,15 +1,15 @@
-import {Bot} from "./bot";
+import { Bot } from "./bot";
 import * as dotenv from 'dotenv';
-import {CommandHandler} from "./commands/commandHandler";
-import {DiceCommand} from "./commands/aplication/diceCommand";
-import {ReplyCommand} from "./commands/aplication/replyCommand";
+import { CommandHandler } from "./commands/commandHandler";
+import { DiceCommand } from "./commands/aplication/diceCommand";
+import { ReplyCommand } from "./commands/aplication/replyCommand";
 
 dotenv.config();
 
 const diceCommand = new DiceCommand();
 const replyCommand = new ReplyCommand();
 
-async function server () {
+async function server() {
     // TODO crear 1 cliente por servidor (a futuro)
     console.log('start')
     const client = new Bot();
