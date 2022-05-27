@@ -44,8 +44,6 @@ export class PlayListHandler {
 
     private newSongToPlayListEmbed(newSong: playListRepository) {
 
-        console.log(newSong.user)
-
         const embed = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`${newSong.songName}`)
@@ -59,7 +57,7 @@ export class PlayListHandler {
         //     { name: 'Cooldown', value: `${typeCommand[1].coolDown} ms`, inline: false },
         // )
 
-        // devuelve el embed y el numero de eleciones 
+        // devuelve el embed
         return embed;
     }
 
