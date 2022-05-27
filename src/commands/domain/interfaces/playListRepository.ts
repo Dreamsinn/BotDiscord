@@ -1,5 +1,6 @@
 export interface playListRepository {
     songName: string,
     songId: string,
-    channel: any
+    channel: any,
+    user: any
 }
