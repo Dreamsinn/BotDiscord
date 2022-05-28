@@ -8,14 +8,14 @@ import { discordEmojis } from "../../../domain/discordEmojis";
 import { newSongRepository } from "../../../domain/interfaces/playListRepository";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
-
+import { UsersUsingACommand } from "../../utils/usersUsingACommand"
 
 export class PlayCommand extends Command {
     playSchema: DiscordRequestRepo = PlayCommandSchema;
     coolDown = new CoolDown();
+    usersUsingACommand = UsersUsingACommand.usersUsingACommand;
     youtubeSearch: YoutubeSearch;
     playListHandler: PlayListHandler;
-    usersSearchingASong = [];
 
     constructor(
         youtubeSearch: YoutubeSearch,
@@ -28,13 +28,17 @@ export class PlayCommand extends Command {
 
     // si es menor que 3 esque tiene prefijo pero no contenido
     public async call(event) {
+        console.log('lista en play', this.usersUsingACommand.readUserList())
+
         // si el mensaje no es mas largo que "~p " no tiene contenido
         if (event.content.length < 3) {
             return;
         }
 
+
+
         // si el usurio esta en la array esque ha buscado una cancion pero aun no a resuelto el embed
-        if (this.usersSearchingASong.find((id) => id === event.author.id)) {
+        if (this.usersUsingACommand.searchIdInUserList(event.author.id)) {
             event.channel.send('Antes de buscar otra cancion, resuelve el mensaje anterio!')
             return;
         }
@@ -77,12 +81,13 @@ export class PlayCommand extends Command {
             embeds: [embed],
         }
 
-        this.usersSearchingASong.push(event.author.id)
+        this.usersUsingACommand.updateUserList(event.author.id)
 
         // enviar respuesta con opciones
         const message = await event.reply(output)
 
         const filter = (reaction) => {
+            console.log(console.log('lista en play', this.usersUsingACommand.readUserList()))
             // si el autor es el mismo, y el mensaje contiene X, 0 o un numero entre 0 y las numero de opciones
             return event.author.id === reaction.author.id && (reaction.content === 'x' || (Number(reaction.content) && Number(reaction.content) > 0 && Number(reaction.content) < numberChoices));
         };
@@ -96,7 +101,7 @@ export class PlayCommand extends Command {
                 if (collectedMessage.content === 'x') {
                     console.log('Search cancelled');
                     event.reply('Search cancelled');
-                    this.deleteUserFromSearchingSongArray(event.author.id)
+                    this.usersUsingACommand.removeUserList(event.author.id)
                     message.delete();
                     collectedMessage.delete();
                     return;
@@ -104,14 +109,14 @@ export class PlayCommand extends Command {
 
                 // si ningun caso anterior
                 this.updateToPlayList(collectedMessage, event, response);
-                this.deleteUserFromSearchingSongArray(event.author.id)
+                this.usersUsingACommand.removeUserList(event.author.id)
                 message.delete();
                 collectedMessage.delete();
             })
             .catch(() => {
                 // sino contesta
                 console.log(`No answer`);
-                this.deleteUserFromSearchingSongArray(event.author.id)
+                this.usersUsingACommand.removeUserList(event.author.id)
                 message.delete();
                 event.reply('Time out')
                 return;
@@ -122,7 +127,7 @@ export class PlayCommand extends Command {
 
     private deleteUserFromSearchingSongArray(userId: string) {
         // crea un nuevo array sin la id del usuario
-        this.usersSearchingASong = this.usersSearchingASong.filter((id: string) => id !== userId)
+        // this.usersUsingACommand = this.usersUsingACommandList.filter((id: string) => id !== userId)
     }
 
     private createSelectChoicesEmbed(data: any[]) {
