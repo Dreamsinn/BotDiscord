@@ -3,11 +3,13 @@ import * as dotenv from 'dotenv';
 import { CommandHandler } from "./commands/commandHandler";
 import { DiceCommand } from "./commands/aplication/diceCommand";
 import { ReplyCommand } from "./commands/aplication/replyCommand";
+import { UsersUsingACommand } from "./commands/aplication/utils/usersUsingACommand"
 
 dotenv.config();
 
 const diceCommand = new DiceCommand();
 const replyCommand = new ReplyCommand();
+const usersUsingACommand = UsersUsingACommand.usersUsingACommand;
 
 async function server() {
     // TODO crear 1 cliente por servidor (a futuro)
@@ -19,9 +21,9 @@ async function server() {
 
     const commandHandler = new CommandHandler(diceCommand, replyCommand);
 
-
     client.client.on('messageCreate', async event => {
         if (event.author.bot) return false;
+        if (usersUsingACommand.searchIdInUserList(event.author.id)) return false;
         // si el autor del mensaje no es el bot
         return await commandHandler.isCommand(event);
     });
@@ -31,6 +33,8 @@ async function server() {
     //         console.log(event.message.embeds)
     //     }
     // });
+
 }
 
 server();
+
