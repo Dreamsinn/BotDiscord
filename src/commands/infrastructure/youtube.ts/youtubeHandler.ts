@@ -6,7 +6,7 @@ export class YoutubeSearch implements YoutubeSearchRepository {
         const order = 'relevance';
         const part = 'snippet';
         // se le tendria que anyadir id a PART
-        const maxResults = '9';
+        const maxResults = '10';
         // se pone con coma
         const type = 'video,playlist'
 
@@ -25,12 +25,12 @@ export class YoutubeSearch implements YoutubeSearchRepository {
         return response;
     }
 
-    public async searchSongByURL(songId: string) {
-        const part = 'id';
+    public async searchSongById(songId: string) {
+        const part = 'contentDetails';
         // se le tendria que anyadir id a PART
         const maxResults = '1';
         const id = songId;
-        const response = await axios.get(`https://www.googleapis.com/youtube/v3/search?key=${process.env.API_KEY_YOUTUBE}&part=${part}&maxResults=${maxResults}&id=${id}`)
+        const response = await axios.get(`https://www.googleapis.com/youtube/v3/videos?key=${process.env.API_KEY_YOUTUBE}&part=${part}&maxResults=${maxResults}&id=${id}`)
             .catch(error => {
                 console.log('EROOR', error);
                 return error.response.data.error;

@@ -5,7 +5,7 @@ import { YoutubeSearch } from "../../../infrastructure/youtube.ts/youtubeHandler
 import { MessageEmbed } from 'discord.js';
 import { CommandOutput } from "../../../domain/interfaces/commandOutput";
 import { discordEmojis } from "../../../domain/discordEmojis";
-import { playListRepository } from "../../../domain/interfaces/playListRepository";
+import { newSongRepository } from "../../../domain/interfaces/playListRepository";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 
@@ -27,6 +27,7 @@ export class PlayCommand extends Command {
 
     // si es menor que 3 esque tiene prefijo pero no contenido
     public async call(event) {
+        // si el mensaje no es mas largo que "~p " no tiene contenido
         if (event.content.length < 3) {
             return;
         }
@@ -135,17 +136,55 @@ export class PlayCommand extends Command {
         return { embed, numberChoices: data.length };
     }
 
-    private updateToPlayList(collectedMessage, event, response) {
+    private async updateToPlayList(collectedMessage, event, response) {
         // numero marcado -1
         const numberSelected = Number((collectedMessage.content) - 1)
 
-        const newSong: playListRepository = {
+        const songId = response.data.items[numberSelected].id.videoId;
+
+        const songData = await this.youtubeSearch.searchSongById(songId);
+        const songDurationString = songData.data.items[0].contentDetails.duration;
+
+        console.log(this.parseSongDuration(songDurationString))
+        const newSong: newSongRepository = {
             songName: response.data.items[numberSelected].snippet.title,
-            songId: response.data.items[numberSelected].id.videoId,
+            songId: songId,
+            duration: this.parseSongDuration(songDurationString),
             channel: event.channel,
             user: event.author
         }
 
         this.playListHandler.update(newSong);
+    }
+
+    private parseSongDuration(durationString = "") {
+        const duration = { hours: 0, minutes: 0, seconds: 0, string: '' };
+        const durationParts = durationString
+            .replace("PT", "")
+            .replace("H", ":")
+            .replace("M", ":")
+            .replace("S", "")
+            .split(":");
+        console.log(durationParts)
+        if (durationParts.length === 3) {
+            duration.hours = Number(durationParts[0]);
+            duration.minutes = Number(durationParts[1]);
+            duration.seconds = Number(durationParts[2]);
+            duration.string = `${duration.hours}h${duration.minutes}m${duration.seconds}s`;
+        }
+
+        if (durationParts.length === 2) {
+            duration.minutes = Number(durationParts[0]);
+            duration.seconds = Number(durationParts[1]);
+            duration.string = `${duration.minutes}m${duration.seconds}s`;
+        }
+
+        if (durationParts.length === 1) {
+            duration.seconds = Number(durationParts[0]);
+            duration.string = `${duration.seconds}s`;
+        }
+
+
+        return duration;
     }
 }
