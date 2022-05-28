@@ -1,21 +1,11 @@
-import { playListRepository } from '../domain/interfaces/playListRepository'
+import { playListRepository, newSongRepository, durationRepository } from '../domain/interfaces/playListRepository'
 import { CommandOutput } from "../domain/interfaces/commandOutput";
 import { MessageEmbed } from 'discord.js';
-import { YoutubeSearch } from '../infrastructure/youtube.ts/youtubeHandler'
-
-
-
 export class PlayListHandler {
     private playList: [playListRepository];
-    private youtubeSearch: YoutubeSearch;
+    private playListDuration: durationRepository = { hours: 0, minutes: 0, seconds: 0 };
 
-    constructor(
-        youtubeSearch: YoutubeSearch
-    ) {
-        this.youtubeSearch = youtubeSearch;
-    }
-
-    public async update(newSong: playListRepository) {
+    public async update({ user, channel, ...newSong }: newSongRepository) {
         if (this.playList === undefined) {
             // sino esta iniciada, es igual a la cancion
             this.playList = [newSong]
@@ -24,42 +14,69 @@ export class PlayListHandler {
             this.playList.push(newSong);
         }
 
-        const embed = this.newSongToPlayListEmbed(newSong)
+        const embed = this.newSongToPlayListEmbed(user, newSong)
 
+        // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
+        this.calculateQeueDuration(newSong.duration);
 
         const output: CommandOutput = {
             embeds: [embed],
         }
 
-        newSong.channel.send(output)
+        channel.send(output)
 
-        const song = await this.youtubeSearch.searchSongByURL(newSong.songId)
-        console.log(song.data.items[0])
-
-        // TODO: enviar un embed en el canal de la cancion con nombre y posicion en array
-        // newSong.channel.send('a')
         // TODO: reproducir primera cancion array y con una funcion autoejecutable, con un if(array no vacia) y im cooldown = al timepo de la cancion
 
     }
 
-    private newSongToPlayListEmbed(newSong: playListRepository) {
-
+    private newSongToPlayListEmbed(user, { ...newSong }) {
         const embed = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`${newSong.songName}`)
-            .setAuthor({ name: `${newSong.user.username}`, iconURL: `${newSong.user.displayAvatarURL()}` })
+            .setAuthor({ name: `${user.username}`, iconURL: `${user.displayAvatarURL()}` })
             .setURL(`https://www.youtube.com/watch?v=${newSong.songId}`)
-
-        console.log(newSong.songId)
-        // .addFields(
-        //     { name: 'Descripcion', value: `${typeCommand[1].description}`, inline: false },
-        //     { name: 'Alias', value: `${typeCommand[1].aliases}`, inline: false },
-        //     { name: 'Cooldown', value: `${typeCommand[1].coolDown} ms`, inline: false },
-        // )
+            .addFields(
+                { name: 'Duracion', value: `${newSong.duration.string}`, inline: true },
+                { name: 'Posicion', value: `${this.playList.length}`, inline: true },
+                { name: 'Espera', value: `${this.getQeueDuration()}`, inline: true },
+            )
 
         // devuelve el embed
         return embed;
     }
+
+    private calculateQeueDuration(newSong: durationRepository) {
+        this.playListDuration.seconds += newSong.seconds;
+        this.playListDuration.minutes += newSong.minutes;
+        this.playListDuration.hours += newSong.hours;
+
+        if (this.playListDuration.seconds >= 60) {
+            this.playListDuration.seconds -= 60;
+            this.playListDuration.minutes += 1;
+        }
+
+        if (this.playListDuration.minutes >= 60) {
+            this.playListDuration.minutes -= 60;
+            this.playListDuration.hours += 1;
+        }
+    }
+
+    private getQeueDuration() {
+        const hours = this.playListDuration.hours;
+        const minutes = this.playListDuration.minutes;
+        const seconds = this.playListDuration.seconds;
+
+        if (hours !== 0) {
+            return `${hours}h ${minutes}m ${seconds}s`
+        }
+
+        if (hours == 0 && minutes !== 0) {
+            return `${minutes}m ${seconds}s`
+        }
+
+        return `${seconds}s`
+    }
+
 
 
 }

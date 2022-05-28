@@ -15,7 +15,7 @@ export interface Route {
 }
 
 const youtubeSearch = new YoutubeSearch();
-const playListHandler = new PlayListHandler(youtubeSearch);
+const playListHandler = new PlayListHandler();
 
 // se podria tambien un switch
 export const routes: Route[] = [
