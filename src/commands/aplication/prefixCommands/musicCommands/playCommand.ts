@@ -15,6 +15,7 @@ export class PlayCommand extends Command {
     coolDown = new CoolDown();
     youtubeSearch: YoutubeSearch;
     playListHandler: PlayListHandler;
+    usersSearchingASong = [];
 
     constructor(
         youtubeSearch: YoutubeSearch,
@@ -29,6 +30,12 @@ export class PlayCommand extends Command {
     public async call(event) {
         // si el mensaje no es mas largo que "~p " no tiene contenido
         if (event.content.length < 3) {
+            return;
+        }
+
+        // si el usurio esta en la array esque ha buscado una cancion pero aun no a resuelto el embed
+        if (this.usersSearchingASong.find((id) => id === event.author.id)) {
+            event.channel.send('Antes de buscar otra cancion, resuelve el mensaje anterio!')
             return;
         }
 
@@ -70,10 +77,10 @@ export class PlayCommand extends Command {
             embeds: [embed],
         }
 
+        this.usersSearchingASong.push(event.author.id)
+
         // enviar respuesta con opciones
         const message = await event.reply(output)
-
-        // const message = await event.channel.send(output)
 
         const filter = (reaction) => {
             // si el autor es el mismo, y el mensaje contiene X, 0 o un numero entre 0 y las numero de opciones
@@ -88,34 +95,34 @@ export class PlayCommand extends Command {
                 // Si se responde una X se borra el mensaje
                 if (collectedMessage.content === 'x') {
                     console.log('Search cancelled');
-                    event.channel.send('Search cancelled');
+                    event.reply('Search cancelled');
+                    this.deleteUserFromSearchingSongArray(event.author.id)
                     message.delete();
                     collectedMessage.delete();
                     return;
                 };
 
-                // si no hay respuesta se borra el mensaje
-                if (!collectedMessage) {
-                    console.log(`No answer`);
-                    message.delete();
-                    event.channel.send('Time out')
-                    return;
-                }
-
                 // si ningun caso anterior
                 this.updateToPlayList(collectedMessage, event, response);
+                this.deleteUserFromSearchingSongArray(event.author.id)
                 message.delete();
                 collectedMessage.delete();
             })
-            .catch((err) => {
-                // si hay un error, se borra el mensaje
-                console.log(`Error: ${err}`);
+            .catch(() => {
+                // sino contesta
+                console.log(`No answer`);
+                this.deleteUserFromSearchingSongArray(event.author.id)
                 message.delete();
-                event.channel.send(`Error: ${err}`)
+                event.reply('Time out')
                 return;
             })
         // TODO: si contesta correctamente, siguiente busqueda
 
+    }
+
+    private deleteUserFromSearchingSongArray(userId: string) {
+        // crea un nuevo array sin la id del usuario
+        this.usersSearchingASong = this.usersSearchingASong.filter((id: string) => id !== userId)
     }
 
     private createSelectChoicesEmbed(data: any[]) {
@@ -142,10 +149,10 @@ export class PlayCommand extends Command {
 
         const songId = response.data.items[numberSelected].id.videoId;
 
+        // llamada api para duracion del vidio
         const songData = await this.youtubeSearch.searchSongById(songId);
         const songDurationString = songData.data.items[0].contentDetails.duration;
 
-        console.log(this.parseSongDuration(songDurationString))
         const newSong: newSongRepository = {
             songName: response.data.items[numberSelected].snippet.title,
             songId: songId,
@@ -165,7 +172,7 @@ export class PlayCommand extends Command {
             .replace("M", ":")
             .replace("S", "")
             .split(":");
-        console.log(durationParts)
+
         if (durationParts.length === 3) {
             duration.hours = Number(durationParts[0]);
             duration.minutes = Number(durationParts[1]);
@@ -183,7 +190,6 @@ export class PlayCommand extends Command {
             duration.seconds = Number(durationParts[0]);
             duration.string = `${duration.seconds}s`;
         }
-
 
         return duration;
     }

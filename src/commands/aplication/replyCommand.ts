@@ -61,7 +61,7 @@ export class ReplyCommand {
     }
 }
 
-//TODO 13 da undefined
+//TODO hamburgessa no responde
 
 export const replyCommandOptions = {
     cinco: 'POR EL CULO TE LA HINCO',
