@@ -9,7 +9,7 @@ export interface newSongRepository {
     songId: string,
     duration: durationRepository,
     channel: any,
-    user: any
+    member: any
 }
 
 export interface durationRepository {
