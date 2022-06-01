@@ -28,7 +28,7 @@ export class PlayListHandler {
         const embed = this.newSongToPlayListEmbed(member, newSong)
 
         // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
-        this.calculateQeueDuration(newSong.duration);
+        this.calculateQeueDuration();
 
         const output: CommandOutput = {
             embeds: [embed],
@@ -61,21 +61,26 @@ export class PlayListHandler {
         return embed;
     }
 
-    private calculateQeueDuration(newSong: durationRepository) {
-        // TODO restar las canciones que ya han sonado
-        this.playListDuration.seconds += newSong.seconds;
-        this.playListDuration.minutes += newSong.minutes;
-        this.playListDuration.hours += newSong.hours;
+    private calculateQeueDuration() {
+        this.playListDuration = { hours: 0, minutes: 0, seconds: 0 };
+        console.log(this.playListDuration)
+        this.playList.forEach((song) => {
+            console.log(song)
+            this.playListDuration.seconds += song.duration.seconds;
+            this.playListDuration.minutes += song.duration.minutes;
+            this.playListDuration.hours += song.duration.hours;
 
-        if (this.playListDuration.seconds >= 60) {
-            this.playListDuration.seconds -= 60;
-            this.playListDuration.minutes += 1;
-        }
+            if (this.playListDuration.seconds >= 60) {
+                this.playListDuration.seconds -= 60;
+                this.playListDuration.minutes += 1;
+            }
 
-        if (this.playListDuration.minutes >= 60) {
-            this.playListDuration.minutes -= 60;
-            this.playListDuration.hours += 1;
-        }
+            if (this.playListDuration.minutes >= 60) {
+                this.playListDuration.minutes -= 60;
+                this.playListDuration.hours += 1;
+            }
+        })
+        console.log(this.playListDuration)
     }
 
     private getQeueDuration() {
@@ -125,12 +130,10 @@ export class PlayListHandler {
             return
         }
 
-        // TODO no funciona la cola
-
-        this.player.on('stateChange', (data: any) => {
-            if (data.status === 'playing') {
+        this.player.on('stateChange', (oldState, newState) => {
+            if (newState.status === 'idle') {
                 this.playList.shift()
-                if (this.playList.length[0]) {
+                if (this.playList[0]) {
                     this.playMusic()
                 }
                 return
