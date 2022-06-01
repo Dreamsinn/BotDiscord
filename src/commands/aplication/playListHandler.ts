@@ -1,11 +1,16 @@
 import { playListRepository, newSongRepository, durationRepository } from '../domain/interfaces/playListRepository'
 import { CommandOutput } from "../domain/interfaces/commandOutput";
 import { MessageEmbed } from 'discord.js';
+import { createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
+const ytdl = require('ytdl-core');
+
 export class PlayListHandler {
     private playList: [playListRepository];
     private playListDuration: durationRepository = { hours: 0, minutes: 0, seconds: 0 };
+    private botConnection: any;
+    private player: any;
 
-    public async update({ user, channel, ...newSong }: newSongRepository) {
+    public async update({ member, channel, ...newSong }: newSongRepository) {
         if (this.playList === undefined) {
             // sino esta iniciada, es igual a la cancion
             this.playList = [newSong]
@@ -14,7 +19,13 @@ export class PlayListHandler {
             this.playList.push(newSong);
         }
 
-        const embed = this.newSongToPlayListEmbed(user, newSong)
+        // si no estas en un canal de voz
+        if (!member.voice.channel) {
+            channel.send('Tienes que estar en un canal de voz!')
+            return;
+        }
+
+        const embed = this.newSongToPlayListEmbed(member, newSong)
 
         // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
         this.calculateQeueDuration(newSong.duration);
@@ -25,15 +36,20 @@ export class PlayListHandler {
 
         channel.send(output)
 
-        // TODO: reproducir primera cancion array y con una funcion autoejecutable, con un if(array no vacia) y im cooldown = al timepo de la cancion
+        if (!this.botConnection) {
+            this.joinToChannel(member, channel);
+        }
 
+        if (!this.player || this.player._state.status === 'idle') {
+            this.playMusic();
+        }
     }
 
-    private newSongToPlayListEmbed(user, { ...newSong }) {
+    private newSongToPlayListEmbed(member, { ...newSong }) {
         const embed = new MessageEmbed()
             .setColor('#0099ff')
-            .setTitle(`${newSong.songName}`)
-            .setAuthor({ name: `${user.username}`, iconURL: `${user.displayAvatarURL()}` })
+            .setTitle(newSong.songName ? `${newSong.songName}` : 'Ha habido un error a la hora de coger el nombre')
+            .setAuthor({ name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` })
             .setURL(`https://www.youtube.com/watch?v=${newSong.songId}`)
             .addFields(
                 { name: 'Duracion', value: `${newSong.duration.string}`, inline: true },
@@ -46,6 +62,7 @@ export class PlayListHandler {
     }
 
     private calculateQeueDuration(newSong: durationRepository) {
+        // TODO restar las canciones que ya han sonado
         this.playListDuration.seconds += newSong.seconds;
         this.playListDuration.minutes += newSong.minutes;
         this.playListDuration.hours += newSong.hours;
@@ -77,6 +94,51 @@ export class PlayListHandler {
         return `${seconds}s`
     }
 
+    private joinToChannel(member: any, channel: any) {
 
+        this.botConnection = joinVoiceChannel({
+            channelId: member.voice.channel.id,
+            guildId: channel.guild.id,
+            adapterCreator: channel.guild.voiceAdapterCreator,
+            selfDeaf: true,
+        })
+    }
 
+    private async playMusic() {
+        if (!this.player) {
+            this.player = createAudioPlayer()
+            this.botConnection.subscribe(this.player)
+        }
+
+        try {
+            const song = await ytdl(`https://www.youtube.com/watch?v=${this.playList[0].songId}`, { filter: "audioonly" })
+
+            const resources = createAudioResource(song)
+
+            this.player.play(resources)
+        } catch (err: any) {
+            console.log('ERROR', err)
+            this.playList.shift()
+            if (this.playList.length[0]) {
+                this.playMusic()
+            }
+            return
+        }
+
+        // TODO no funciona la cola
+
+        this.player.on('stateChange', (data: any) => {
+            if (data.status === 'playing') {
+                this.playList.shift()
+                if (this.playList.length[0]) {
+                    this.playMusic()
+                }
+                return
+            }
+        })
+    }
+
+    private botDisconect() {
+        this.botConnection.destroy()
+    }
 }

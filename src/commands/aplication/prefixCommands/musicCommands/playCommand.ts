@@ -9,6 +9,7 @@ import { newSongRepository } from "../../../domain/interfaces/playListRepository
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { UsersUsingACommand } from "../../utils/usersUsingACommand"
+const ytdl = require('ytdl-core');
 
 export class PlayCommand extends Command {
     playSchema: DiscordRequestRepo = PlayCommandSchema;
@@ -28,14 +29,10 @@ export class PlayCommand extends Command {
 
     // si es menor que 3 esque tiene prefijo pero no contenido
     public async call(event) {
-        console.log('lista en play', this.usersUsingACommand.readUserList())
-
         // si el mensaje no es mas largo que "~p " no tiene contenido
         if (event.content.length < 3) {
             return;
         }
-
-
 
         // si el usurio esta en la array esque ha buscado una cancion pero aun no a resuelto el embed
         if (this.usersUsingACommand.searchIdInUserList(event.author.id)) {
@@ -54,8 +51,7 @@ export class PlayCommand extends Command {
 
         // si buscas por enlace
         if (song.includes('youtube.com/watch?v=')) {
-            // TODO: que busque por enlace
-            return;
+            return this.findSongIdFromYoutubeURL(song, event)
         } else {
             // si buscas por nombre de cancion
             return this.searchBySongName(song, event);
@@ -75,6 +71,11 @@ export class PlayCommand extends Command {
             return await event.reply(output);
         }
 
+        if (response.data.items.length) {
+            event.channel.send('No hay coincidencias')
+            return;
+        }
+
         const { embed, numberChoices } = this.createSelectChoicesEmbed(response.data.items);
 
         const output: CommandOutput = {
@@ -87,7 +88,6 @@ export class PlayCommand extends Command {
         const message = await event.reply(output)
 
         const filter = (reaction) => {
-            console.log(console.log('lista en play', this.usersUsingACommand.readUserList()))
             // si el autor es el mismo, y el mensaje contiene X, 0 o un numero entre 0 y las numero de opciones
             return event.author.id === reaction.author.id && (reaction.content === 'x' || (Number(reaction.content) && Number(reaction.content) > 0 && Number(reaction.content) < numberChoices));
         };
@@ -106,11 +106,18 @@ export class PlayCommand extends Command {
                     collectedMessage.delete();
                     return;
                 };
-
                 // si ningun caso anterior
-                this.updateToPlayList(collectedMessage, event, response);
+                const numberSelected = Number((collectedMessage.content) - 1)
+
+                const songId = response.data.items[numberSelected].id.videoId;
+
+                // conseguimos la id y la pasamos
+                this.updateToPlayList(event, songId);
+                // eliminamos a la persona de la lista
                 this.usersUsingACommand.removeUserList(event.author.id)
+                // eleminamos opciones
                 message.delete();
+                // eliminamos la respuesta a la opciones
                 collectedMessage.delete();
             })
             .catch(() => {
@@ -123,11 +130,6 @@ export class PlayCommand extends Command {
             })
         // TODO: si contesta correctamente, siguiente busqueda
 
-    }
-
-    private deleteUserFromSearchingSongArray(userId: string) {
-        // crea un nuevo array sin la id del usuario
-        // this.usersUsingACommand = this.usersUsingACommandList.filter((id: string) => id !== userId)
     }
 
     private createSelectChoicesEmbed(data: any[]) {
@@ -148,28 +150,77 @@ export class PlayCommand extends Command {
         return { embed, numberChoices: data.length };
     }
 
-    private async updateToPlayList(collectedMessage, event, response) {
-        // numero marcado -1
-        const numberSelected = Number((collectedMessage.content) - 1)
+    private findSongIdFromYoutubeURL(url: string, event) {
+        const rawSongId = url
+            .replace('https://', '')
+            .replace('www.', '')
+            .replace('youtube.com/watch?v=', '')
 
-        const songId = response.data.items[numberSelected].id.videoId;
+        const URLParametersPosition = rawSongId.indexOf('&')
 
-        // llamada api para duracion del vidio
-        const songData = await this.youtubeSearch.searchSongById(songId);
-        const songDurationString = songData.data.items[0].contentDetails.duration;
-
-        const newSong: newSongRepository = {
-            songName: response.data.items[numberSelected].snippet.title,
-            songId: songId,
-            duration: this.parseSongDuration(songDurationString),
-            channel: event.channel,
-            user: event.author
+        if (URLParametersPosition === -1) {
+            return this.updateToPlayList(event, rawSongId)
         }
 
-        this.playListHandler.update(newSong);
+        const songId = rawSongId.substring(0, URLParametersPosition)
+
+        return this.updateToPlayList(event, songId)
+
     }
 
-    private parseSongDuration(durationString = "") {
+    private async updateToPlayList(event, songId) {
+        // llamada api para duracion del vidio
+
+        // const songData = await this.youtubeSearch.searchSongById(songId);
+        // const songDurationString = songData.data.items[0].contentDetails.duration;
+
+        let songName: string;
+
+        let duration: any;
+
+        try {
+            const songData = await ytdl.getBasicInfo(`https://www.youtube.com/watch?v=${songId}`)
+            songName = songData.videoDetails.title
+            duration = this.parseSongDuration(songData.videoDetails.lengthSeconds, true)
+        } catch (err) {
+            event.channel.send(`Error: ${err}`)
+            console.log(`Error: ${err}`)
+
+            // si falla ytdl la llamamos a la api de google, para que sea mas dificil llegar al limite
+            const songData = await this.youtubeSearch.searchSongById(songId);
+            duration = this.parseSongDuration(songData.data.items[0].contentDetails.duration, false)
+        }
+
+        const newSong: newSongRepository = {
+            songName: songName,
+            songId: songId,
+            duration: duration,
+            channel: event.channel,
+            member: event.member
+        }
+
+        return this.playListHandler.update(newSong);
+    }
+
+    private parseSongDuration(durationString = "", onlySeconds: boolean) {
+        if (onlySeconds) {
+            // si cojemos la de ydtl, lo pasamos al formato de la respuesta de youtube
+            const duration = Number(durationString);
+            const hours = Math.floor(duration / 3600);
+            const minutes = Math.floor(duration % 3600 / 60);
+            const seconds = Math.floor(duration % 3600 % 60);
+
+            durationString = `${hours}H${minutes}M${seconds}S`;
+
+            if (hours === 0) {
+                durationString = `${minutes}M${seconds}S`;
+
+            }
+
+            if (minutes === 0 && hours === 0) {
+                durationString = `${seconds}S`;
+            }
+        }
         const duration = { hours: 0, minutes: 0, seconds: 0, string: '' };
         const durationParts = durationString
             .replace("PT", "")

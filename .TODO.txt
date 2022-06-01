@@ -1,0 +1,33 @@
+- Tipos de evento etc => https://discord.com/developers/docs/interactions/receiving-and-responding
+
+- Hacer una clase de utilidad para contruir embeds
+
+- En comandos de prefijos con contenido pasar aparte el mensaje sin prefijo, y if con longitud de prefijo y comando hacer un .lenght para que nos ea tan dummy
+
+- Un cliente distinto por servidor (intancia / base de datos?)
+
+    // static instancia;
+    // private client: any;
+
+    // constructor(client: any) {
+    //     PlayListHandler.instancia = this;
+    //     this.client = client;
+    // }
+
+
+    en handler
+    private playListIntanceServers = [];
+
+
+    if (route.category === 'music') {
+                    if (!this.playListIntanceServers.find((data: any) => data.id === event.guildId)) {
+                        this.playListIntanceServers.push({id: event.guildId, playList: new PlayListHandler(bot)})
+                    }
+                    const data = this.playListIntanceServers.find((data: any) => data.id === event.guildId)
+                    return route.command.call(event);
+                }
+
+- Comando para mover el bot de canal de voz  //await member.voice.setChannel('newChannelId')// aunque quizas mejor //joinVoiceChannel//
+
+
+- Comando dados < y >
