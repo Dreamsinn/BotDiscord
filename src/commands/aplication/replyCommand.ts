@@ -5,8 +5,8 @@ import { MessageEmbed } from "discord.js";
 import { CoolDown } from "./utils/coolDown";
 
 export class ReplyCommand {
-    replySchema: DiscordRequestRepo = ReplyCommandSchema;
-    coolDown = new CoolDown();
+    private replySchema: DiscordRequestRepo = ReplyCommandSchema;
+    private coolDown = new CoolDown();
 
     public async call(event): Promise<CommandOutput> {
         console.log('ReplyCommand executed')

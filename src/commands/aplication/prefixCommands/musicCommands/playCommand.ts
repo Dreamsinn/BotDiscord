@@ -12,11 +12,11 @@ import { UsersUsingACommand } from "../../utils/usersUsingACommand"
 const ytdl = require('ytdl-core');
 
 export class PlayCommand extends Command {
-    playSchema: DiscordRequestRepo = PlayCommandSchema;
-    coolDown = new CoolDown();
-    usersUsingACommand = UsersUsingACommand.usersUsingACommand;
-    youtubeSearch: YoutubeSearch;
-    playListHandler: PlayListHandler;
+    private playSchema: DiscordRequestRepo = PlayCommandSchema;
+    private coolDown = new CoolDown();
+    private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
+    private youtubeSearch: YoutubeSearch;
+    private playListHandler: PlayListHandler;
 
     constructor(
         youtubeSearch: YoutubeSearch,
@@ -128,8 +128,6 @@ export class PlayCommand extends Command {
                 event.reply('Time out')
                 return;
             })
-        // TODO: si contesta correctamente, siguiente busqueda
-
     }
 
     private createSelectChoicesEmbed(data: any[]) {
@@ -170,9 +168,6 @@ export class PlayCommand extends Command {
 
     private async updateToPlayList(event, songId) {
         // llamada api para duracion del vidio
-
-        // const songData = await this.youtubeSearch.searchSongById(songId);
-        // const songDurationString = songData.data.items[0].contentDetails.duration;
 
         let songName: string;
 

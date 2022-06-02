@@ -31,3 +31,14 @@
 
 
 - Comando dados < y >
+
+- ReadPlaylist     public readPlayList(event) {
+        if (this.playList && this.playList.length > 0) {
+            return this.playList;
+        }
+        event.channel.send('No hay ninguna cancion en la cola')
+    }
+
+- Comando para desabilitar ReadPlaylist
+
+- Mirar si los datos del schema son necesarios

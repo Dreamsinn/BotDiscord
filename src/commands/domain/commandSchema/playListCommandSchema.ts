@@ -1,5 +1,5 @@
 const PlayListCommandSchema = {
-    aliases: ['playlist'],
+    aliases: ['playlist', 'pl'],
     coolDown: 0,
     devOnly: false,
     description: 'show up list of music requested, paginated',
