@@ -36,11 +36,13 @@ export class PlayListHandler {
 
         channel.send(output)
 
-        if (!this.botConnection) {
+        // si no hay conexion o se ha desconectado el bot dle canal de voz, que entablezca una nueva conexion
+        if (!this.botConnection || this.botConnection._state.status === 'destroyed') {
             this.joinToChannel(member, channel);
         }
 
-        if (!this.player || this.player._state.status === 'idle') {
+        // si el player no esta reproduciendo
+        if (this.player._state.status === 'idle') {
             this.playMusic();
         }
     }
@@ -63,9 +65,7 @@ export class PlayListHandler {
 
     private calculateQeueDuration() {
         this.playListDuration = { hours: 0, minutes: 0, seconds: 0 };
-        console.log(this.playListDuration)
         this.playList.forEach((song) => {
-            console.log(song)
             this.playListDuration.seconds += song.duration.seconds;
             this.playListDuration.minutes += song.duration.minutes;
             this.playListDuration.hours += song.duration.hours;
@@ -80,7 +80,6 @@ export class PlayListHandler {
                 this.playListDuration.hours += 1;
             }
         })
-        console.log(this.playListDuration)
     }
 
     private getQeueDuration() {
@@ -100,37 +99,39 @@ export class PlayListHandler {
     }
 
     private joinToChannel(member: any, channel: any) {
-
+        // une al bot al canal de discord y da la capacidad de reproducir musica
         this.botConnection = joinVoiceChannel({
             channelId: member.voice.channel.id,
             guildId: channel.guild.id,
             adapterCreator: channel.guild.voiceAdapterCreator,
             selfDeaf: true,
         })
+
+        this.player = createAudioPlayer()
+
+
+        this.botConnection.subscribe(this.player)
     }
 
     private async playMusic() {
-        if (!this.player) {
-            this.player = createAudioPlayer()
-            this.botConnection.subscribe(this.player)
-        }
-
         try {
+            // descarga cancion
             const song = await ytdl(`https://www.youtube.com/watch?v=${this.playList[0].songId}`, { filter: "audioonly" })
-
+            // craa recurso
             const resources = createAudioResource(song)
-
+            // pasa recurso al player
             this.player.play(resources)
         } catch (err: any) {
             console.log('ERROR', err)
             this.playList.shift()
-            if (this.playList.length[0]) {
+            if (this.playList[0]) {
                 this.playMusic()
             }
             return
         }
 
         this.player.on('stateChange', (oldState, newState) => {
+            // cunado el player no esta reproduciendo
             if (newState.status === 'idle') {
                 this.playList.shift()
                 if (this.playList[0]) {
@@ -141,7 +142,37 @@ export class PlayListHandler {
         })
     }
 
-    private botDisconect() {
-        this.botConnection.destroy()
+    public botDisconnect() {
+        return this.botConnection.destroy()
+    }
+
+    public skipMusic() {
+        const musicToSkip = this.playList[0]
+        this.player.stop()
+        this.playList.shift()
+        if (this.playList[0]) {
+            this.playMusic()
+        }
+        return musicToSkip;
+    }
+
+    public pauseMusic() {
+        if (!this.player || this.player._state.status === 'idle') {
+            return
+        }
+        return this.player.pause()
+    }
+
+    public unpauseMusic() {
+        if (!this.player || this.player._state.status === 'idle') {
+            return
+        }
+        return this.player.unpause()
+    }
+
+    public changeBotVoiceChanel(event) {
+        this.joinToChannel(event.member, event.channel)
+        this.playMusic()
+        return
     }
 }

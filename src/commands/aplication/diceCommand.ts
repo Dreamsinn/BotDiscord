@@ -5,8 +5,8 @@ import { CommandOutput } from "../domain/interfaces/commandOutput";
 import { CoolDown } from "./utils/coolDown";
 
 export class DiceCommand {
-    diceSchema: DiscordRequestRepo = DiceCommandSchema;
-    coolDown = new CoolDown();
+    private diceSchema: DiscordRequestRepo = DiceCommandSchema;
+    private coolDown = new CoolDown();
 
     public async call(event): Promise<CommandOutput> {
         // buscar la posicion de la D, y la de la , (-1 si no hay)
