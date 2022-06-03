@@ -5,7 +5,7 @@ import { createAudioPlayer, createAudioResource, joinVoiceChannel } from "@disco
 const ytdl = require('ytdl-core');
 
 export class PlayListHandler {
-    private playList: [playListRepository];
+    private playList: playListRepository[];
     private playListDuration: durationRepository = { hours: 0, minutes: 0, seconds: 0 };
     private botConnection: any;
     private player: any;
@@ -174,5 +174,10 @@ export class PlayListHandler {
         this.joinToChannel(event.member, event.channel)
         this.playMusic()
         return
+    }
+
+    public readPlayList() {
+        const playList = this.playList.slice(0)
+        return playList
     }
 }
