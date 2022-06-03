@@ -154,7 +154,7 @@ export class PlayListHandler {
         const musicToSkip = this.playList[0]
         this.player.stop()
         this.playList.shift()
-        if (this.playList[0]) {
+        if (this.playList[0] && this.player && this.player._state.status !== 'paused') {
             this.playMusic()
         }
         return musicToSkip;
