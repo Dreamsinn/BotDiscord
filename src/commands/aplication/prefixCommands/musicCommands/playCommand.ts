@@ -36,7 +36,7 @@ export class PlayCommand extends Command {
 
         // si el usurio esta en la array esque ha buscado una cancion pero aun no a resuelto el embed
         if (this.usersUsingACommand.searchIdInUserList(event.author.id)) {
-            event.channel.send('Antes de buscar otra cancion, resuelve el mensaje anterio!')
+            event.channel.send('You have a command pending response, resolve it first please or wait it time out')
             return;
         }
 
@@ -92,7 +92,7 @@ export class PlayCommand extends Command {
             return event.author.id === reaction.author.id && (reaction.content === 'x' || (Number(reaction.content) && Number(reaction.content) > 0 && Number(reaction.content) < numberChoices));
         };
 
-        message.channel.awaitMessages({ filter, time: 20000, max: 1 })
+        message.channel.awaitMessages({ filter, time: 20000, max: 1, errors: ['time'] })
             .then((collected: any) => {
                 let collectedMessage: any;
                 collected.map((e: any) => collectedMessage = e);
@@ -120,12 +120,18 @@ export class PlayCommand extends Command {
                 // eliminamos la respuesta a la opciones
                 collectedMessage.delete();
             })
-            .catch(() => {
-                // sino contesta
-                console.log(`No answer`);
+            .catch((err) => {
+                if (err instanceof TypeError) {
+                    console.log(err)
+                    event.channel.send(`Error: ${err.message}`)
+                } else {
+                    // sino contesta
+                    console.log(`No answer`);
+                    event.reply('Time out')
+                }
+
                 this.usersUsingACommand.removeUserList(event.author.id)
                 message.delete();
-                event.reply('Time out')
                 return;
             })
     }

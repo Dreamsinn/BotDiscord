@@ -42,3 +42,7 @@
 - Comando para desabilitar ReadPlaylist
 
 - Mirar si los datos del schema son necesarios
+
+- Arreglar pause y unapuse, play que no despause, y revisar condicion de unpause
+
+- Usar message.content.split(",") para mejorar el diceCommand S
