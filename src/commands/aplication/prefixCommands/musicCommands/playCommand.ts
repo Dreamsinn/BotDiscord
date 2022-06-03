@@ -71,7 +71,6 @@ export class PlayCommand extends Command {
             return await event.reply(output);
         }
 
-        console.log(response.data.items)
         if (!response.data.items[0]) {
             event.channel.send('No hay coincidencias')
             return;

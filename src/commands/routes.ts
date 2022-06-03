@@ -17,6 +17,8 @@ import { DisconnectCommandSchema } from "./domain/commandSchema/DisconnectComman
 import { DisconnectCommand } from "./aplication/prefixCommands/musicCommands/disconnectCommand";
 import { JoinChannelCommandSchema } from "./domain/commandSchema/joinChannelCommandSchema";
 import { JoinChannelCommand } from "./aplication/prefixCommands/musicCommands/JoinChannelCommand";
+import { ClearPlayListCommandSchema } from "./domain/commandSchema/clearPlayListCommandSchema";
+import { ClearPlayListCommand } from "./aplication/prefixCommands/musicCommands/ClearPlayListCommand";
 
 export interface Route {
     alias: string[],
@@ -59,5 +61,9 @@ export const routes: Route[] = [
     {
         alias: JoinChannelCommandSchema.aliases,
         command: new JoinChannelCommand(playListHandler),
+    },
+    {
+        alias: ClearPlayListCommandSchema.aliases,
+        command: new ClearPlayListCommand(playListHandler),
     }
 ]

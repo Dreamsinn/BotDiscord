@@ -14,7 +14,7 @@ export class PlayListCommand extends Command {
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
     private page = 0;
-    private playListPages = [];
+    private playListPages;
 
     constructor(
         playListHandler: PlayListHandler,
@@ -39,10 +39,14 @@ export class PlayListCommand extends Command {
             return event.channel.send('There is not a playlist')
         }
 
+        // inializamos si no lo esta, y si lo esta se reinicia
+        this.playListPages = [];
+
         // la partimos en grupos de 10, para la paginacion
         while (playList.length > 0) {
             this.playListPages.push(playList.splice(0, 10))
         }
+
 
         const embed = this.createPlayListEmbed()
 
@@ -57,8 +61,7 @@ export class PlayListCommand extends Command {
 
         const message = await event.reply(output)
 
-        this.messageReaction(message)
-
+        return this.messageReaction(message)
     }
 
     private createPlayListEmbed() {
@@ -83,14 +86,19 @@ export class PlayListCommand extends Command {
     private messageReaction(message: any) {
         message.react(discordEmojis["<-"])
         message.react(discordEmojis["->"])
+        message.react(discordEmojis.x)
 
         const filter = (reaction: any, user: any) => {
-            return [discordEmojis["<-"], discordEmojis["->"]].includes(reaction.emoji.name) && user.bot !== true;
+            return [discordEmojis["<-"], discordEmojis["->"], discordEmojis.x].includes(reaction.emoji.name) && user.bot !== true;
         };
 
         const collector = message.createReactionCollector({ filter, time: 60000 })
         collector.on('collect', (collected, user) => {
-            this.reactionHandler(message, collected, user)
+            if (collected._emoji.name === discordEmojis.x) {
+                // kill collector
+                return collector.stop()
+            }
+            return this.reactionHandler(message, collected, user)
         });
 
         collector.on('end', () => {
