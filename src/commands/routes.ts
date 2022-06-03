@@ -34,7 +34,7 @@ export const routes: Route[] = [
     },
     {
         alias: PlayListCommandSchema.aliases,
-        command: new PlayListCommand(),
+        command: new PlayListCommand(playListHandler),
     },
     {
         alias: HelpCommandSchema.aliases,
