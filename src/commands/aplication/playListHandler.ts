@@ -5,7 +5,114 @@ import { createAudioPlayer, createAudioResource, joinVoiceChannel } from "@disco
 const ytdl = require('ytdl-core');
 
 export class PlayListHandler {
-    private playList: playListRepository[];
+    // private playList: playListRepository[];
+    private playList: playListRepository[] = [
+        {
+            songName: 'Elfen Lied - Lilium (Live at San Japan) ft. Giggles',
+            songId: '-NrZmYn24mM',
+            duration: { hours: 0, minutes: 3, seconds: 53, string: '3m53s' }
+        },
+        {
+            songName: 'Dark Piano - Nil',
+            songId: 'x1XxtiSam2k',
+            duration: { hours: 0, minutes: 3, seconds: 30, string: '3m30s' }
+        },
+        {
+            songName: 'Disintegrating - Myuu',
+            songId: 'piFJVwr1YYA',
+            duration: { hours: 0, minutes: 4, seconds: 44, string: '4m44s' }
+        },
+        {
+            songName: 'Hopeless - Myuu',
+            songId: '1kny88W533Q',
+            duration: { hours: 0, minutes: 7, seconds: 42, string: '7m42s' }
+        },
+        {
+            songName: 'Fading - Myuu',
+            songId: 'nWLSW-1jJvs',
+            duration: { hours: 0, minutes: 7, seconds: 55, string: '7m55s' }
+        },
+        {
+            songName: 'Dark Piano - Dementia',
+            songId: 'nxvEbqKZy-0',
+            duration: { hours: 0, minutes: 7, seconds: 24, string: '7m24s' }
+        },
+        {
+            songName: 'Dark Piano - Dementia',
+            songId: 'nxvEbqKZy-0',
+            duration: { hours: 0, minutes: 7, seconds: 24, string: '7m24s' }
+        },
+        {
+            songName: 'Dark Piano - Waltz of The Mannequins',
+            songId: '97kf9VrCsbk',
+            duration: { hours: 0, minutes: 4, seconds: 40, string: '4m40s' }
+        },
+        {
+            songName: 'Rise and Fall - Myuu',
+            songId: 'uj3Gif77SYM',
+            duration: { hours: 0, minutes: 6, seconds: 23, string: '6m23s' }
+        },
+        {
+            songName: 'Identity Crisis - Myuu',
+            songId: 'g5X6KZBk_6s',
+            duration: { hours: 0, minutes: 3, seconds: 46, string: '3m46s' }
+        },
+        {
+            songName: 'Dark Piano - Severus',
+            songId: 'nPwaRCAxoso',
+            duration: { hours: 0, minutes: 6, seconds: 49, string: '6m49s' }
+        },
+        {
+            songName: 'What Could Have Been - Myuu',
+            songId: '2bLCGNf--Fg',
+            duration: { hours: 0, minutes: 3, seconds: 32, string: '3m32s' }
+        },
+        {
+            songName: 'Silent Hill 3 - I Want Love (Cover) Myuu ft. @Violet Orlandi',
+            songId: 'mtrf3mpuV_o',
+            duration: { hours: 0, minutes: 4, seconds: 38, string: '4m38s' }
+        },
+        {
+            songName: 'Reversion 2015 - Myuu',
+            songId: 'XhZ-Ny-onfg',
+            duration: { hours: 0, minutes: 4, seconds: 39, string: '4m39s' }
+        },
+        {
+            songName: 'Dark Piano - Selfish',
+            songId: 'fjGXGdLSUt8',
+            duration: { hours: 0, minutes: 4, seconds: 33, string: '4m33s' }
+        },
+        {
+            songName: 'Dark Piano - Depression',
+            songId: 'S1T3UF1vhSk',
+            duration: { hours: 0, minutes: 3, seconds: 41, string: '3m41s' }
+        },
+        {
+            songName: 'Dark Fur Elise | Rainy Detuned Piano',
+            songId: 'A6r3uHKDOOc',
+            duration: { hours: 0, minutes: 5, seconds: 3, string: '5m3s' }
+        },
+        {
+            songName: 'Outsider - Myuu',
+            songId: 'Dlta3Qgy_6I',
+            duration: { hours: 0, minutes: 4, seconds: 19, string: '4m19s' }
+        },
+        {
+            songName: 'Tender Remains - Myuu',
+            songId: '4qrFYVjsIM0',
+            duration: { hours: 0, minutes: 5, seconds: 3, string: '5m3s' }
+        },
+        {
+            songName: 'Story of Soron - Myuu',
+            songId: 'IZ9L9oq_62g',
+            duration: { hours: 0, minutes: 5, seconds: 39, string: '5m39s' }
+        },
+        {
+            songName: 'Dark Piano - Psychopath',
+            songId: 'GAK50LHGMfA',
+            duration: { hours: 0, minutes: 5, seconds: 48, string: '5m48s' }
+        }
+    ]
     private playListDuration: durationRepository = { hours: 0, minutes: 0, seconds: 0 };
     private botConnection: any;
     private player: any;
@@ -18,7 +125,7 @@ export class PlayListHandler {
             // si la array esta inicaida, hace push de la cancion
             this.playList.push(newSong);
         }
-
+        console.log(this.playList)
         // si no estas en un canal de voz
         if (!member.voice.channel) {
             channel.send('Tienes que estar en un canal de voz!')
@@ -26,6 +133,7 @@ export class PlayListHandler {
         }
 
         const embed = this.newSongToPlayListEmbed(member, newSong)
+
 
         // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
         this.calculateQeueDuration();
@@ -143,7 +251,10 @@ export class PlayListHandler {
     }
 
     public botDisconnect() {
-        return this.botConnection.destroy()
+        if (this.botConnection) {
+            return this.botConnection.destroy()
+        }
+        return
     }
 
     public skipMusic() {
@@ -178,6 +289,15 @@ export class PlayListHandler {
 
     public readPlayList() {
         const playList = this.playList.slice(0)
+        console.log(playList)
         return playList
+    }
+
+    public deletePlayList() {
+        if ((this.player && this.player._state.status === 'idle') || (this.botConnection && this.botConnection._state.status === 'destroyed')) {
+            return this.playList = [];
+        }
+        // eleminamos todos menos el primero, que al ser el que esta sonando, si se elimina y se hace skip, peta
+        return this.playList = [this.playList[0]];
     }
 }
