@@ -85,8 +85,13 @@ export class HelpCommand extends Command {
 
         message.awaitReactions({ filter, max: 1, time: 20000, errors: ['time'] })
             .then(collected => this.createCommandsEmbed(collected, message, event))
-            .catch(collected => {
-                console.log(`No reaction`);
+            .catch(err => {
+                if (err instanceof TypeError) {
+                    console.log(err)
+                    event.channel.send(`Error: ${err.message}`)
+                } else {
+                    console.log('No reaction')
+                }
                 return
             });
     }

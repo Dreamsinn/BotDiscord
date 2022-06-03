@@ -1,10 +1,10 @@
+import { Command } from "./aplication/Command";
 import { PlayCommand } from "./aplication/prefixCommands/musicCommands/playCommand";
 import { PlayListCommand } from "./aplication/prefixCommands/musicCommands/playListCommand";
 import { HelpCommand } from "./aplication/prefixCommands/helpCommand";
 import { PlayCommandSchema } from "./domain/commandSchema/playCommandSchema";
 import { PlayListCommandSchema } from "./domain/commandSchema/playListCommandSchema";
 import { HelpCommandSchema } from "./domain/commandSchema/helpCommandSchema";
-import { Command } from "./aplication/Command";
 import { YoutubeSearch } from "./infrastructure/youtube.ts/youtubeHandler"
 import { PlayListHandler } from "./aplication/playListHandler"
 import { PauseCommandSchema } from "./domain/commandSchema/PauseCommandSchema";
@@ -19,6 +19,8 @@ import { JoinChannelCommandSchema } from "./domain/commandSchema/joinChannelComm
 import { JoinChannelCommand } from "./aplication/prefixCommands/musicCommands/JoinChannelCommand";
 import { ClearPlayListCommandSchema } from "./domain/commandSchema/clearPlayListCommandSchema";
 import { ClearPlayListCommand } from "./aplication/prefixCommands/musicCommands/ClearPlayListCommand";
+import { RemoveSongsFromPlayListCommandSchema } from "./domain/commandSchema/removeSongsFromPlayListCommandSchema";
+import { RemoveSongsFromPlayListCommand } from "./aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand";
 
 export interface Route {
     alias: string[],
@@ -65,5 +67,9 @@ export const routes: Route[] = [
     {
         alias: ClearPlayListCommandSchema.aliases,
         command: new ClearPlayListCommand(playListHandler),
+    },
+    {
+        alias: RemoveSongsFromPlayListCommandSchema.aliases,
+        command: new RemoveSongsFromPlayListCommand(playListHandler),
     }
 ]

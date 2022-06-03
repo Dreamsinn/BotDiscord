@@ -59,7 +59,7 @@ export class PlayListCommand extends Command {
             return event.reply(output)
         }
 
-        const message = await event.reply(output)
+        const message = await event.channel.send(output)
 
         return this.messageReaction(message)
     }
