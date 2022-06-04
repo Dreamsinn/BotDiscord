@@ -5,7 +5,8 @@ import { HelpCommand } from "./aplication/prefixCommands/helpCommand";
 import { PlayCommandSchema } from "./domain/commandSchema/playCommandSchema";
 import { PlayListCommandSchema } from "./domain/commandSchema/playListCommandSchema";
 import { HelpCommandSchema } from "./domain/commandSchema/helpCommandSchema";
-import { YoutubeSearch } from "./infrastructure/youtube.ts/youtubeHandler"
+import { YoutubeAPIHandler } from "./infrastructure/youtubeHandler"
+import { PlayDlHandler } from "./infrastructure/playDlHandler"
 import { PlayListHandler } from "./aplication/playListHandler"
 import { PauseCommandSchema } from "./domain/commandSchema/PauseCommandSchema";
 import { PauseCommand } from "./aplication/prefixCommands/musicCommands/pauseCommand";
@@ -27,14 +28,15 @@ export interface Route {
     command: Command;
 }
 
-const youtubeSearch = new YoutubeSearch();
-const playListHandler = new PlayListHandler();
+const youtubeSearch = new YoutubeAPIHandler();
+const playDlHandler = new PlayDlHandler();
+const playListHandler = new PlayListHandler(playDlHandler);
 
 // se podria tambien un switch
 export const routes: Route[] = [
     {
         alias: PlayCommandSchema.aliases,
-        command: new PlayCommand(youtubeSearch, playListHandler),
+        command: new PlayCommand(youtubeSearch, playListHandler, playDlHandler),
     },
     {
         alias: PlayListCommandSchema.aliases,
