@@ -2,13 +2,21 @@ import { playListRepository, newSongRepository, durationRepository } from '../do
 import { CommandOutput } from "../domain/interfaces/commandOutput";
 import { MessageEmbed } from 'discord.js';
 import { createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
-const ytdl = require('ytdl-core');
+import { PlayDlHandler } from '../infrastructure/playDlHandler'
 
 export class PlayListHandler {
     private playList: playListRepository[];
     private playListDuration: durationRepository = { hours: 0, minutes: 0, seconds: 0 };
     private botConnection: any;
     private player: any;
+
+    private playDlHandler: PlayDlHandler;
+
+    constructor(
+        playDlHandler: PlayDlHandler,
+    ) {
+        this.playDlHandler = playDlHandler;
+    }
 
     public async update({ member, channel, ...newSong }: newSongRepository) {
         if (this.playList === undefined) {
@@ -117,9 +125,13 @@ export class PlayListHandler {
     private async playMusic() {
         try {
             // descarga cancion
-            const song = await ytdl(`https://www.youtube.com/watch?v=${this.playList[0].songId}`, { filter: "audioonly" })
+            const song = await this.playDlHandler.getSongStream(this.playList[0].songId)
+
             // craa recurso
-            const resources = createAudioResource(song)
+            const resources = createAudioResource(song.stream, {
+                inputType: song.type
+            })
+
             // pasa recurso al player
             this.player.play(resources)
         } catch (err: any) {

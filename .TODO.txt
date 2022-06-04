@@ -46,3 +46,5 @@
 - Arreglar pause y unapuse, play que no despause, y revisar condicion de unpause
 
 - Usar message.content.split(",") para mejorar el diceCommand S
+
+- Convertir la paginacion en un util, modificar playlist y remove
