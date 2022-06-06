@@ -1,14 +1,15 @@
-import { DiscordRequestRepo } from "../../../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
 import { PlayListCommandSchema } from "../../../domain/commandSchema/playListCommandSchema";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
 import { discordEmojis } from "../../../domain/discordEmojis"
-import { playListRepository } from '../../../domain/interfaces/playListRepository'
+import { songData } from '../../../domain/interfaces/songData'
 import { MessageCreator } from "../../utils/messageCreator";
+import { Message, MessageReaction, User } from "discord.js";
 
 export class PlayListCommand extends Command {
-    private playListSchema: DiscordRequestRepo = PlayListCommandSchema;
+    private playListSchema: CommandSchema = PlayListCommandSchema;
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
     private page = 0;
@@ -21,7 +22,7 @@ export class PlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event) {
+    public async call(event: Message) {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.playListSchema.coolDown);
         if (interrupt === 1) {
@@ -30,7 +31,7 @@ export class PlayListCommand extends Command {
         }
 
         // conseguimos la playList
-        const playList: playListRepository[] = this.playListHandler.readPlayList()
+        const playList: songData[] = this.playListHandler.readPlayList()
 
         // si esta vacia
         if (!playList[0]) {
@@ -82,18 +83,18 @@ export class PlayListCommand extends Command {
         return output;
     }
 
-    private messageReaction(message: any) {
+    private messageReaction(message: Message) {
         message.react(discordEmojis["<-"])
         message.react(discordEmojis["->"])
         message.react(discordEmojis.x)
 
-        const filter = (reaction: any, user: any) => {
+        const filter = (reaction: MessageReaction, user: User) => {
             return [discordEmojis["<-"], discordEmojis["->"], discordEmojis.x].includes(reaction.emoji.name) && user.bot !== true;
         };
 
         const collector = message.createReactionCollector({ filter, time: 60000 })
         collector.on('collect', (collected, user) => {
-            if (collected._emoji.name === discordEmojis.x) {
+            if (collected.emoji.name === discordEmojis.x) {
                 // kill collector
                 return collector.stop()
             }
@@ -107,13 +108,14 @@ export class PlayListCommand extends Command {
 
     }
 
-    private reactionHandler(message: any, collected: any, user: any) {
+    private reactionHandler(message: Message, collected: MessageReaction, user: User) {
         // eleminamos la reaccion
         this.deleteUserReaction(message, user)
 
         const maxPage = this.playListPages.length - 1;
         let pageChanged: boolean;
-        const emoji = collected._emoji.name
+
+        const emoji = collected.emoji.name
         // si se ha tirado hacia atras, y la pagina es superior a 0: disminuimos pagina
         if (emoji === discordEmojis["<-"] && this.page > 0) {
             pageChanged = true;
@@ -133,7 +135,7 @@ export class PlayListCommand extends Command {
         }
     }
 
-    private async deleteUserReaction(message: any, user: any) {
+    private async deleteUserReaction(message: Message, user: User) {
         const userReactions = message.reactions.cache.filter(reaction => reaction.users.cache.has(user.id));
 
         try {

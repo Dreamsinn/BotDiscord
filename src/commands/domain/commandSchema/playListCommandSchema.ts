@@ -1,4 +1,6 @@
-const PlayListCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const PlayListCommandSchema: CommandSchema = {
     aliases: ['playlist', 'pl'],
     coolDown: 0,
     devOnly: false,

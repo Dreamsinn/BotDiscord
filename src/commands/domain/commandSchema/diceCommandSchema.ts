@@ -1,4 +1,6 @@
-const DiceCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const DiceCommandSchema: CommandSchema = {
     aliases: ['D'],
     coolDown: 120,
     devOnly: false,

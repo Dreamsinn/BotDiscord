@@ -1,11 +1,11 @@
-import { DiscordRequestRepo } from "../../../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
 import { PauseCommandSchema } from "../../../domain/commandSchema/PauseCommandSchema";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
 
 export class PauseCommand extends Command {
-    private pauseSchema: DiscordRequestRepo = PauseCommandSchema;
+    private pauseSchema: CommandSchema = PauseCommandSchema;
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
 
@@ -17,7 +17,7 @@ export class PauseCommand extends Command {
     }
 
 
-    public async call(event) {
+    public async call() {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.pauseSchema.coolDown);
         if (interrupt === 1) {

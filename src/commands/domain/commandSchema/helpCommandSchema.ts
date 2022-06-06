@@ -1,4 +1,6 @@
-const HelpCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const HelpCommandSchema: CommandSchema = {
     aliases: ['help'],
     coolDown: 0,
     devOnly: false,

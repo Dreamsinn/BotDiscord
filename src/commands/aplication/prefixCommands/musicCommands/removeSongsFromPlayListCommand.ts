@@ -1,4 +1,4 @@
-import { DiscordRequestRepo } from "../../../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
 import { RemoveSongsFromPlayListCommandSchema } from "../../../domain/commandSchema/removeSongsFromPlayListCommandSchema";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
@@ -7,11 +7,12 @@ import { PlayListCommand } from "./playListCommand";
 import { UsersUsingACommand } from "../../utils/usersUsingACommand"
 import { Message, MessageOptions } from 'discord.js';
 import { MessageCreator } from "../../utils/messageCreator";
+import { songData } from "../../../domain/interfaces/songData";
 
 
 
 export class RemoveSongsFromPlayListCommand extends Command {
-    private removeSchema: DiscordRequestRepo = RemoveSongsFromPlayListCommandSchema;
+    private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
     private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
@@ -23,7 +24,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event): Promise<Message> {
+    public async call(event: Message): Promise<Message> {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
         if (interrupt === 1) {
@@ -44,10 +45,10 @@ export class RemoveSongsFromPlayListCommand extends Command {
         const lastSongIndex = playList.length;
 
         // deteta siguiente mensaje del usuario
-        const filter = (message) => {
+        const filter = (message: Message) => {
             const userConditions = event.author.id === message.author.id;
             const numbersArray = message.content.split(",");
-            const numbersConditions = (!numbersArray.find((n) => isNaN(n)) && Math.max(Number(...numbersArray)) <= lastSongIndex && Math.min(Number(...numbersArray)) >= 1);
+            const numbersConditions = (!numbersArray.find((n) => isNaN(Number(n))) && Math.max(Number(...numbersArray)) <= lastSongIndex && Math.min(Number(...numbersArray)) >= 1);
             const letterConditoin = (message.content === 'x' || message.content === 'X');
 
             // si la respuesta viene del mismo que el evento, todos son numeros, mayot que 0 y no mayor que el numero de items, o X
@@ -55,11 +56,11 @@ export class RemoveSongsFromPlayListCommand extends Command {
         };
 
         event.channel.awaitMessages({ filter, time: 60000, max: 1, errors: ['time'] })
-            .then((collected: any) => {
+            .then((collected) => {
                 // usuario ya puede usar otros comandos
                 this.usersUsingACommand.removeUserList(event.author.id)
-                let collectedMessage: any;
-                collected.map((e: any) => collectedMessage = e);
+                let collectedMessage: Message;
+                collected.map((e: Message) => collectedMessage = e);
 
                 if (collectedMessage.content === 'x' || collectedMessage.content === 'X') {
                     // cancela el comando
@@ -86,8 +87,8 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
     }
 
-    private detectPlayListCommandMessage(event: any) {
-        const filter = (message: any) => {
+    private detectPlayListCommandMessage(event: Message) {
+        const filter = (message: Message) => {
             return message.embeds[0].title === 'Playlist' && message.author.bot;
         };
 
@@ -96,7 +97,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         collector.on('collect', message => {
             const newEmbed = message.embeds[0]
             newEmbed.setTitle('Remove song from playlist')
-            newEmbed.setDescription('Write - X - to cancel operation', false);
+            newEmbed.setDescription('Write - X - to cancel operation');
             const output: MessageOptions = {
                 embeds: [newEmbed],
             }
@@ -104,11 +105,11 @@ export class RemoveSongsFromPlayListCommand extends Command {
         });
     }
 
-    private removeSongFromPlayList(content: string, event: any) {
+    private removeSongFromPlayList(content: string, event: Message) {
         // pasa a playListHandler el indice(-1) de las canciones
         const stringNumbersArray = content.split(",");
 
-        const numberArray = [];
+        const numberArray: number[] = [];
 
         stringNumbersArray.forEach(str => {
             let n = Number(str);
@@ -122,7 +123,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         return this.removedMusicEmbed(removedMusic, event)
     }
 
-    private removedMusicEmbed(removedMusic, event) {
+    private removedMusicEmbed(removedMusic: songData[], event: Message) {
         let removedMusicString = '';
 
         removedMusic.forEach((song) => {

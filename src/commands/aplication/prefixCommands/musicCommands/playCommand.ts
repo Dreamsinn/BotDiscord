@@ -1,19 +1,20 @@
-import { DiscordRequestRepo } from "../../../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
 import { PlayCommandSchema } from "../../../domain/commandSchema/playCommandSchema";
 import { Command } from "../../../aplication/Command";
 import { YoutubeAPIHandler } from "../../../infrastructure/youtubeHandler";
 import { PlayDlHandler } from "../../../infrastructure/playDlHandler"
 import { discordEmojis } from "../../../domain/discordEmojis";
-import { newSongRepository, playListRepository } from "../../../domain/interfaces/playListRepository";
+import { newSongData, songData } from "../../../domain/interfaces/songData";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { UsersUsingACommand } from "../../utils/usersUsingACommand"
 import { YouTubeVideo } from "play-dl";
-import { SearchedSongRepository } from "../../../domain/interfaces/searchedSongRepository";
+import { rawSongData } from "../../../domain/interfaces/songData";
 import { MessageCreator } from "../../utils/messageCreator";
+import { Message } from "discord.js";
 
 export class PlayCommand extends Command {
-    private playSchema: DiscordRequestRepo = PlayCommandSchema;
+    private playSchema: CommandSchema = PlayCommandSchema;
     private coolDown = new CoolDown();
     private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
     private youtubeAPIHandler: YoutubeAPIHandler;
@@ -31,13 +32,13 @@ export class PlayCommand extends Command {
         this.playDlHandler = playDlHandler;
     }
 
-    public call(event) {
+    public call(event: Message) {
         // si el mensaje no es mas largo que "~p " no tiene contenido
         if (event.content.length < 3) {
             return;
         }
 
-        // si no estas en un canal de voz
+        // // si no estas en un canal de voz
         if (!event.member.voice.channel) {
             event.channel.send('Tienes que estar en un canal de voz!')
             return;
@@ -71,8 +72,8 @@ export class PlayCommand extends Command {
 
     }
 
-    private async searchBySongName(argument: string, event) {
-        let response: SearchedSongRepository[];
+    private async searchBySongName(argument: string, event: Message) {
+        let response: rawSongData[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
         try {
             response = await this.playDlHandler.searchSongByName(argument)
@@ -81,7 +82,7 @@ export class PlayCommand extends Command {
             event.channel.send(`Play-dl Search Error: ${err}`)
 
             try {
-                response = await this.youtubeAPIHandler.searchSongByName(argument, event);
+                response = await this.youtubeAPIHandler.searchSongByName(argument);
             } catch (err) {
                 console.log(err)
                 event.channel.send(err)
@@ -102,7 +103,7 @@ export class PlayCommand extends Command {
 
         const message = await event.reply(output)
 
-        const filter = (reaction) => {
+        const filter = (reaction: Message) => {
             const authorCondition = event.author.id === reaction.author.id;
             const letterCondition = reaction.content === 'x'
             const numberCondition = (Number(reaction.content) && Number(reaction.content) > 0 && Number(reaction.content) < numberChoices)
@@ -111,11 +112,11 @@ export class PlayCommand extends Command {
         };
 
         message.channel.awaitMessages({ filter, time: 20000, max: 1, errors: ['time'] })
-            .then((collected: any) => {
+            .then((collected) => {
                 // eliminamos a la persona de la lista de no poder usar comandos
                 this.usersUsingACommand.removeUserList(event.author.id)
-                let collectedMessage: any;
-                collected.map((e: any) => collectedMessage = e);
+                let collectedMessage: Message;
+                collected.map((e: Message) => collectedMessage = e);
 
                 // Si se responde una X se borra el mensaje
                 if (collectedMessage.content === 'x') {
@@ -126,9 +127,9 @@ export class PlayCommand extends Command {
                     return;
                 };
 
-                const numberSelected = Number((collectedMessage.content) - 1)
+                const numberSelected = Number((collectedMessage.content)) - 1;
 
-                const song: SearchedSongRepository = response[numberSelected];
+                const song: rawSongData = response[numberSelected];
 
                 // eleminamos opciones
                 message.delete();
@@ -139,21 +140,21 @@ export class PlayCommand extends Command {
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
-                    console.log(err)
-                    event.channel.send(`Error: ${err.message}`)
+                    console.log(err);
+                    event.channel.send(`Error: ${err.message}`);
                 } else {
                     // sino contesta
                     console.log(`No answer`);
-                    event.reply('Time out')
+                    event.reply('Time out');
                 }
 
-                this.usersUsingACommand.removeUserList(event.author.id)
+                this.usersUsingACommand.removeUserList(event.author.id);
                 message.delete();
                 return;
             })
     }
 
-    private createSelectChoicesEmbed(songList: SearchedSongRepository[]) {
+    private createSelectChoicesEmbed(songList: rawSongData[]) {
         // pasa un embed al discord para que elija exactamente cual quiere
         let embedContent = '```js\n';
 
@@ -161,7 +162,7 @@ export class PlayCommand extends Command {
             embedContent += `${i + 1} - ${song.title}\n`
         })
 
-        embedContent += `${discordEmojis.x} - Cancel\n` + '```'
+        embedContent += `${discordEmojis.x} - Cancel\n` + '```';
 
         const output = new MessageCreator({
             embed: {
@@ -178,7 +179,7 @@ export class PlayCommand extends Command {
         return { output, numberChoices: songList.length };
     }
 
-    private findSongIdFromYoutubeURL(url: string, event) {
+    private findSongIdFromYoutubeURL(url: string, event: Message) {
         // encontramos la id del video
         const rawSongId = url
             .replace('https://', '')
@@ -188,20 +189,20 @@ export class PlayCommand extends Command {
         const URLParametersPosition = rawSongId.indexOf('&')
 
         if (URLParametersPosition === -1) {
-            const song: SearchedSongRepository = { id: rawSongId }
+            const song: rawSongData = { id: rawSongId }
             return this.updateToPlayList(event, song)
         }
 
-        const song: SearchedSongRepository = { id: rawSongId.substring(0, URLParametersPosition) }
+        const song: rawSongData = { id: rawSongId.substring(0, URLParametersPosition) }
 
         return this.updateToPlayList(event, song)
 
     }
 
-    private async updateToPlayList(event, song: SearchedSongRepository) {
-        const songData: SearchedSongRepository = await this.mapSongData(event, song)
+    private async updateToPlayList(event: Message, song: rawSongData) {
+        const songData: rawSongData = await this.mapSongData(event, song)
 
-        const newSong: newSongRepository = {
+        const newSong: newSongData = {
             newSong: {
                 songName: songData.title,
                 songId: songData.id,
@@ -214,7 +215,7 @@ export class PlayCommand extends Command {
         return this.playListHandler.update(newSong);
     }
 
-    private async mapSongData(event, song: SearchedSongRepository): Promise<SearchedSongRepository> {
+    private async mapSongData(event: Message, song: rawSongData): Promise<rawSongData> {
         // optenemos duracion y nombre
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
         try {
@@ -229,7 +230,7 @@ export class PlayCommand extends Command {
 
             try {
                 // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
-                const songData = await this.youtubeAPIHandler.searchSongById(song.id);
+                const songData: rawSongData = await this.youtubeAPIHandler.searchSongById(song.id);
                 if (!song.title) {
                     song.title = songData.title;
                 }
@@ -243,7 +244,7 @@ export class PlayCommand extends Command {
         return song
     }
 
-    private async findYoutubePlayList(url: string, event, watch = false) {
+    private async findYoutubePlayList(url: string, event: Message, watch = false) {
         let rawPlayListId: string;
         let playListId: string;
 
@@ -260,7 +261,7 @@ export class PlayCommand extends Command {
 
             // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
             try {
-                const playListData: SearchedSongRepository[] = await this.playDlHandler.getSognsInfoFromPlayList(url)
+                const playListData: rawSongData[] = await this.playDlHandler.getSognsInfoFromPlayList(url)
                 return this.mapPlayDLPlayListData(event, playListData)
             } catch (err) {
                 event.channel.send('Play-dl failed to fectch PlayList, it will be tried with Youtube API')
@@ -285,7 +286,7 @@ export class PlayCommand extends Command {
         return this.isPlayListDesired(event, playListId, url)
     }
 
-    private async isPlayListDesired(event, playListId: string, url: string) {
+    private async isPlayListDesired(event: Message, playListId: string, url: string) {
         // preguntamos al usuario si quiere reproducir la cancion el la playlist
         const output = new MessageCreator({
             embed: {
@@ -299,7 +300,7 @@ export class PlayCommand extends Command {
 
         this.usersUsingACommand.updateUserList(event.author.id)
 
-        const filter = (reaction) => {
+        const filter = (reaction: Message) => {
             const authorCondition = event.author.id === reaction.author.id;
             const contentCondition = ['y', 'Y', 'n', 'N', 'x', 'X'].includes(reaction.content)
             // si el autor es el mismo, y el mensaje contiene Y, N, o X
@@ -307,10 +308,10 @@ export class PlayCommand extends Command {
         };
 
         message.channel.awaitMessages({ filter, time: 20000, max: 1, errors: ['time'] })
-            .then(async (collected: any) => {
+            .then(async (collected) => {
                 this.usersUsingACommand.removeUserList(event.author.id)
-                let collectedMessage: any;
-                collected.map((e: any) => collectedMessage = e);
+                let collectedMessage: Message;
+                collected.map((e: Message) => collectedMessage = e);
 
                 // Si se responde una X se borra el mensaje
                 if (['x', 'X'].includes(collectedMessage.content)) {
@@ -331,7 +332,7 @@ export class PlayCommand extends Command {
                 if (['y', 'Y'].includes(collectedMessage.content)) {
                     message.delete();
                     try {
-                        const playListData: SearchedSongRepository[] = await this.playDlHandler.getSognsInfoFromPlayList(url)
+                        const playListData: rawSongData[] = await this.playDlHandler.getSognsInfoFromPlayList(url)
 
                         return this.mapPlayDLPlayListData(event, playListData)
                     } catch (err) {
@@ -355,10 +356,10 @@ export class PlayCommand extends Command {
             })
     }
 
-    private mapPlayDLPlayListData(event, rawPlayList: SearchedSongRepository[]) {
-        const playList: playListRepository[] = [];
-        rawPlayList.forEach((song: SearchedSongRepository) => {
-            const newSong: playListRepository = {
+    private mapPlayDLPlayListData(event: Message, rawPlayList: rawSongData[]) {
+        const playList: songData[] = [];
+        rawPlayList.forEach((song: rawSongData) => {
+            const newSong: songData = {
                 songName: song.title,
                 songId: song.id,
                 duration: this.parseSongDuration(String(song.duration), true)
@@ -368,9 +369,9 @@ export class PlayCommand extends Command {
         return this.updatePlayListWithAPlayList(event, playList)
     }
 
-    private async fetchYoutubePlayListData(event, playListId: string, url: string) {
+    private async fetchYoutubePlayListData(event: Message, playListId: string, url: string) {
         // llama a la API de youtube, si esta tambien falla y esta sonando un video reproduce el video
-        let rawPlayList: SearchedSongRepository[];
+        let rawPlayList: rawSongData[];
         try {
             rawPlayList = await this.youtubeAPIHandler.searchPlaylist(playListId)
         } catch (err) {
@@ -384,17 +385,17 @@ export class PlayCommand extends Command {
             return
         }
         // por cada video llama a la api para obtener la informacion
-        const playlist: playListRepository[] = await this.mapSongListData(event, rawPlayList)
+        const playlist: songData[] = await this.mapSongListData(event, rawPlayList)
 
         return this.updatePlayListWithAPlayList(event, playlist)
     }
 
 
-    private async mapSongListData(event, rawPlayList: SearchedSongRepository[]): Promise<playListRepository[]> {
-        const playlist: playListRepository[] = []
+    private async mapSongListData(event: Message, rawPlayList: rawSongData[]): Promise<songData[]> {
+        const playlist: songData[] = []
         for (let i = 0; rawPlayList.length > i; i++) {
             const songData = await this.mapSongData(event, rawPlayList[i])
-            const newSong: playListRepository = {
+            const newSong: songData = {
                 songName: songData.title,
                 songId: songData.id,
                 duration: songData.durationData,
@@ -404,8 +405,8 @@ export class PlayCommand extends Command {
         return playlist
     }
 
-    private async updatePlayListWithAPlayList(event, playList?: playListRepository[]) {
-        const newSongList: newSongRepository = {
+    private async updatePlayListWithAPlayList(event, playList?: songData[]) {
+        const newSongList: newSongData = {
             songList: playList,
             channel: event.channel,
             member: event.member

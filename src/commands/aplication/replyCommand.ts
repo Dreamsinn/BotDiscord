@@ -1,14 +1,14 @@
-import { DiscordRequestRepo } from "../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../domain/interfaces/commandSchema";
 import { ReplyCommandSchema } from "../domain/commandSchema/replyCommandSchema";
 import { CoolDown } from "./utils/coolDown";
 import { MessageCreator } from "./utils/messageCreator";
 import { Message } from "discord.js";
 
 export class ReplyCommand {
-    private replySchema: DiscordRequestRepo = ReplyCommandSchema;
+    private replySchema: CommandSchema = ReplyCommandSchema;
     private coolDown = new CoolDown();
 
-    public async call(event): Promise<Message> {
+    public async call(event: Message): Promise<Message> {
         console.log('ReplyCommand executed')
         // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
         // concatenar if fa que sigui lios
@@ -42,7 +42,7 @@ export class ReplyCommand {
         return
     }
 
-    private mapAliases(alias) {
+    private mapAliases(alias: string) {
         console.log(alias)
         if (alias.charAt(alias.length - 1) === ' ') {
             const aliasModified = alias.slice(0, -1);

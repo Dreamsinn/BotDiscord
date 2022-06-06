@@ -1,16 +1,16 @@
-import { DiscordRequestRepo } from "../../../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
 import { SkipMusicCommandSchema } from "../../../domain/commandSchema/SkipMusicCommandSchema";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
 import { Message } from 'discord.js';
-import { playListRepository } from '../../../domain/interfaces/playListRepository'
+import { songData } from '../../../domain/interfaces/songData'
 import { MessageCreator } from "../../utils/messageCreator";
 
 
 
 export class SkipMusicCommand extends Command {
-    private skipSchema: DiscordRequestRepo = SkipMusicCommandSchema;
+    private skipSchema: CommandSchema = SkipMusicCommandSchema;
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
 
@@ -22,7 +22,7 @@ export class SkipMusicCommand extends Command {
     }
 
 
-    public async call(event): Promise<Message> {
+    public async call(event: Message): Promise<Message> {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.skipSchema.coolDown);
         if (interrupt === 1) {
@@ -30,7 +30,7 @@ export class SkipMusicCommand extends Command {
             return;
         }
 
-        const skipedMusic: playListRepository = this.playListHandler.skipMusic()
+        const skipedMusic: songData = this.playListHandler.skipMusic()
 
         if (!skipedMusic) {
             return

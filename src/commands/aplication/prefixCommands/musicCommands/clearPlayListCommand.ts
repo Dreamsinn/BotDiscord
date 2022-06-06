@@ -1,11 +1,11 @@
-import { DiscordRequestRepo } from "../../../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
 import { ClearPlayListCommandSchema } from "../../../domain/commandSchema/clearPlayListCommandSchema";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
 
 export class ClearPlayListCommand extends Command {
-    private clearSchema: DiscordRequestRepo = ClearPlayListCommandSchema;
+    private clearSchema: CommandSchema = ClearPlayListCommandSchema;
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
 
@@ -17,7 +17,7 @@ export class ClearPlayListCommand extends Command {
     }
 
 
-    public async call(event) {
+    public async call() {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.clearSchema.coolDown);
         if (interrupt === 1) {

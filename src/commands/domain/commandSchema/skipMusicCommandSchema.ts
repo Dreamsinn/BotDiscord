@@ -1,4 +1,6 @@
-const SkipMusicCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const SkipMusicCommandSchema: CommandSchema = {
     aliases: ['skip', 's'],
     coolDown: 0,
     devOnly: false,

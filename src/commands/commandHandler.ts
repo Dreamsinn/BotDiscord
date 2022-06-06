@@ -1,7 +1,8 @@
 import { ReplyCommand, replyCommandOptions } from "./aplication/replyCommand";
 import { DiceCommand } from "./aplication/diceCommand";
-import { Route, routes } from "./routes";
+import { routes } from "./routes";
 import { DiceCommandSchema } from "./domain/commandSchema/diceCommandSchema";
+import { Message } from "discord.js";
 
 export class CommandHandler {
     diceCommand: DiceCommand
@@ -13,11 +14,8 @@ export class CommandHandler {
         this.diceCommand = diceCommand;
         this.replyCommand = replyCommand;
     }
-    // per inversio de dependencies, pases la dependencia al constructor, la creas fora y poses una = la mateixa,
-    // tambes necesitas crearlo a la primera pagian, ya que la inversio es recursiva fins al principi
 
-    // TODO: jordi, posar comentaris de que fa cada cosa
-    public async isCommand(event) {
+    public async isCommand(event: Message) {
         if (event.content.startsWith(`${process.env.PREFIX}`)) {
             // si el comando tiene prefijo, para comandos con prefijo
             console.log('prefix founded')
@@ -42,7 +40,7 @@ export class CommandHandler {
         return
     }
 
-    private async isPrefixCommand(event) {
+    private async isPrefixCommand(event: Message) {
         let command: string;
         if (event.content.includes(' ')) {
             // si el mensaje tiene ' ', mirar command antes del ' '

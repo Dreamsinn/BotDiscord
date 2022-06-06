@@ -1,4 +1,4 @@
-export interface DiscordRequestRepo {
+export interface CommandSchema {
     aliases: string[],
     coolDown?: number,
     devOnly?: boolean,

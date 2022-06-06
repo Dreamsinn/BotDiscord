@@ -1,12 +1,12 @@
-import { playListRepository, newSongRepository, durationRepository } from '../domain/interfaces/playListRepository'
-import { MessageOptions } from 'discord.js';
-import { createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
+import { songData, newSongData, songDuration } from '../domain/interfaces/songData'
+import { GuildMember, Message, MessageOptions } from 'discord.js';
+import { AudioPlayerState, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
 import { PlayDlHandler } from '../infrastructure/playDlHandler'
 import { MessageCreator } from './utils/messageCreator';
 
 export class PlayListHandler {
-    private playList: playListRepository[] = [];
-    private playListDuration: durationRepository = { hours: 0, minutes: 0, seconds: 0 };
+    private playList: songData[] = [];
+    private playListDuration: songDuration = { hours: 0, minutes: 0, seconds: 0 };
     private botConnection: any;
     private player: any;
     private playDlHandler: PlayDlHandler;
@@ -18,7 +18,7 @@ export class PlayListHandler {
         this.playDlHandler = playDlHandler;
     }
 
-    public async update({ member, channel, songList, newSong }: newSongRepository) {
+    public async update({ member, channel, songList, newSong }: newSongData) {
         if (songList) {
             this.playList.push(...songList)
         } else {
@@ -48,13 +48,13 @@ export class PlayListHandler {
         }
     }
 
-    private newListToPlayListEmbed(member, songList) {
+    private newListToPlayListEmbed(member: GuildMember, songList: songData[]) {
         // TODO: descripcion con lista de todas las canciones, mas adelante, con paginacion de 20s y sin mensaje de Time Out
-        let songListDuration: durationRepository;
+        let songListDuration: songDuration;
         songListDuration = this.calculateListDuration(songList, songListDuration);
 
         let songNameList = '';
-        songList.forEach((song: playListRepository, i: number) => {
+        songList.forEach((song: songData, i: number) => {
             songNameList += `${i + 1} - ${song.songName}\n`
         })
 
@@ -75,7 +75,7 @@ export class PlayListHandler {
         return output;
     }
 
-    private newSongToPlayListEmbed(member, newSong: playListRepository) {
+    private newSongToPlayListEmbed(member: GuildMember, newSong: songData) {
         const output = new MessageCreator({
             embed: {
                 color: '#0099ff',
@@ -93,7 +93,7 @@ export class PlayListHandler {
         return output;
     }
 
-    private calculateListDuration(songList: playListRepository[], listDuration: durationRepository) {
+    private calculateListDuration(songList: songData[], listDuration: songDuration) {
         listDuration = { hours: 0, minutes: 0, seconds: 0 };
         songList.forEach((song) => {
             listDuration.seconds += song.duration.seconds;
@@ -113,7 +113,7 @@ export class PlayListHandler {
         return listDuration
     }
 
-    private getQeueDuration(listDuration: durationRepository) {
+    private getQeueDuration(listDuration: songDuration) {
         const hours = listDuration.hours;
         const minutes = listDuration.minutes;
         const seconds = listDuration.seconds;
@@ -129,7 +129,7 @@ export class PlayListHandler {
         return `${seconds}s`
     }
 
-    private joinToChannel(member: any, channel: any) {
+    private joinToChannel(member: GuildMember, channel: any) {
         // une al bot al canal de discord y da la capacidad de reproducir musica
         this.botConnection = joinVoiceChannel({
             channelId: member.voice.channel.id,
@@ -171,7 +171,7 @@ export class PlayListHandler {
     }
 
     private musicEventListener() {
-        this.player.on('stateChange', (oldState, newState) => {
+        this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
             // cunado el player no esta reproduciendo
             if (newState.status === 'idle') {
                 this.playList.shift()
@@ -191,7 +191,7 @@ export class PlayListHandler {
     }
 
     public skipMusic() {
-        let musicToSkip: playListRepository;
+        let musicToSkip: songData;
         if (this.player) {
             musicToSkip = this.playList[0]
             this.player.stop()
@@ -216,7 +216,7 @@ export class PlayListHandler {
         return this.player.unpause()
     }
 
-    public changeBotVoiceChanel(event) {
+    public changeBotVoiceChanel(event: Message) {
         this.joinToChannel(event.member, event.channel)
         if (this.playList[0]) {
             this.playMusic()

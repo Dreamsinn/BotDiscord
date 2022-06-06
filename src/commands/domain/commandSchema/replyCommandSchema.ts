@@ -1,4 +1,6 @@
-const ReplyCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const ReplyCommandSchema: CommandSchema = {
     aliases: ['cinco', '5', 'trece', '13', 'javi', 'ino ', 'ano '],
     coolDown: 0,
     devOnly: false,
