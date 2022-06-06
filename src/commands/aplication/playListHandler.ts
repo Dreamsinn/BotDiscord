@@ -131,6 +131,13 @@ export class PlayListHandler {
 
     private joinToChannel(member: GuildMember, channel: any) {
         // une al bot al canal de discord y da la capacidad de reproducir musica
+
+        // // si no estas en un canal de voz
+        if (!member.voice.channel) {
+            channel.send('Tienes que estar en un canal de voz!')
+            return;
+        }
+
         this.botConnection = joinVoiceChannel({
             channelId: member.voice.channel.id,
             guildId: channel.guild.id,
