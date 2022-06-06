@@ -5,7 +5,7 @@ import { createAudioPlayer, createAudioResource, joinVoiceChannel } from "@disco
 import { PlayDlHandler } from '../infrastructure/playDlHandler'
 
 export class PlayListHandler {
-    private playList: playListRepository[];
+    private playList: playListRepository[] = [];
     private playListDuration: durationRepository = { hours: 0, minutes: 0, seconds: 0 };
     private botConnection: any;
     private player: any;
@@ -18,26 +18,22 @@ export class PlayListHandler {
         this.playDlHandler = playDlHandler;
     }
 
-    public async update({ member, channel, ...newSong }: newSongRepository) {
-        if (this.playList === undefined) {
-            // sino esta iniciada, es igual a la cancion
-            this.playList = [newSong]
+    public async update({ member, channel, songList, newSong }: newSongRepository) {
+        if (songList) {
+            this.playList.push(...songList)
         } else {
-            // si la array esta inicaida, hace push de la cancion
             this.playList.push(newSong);
         }
 
-        // si no estas en un canal de voz
-        if (!member.voice.channel) {
-            channel.send('Tienes que estar en un canal de voz!')
-            return;
+        let embed;
+        if (songList) {
+            embed = this.newListToPlayListEmbed(member, songList)
+        } else {
+            embed = this.newSongToPlayListEmbed(member, newSong)
         }
 
-        const embed = this.newSongToPlayListEmbed(member, newSong)
-
-
         // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
-        this.calculateQeueDuration();
+        this.playListDuration = this.calculateListDuration(this.playList, this.playListDuration);
 
         const output: CommandOutput = {
             embeds: [embed],
@@ -56,7 +52,34 @@ export class PlayListHandler {
         }
     }
 
-    private newSongToPlayListEmbed(member, { ...newSong }) {
+    private newListToPlayListEmbed(member, songList) {
+        // TODO: descripcion con lista de todas las canciones, mas adelante, con paginacion de 20s y sin mensaje de Time Out
+        let songListDuration: durationRepository;
+        songListDuration = this.calculateListDuration(songList, songListDuration);
+
+        let songNameList = '';
+        songList.forEach((song: playListRepository, i: number) => {
+            console.log(song)
+            songNameList += `${i + 1} - ${song.songName}\n`
+        })
+        console.log(songNameList)
+        const embed = new MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`${songList.length} added to playlist`)
+            .setAuthor({ name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` })
+            .setDescription(songNameList)
+            .addFields(
+                { name: 'Duracion', value: `${this.getQeueDuration(songListDuration)}`, inline: true },
+                { name: 'Posicion', value: `${this.playList.length + 1 - songList.length}`, inline: true },
+                { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
+            )
+
+        // devuelve el embed
+        return embed;
+    }
+
+    private newSongToPlayListEmbed(member, newSong: playListRepository) {
+
         const embed = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle(newSong.songName ? `${newSong.songName}` : 'Ha habido un error a la hora de coger el nombre')
@@ -65,36 +88,37 @@ export class PlayListHandler {
             .addFields(
                 { name: 'Duracion', value: `${newSong.duration.string}`, inline: true },
                 { name: 'Posicion', value: `${this.playList.length}`, inline: true },
-                { name: 'Espera', value: `${this.getQeueDuration()}`, inline: true },
+                { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
             )
 
         // devuelve el embed
         return embed;
     }
 
-    private calculateQeueDuration() {
-        this.playListDuration = { hours: 0, minutes: 0, seconds: 0 };
-        this.playList.forEach((song) => {
-            this.playListDuration.seconds += song.duration.seconds;
-            this.playListDuration.minutes += song.duration.minutes;
-            this.playListDuration.hours += song.duration.hours;
+    private calculateListDuration(songList: playListRepository[], listDuration: durationRepository) {
+        listDuration = { hours: 0, minutes: 0, seconds: 0 };
+        songList.forEach((song) => {
+            listDuration.seconds += song.duration.seconds;
+            listDuration.minutes += song.duration.minutes;
+            listDuration.hours += song.duration.hours;
 
-            if (this.playListDuration.seconds >= 60) {
-                this.playListDuration.seconds -= 60;
-                this.playListDuration.minutes += 1;
+            if (listDuration.seconds >= 60) {
+                listDuration.seconds -= 60;
+                listDuration.minutes += 1;
             }
 
-            if (this.playListDuration.minutes >= 60) {
-                this.playListDuration.minutes -= 60;
-                this.playListDuration.hours += 1;
+            if (listDuration.minutes >= 60) {
+                listDuration.minutes -= 60;
+                listDuration.hours += 1;
             }
         })
+        return listDuration
     }
 
-    private getQeueDuration() {
-        const hours = this.playListDuration.hours;
-        const minutes = this.playListDuration.minutes;
-        const seconds = this.playListDuration.seconds;
+    private getQeueDuration(listDuration: durationRepository) {
+        const hours = listDuration.hours;
+        const minutes = listDuration.minutes;
+        const seconds = listDuration.seconds;
 
         if (hours !== 0) {
             return `${hours}h ${minutes}m ${seconds}s`
@@ -240,5 +264,4 @@ export class PlayListHandler {
 
         return removedMusic;
     }
-
 }

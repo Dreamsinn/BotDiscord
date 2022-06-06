@@ -5,9 +5,8 @@ export interface playListRepository {
 }
 
 export interface newSongRepository {
-    songName: string,
-    songId: string,
-    duration: durationRepository,
+    newSong?: playListRepository,
+    songList?: playListRepository[],
     channel: any,
     member: any
 }
