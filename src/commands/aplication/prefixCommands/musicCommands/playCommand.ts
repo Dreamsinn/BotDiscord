@@ -3,8 +3,6 @@ import { PlayCommandSchema } from "../../../domain/commandSchema/playCommandSche
 import { Command } from "../../../aplication/Command";
 import { YoutubeAPIHandler } from "../../../infrastructure/youtubeHandler";
 import { PlayDlHandler } from "../../../infrastructure/playDlHandler"
-import { MessageEmbed } from 'discord.js';
-import { CommandOutput } from "../../../domain/interfaces/commandOutput";
 import { discordEmojis } from "../../../domain/discordEmojis";
 import { newSongRepository, playListRepository } from "../../../domain/interfaces/playListRepository";
 import { PlayListHandler } from "../../playListHandler"
@@ -12,6 +10,7 @@ import { CoolDown } from "../../utils/coolDown";
 import { UsersUsingACommand } from "../../utils/usersUsingACommand"
 import { YouTubeVideo } from "play-dl";
 import { SearchedSongRepository } from "../../../domain/interfaces/searchedSongRepository";
+import { MessageCreator } from "../../utils/messageCreator";
 
 export class PlayCommand extends Command {
     private playSchema: DiscordRequestRepo = PlayCommandSchema;
@@ -96,11 +95,7 @@ export class PlayCommand extends Command {
             return;
         }
 
-        const { embed, numberChoices } = this.createSelectChoicesEmbed(response);
-
-        const output: CommandOutput = {
-            embeds: [embed],
-        }
+        const { output, numberChoices } = this.createSelectChoicesEmbed(response);
 
         // subimos al usuario a la lista para que no pueda usar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id)
@@ -168,12 +163,19 @@ export class PlayCommand extends Command {
 
         embedContent += `${discordEmojis.x} - Cancel\n` + '```'
 
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .addFields({ name: 'Escriba el número de la canción que quiera seleccionar', value: embedContent, inline: false })
+        const output = new MessageCreator({
+            embed: {
+                color: '#40b3ff',
+                field: {
+                    name: 'Escriba el número de la canción que quiera seleccionar',
+                    value: embedContent,
+                    inline: false
+                }
+            }
+        }).call()
 
         // devuelve el embed y el numero de eleciones 
-        return { embed, numberChoices: songList.length };
+        return { output, numberChoices: songList.length };
     }
 
     private findSongIdFromYoutubeURL(url: string, event) {
@@ -285,11 +287,13 @@ export class PlayCommand extends Command {
 
     private async isPlayListDesired(event, playListId: string, url: string) {
         // preguntamos al usuario si quiere reproducir la cancion el la playlist
-        const embed = this.createIsPlayListDesiredEmbed()
-
-        const output: CommandOutput = {
-            embeds: [embed],
-        }
+        const output = new MessageCreator({
+            embed: {
+                color: "#40b3ff",
+                title: 'Is playlist desired?',
+                description: 'Y - Play playlisy \nN - Play song \nX - Cancel'
+            }
+        }).call()
 
         const message = await event.channel.send(output)
 
@@ -349,16 +353,6 @@ export class PlayCommand extends Command {
                 message.delete();
                 return;
             })
-    }
-
-    private createIsPlayListDesiredEmbed() {
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle('Is playlist desired?')
-            .setDescription('Y - Play playlisy \nN - Play song \nX - Cancel')
-
-        // devuelve el embed y el numero de eleciones 
-        return embed;
     }
 
     private mapPlayDLPlayListData(event, rawPlayList: SearchedSongRepository[]) {

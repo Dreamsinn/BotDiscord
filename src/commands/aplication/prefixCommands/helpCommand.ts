@@ -1,14 +1,14 @@
-import { MessageEmbed } from 'discord.js';
+import { Message } from 'discord.js';
 import { HelpCommandSchema } from '../../domain/commandSchema/helpCommandSchema'
 import { DiscordRequestRepo } from "../../domain/interfaces/discordRequestRepo";
 import { CoolDown } from "../utils/coolDown"
-import { CommandOutput } from "../../domain/interfaces/commandOutput"
 import { Command } from '../Command';
 import { PlayCommandSchema } from '../../domain/commandSchema/playCommandSchema';
 import { PlayListCommandSchema } from '../../domain/commandSchema/playListCommandSchema';
 import { DiceCommandSchema } from '../../domain/commandSchema/diceCommandSchema';
 import { ReplyCommandSchema } from '../../domain/commandSchema/replyCommandSchema';
 import { discordEmojis } from '../../domain/discordEmojis';
+import { MessageCreator } from '../utils/messageCreator';
 
 export class HelpCommand extends Command {
     // TODO, poner schemas como dependencias?
@@ -16,7 +16,7 @@ export class HelpCommand extends Command {
     coolDown = new CoolDown();
 
 
-    public async call(event): Promise<CommandOutput> {
+    public async call(event): Promise<Message> {
         console.log('help command')
         // coolDown
         const interrupt = this.coolDown.call(this.helpSchema.coolDown);
@@ -25,12 +25,8 @@ export class HelpCommand extends Command {
             return
         }
 
-        // construir mensaje
-        const embed = this.createTypeOfCommandsEmbed();
+        const output = this.createTypeOfCommandsEmbed();
 
-        const output: CommandOutput = {
-            embeds: [embed],
-        }
         const message = await event.reply(output)
 
         // crear botones de reaccion
@@ -40,19 +36,15 @@ export class HelpCommand extends Command {
     private createTypeOfCommandsEmbed() {
         const embedContent = Object.entries(typesOfCommands).map((typeCommand, i) => this.mapTypeCommandsAddFiledsEmbed(typeCommand, i));
 
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(`Tipos de comandos`)
-            // .setDescription(`1 - Commandos con prefijo\n` + `2 - Commando de dado\n` + `3 - Commando de respuesta\n`)
-            .addFields(embedContent
-                // [
-                // {name: '\u200b', value: '1 - Commandos con prefijo', inline: false},
-                // {name: '\u200b', value: '2 - Commando de dado', inline: false},
-                // {name: '\u200b', value: '3 - Commando de respuesta', inline: false}
-                // ]
-            )
+        const output = new MessageCreator({
+            embed: {
+                color: '#BFFF00',
+                title: `Tipos de comandos`,
+                fields: embedContent
+            }
+        }).call()
 
-        return embed;
+        return output;
     }
 
     private mapTypeCommandsAddFiledsEmbed(typeCommand, index) {
@@ -99,18 +91,14 @@ export class HelpCommand extends Command {
     private async createCommandsEmbed(collected: any, message: any, event) {
         // determinar a que ha reaccionado
         const typeCommand = this.commandSelected(collected, message)
-        let embed;
+        let output;
         let needReaction: boolean;
         if (typeCommand[0] === 'prefixCommand') {
             needReaction = true;
-            embed = this.createPrefixTypeEmbed()
+            output = this.createPrefixTypeEmbed()
         } else {
             // crear embed de comando
-            embed = this.createCommandEmbed(typeCommand, message)
-        }
-
-        const output: CommandOutput = {
-            embeds: [embed],
+            output = this.createCommandEmbed(typeCommand, message)
         }
 
         await message.edit(output)
@@ -146,30 +134,33 @@ export class HelpCommand extends Command {
             }
         }
 
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(`${typesOfCommands.prefixCommand.typeDescription}`)
-            .setDescription(`Estos comandos requieren de '${process.env.PREFIX}' antes del alias`)
-            .addFields(
-                embedContent
-            )
+        const output = new MessageCreator({
+            embed: {
+                color: '#BFFF00',
+                title: typesOfCommands.prefixCommand.typeDescription,
+                description: `Estos comandos requieren de '${process.env.PREFIX}' antes del alias`,
+                fields: embedContent
+            }
+        }).call()
 
-        return embed;
+        return output;
     }
 
     private createCommandEmbed(typeCommand, message) {
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(`${typeCommand[1].typeDescription}`)
-            .setDescription(`El alias es la parte necesaria para llamar a un comando`)
-            .addFields(
-                // {name: 'Nombre', value: `${typeCommand[1].name}`, inline: false},
-                { name: 'Descripcion', value: `${typeCommand[1].description}`, inline: false },
-                { name: 'Alias', value: `${typeCommand[1].aliases}`, inline: false },
-                { name: 'Cooldown', value: `${typeCommand[1].coolDown} ms`, inline: false },
-            )
+        const output = new MessageCreator({
+            embed: {
+                color: '#BFFF00',
+                title: typeCommand[1].typeDescription,
+                description: `El alias es la parte necesaria para llamar a un comando`,
+                fields: [
+                    { name: 'Descripcion', value: `${typeCommand[1].description}`, inline: false },
+                    { name: 'Alias', value: `${typeCommand[1].aliases}`, inline: false },
+                    { name: 'Cooldown', value: `${typeCommand[1].coolDown} ms`, inline: false },
+                ],
+            }
+        }).call()
 
-        return embed;
+        return output;
     }
 }
 

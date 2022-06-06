@@ -1,8 +1,8 @@
 import { playListRepository, newSongRepository, durationRepository } from '../domain/interfaces/playListRepository'
-import { CommandOutput } from "../domain/interfaces/commandOutput";
-import { MessageEmbed } from 'discord.js';
+import { MessageOptions } from 'discord.js';
 import { createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
 import { PlayDlHandler } from '../infrastructure/playDlHandler'
+import { MessageCreator } from './utils/messageCreator';
 
 export class PlayListHandler {
     private playList: playListRepository[] = [];
@@ -25,19 +25,15 @@ export class PlayListHandler {
             this.playList.push(newSong);
         }
 
-        let embed;
+        let output: MessageOptions;
         if (songList) {
-            embed = this.newListToPlayListEmbed(member, songList)
+            output = this.newListToPlayListEmbed(member, songList)
         } else {
-            embed = this.newSongToPlayListEmbed(member, newSong)
+            output = this.newSongToPlayListEmbed(member, newSong)
         }
 
         // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
         this.playListDuration = this.calculateListDuration(this.playList, this.playListDuration);
-
-        const output: CommandOutput = {
-            embeds: [embed],
-        }
 
         channel.send(output)
 
@@ -62,34 +58,39 @@ export class PlayListHandler {
             songNameList += `${i + 1} - ${song.songName}\n`
         })
 
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(`${songList.length} added to playlist`)
-            .setAuthor({ name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` })
-            .setDescription(songNameList)
-            .addFields(
-                { name: 'Duracion', value: `${this.getQeueDuration(songListDuration)}`, inline: true },
-                { name: 'Posicion', value: `${this.playList.length + 1 - songList.length}`, inline: true },
-                { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
-            )
+        const output = new MessageCreator({
+            embed: {
+                color: '#0099ff',
+                title: `${songList.length} added to playlist`,
+                author: { name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` },
+                description: songNameList,
+                fields: [
+                    { name: 'Duracion', value: `${this.getQeueDuration(songListDuration)}`, inline: true },
+                    { name: 'Posicion', value: `${this.playList.length + 1 - songList.length}`, inline: true },
+                    { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
+                ]
+            }
+        }).call()
 
-        return embed;
+        return output;
     }
 
     private newSongToPlayListEmbed(member, newSong: playListRepository) {
+        const output = new MessageCreator({
+            embed: {
+                color: '#0099ff',
+                title: newSong.songName ? `${newSong.songName}` : 'Ha habido un error a la hora de coger el nombre',
+                author: { name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` },
+                URL: `https://www.youtube.com/watch?v=${newSong.songId}`,
+                fields: [
+                    { name: 'Duracion', value: `${newSong.duration.string}`, inline: true },
+                    { name: 'Posicion', value: `${this.playList.length}`, inline: true },
+                    { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true }
+                ]
+            }
+        }).call()
 
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(newSong.songName ? `${newSong.songName}` : 'Ha habido un error a la hora de coger el nombre')
-            .setAuthor({ name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` })
-            .setURL(`https://www.youtube.com/watch?v=${newSong.songId}`)
-            .addFields(
-                { name: 'Duracion', value: `${newSong.duration.string}`, inline: true },
-                { name: 'Posicion', value: `${this.playList.length}`, inline: true },
-                { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
-            )
-
-        return embed;
+        return output;
     }
 
     private calculateListDuration(songList: playListRepository[], listDuration: durationRepository) {

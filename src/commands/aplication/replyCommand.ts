@@ -1,17 +1,16 @@
 import { DiscordRequestRepo } from "../domain/interfaces/discordRequestRepo";
 import { ReplyCommandSchema } from "../domain/commandSchema/replyCommandSchema";
-import { CommandOutput } from "../domain/interfaces/commandOutput";
-import { MessageEmbed } from "discord.js";
 import { CoolDown } from "./utils/coolDown";
+import { MessageCreator } from "./utils/messageCreator";
+import { Message } from "discord.js";
 
 export class ReplyCommand {
     private replySchema: DiscordRequestRepo = ReplyCommandSchema;
     private coolDown = new CoolDown();
 
-    public async call(event): Promise<CommandOutput> {
+    public async call(event): Promise<Message> {
         console.log('ReplyCommand executed')
         // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
-        // per el cooldawn una funcio, o metodo que comprobes si te en ves de un if,
         // concatenar if fa que sigui lios
         this.replySchema.aliases.forEach(alias => {
             // mirar si se encuntra el alias al principio, o ente ' '
@@ -25,29 +24,22 @@ export class ReplyCommand {
                 }
 
                 console.log('alias founded')
-                // construir el cuadro del mensaje
-                const embed = this.embedConstructor(event, alias);
 
-                console.log('embed builded')
+                const output = new MessageCreator({
+                    message: {
+                        content: `${event.author.username} a dicho: ${event.content}!`,
+                    },
+                    embed: {
+                        color: '#0099ff',
+                        title: `${event.author.username} te falta calle`,
+                        description: `${this.mapAliases(alias)}`
+                    }
+                }).call()
 
-                const output: CommandOutput = {
-                    content: `${event.author.username} a dicho: ${event.content}!`,
-                    embeds: [embed],
-                }
                 return event.reply(output);
             }
         })
         return
-    }
-
-    private embedConstructor(event, alias) {
-        const replay = this.mapAliases(alias);
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(`${event.author.username} te falta calle`)
-            .setDescription(`${replay}`)
-
-        return embed
     }
 
     private mapAliases(alias) {

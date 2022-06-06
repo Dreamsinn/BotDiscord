@@ -29,22 +29,11 @@
 
 - Comando para mover el bot de canal de voz  //await member.voice.setChannel('newChannelId')// aunque quizas mejor //joinVoiceChannel//
 
-
-- Comando dados < y >
-
-- ReadPlaylist     public readPlayList(event) {
-        if (this.playList && this.playList.length > 0) {
-            return this.playList;
-        }
-        event.channel.send('No hay ninguna cancion en la cola')
-    }
-
-- Comando para desabilitar ReadPlaylist
-
 - Mirar si los datos del schema son necesarios
 
-- Arreglar pause y unapuse, play que no despause, y revisar condicion de unpause
-
-- Usar message.content.split(",") para mejorar el diceCommand S
-
 - Convertir la paginacion en un util, modificar playlist y remove
+
+- Reacer dice y reply commands
+-- Usar message.content.split(",") para mejorar el diceCommand y (< y >)
+
+- try catch en joinVoiceChannel, si se va del canal antes de unirse peta

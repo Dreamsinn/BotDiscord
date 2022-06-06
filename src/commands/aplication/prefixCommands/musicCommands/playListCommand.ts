@@ -5,9 +5,7 @@ import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
 import { discordEmojis } from "../../../domain/discordEmojis"
 import { playListRepository } from '../../../domain/interfaces/playListRepository'
-import { MessageEmbed } from 'discord.js';
-import { CommandOutput } from "../../../domain/interfaces/commandOutput";
-
+import { MessageCreator } from "../../utils/messageCreator";
 
 export class PlayListCommand extends Command {
     private playListSchema: DiscordRequestRepo = PlayListCommandSchema;
@@ -48,11 +46,7 @@ export class PlayListCommand extends Command {
         }
 
 
-        const embed = this.createPlayListEmbed()
-
-        const output: CommandOutput = {
-            embeds: [embed],
-        }
+        const output = this.createPlayListEmbed()
 
         //  si solo hay una pagina, se acaba
         if (!(this.playListPages.length > 1)) {
@@ -73,14 +67,19 @@ export class PlayListCommand extends Command {
         }
         songsInThePage += '```'
 
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle('Playlist')
-            .addFields(
-                { name: `Page [${this.page + 1}/${this.playListPages.length}]`, value: `${songsInThePage}` },
-            )
+        const output = new MessageCreator({
+            embed: {
+                color: '#FFE4C4',
+                title: 'Playlist',
+                field: {
+                    name: `Page [${this.page + 1}/${this.playListPages.length}]`,
+                    value: songsInThePage,
+                    inline: false
+                }
+            }
+        }).call()
 
-        return embed;
+        return output;
     }
 
     private messageReaction(message: any) {
@@ -128,11 +127,8 @@ export class PlayListCommand extends Command {
 
         // si se ha cambiado la pagina
         if (pageChanged) {
-            const embed = this.createPlayListEmbed()
+            const output = this.createPlayListEmbed()
 
-            const output: CommandOutput = {
-                embeds: [embed],
-            }
             message.edit(output)
         }
     }

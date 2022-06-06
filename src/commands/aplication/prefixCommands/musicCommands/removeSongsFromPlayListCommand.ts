@@ -5,8 +5,8 @@ import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
 import { PlayListCommand } from "./playListCommand";
 import { UsersUsingACommand } from "../../utils/usersUsingACommand"
-import { CommandOutput } from "../../../domain/interfaces/commandOutput";
-import { MessageEmbed } from 'discord.js';
+import { Message, MessageOptions } from 'discord.js';
+import { MessageCreator } from "../../utils/messageCreator";
 
 
 
@@ -23,7 +23,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event) {
+    public async call(event): Promise<Message> {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
         if (interrupt === 1) {
@@ -68,15 +68,9 @@ export class RemoveSongsFromPlayListCommand extends Command {
                     return
                 }
 
-                const embed = this.removeSongFromPlayList(collectedMessage.content, event)
-
-                const output: CommandOutput = {
-                    embeds: [embed],
-                }
+                const output = this.removeSongFromPlayList(collectedMessage.content, event)
 
                 return event.channel.send(output)
-
-
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
@@ -103,7 +97,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
             const newEmbed = message.embeds[0]
             newEmbed.setTitle('Remove song from playlist')
             newEmbed.setDescription('Write - X - to cancel operation', false);
-            const output: CommandOutput = {
+            const output: MessageOptions = {
                 embeds: [newEmbed],
             }
             message.edit(output)
@@ -135,13 +129,19 @@ export class RemoveSongsFromPlayListCommand extends Command {
             removedMusicString += `${song.songName}\n`
         })
 
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setAuthor({ name: `${event.member.user.username}`, iconURL: `${event.member.user.displayAvatarURL()}` })
-            .addFields(
-                { name: `Songs removeds from Playlist`, value: `${removedMusicString}` },
-            )
+        // TODO paginar
+        const output = new MessageCreator({
+            embed: {
+                color: 'ORANGE',
+                author: { name: `${event.member.user.username}`, iconURL: `${event.member.user.displayAvatarURL()}` },
+                field: {
+                    name: `Songs removeds from Playlist`,
+                    value: removedMusicString,
+                    inline: false
+                }
+            }
+        }).call()
 
-        return embed;
+        return output;
     }
 }

@@ -1,14 +1,14 @@
 import { DiscordRequestRepo } from "../domain/interfaces/discordRequestRepo";
 import { DiceCommandSchema } from "../domain/commandSchema/diceCommandSchema";
-import { MessageEmbed } from "discord.js";
-import { CommandOutput } from "../domain/interfaces/commandOutput";
+import { Message } from "discord.js";
 import { CoolDown } from "./utils/coolDown";
+import { MessageCreator } from "./utils/messageCreator";
 
 export class DiceCommand {
     private diceSchema: DiscordRequestRepo = DiceCommandSchema;
     private coolDown = new CoolDown();
 
-    public async call(event): Promise<CommandOutput> {
+    public async call(event): Promise<Message> {
         // buscar la posicion de la D, y la de la , (-1 si no hay)
         const { D_position, comma_position } = this.searchDandCommaPosition(event.content);
 
@@ -24,12 +24,7 @@ export class DiceCommand {
             return;
         }
 
-        const embed = this.rolDices(event.content, D_position, comma_position, event);
-
-        const output: CommandOutput = {
-            // content: `${event.author.username} a lanzado: ${diceNumber} dados de ${diceFaces} caras`,
-            embeds: [embed],
-        }
+        const output = this.rolDices(event.content, D_position, comma_position, event);
 
         return event.reply(output);
 
@@ -85,8 +80,11 @@ export class DiceCommand {
         }
 
         // comprobar que no se supera el limite de caras y tiradas
-        this.rollLimitation(diceNumberArray, diceFacesArray, event)
-
+        const notAllowdRoll = this.rollLimitation(diceNumberArray, diceFacesArray, event)
+        if (this.rollLimitation(diceNumberArray, diceFacesArray, event)) {
+            return notAllowdRoll
+        }
+        console.log('hemos llegado')
         // tirar los dados
         return this.mapRollString(diceNumberArray, diceFacesArray)
     }
@@ -142,16 +140,16 @@ export class DiceCommand {
         const maxNumberOfFaces = Math.max(...diceFacesArray)
 
         if (numberOfFaces > 30 || maxNumberOfFaces > 10000) {
-            const embed = new MessageEmbed()
-                .setColor('#0099ff')
-                .setTitle(`Tirada no permitida`)
-                .setDescription(`Como maximo se puede lanzar 30 dados de 10000 caras`)
-
-            const output: CommandOutput = {
-                embeds: [embed],
-            }
-            return event.reply(output);
+            const output = new MessageCreator({
+                embed: {
+                    color: 'RED',
+                    title: 'Tirada no permitida',
+                    description: 'Como maximo se puede lanzar 30 dados de 10000 caras',
+                }
+            }).call()
+            return output;
         }
+        return
     }
 
     private mapRollString(diceNumberArray: number[], diceFacesArray: number[]) {
@@ -199,12 +197,13 @@ export class DiceCommand {
     }
 
     private embedConstructor(diceTotal, rollStringArray) {
-        // construir embed
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(rollStringArray)
-            .setDescription(`${diceTotal}`)
-
-        return embed;
+        const output = new MessageCreator({
+            embed: {
+                color: 'GREEN',
+                title: rollStringArray,
+                description: `${diceTotal}`,
+            }
+        }).call()
+        return output;
     }
 }
