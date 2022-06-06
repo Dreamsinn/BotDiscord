@@ -3,9 +3,9 @@ import { SkipMusicCommandSchema } from "../../../domain/commandSchema/SkipMusicC
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
-import { CommandOutput } from "../../../domain/interfaces/commandOutput";
-import { MessageEmbed } from 'discord.js';
+import { Message } from 'discord.js';
 import { playListRepository } from '../../../domain/interfaces/playListRepository'
+import { MessageCreator } from "../../utils/messageCreator";
 
 
 
@@ -22,7 +22,7 @@ export class SkipMusicCommand extends Command {
     }
 
 
-    public async call(event) {
+    public async call(event): Promise<Message> {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.skipSchema.coolDown);
         if (interrupt === 1) {
@@ -30,29 +30,22 @@ export class SkipMusicCommand extends Command {
             return;
         }
 
-        const skipedMusic = this.playListHandler.skipMusic()
+        const skipedMusic: playListRepository = this.playListHandler.skipMusic()
 
         if (!skipedMusic) {
             return
         }
 
-        const embed = this.skipSongEmbed(event, skipedMusic)
-
-        const output: CommandOutput = {
-            embeds: [embed],
-        }
+        const output = new MessageCreator({
+            embed: {
+                color: 'ORANGE',
+                author: { name: `${event.member.user.username}`, iconURL: `${event.member.user.displayAvatarURL()}` },
+                URL: `https://www.youtube.com/watch?v=${skipedMusic.songId}`,
+                title: 'Skipped music:',
+                description: skipedMusic.songName,
+            }
+        }).call()
 
         return event.channel.send(output)
-    }
-
-
-    private skipSongEmbed(event, skipedMusic: playListRepository) {
-        const embed = new MessageEmbed()
-            .setColor('#0099ff')
-            .setAuthor({ name: `${event.member.user.username}`, iconURL: `${event.member.user.displayAvatarURL()}` })
-            .setDescription(`Skip: ${skipedMusic.songName}`)
-
-        // devuelve el embed
-        return embed;
     }
 }

@@ -1,5 +1,5 @@
 export class UsersUsingACommand {
-    // se llama a la instancia primero, para que solo haya una
+    // esta clase es para cuando un comando espera una respuesta escrita no active otro comando
     public static usersUsingACommand = new UsersUsingACommand()
 
     private usersList = [];
