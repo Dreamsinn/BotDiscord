@@ -9,8 +9,8 @@ export class PlayListHandler {
     private playListDuration: durationRepository = { hours: 0, minutes: 0, seconds: 0 };
     private botConnection: any;
     private player: any;
-
     private playDlHandler: PlayDlHandler;
+    private isMusicListenerActive = false;
 
     constructor(
         playDlHandler: PlayDlHandler,
@@ -59,10 +59,9 @@ export class PlayListHandler {
 
         let songNameList = '';
         songList.forEach((song: playListRepository, i: number) => {
-            console.log(song)
             songNameList += `${i + 1} - ${song.songName}\n`
         })
-        console.log(songNameList)
+
         const embed = new MessageEmbed()
             .setColor('#0099ff')
             .setTitle(`${songList.length} added to playlist`)
@@ -74,7 +73,6 @@ export class PlayListHandler {
                 { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
             )
 
-        // devuelve el embed
         return embed;
     }
 
@@ -91,7 +89,6 @@ export class PlayListHandler {
                 { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
             )
 
-        // devuelve el embed
         return embed;
     }
 
@@ -160,19 +157,25 @@ export class PlayListHandler {
             this.player.play(resources)
         } catch (err: any) {
             console.log('ERROR', err)
-            this.playList.shift()
-            if (this.playList[0]) {
-                this.playMusic()
-            }
+            // necesario?
+            this.skipMusic()
             return
         }
 
+        if (!this.isMusicListenerActive) {
+            this.isMusicListenerActive = true;
+            this.musicEventListener()
+        }
+
+    }
+
+    private musicEventListener() {
         this.player.on('stateChange', (oldState, newState) => {
             // cunado el player no esta reproduciendo
             if (newState.status === 'idle') {
                 this.playList.shift()
                 if (this.playList[0]) {
-                    this.playMusic()
+                    return this.playMusic()
                 }
                 return
             }
@@ -187,11 +190,10 @@ export class PlayListHandler {
     }
 
     public skipMusic() {
-        const musicToSkip = this.playList[0]
-        this.player.stop()
-        this.playList.shift()
-        if (this.playList[0] && this.player && this.player._state.status !== 'paused') {
-            this.playMusic()
+        let musicToSkip: playListRepository;
+        if (this.player) {
+            musicToSkip = this.playList[0]
+            this.player.stop()
         }
         return musicToSkip;
     }
@@ -204,20 +206,25 @@ export class PlayListHandler {
     }
 
     public unpauseMusic() {
-        if (!this.player || this.player._state.status === 'idle') {
+        if (!this.player) {
             return
+        }
+        if (this.player._state.status === 'idle' && this.playList[0]) {
+            return this.playMusic()
         }
         return this.player.unpause()
     }
 
     public changeBotVoiceChanel(event) {
         this.joinToChannel(event.member, event.channel)
-        this.playMusic()
+        if (this.playList[0]) {
+            this.playMusic()
+        }
         return
     }
 
     public readPlayList() {
-        const playList = this.playList.slice(0)
+        const playList = [...this.playList]
         return playList
     }
 
@@ -225,7 +232,7 @@ export class PlayListHandler {
         if ((this.player && this.player._state.status === 'idle') || (this.botConnection && this.botConnection._state.status === 'destroyed')) {
             return this.playList = [];
         }
-        // eleminamos todos menos el primero, que al ser el que esta sonando, si se elimina y se hace skip, peta
+        // eleminamos todos menos el primero, que al ser el que esta sonando
         return this.playList = [this.playList[0]];
     }
 
