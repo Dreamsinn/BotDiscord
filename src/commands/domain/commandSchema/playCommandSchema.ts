@@ -1,4 +1,6 @@
-const PlayCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const PlayCommandSchema: CommandSchema = {
     aliases: ['p'],
     coolDown: 0,
     devOnly: false,

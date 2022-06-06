@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { YoutubeSearchRepository } from '../domain/interfaces/youtubeRepository'
-import { SearchedSongRepository } from '../domain/interfaces/searchedSongRepository'
+import { YoutubeAPI } from '../domain/interfaces/youtubeAPI'
+import { rawSongData } from '../domain/interfaces/songData'
 
-export class YoutubeAPIHandler implements YoutubeSearchRepository {
-    public async searchSongByName(song: string, event: any): Promise<SearchedSongRepository[]> {
+export class YoutubeAPIHandler implements YoutubeAPI {
+    public async searchSongByName(song: string): Promise<rawSongData[]> {
         const order = 'relevance';
         const part = 'snippet';
         const maxResults = '9';
@@ -15,7 +15,7 @@ export class YoutubeAPIHandler implements YoutubeSearchRepository {
                 throw new Error(`YoutubeAPI Search Error: ${err.code}, ${err}`);
             })
 
-        const response: SearchedSongRepository[] = [];
+        const response: rawSongData[] = [];
         searched.data.items.forEach((songData: any) => {
             response.push({
                 id: songData.id.videoId,
@@ -26,7 +26,7 @@ export class YoutubeAPIHandler implements YoutubeSearchRepository {
         return response;
     }
 
-    public async searchPlaylist(playListId: string): Promise<SearchedSongRepository[]> {
+    public async searchPlaylist(playListId: string): Promise<rawSongData[]> {
         const part = 'snippet';
         const playlistId = playListId
         const maxResults = '30'
@@ -37,7 +37,7 @@ export class YoutubeAPIHandler implements YoutubeSearchRepository {
                 throw new Error(`YoutubeAPI PlayList Error:, ${err.code}, ${err}`)
             })
 
-        const response: SearchedSongRepository[] = [];
+        const response: rawSongData[] = [];
         searched.data.items.forEach((songData: any) => {
             response.push({
                 id: songData.snippet.resourceId.videoId,
@@ -48,7 +48,7 @@ export class YoutubeAPIHandler implements YoutubeSearchRepository {
         return response
     }
 
-    public async searchSongById(songId: string): Promise<SearchedSongRepository> {
+    public async searchSongById(songId: string): Promise<rawSongData> {
         const part = 'snippet,contentDetails';
         const maxResults = '1';
         const id = songId;
@@ -58,7 +58,7 @@ export class YoutubeAPIHandler implements YoutubeSearchRepository {
                 throw new Error(`YoutubeAPI Data Error:, ${err.code}, ${err}`)
             })
 
-        const response: SearchedSongRepository = {
+        const response: rawSongData = {
             title: searched.data.items[0].snippet.title,
             durationString: searched.data.items[0].contentDetails.duration,
         };

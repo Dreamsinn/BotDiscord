@@ -1,4 +1,6 @@
-const JoinChannelCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const JoinChannelCommandSchema: CommandSchema = {
     aliases: ['j', 'join'],
     coolDown: 0,
     devOnly: false,

@@ -1,6 +1,6 @@
-import { Message } from 'discord.js';
+import { EmbedFieldData, Message, MessageOptions, MessageReaction, User } from 'discord.js';
 import { HelpCommandSchema } from '../../domain/commandSchema/helpCommandSchema'
-import { DiscordRequestRepo } from "../../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../../domain/interfaces/commandSchema";
 import { CoolDown } from "../utils/coolDown"
 import { Command } from '../Command';
 import { PlayCommandSchema } from '../../domain/commandSchema/playCommandSchema';
@@ -12,11 +12,11 @@ import { MessageCreator } from '../utils/messageCreator';
 
 export class HelpCommand extends Command {
     // TODO, poner schemas como dependencias?
-    helpSchema: DiscordRequestRepo = HelpCommandSchema;
+    helpSchema: CommandSchema = HelpCommandSchema;
     coolDown = new CoolDown();
 
 
-    public async call(event): Promise<Message> {
+    public async call(event: Message): Promise<Message> {
         console.log('help command')
         // coolDown
         const interrupt = this.coolDown.call(this.helpSchema.coolDown);
@@ -51,7 +51,7 @@ export class HelpCommand extends Command {
         return { name: '\u200b', value: `${index + 1} - ${typeCommand[1].typeDescription}`, inline: false }
     }
 
-    private messageReaction(message, event, type) {
+    private messageReaction(message: Message, event: Message, type: string) {
         let dataLength: number;
         // determinar cuando se ha ejecutado el metodo
         if (type === 'typeOFCommand') {
@@ -71,12 +71,17 @@ export class HelpCommand extends Command {
         // message.react('3️⃣')
 
         // detectar cuando el usuario reaciona
-        const filter = (reaction, user) => {
+        const filter = (reaction: MessageReaction, user: User) => {
             return discordEmojis.numberEmojis.find(e => e === reaction.emoji.name) && user.id === event.author.id;
         };
 
         message.awaitReactions({ filter, max: 1, time: 20000, errors: ['time'] })
-            .then(collected => this.createCommandsEmbed(collected, message, event))
+            .then(collected => {
+                let collectedMessage: MessageReaction;
+                collected.map((e) => collectedMessage = e)
+
+                return this.createCommandsEmbed(collectedMessage, message, event)
+            })
             .catch(err => {
                 if (err instanceof TypeError) {
                     console.log(err)
@@ -88,17 +93,17 @@ export class HelpCommand extends Command {
             });
     }
 
-    private async createCommandsEmbed(collected: any, message: any, event) {
+    private async createCommandsEmbed(collected: MessageReaction, message: Message, event: Message) {
         // determinar a que ha reaccionado
         const typeCommand = this.commandSelected(collected, message)
-        let output;
+        let output: MessageOptions;
         let needReaction: boolean;
         if (typeCommand[0] === 'prefixCommand') {
             needReaction = true;
             output = this.createPrefixTypeEmbed()
         } else {
             // crear embed de comando
-            output = this.createCommandEmbed(typeCommand, message)
+            output = this.createCommandEmbed(typeCommand)
         }
 
         await message.edit(output)
@@ -109,9 +114,8 @@ export class HelpCommand extends Command {
         }
     }
 
-    private commandSelected(collected: any, message: any) {
-        let emoji: string;
-        collected.map(d => emoji = d._emoji.name)
+    private commandSelected(collected: MessageReaction, message: Message) {
+        let emoji = collected.emoji.name;
 
         const arrayIndex = discordEmojis.numberEmojis.findIndex(e => e === emoji)
 
@@ -125,7 +129,7 @@ export class HelpCommand extends Command {
     }
 
     private createPrefixTypeEmbed() {
-        const embedContent = [];
+        const embedContent: EmbedFieldData[] = [];
         for (let i = 0; i < Object.entries(typesOfCommands.prefixCommand).length; i++) {
             // el 0 seria typeDescription: 'Commandos con prefijo',
             if (i != 0) {
@@ -146,7 +150,7 @@ export class HelpCommand extends Command {
         return output;
     }
 
-    private createCommandEmbed(typeCommand, message) {
+    private createCommandEmbed(typeCommand) {
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',

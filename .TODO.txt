@@ -27,11 +27,11 @@
                     return route.command.call(event);
                 }
 
-- Comando para mover el bot de canal de voz  //await member.voice.setChannel('newChannelId')// aunque quizas mejor //joinVoiceChannel//
+> Comando para mover el bot de canal de voz  //await member.voice.setChannel('newChannelId')// aunque quizas mejor //joinVoiceChannel//
 
 - Mirar si los datos del schema son necesarios
 
-- Convertir la paginacion en un util, modificar playlist y remove
+- Convertir la paginacion en un util, modificar playlist y remove(hacer paginacion apaerta ahora mismo al cambiar de pagina se va la modificacion)
 
 - Reacer dice y reply commands
 -- Usar message.content.split(",") para mejorar el diceCommand y (< y >)

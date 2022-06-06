@@ -1,4 +1,6 @@
-const RemoveSongsFromPlayListCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const RemoveSongsFromPlayListCommandSchema: CommandSchema = {
     aliases: ['rm', 'remove'],
     coolDown: 0,
     devOnly: false,

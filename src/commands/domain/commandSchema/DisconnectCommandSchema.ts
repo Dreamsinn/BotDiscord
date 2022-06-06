@@ -1,4 +1,6 @@
-const DisconnectCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const DisconnectCommandSchema: CommandSchema = {
     aliases: ['dc', 'disconnect'],
     coolDown: 0,
     devOnly: false,

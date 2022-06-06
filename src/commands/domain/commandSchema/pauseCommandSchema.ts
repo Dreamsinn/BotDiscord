@@ -1,4 +1,6 @@
-const PauseCommandSchema = {
+import { CommandSchema } from "../interfaces/commandSchema"
+
+const PauseCommandSchema: CommandSchema = {
     aliases: ['pause'],
     coolDown: 0,
     devOnly: false,

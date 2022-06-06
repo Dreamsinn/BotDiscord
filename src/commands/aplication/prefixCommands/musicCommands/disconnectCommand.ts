@@ -1,11 +1,11 @@
-import { DiscordRequestRepo } from "../../../domain/interfaces/discordRequestRepo";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
 import { DisconnectCommandSchema } from "../../../domain/commandSchema/DisconnectCommandSchema";
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
 
 export class DisconnectCommand extends Command {
-    private BotDisconnectSchema: DiscordRequestRepo = DisconnectCommandSchema;
+    private BotDisconnectSchema: CommandSchema = DisconnectCommandSchema;
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
 
@@ -16,7 +16,7 @@ export class DisconnectCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event) {
+    public async call() {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.BotDisconnectSchema.coolDown);
         if (interrupt === 1) {

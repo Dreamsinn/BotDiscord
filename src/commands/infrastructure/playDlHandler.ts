@@ -1,15 +1,15 @@
 import { YouTubeVideo, InfoData, YouTubeStream, SoundCloudStream, YouTubePlayList, } from 'play-dl';
-import { PlayDlRepository } from '../domain/interfaces/playDlRepository'
-import { SearchedSongRepository } from '../domain/interfaces/searchedSongRepository'
+import { PlayDlAPI } from '../domain/interfaces/playDlAPI'
+import { rawSongData } from '../domain/interfaces/songData'
 import play from 'play-dl';
 
 
 
-export class PlayDlHandler implements PlayDlRepository {
-    public async searchSongByName(songString: string): Promise<SearchedSongRepository[]> {
+export class PlayDlHandler implements PlayDlAPI {
+    public async searchSongByName(songString: string): Promise<rawSongData[]> {
         const searched = await play.search(songString, { source: { youtube: "video" }, limit: 9 })
 
-        const response: SearchedSongRepository[] = [];
+        const response: rawSongData[] = [];
         searched.forEach((songData) => {
             response.push({
                 id: songData.id,
@@ -29,14 +29,14 @@ export class PlayDlHandler implements PlayDlRepository {
         return songData
     }
 
-    public async getSognsInfoFromPlayList(url: string): Promise<SearchedSongRepository[]> {
+    public async getSognsInfoFromPlayList(url: string): Promise<rawSongData[]> {
         const rawPlayList: YouTubePlayList = await play.playlist_info(url, { incomplete: true })
 
         const platlistData = await rawPlayList.all_videos()
 
-        const playList: SearchedSongRepository[] = []
+        const playList: rawSongData[] = []
         platlistData.forEach((songData: YouTubeVideo) => {
-            const newSong: SearchedSongRepository = {
+            const newSong: rawSongData = {
                 title: songData.title,
                 id: songData.id,
                 duration: songData.durationInSec,
