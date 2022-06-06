@@ -32,6 +32,10 @@ export class SkipMusicCommand extends Command {
 
         const skipedMusic = this.playListHandler.skipMusic()
 
+        if (!skipedMusic) {
+            return
+        }
+
         const embed = this.skipSongEmbed(event, skipedMusic)
 
         const output: CommandOutput = {
