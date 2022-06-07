@@ -1,4 +1,4 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const PlayCommandSchema: CommandSchema = {
     aliases: ['p'],
@@ -10,9 +10,7 @@ const PlayCommandSchema: CommandSchema = {
     usage: 'p',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    PlayCommandSchema
-}
+export { PlayCommandSchema };

@@ -1,12 +1,12 @@
-import { CommandSchema } from "../../../domain/interfaces/commandSchema";
-import { RemoveSongsFromPlayListCommandSchema } from "../../../domain/commandSchema/removeSongsFromPlayListCommandSchema";
-import { PlayListHandler } from "../../playListHandler"
-import { CoolDown } from "../../utils/coolDown";
-import { Command } from "../../Command";
-import { UsersUsingACommand } from "../../utils/usersUsingACommand"
 import { Message } from 'discord.js';
-import { songData } from "../../../domain/interfaces/songData";
-import { PaginatedMessage } from "../../utils/paginatedMessage";
+import { RemoveSongsFromPlayListCommandSchema } from '../../../domain/commandSchema/removeSongsFromPlayListCommandSchema';
+import { Command } from '../../../domain/interfaces/Command';
+import { CommandSchema } from '../../../domain/interfaces/commandSchema';
+import { songData } from '../../../domain/interfaces/songData';
+import { PlayListHandler } from '../../playListHandler';
+import { CoolDown } from '../../utils/coolDown';
+import { PaginatedMessage } from '../../utils/paginatedMessage';
+import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 
 export class RemoveSongsFromPlayListCommand extends Command {
     private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
@@ -14,9 +14,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
     private playListHandler: PlayListHandler;
     private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
 
-    constructor(
-        playListHandler: PlayListHandler,
-    ) {
+    constructor(playListHandler: PlayListHandler) {
         super();
         this.playListHandler = playListHandler;
     }
@@ -25,7 +23,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
         if (interrupt === 1) {
-            console.log('command interrupted by cooldown')
+            console.log('command interrupted by cooldown');
             return;
         }
 
@@ -35,8 +33,12 @@ export class RemoveSongsFromPlayListCommand extends Command {
             embed: {
                 color: 'ORANGE',
                 title: 'Remove songs from playlist:',
-                author: { name: `${event.member.user.username}`, iconURL: `${event.member.user.displayAvatarURL()}` },
-                description: 'Write the numbers of the songs you wish to remove split by " , " \nWrite " X " to cancel operation',
+                author: {
+                    name: `${event.member.user.username}`,
+                    iconURL: `${event.member.user.displayAvatarURL()}`,
+                },
+                description:
+                    'Write the numbers of the songs you wish to remove split by " , " \nWrite " X " to cancel operation',
             },
             pagination: {
                 event: event,
@@ -45,66 +47,70 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 timeOut: 60000,
                 jsFormat: true,
                 reply: false,
-                author: event.author
-            }
+                author: event.author,
+            },
         }).call();
 
-        return this.messageCollector(event, playList)
+        return this.messageCollector(event, playList);
     }
 
     private messageCollector(event: Message, playList: songData[]) {
         // usuario no pueda ejecutar otros comandos
-        this.usersUsingACommand.updateUserList(event.author.id)
+        this.usersUsingACommand.updateUserList(event.author.id);
 
         const lastSongIndex = playList.length;
 
         const filter = (message: Message) => {
             const userConditions = event.author.id === message.author.id;
-            const numbersArray = message.content.split(",");
-            const numbersConditions = (!numbersArray.find((n) => isNaN(Number(n))) && Math.max(Number(...numbersArray)) <= lastSongIndex && Math.min(Number(...numbersArray)) >= 1);
-            const letterConditoin = (message.content === 'x' || message.content === 'X');
+            const numbersArray = message.content.split(',');
+            const numbersConditions =
+                !numbersArray.find((n) => isNaN(Number(n))) &&
+                Math.max(Number(...numbersArray)) <= lastSongIndex &&
+                Math.min(Number(...numbersArray)) >= 1;
+            const letterConditoin = message.content === 'x' || message.content === 'X';
 
             // si la respuesta viene del mismo que el evento, todos son numeros, mayot que 0 y no mayor que el numero de items, o X
             return userConditions && (numbersConditions || letterConditoin);
         };
 
-        event.channel.awaitMessages({ filter, time: 60000, max: 1, errors: ['time'] })
+        event.channel
+            .awaitMessages({ filter, time: 60000, max: 1, errors: ['time'] })
             .then((collected) => {
                 // usuario ya puede usar otros comandos
-                this.usersUsingACommand.removeUserList(event.author.id)
+                this.usersUsingACommand.removeUserList(event.author.id);
                 let collectedMessage: Message;
-                collected.map((e: Message) => collectedMessage = e);
+                collected.map((e: Message) => (collectedMessage = e));
 
                 if (collectedMessage.content === 'x' || collectedMessage.content === 'X') {
                     // cancela el comando
-                    console.log('Remove command cancelled')
-                    event.channel.send('Remove command cancelled')
-                    return
+                    console.log('Remove command cancelled');
+                    event.channel.send('Remove command cancelled');
+                    return;
                 }
 
-                return this.removeSongFromPlayList(collectedMessage.content, event)
+                return this.removeSongFromPlayList(collectedMessage.content, event);
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
-                    console.log(err)
-                    event.channel.send(`Error: ${err.message}`)
+                    console.log(err);
+                    event.channel.send(`Error: ${err.message}`);
                 } else {
-                    event.reply('Time out')
+                    event.reply('Time out');
                 }
 
-                this.usersUsingACommand.removeUserList(event.author.id)
+                this.usersUsingACommand.removeUserList(event.author.id);
                 return;
-            })
+            });
     }
 
     private removeSongFromPlayList(content: string, event: Message) {
         // pasa a playListHandler el indice(-1) de las canciones
-        const stringNumbersArray = content.split(",");
+        const stringNumbersArray = content.split(',');
 
         const numberArray: number[] = [];
 
-        stringNumbersArray.forEach(str => {
-            let n = Number(str);
+        stringNumbersArray.forEach((str) => {
+            const n = Number(str);
             if (n !== 0) {
                 numberArray.push(Number(str));
             }
@@ -112,7 +118,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
         // recive las canciones borradas y hace embed de las canciones borradas
         const removedMusic = this.playListHandler.removeSongsFromPlayList(numberArray);
-        return this.removedMusicEmbed(removedMusic, event)
+        return this.removedMusicEmbed(removedMusic, event);
     }
 
     private async removedMusicEmbed(removedMusic: songData[], event: Message) {
@@ -120,7 +126,10 @@ export class RemoveSongsFromPlayListCommand extends Command {
             embed: {
                 color: 'ORANGE',
                 title: `${removedMusic.length} songs removeds from Playlist`,
-                author: { name: `${event.member.user.username}`, iconURL: `${event.member.user.displayAvatarURL()}` },
+                author: {
+                    name: `${event.member.user.username}`,
+                    iconURL: `${event.member.user.displayAvatarURL()}`,
+                },
             },
             pagination: {
                 event: event,
@@ -129,7 +138,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 timeOut: 30000,
                 reply: false,
                 jsFormat: true,
-            }
-        }).call()
+            },
+        }).call();
     }
 }

@@ -1,25 +1,30 @@
 # Estructura del bot
 
 ## main
- - Ejecutar lo necesario para que el bot funcione
+
+-   Ejecutar lo necesario para que el bot funcione
 
 ## Infrastructure
- - Conexion con otras API
- - Conexion con bd, si necesario
+
+-   Conexion con otras API
+-   Conexion con bd, si necesario
 
 ## Aplication
- - Aplicacion de los comandos
+
+-   Aplicacion de los comandos
 
 ## Domain
- - Comandos
- - Interfices necesarias para dominio, si necesarias
- - Esquemas de bd, si necesario
 
+-   Comandos
+-   Interfices necesarias para dominio, si necesarias
+-   Esquemas de bd, si necesario
 
 # Uso
- - yarn install
- 
+
+-   yarn install
+
 # ENCENDER BOT
- - yarn serve
+
+-   yarn start
 
 // explicar con funciona el bot

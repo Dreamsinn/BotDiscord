@@ -1,4 +1,4 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const SkipMusicCommandSchema: CommandSchema = {
     aliases: ['skip', 's'],
@@ -10,9 +10,7 @@ const SkipMusicCommandSchema: CommandSchema = {
     usage: 's',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    SkipMusicCommandSchema
-}
+export { SkipMusicCommandSchema };

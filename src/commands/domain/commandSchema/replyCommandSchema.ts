@@ -1,4 +1,4 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const ReplyCommandSchema: CommandSchema = {
     aliases: ['cinco', '5', 'trece', '13', 'javi', 'ino ', 'ano '],
@@ -10,9 +10,7 @@ const ReplyCommandSchema: CommandSchema = {
     usage: 'cinco',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    ReplyCommandSchema
-}
+export { ReplyCommandSchema };

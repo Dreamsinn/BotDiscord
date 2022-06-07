@@ -1,4 +1,4 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const HelpCommandSchema: CommandSchema = {
     aliases: ['help'],
@@ -10,9 +10,7 @@ const HelpCommandSchema: CommandSchema = {
     usage: 'help',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    HelpCommandSchema
-}
+export { HelpCommandSchema };

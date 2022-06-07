@@ -1,13 +1,13 @@
 import { EmbedFieldData, Message, MessageOptions, MessageReaction, User } from 'discord.js';
-import { HelpCommandSchema } from '../../domain/commandSchema/helpCommandSchema'
-import { CommandSchema } from "../../domain/interfaces/commandSchema";
-import { CoolDown } from "../utils/coolDown"
-import { Command } from '../Command';
+import { DiceCommandSchema } from '../../domain/commandSchema/diceCommandSchema';
+import { HelpCommandSchema } from '../../domain/commandSchema/helpCommandSchema';
 import { PlayCommandSchema } from '../../domain/commandSchema/playCommandSchema';
 import { PlayListCommandSchema } from '../../domain/commandSchema/playListCommandSchema';
-import { DiceCommandSchema } from '../../domain/commandSchema/diceCommandSchema';
 import { ReplyCommandSchema } from '../../domain/commandSchema/replyCommandSchema';
 import { discordEmojis } from '../../domain/discordEmojis';
+import { Command } from '../../domain/interfaces/Command';
+import { CommandSchema } from '../../domain/interfaces/commandSchema';
+import { CoolDown } from '../utils/coolDown';
 import { MessageCreator } from '../utils/messageCreator';
 
 export class HelpCommand extends Command {
@@ -15,116 +15,121 @@ export class HelpCommand extends Command {
     helpSchema: CommandSchema = HelpCommandSchema;
     coolDown = new CoolDown();
 
-
     public async call(event: Message): Promise<Message> {
-        console.log('help command')
+        console.log('help command');
         // coolDown
         const interrupt = this.coolDown.call(this.helpSchema.coolDown);
         if (interrupt === 1) {
-            console.log('command interrupted by cooldown')
-            return
+            console.log('command interrupted by cooldown');
+            return;
         }
 
         const output = this.createTypeOfCommandsEmbed();
 
-        const message = await event.reply(output)
+        const message = await event.reply(output);
 
         // crear botones de reaccion
-        this.messageReaction(message, event, 'typeOFCommand')
+        this.messageReaction(message, event, 'typeOFCommand');
     }
 
     private createTypeOfCommandsEmbed() {
-        const embedContent = Object.entries(typesOfCommands).map((typeCommand, i) => this.mapTypeCommandsAddFiledsEmbed(typeCommand, i));
+        const embedContent = Object.entries(typesOfCommands).map((typeCommand, i) =>
+            this.mapTypeCommandsAddFiledsEmbed(typeCommand, i),
+        );
 
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',
                 title: `Tipos de comandos`,
-                fields: embedContent
-            }
-        }).call()
+                fields: embedContent,
+            },
+        }).call();
 
         return output;
     }
 
     private mapTypeCommandsAddFiledsEmbed(typeCommand, index) {
-        return { name: '\u200b', value: `${index + 1} - ${typeCommand[1].typeDescription}`, inline: false }
+        return {
+            name: '\u200b',
+            value: `${index + 1} - ${typeCommand[1].typeDescription}`,
+            inline: false,
+        };
     }
 
     private messageReaction(message: Message, event: Message, type: string) {
         let dataLength: number;
         // determinar cuando se ha ejecutado el metodo
         if (type === 'typeOFCommand') {
-            dataLength = Object.keys(typesOfCommands).length
+            dataLength = Object.keys(typesOfCommands).length;
         }
         if (type === 'prefix') {
-            message.reactions.removeAll()
-            dataLength = Object.keys(typesOfCommands.prefixCommand).length - 1
+            message.reactions.removeAll();
+            dataLength = Object.keys(typesOfCommands.prefixCommand).length - 1;
         }
 
         // crear reaccion
         for (let i = 0; i < dataLength; i++) {
-            message.react(discordEmojis.numberEmojis[i])
+            message.react(discordEmojis.numberEmojis[i]);
         }
-        // message.react('1️⃣')
-        // message.react('2️⃣')
-        // message.react('3️⃣')
 
         // detectar cuando el usuario reaciona
         const filter = (reaction: MessageReaction, user: User) => {
-            return discordEmojis.numberEmojis.find(e => e === reaction.emoji.name) && user.id === event.author.id;
+            const emojiCondition = discordEmojis.numberEmojis.find((e) => e === reaction.emoji.name);
+            const userCondition = user.id === event.author.id;
+            return emojiCondition && userCondition;
         };
 
-        message.awaitReactions({ filter, max: 1, time: 20000, errors: ['time'] })
-            .then(collected => {
+        message
+            .awaitReactions({ filter, max: 1, time: 20000, errors: ['time'] })
+            .then((collected) => {
                 let collectedMessage: MessageReaction;
-                collected.map((e) => collectedMessage = e)
+                collected.map((e) => (collectedMessage = e));
 
-                return this.createCommandsEmbed(collectedMessage, message, event)
+                return this.createCommandsEmbed(collectedMessage, message, event);
             })
-            .catch(err => {
+            .catch((err) => {
                 if (err instanceof TypeError) {
-                    console.log(err)
-                    event.channel.send(`Error: ${err.message}`)
+                    console.log(err);
+                    event.channel.send(`Error: ${err.message}`);
                 } else {
-                    console.log('No reaction')
+                    console.log('No reaction');
                 }
-                return
+                return;
             });
     }
 
     private async createCommandsEmbed(collected: MessageReaction, message: Message, event: Message) {
         // determinar a que ha reaccionado
-        const typeCommand = this.commandSelected(collected, message)
+        const typeCommand = this.commandSelected(collected, message);
         let output: MessageOptions;
         let needReaction: boolean;
         if (typeCommand[0] === 'prefixCommand') {
             needReaction = true;
-            output = this.createPrefixTypeEmbed()
+            output = this.createPrefixTypeEmbed();
         } else {
             // crear embed de comando
-            output = this.createCommandEmbed(typeCommand)
+            output = this.createCommandEmbed(typeCommand);
         }
 
-        await message.edit(output)
+        await message.edit(output);
         // const newMessage = await event.reply(output)
 
         if (needReaction) {
-            this.messageReaction(message, event, 'prefix')
+            this.messageReaction(message, event, 'prefix');
         }
     }
 
     private commandSelected(collected: MessageReaction, message: Message) {
-        let emoji = collected.emoji.name;
+        const emoji = collected.emoji.name;
 
-        const arrayIndex = discordEmojis.numberEmojis.findIndex(e => e === emoji)
+        const arrayIndex = discordEmojis.numberEmojis.findIndex((e) => e === emoji);
 
         if (message.embeds[0].title === 'Tipos de comandos') {
-            return Object.entries(typesOfCommands)[arrayIndex]
+            return Object.entries(typesOfCommands)[arrayIndex];
         }
         if (message.embeds[0].title === `${typesOfCommands.prefixCommand.typeDescription}`) {
-            const prefixCommands = typesOfCommands.prefixCommand
-            return Object.entries(prefixCommands)[arrayIndex + 1]
+            const prefixCommands = typesOfCommands.prefixCommand;
+            return Object.entries(prefixCommands)[arrayIndex + 1];
         }
     }
 
@@ -134,7 +139,7 @@ export class HelpCommand extends Command {
             // el 0 seria typeDescription: 'Commandos con prefijo',
             if (i != 0) {
                 const typeCommand = Object.entries(typesOfCommands.prefixCommand)[i];
-                embedContent.push(this.mapTypeCommandsAddFiledsEmbed(typeCommand, (i - 1)))
+                embedContent.push(this.mapTypeCommandsAddFiledsEmbed(typeCommand, i - 1));
             }
         }
 
@@ -143,9 +148,9 @@ export class HelpCommand extends Command {
                 color: '#BFFF00',
                 title: typesOfCommands.prefixCommand.typeDescription,
                 description: `Estos comandos requieren de '${process.env.PREFIX}' antes del alias`,
-                fields: embedContent
-            }
-        }).call()
+                fields: embedContent,
+            },
+        }).call();
 
         return output;
     }
@@ -161,8 +166,8 @@ export class HelpCommand extends Command {
                     { name: 'Alias', value: `${typeCommand[1].aliases}`, inline: false },
                     { name: 'Cooldown', value: `${typeCommand[1].coolDown} ms`, inline: false },
                 ],
-            }
-        }).call()
+            },
+        }).call();
 
         return output;
     }
@@ -207,4 +212,4 @@ const typesOfCommands = {
         aliases: ReplyCommandSchema.aliases,
         coolDown: ReplyCommandSchema.coolDown,
     },
-}
+};

@@ -1,4 +1,4 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const DisconnectCommandSchema: CommandSchema = {
     aliases: ['dc', 'disconnect'],
@@ -10,9 +10,7 @@ const DisconnectCommandSchema: CommandSchema = {
     usage: 'dc',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    DisconnectCommandSchema
-}
+export { DisconnectCommandSchema };

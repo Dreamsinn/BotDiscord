@@ -1,5 +1,9 @@
-import { MessageEmbed, MessageOptions } from "discord.js";
-import { createMessageOptions, embedOptions, messageOptions, paginationOptions } from "../../domain/interfaces/createEmbedOptions";
+import { MessageEmbed, MessageOptions } from 'discord.js';
+import {
+    createMessageOptions,
+    embedOptions,
+    messageOptions,
+} from '../../domain/interfaces/createEmbedOptions';
 
 export class MessageCreator {
     private message: messageOptions;
@@ -13,7 +17,7 @@ export class MessageCreator {
     public call() {
         let embed;
         if (this.embed) {
-            embed = new MessageEmbed()
+            embed = new MessageEmbed();
             this.embed.color ? embed.setColor(this.embed.color) : null;
             this.embed.title ? embed.setTitle(this.embed.title) : null;
             this.embed.URL ? embed.setURL(this.embed.URL) : null;
@@ -21,13 +25,15 @@ export class MessageCreator {
             this.embed.description ? embed.setDescription(this.embed.description) : null;
             this.embed.thumbnailUrl ? embed.setThumbnail(this.embed.thumbnailUrl) : null;
             this.embed.fields ? embed.setFields(this.embed.fields) : null;
-            this.embed.field ? embed.addField(this.embed.field.name, this.embed.field.value, this.embed.field.inline) : null;
+            this.embed.field
+                ? embed.addField(this.embed.field.name, this.embed.field.value, this.embed.field.inline)
+                : null;
             this.embed.imageUrl ? embed.setImage(this.embed.imageUrl) : null;
             this.embed.timeStamp ? embed.setTimestamp(this.embed.timeStamp) : null;
             this.embed.footer ? embed.setFooter(this.embed.footer) : null;
         }
 
-        let output: MessageOptions = {
+        const output: MessageOptions = {
             content: this.message ? this.message.content : null,
             embeds: embed ? [embed] : null,
         };

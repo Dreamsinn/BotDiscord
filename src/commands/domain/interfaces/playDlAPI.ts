@@ -1,5 +1,5 @@
-import { SoundCloudStream, YouTubeStream, YouTubeVideo } from "play-dl";
-import { rawSongData } from "./songData";
+import { SoundCloudStream, YouTubeStream, YouTubeVideo } from 'play-dl';
+import { rawSongData } from './songData';
 
 export abstract class PlayDlAPI {
     abstract searchSongByName(argument: string): Promise<rawSongData[]>;
