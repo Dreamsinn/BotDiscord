@@ -255,8 +255,8 @@ export class PlayCommand extends Command {
                 .replace('www.', '')
                 .replace('youtube.com/playlist?list=', '')
 
-            if (playListId.length < 5) {
-                event.reply('Bad request')
+            if (playListId.length < 3) {
+                return event.reply('Palylist bad request')
             }
 
             // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
@@ -279,8 +279,9 @@ export class PlayCommand extends Command {
             playListId = rawPlayListId
         }
 
-        if (playListId.length < 5) {
-            event.reply('Bad request')
+        if (playListId.length < 3) {
+            event.reply('Palylist bad request, instead song will be played')
+            return this.findSongIdFromYoutubeURL(url, event)
         }
 
         return this.isPlayListDesired(event, playListId, url)
