@@ -11,10 +11,6 @@ const RemoveSongsFromPlayListCommandSchema: CommandSchema = {
         'Ex: 1, 6, 23',
     category: 'prefix',
     name: 'Remove Songs',
-    usage: 'remove',
-    slash: {},
-    contextChat: '',
-    contextUser: '',
 };
 
 export { RemoveSongsFromPlayListCommandSchema };

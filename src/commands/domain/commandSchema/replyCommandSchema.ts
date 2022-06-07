@@ -7,10 +7,6 @@ const ReplyCommandSchema: CommandSchema = {
     description: 'ofrece una respuesta cuando uno de los alias es escrito en el chat',
     category: 'test',
     name: 'reply',
-    usage: 'cinco',
-    slash: {},
-    contextChat: '',
-    contextUser: '',
 };
 
 export { ReplyCommandSchema };

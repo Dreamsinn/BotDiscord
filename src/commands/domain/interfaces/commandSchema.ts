@@ -5,8 +5,4 @@ export interface CommandSchema {
     description: string;
     category: string;
     name: string;
-    usage?: string;
-    slash?: Record<string, unknown>;
-    contextChat?: string;
-    contextUser?: string;
 }

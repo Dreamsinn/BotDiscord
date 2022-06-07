@@ -31,7 +31,7 @@ export class DiceCommand {
 
     private searchDandCommaPosition(messageContent: string) {
         const D_position = messageContent.search(this.diceSchema.aliases[0]);
-        const comma_position = messageContent.search(this.diceSchema.usage);
+        const comma_position = messageContent.search(',');
 
         return { D_position, comma_position };
     }
@@ -69,7 +69,10 @@ export class DiceCommand {
 
         if (comma_position === -1) {
             // sino hay ,
-            const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(event.content, D_position);
+            const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(
+                event.content,
+                D_position,
+            );
             diceNumberArray.push(diceNumber);
             diceFacesArray.push(diceFaces);
         } else {
@@ -104,7 +107,7 @@ export class DiceCommand {
 
     private rolMultipleDices(messageContent: string) {
         // numero de comas
-        const numberOfCommas = messageContent.split(this.diceSchema.usage).length - 1;
+        const numberOfCommas = messageContent.split(',').length - 1;
         let modifiedMessage = messageContent;
         let dice: string;
         const diceNumberArray: number[] = [];
