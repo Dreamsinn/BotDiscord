@@ -7,10 +7,6 @@ const SkipMusicCommandSchema: CommandSchema = {
     description: 'skip current song',
     category: 'prefix',
     name: 'skip',
-    usage: 's',
-    slash: {},
-    contextChat: '',
-    contextUser: '',
 };
 
 export { SkipMusicCommandSchema };

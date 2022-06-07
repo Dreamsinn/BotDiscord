@@ -7,10 +7,6 @@ const HelpCommandSchema: CommandSchema = {
     description: 'Explica el uso y los alias de los comandos',
     category: 'prefix',
     name: 'help',
-    usage: 'help',
-    slash: {},
-    contextChat: '',
-    contextUser: '',
 };
 
 export { HelpCommandSchema };

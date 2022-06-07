@@ -7,10 +7,6 @@ const PauseCommandSchema: CommandSchema = {
     description: 'pause the playlist',
     category: 'prefix',
     name: 'pause',
-    usage: 'pause',
-    slash: {},
-    contextChat: '',
-    contextUser: '',
 };
 
 export { PauseCommandSchema };
