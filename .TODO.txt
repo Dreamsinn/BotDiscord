@@ -1,7 +1,3 @@
-- Tipos de evento etc => https://discord.com/developers/docs/interactions/receiving-and-responding
-
-- Hacer una clase de utilidad para contruir embeds
-
 - En comandos de prefijos con contenido pasar aparte el mensaje sin prefijo, y if con longitud de prefijo y comando hacer un .lenght para que nos ea tan dummy
 
 - Un cliente distinto por servidor (intancia / base de datos?)
@@ -27,13 +23,9 @@
                     return route.command.call(event);
                 }
 
-> Comando para mover el bot de canal de voz  //await member.voice.setChannel('newChannelId')// aunque quizas mejor //joinVoiceChannel//
-
 - Mirar si los datos del schema son necesarios
-
-- Convertir la paginacion en un util, modificar playlist y remove(hacer paginacion apaerta ahora mismo al cambiar de pagina se va la modificacion)
 
 - Reacer dice y reply commands
 -- Usar message.content.split(",") para mejorar el diceCommand y (< y >)
 
-- try catch en joinVoiceChannel, si se va del canal antes de unirse peta
+-comprobar bad request con vidios que me gustan o algo, ademas no para el metodo

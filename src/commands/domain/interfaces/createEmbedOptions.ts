@@ -1,4 +1,5 @@
-import { ColorResolvable, EmbedAuthorData, EmbedFieldData, EmbedFooterData } from "discord.js";
+import { ColorResolvable, EmbedAuthorData, EmbedFieldData, EmbedFooterData, Message, User } from "discord.js";
+import { songData } from "./songData";
 
 // hay mas opciones disponibles en MessageOptions
 export interface createMessageOptions {
@@ -31,5 +32,13 @@ export interface messageOptions {
 }
 
 export interface paginationOptions {
+    event?: Message,
+    channel?: Message["channel"],
+    rawDataToPaginate?: songData[],
+    dataToPaginate?: string[],
+    dataPerPage: number,
     timeOut: number,
+    jsFormat: boolean,
+    reply: boolean,
+    author?: User,
 }

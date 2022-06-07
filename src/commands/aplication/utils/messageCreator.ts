@@ -3,30 +3,28 @@ import { createMessageOptions, embedOptions, messageOptions, paginationOptions }
 
 export class MessageCreator {
     private message: messageOptions;
-    private embedData: embedOptions;
-    private pagination: paginationOptions;
+    private embed: embedOptions;
 
     constructor(messageData: createMessageOptions) {
         this.message = messageData.message;
-        this.embedData = messageData.embed;
-        this.pagination = messageData.pagination;
+        this.embed = messageData.embed;
     }
 
     public call() {
         let embed;
-        if (this.embedData) {
+        if (this.embed) {
             embed = new MessageEmbed()
-            this.embedData.color ? embed.setColor(this.embedData.color) : null;
-            this.embedData.title ? embed.setTitle(this.embedData.title) : null;
-            this.embedData.URL ? embed.setURL(this.embedData.URL) : null;
-            this.embedData.author ? embed.setAuthor(this.embedData.author) : null;
-            this.embedData.description ? embed.setDescription(this.embedData.description) : null;
-            this.embedData.thumbnailUrl ? embed.setThumbnail(this.embedData.thumbnailUrl) : null;
-            this.embedData.fields ? embed.setFields(this.embedData.fields) : null;
-            this.embedData.field ? embed.addField(this.embedData.field.name, this.embedData.field.value, this.embedData.field.inline) : null;
-            this.embedData.imageUrl ? embed.setImage(this.embedData.imageUrl) : null;
-            this.embedData.timeStamp ? embed.setTimestamp(this.embedData.timeStamp) : null;
-            this.embedData.footer ? embed.setFooter(this.embedData.footer) : null;
+            this.embed.color ? embed.setColor(this.embed.color) : null;
+            this.embed.title ? embed.setTitle(this.embed.title) : null;
+            this.embed.URL ? embed.setURL(this.embed.URL) : null;
+            this.embed.author ? embed.setAuthor(this.embed.author) : null;
+            this.embed.description ? embed.setDescription(this.embed.description) : null;
+            this.embed.thumbnailUrl ? embed.setThumbnail(this.embed.thumbnailUrl) : null;
+            this.embed.fields ? embed.setFields(this.embed.fields) : null;
+            this.embed.field ? embed.addField(this.embed.field.name, this.embed.field.value, this.embed.field.inline) : null;
+            this.embed.imageUrl ? embed.setImage(this.embed.imageUrl) : null;
+            this.embed.timeStamp ? embed.setTimestamp(this.embed.timeStamp) : null;
+            this.embed.footer ? embed.setFooter(this.embed.footer) : null;
         }
 
         let output: MessageOptions = {
