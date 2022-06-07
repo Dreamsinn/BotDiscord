@@ -1,30 +1,30 @@
-import { Command } from "./aplication/Command";
-import { PlayCommand } from "./aplication/prefixCommands/musicCommands/playCommand";
-import { PlayListCommand } from "./aplication/prefixCommands/musicCommands/playListCommand";
-import { HelpCommand } from "./aplication/prefixCommands/helpCommand";
-import { PlayCommandSchema } from "./domain/commandSchema/playCommandSchema";
-import { PlayListCommandSchema } from "./domain/commandSchema/playListCommandSchema";
-import { HelpCommandSchema } from "./domain/commandSchema/helpCommandSchema";
-import { YoutubeAPIHandler } from "./infrastructure/youtubeHandler"
-import { PlayDlHandler } from "./infrastructure/playDlHandler"
-import { PlayListHandler } from "./aplication/playListHandler"
-import { PauseCommandSchema } from "./domain/commandSchema/PauseCommandSchema";
-import { PauseCommand } from "./aplication/prefixCommands/musicCommands/pauseCommand";
-import { UnpauseCommandSchema } from "./domain/commandSchema/UnpauseCommandSchema";
-import { UnpauseCommand } from "./aplication/prefixCommands/musicCommands/UnpauseCommand";
-import { SkipMusicCommandSchema } from "./domain/commandSchema/SkipMusicCommandSchema";
-import { SkipMusicCommand } from "./aplication/prefixCommands/musicCommands/SkipMusicCommand";
-import { DisconnectCommandSchema } from "./domain/commandSchema/DisconnectCommandSchema";
-import { DisconnectCommand } from "./aplication/prefixCommands/musicCommands/disconnectCommand";
-import { JoinChannelCommandSchema } from "./domain/commandSchema/joinChannelCommandSchema";
-import { JoinChannelCommand } from "./aplication/prefixCommands/musicCommands/JoinChannelCommand";
-import { ClearPlayListCommandSchema } from "./domain/commandSchema/clearPlayListCommandSchema";
-import { ClearPlayListCommand } from "./aplication/prefixCommands/musicCommands/ClearPlayListCommand";
-import { RemoveSongsFromPlayListCommandSchema } from "./domain/commandSchema/removeSongsFromPlayListCommandSchema";
-import { RemoveSongsFromPlayListCommand } from "./aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand";
+import { PlayListHandler } from './aplication/playListHandler';
+import { HelpCommand } from './aplication/prefixCommands/helpCommand';
+import { ClearPlayListCommand } from './aplication/prefixCommands/musicCommands/ClearPlayListCommand';
+import { DisconnectCommand } from './aplication/prefixCommands/musicCommands/disconnectCommand';
+import { JoinChannelCommand } from './aplication/prefixCommands/musicCommands/JoinChannelCommand';
+import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
+import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
+import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
+import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
+import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/SkipMusicCommand';
+import { UnpauseCommand } from './aplication/prefixCommands/musicCommands/UnpauseCommand';
+import { ClearPlayListCommandSchema } from './domain/commandSchema/clearPlayListCommandSchema';
+import { DisconnectCommandSchema } from './domain/commandSchema/DisconnectCommandSchema';
+import { HelpCommandSchema } from './domain/commandSchema/helpCommandSchema';
+import { JoinChannelCommandSchema } from './domain/commandSchema/joinChannelCommandSchema';
+import { PauseCommandSchema } from './domain/commandSchema/PauseCommandSchema';
+import { PlayCommandSchema } from './domain/commandSchema/playCommandSchema';
+import { PlayListCommandSchema } from './domain/commandSchema/playListCommandSchema';
+import { RemoveSongsFromPlayListCommandSchema } from './domain/commandSchema/removeSongsFromPlayListCommandSchema';
+import { SkipMusicCommandSchema } from './domain/commandSchema/SkipMusicCommandSchema';
+import { UnpauseCommandSchema } from './domain/commandSchema/UnpauseCommandSchema';
+import { Command } from './domain/interfaces/Command';
+import { PlayDlHandler } from './infrastructure/playDlHandler';
+import { YoutubeAPIHandler } from './infrastructure/youtubeHandler';
 
 export interface Route {
-    alias: string[],
+    alias: string[];
     command: Command;
 }
 
@@ -73,5 +73,5 @@ export const routes: Route[] = [
     {
         alias: RemoveSongsFromPlayListCommandSchema.aliases,
         command: new RemoveSongsFromPlayListCommand(playListHandler),
-    }
-]
+    },
+];

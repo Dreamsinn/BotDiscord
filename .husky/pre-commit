@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# undefined
+# npm test
+# npx tsc --noEmit && npx eslint --fix . && npx prettier --write .
+npx lint-staged
+# npx tsc --noEmit && npx eslint --fix . && npx prettier --write .

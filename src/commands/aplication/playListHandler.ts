@@ -1,7 +1,12 @@
-import { songData, newSongData, songDuration } from '../domain/interfaces/songData'
-import { GuildMember, Message, MessageOptions } from 'discord.js';
-import { AudioPlayerState, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
-import { PlayDlHandler } from '../infrastructure/playDlHandler'
+import {
+    AudioPlayerState,
+    createAudioPlayer,
+    createAudioResource,
+    joinVoiceChannel,
+} from '@discordjs/voice';
+import { GuildMember, Message } from 'discord.js';
+import { newSongData, songData, songDuration } from '../domain/interfaces/songData';
+import { PlayDlHandler } from '../infrastructure/playDlHandler';
 import { MessageCreator } from './utils/messageCreator';
 import { PaginatedMessage } from './utils/paginatedMessage';
 
@@ -13,27 +18,25 @@ export class PlayListHandler {
     private playDlHandler: PlayDlHandler;
     private isMusicListenerActive = false;
 
-    constructor(
-        playDlHandler: PlayDlHandler,
-    ) {
+    constructor(playDlHandler: PlayDlHandler) {
         this.playDlHandler = playDlHandler;
     }
 
     public async update({ member, channel, songList, newSong }: newSongData) {
         if (songList) {
-            this.playList.push(...songList)
+            this.playList.push(...songList);
         } else {
             this.playList.push(newSong);
         }
 
         if (songList) {
-            await this.newListToPlayListEmbed(member, songList, channel)
+            await this.newListToPlayListEmbed(member, songList, channel);
         } else {
-            this.newSongToPlayListEmbed(member, newSong, channel)
+            this.newSongToPlayListEmbed(member, newSong, channel);
         }
 
         // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
-        this.playListDuration = this.calculateListDuration(this.playList, this.playListDuration);
+        this.playListDuration = this.calculateListDuration(this.playList);
 
         // si no hay conexion o se ha desconectado el bot dle canal de voz, que entablezca una nueva conexion
         if (!this.botConnection || this.botConnection._state.status === 'destroyed') {
@@ -46,21 +49,39 @@ export class PlayListHandler {
         }
     }
 
-    private async newListToPlayListEmbed(member: GuildMember, songList: songData[], channel: Message["channel"]) {
+    private async newListToPlayListEmbed(
+        member: GuildMember,
+        songList: songData[],
+        channel: Message['channel'],
+    ) {
         // TODO: descripcion con lista de todas las canciones, mas adelante, con paginacion de 20s y sin mensaje de Time Out
-        let songListDuration: songDuration;
-        songListDuration = this.calculateListDuration(songList, songListDuration);
+        const songListDuration = this.calculateListDuration(songList);
 
         return await new PaginatedMessage({
             embed: {
                 color: '#0099ff',
                 title: `${songList.length} added to playlist`,
-                author: { name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` },
+                author: {
+                    name: `${member.user.username}`,
+                    iconURL: `${member.user.displayAvatarURL()}`,
+                },
                 fields: [
-                    { name: 'Duracion', value: `${this.getQeueDuration(songListDuration)}`, inline: true },
-                    { name: 'Posicion', value: `${this.playList.length + 1 - songList.length}`, inline: true },
-                    { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
-                ]
+                    {
+                        name: 'Duracion',
+                        value: `${this.getQeueDuration(songListDuration)}`,
+                        inline: true,
+                    },
+                    {
+                        name: 'Posicion',
+                        value: `${this.playList.length + 1 - songList.length}`,
+                        inline: true,
+                    },
+                    {
+                        name: 'Espera',
+                        value: `${this.getQeueDuration(this.playListDuration)}`,
+                        inline: true,
+                    },
+                ],
             },
             pagination: {
                 channel: channel,
@@ -69,30 +90,39 @@ export class PlayListHandler {
                 timeOut: 60000,
                 jsFormat: true,
                 reply: false,
-            }
-        }).call()
+            },
+        }).call();
     }
 
-    private newSongToPlayListEmbed(member: GuildMember, newSong: songData, channel: Message["channel"]) {
+    private newSongToPlayListEmbed(member: GuildMember, newSong: songData, channel: Message['channel']) {
         const output = new MessageCreator({
             embed: {
                 color: '#0099ff',
-                title: newSong.songName ? `${newSong.songName}` : 'Ha habido un error a la hora de coger el nombre',
-                author: { name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` },
+                title: newSong.songName
+                    ? `${newSong.songName}`
+                    : 'Ha habido un error a la hora de coger el nombre',
+                author: {
+                    name: `${member.user.username}`,
+                    iconURL: `${member.user.displayAvatarURL()}`,
+                },
                 URL: `https://www.youtube.com/watch?v=${newSong.songId}`,
                 fields: [
                     { name: 'Duracion', value: `${newSong.duration.string}`, inline: true },
                     { name: 'Posicion', value: `${this.playList.length}`, inline: true },
-                    { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true }
-                ]
-            }
-        }).call()
+                    {
+                        name: 'Espera',
+                        value: `${this.getQeueDuration(this.playListDuration)}`,
+                        inline: true,
+                    },
+                ],
+            },
+        }).call();
 
         return channel.send(output);
     }
 
-    private calculateListDuration(songList: songData[], listDuration: songDuration) {
-        listDuration = { hours: 0, minutes: 0, seconds: 0 };
+    private calculateListDuration(songList: songData[]) {
+        const listDuration: songDuration = { hours: 0, minutes: 0, seconds: 0 };
         songList.forEach((song) => {
             listDuration.seconds += song.duration.seconds;
             listDuration.minutes += song.duration.minutes;
@@ -107,8 +137,8 @@ export class PlayListHandler {
                 listDuration.minutes -= 60;
                 listDuration.hours += 1;
             }
-        })
-        return listDuration
+        });
+        return listDuration;
     }
 
     private getQeueDuration(listDuration: songDuration) {
@@ -117,14 +147,14 @@ export class PlayListHandler {
         const seconds = listDuration.seconds;
 
         if (hours !== 0) {
-            return `${hours}h ${minutes}m ${seconds}s`
+            return `${hours}h ${minutes}m ${seconds}s`;
         }
 
         if (hours == 0 && minutes !== 0) {
-            return `${minutes}m ${seconds}s`
+            return `${minutes}m ${seconds}s`;
         }
 
-        return `${seconds}s`
+        return `${seconds}s`;
     }
 
     private joinToChannel(member: GuildMember, channel: any) {
@@ -132,7 +162,7 @@ export class PlayListHandler {
 
         // // si no estas en un canal de voz
         if (!member.voice.channel) {
-            channel.send('Tienes que estar en un canal de voz!')
+            channel.send('Tienes que estar en un canal de voz!');
             return;
         }
 
@@ -141,139 +171,135 @@ export class PlayListHandler {
             guildId: channel.guild.id,
             adapterCreator: channel.guild.voiceAdapterCreator,
             selfDeaf: true,
-        })
+        });
 
-        this.player = createAudioPlayer()
+        this.player = createAudioPlayer();
 
-
-        this.botConnection.subscribe(this.player)
+        this.botConnection.subscribe(this.player);
     }
 
     private async playMusic() {
         try {
             // descarga cancion
-            const song = await this.playDlHandler.getSongStream(this.playList[0].songId)
+            const song = await this.playDlHandler.getSongStream(this.playList[0].songId);
 
             // craa recurso
             const resources = createAudioResource(song.stream, {
-                inputType: song.type
-            })
+                inputType: song.type,
+            });
 
             // pasa recurso al player
-            this.player.play(resources)
-        } catch (err: any) {
-            console.log('ERROR', err)
+            this.player.play(resources);
+        } catch (err) {
+            console.log('ERROR', err);
             // necesario?
-            this.skipMusic()
-            return
+            this.skipMusic();
+            return;
         }
 
         if (!this.isMusicListenerActive) {
             this.isMusicListenerActive = true;
-            this.musicEventListener()
+            this.musicEventListener();
         }
-
     }
 
     private musicEventListener() {
         this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
             // cunado el player no esta reproduciendo
             if (newState.status === 'idle') {
-                this.playList.shift()
+                this.playList.shift();
                 if (this.playList[0]) {
-                    return this.playMusic()
+                    return this.playMusic();
                 }
-                return
+                return;
             }
-        })
+        });
     }
 
     public botDisconnect() {
         if (this.botConnection) {
-            return this.botConnection.destroy()
+            return this.botConnection.destroy();
         }
-        return
+        return;
     }
 
     public skipMusic() {
         let musicToSkip: songData;
         if (this.player) {
-            musicToSkip = this.playList[0]
-            this.player.stop()
+            musicToSkip = this.playList[0];
+            this.player.stop();
         }
         return musicToSkip;
     }
 
     public pauseMusic() {
         if (!this.player || this.player._state.status === 'idle') {
-            return
+            return;
         }
-        return this.player.pause()
+        return this.player.pause();
     }
 
     public unpauseMusic() {
         if (!this.player) {
-            return
+            return;
         }
         if (this.player._state.status === 'idle' && this.playList[0]) {
-            return this.playMusic()
+            return this.playMusic();
         }
-        return this.player.unpause()
+        return this.player.unpause();
     }
 
     public changeBotVoiceChanel(event: Message) {
-        this.joinToChannel(event.member, event.channel)
+        this.joinToChannel(event.member, event.channel);
         if (this.playList[0]) {
-            this.playMusic()
+            this.playMusic();
         }
-        return
+        return;
     }
 
     public readPlayList() {
-        const playList = [...this.playList]
-        return playList
+        const playList = [...this.playList];
+        return playList;
     }
 
     public deletePlayList() {
-        if ((this.player && this.player._state.status === 'idle') || (this.botConnection && this.botConnection._state.status === 'destroyed')) {
-            return this.playList = [];
+        if (
+            (this.player && this.player._state.status === 'idle') ||
+            (this.botConnection && this.botConnection._state.status === 'destroyed')
+        ) {
+            return (this.playList = []);
         }
         // eleminamos todos menos el primero, que al ser el que esta sonando
-        return this.playList = [this.playList[0]];
+        return (this.playList = [this.playList[0]]);
     }
 
     public removeSongsFromPlayList(songsIndex: number[]) {
         // si esta sonando y se quiere eliminar la primera cancion
-        if (songsIndex.find((n) => n === 1) && (this.player && (this.player._state.status === 'buffering' || this.player._state.status === 'playing'))) {
-
+        if (
+            songsIndex.find((n) => n === 1) &&
+            this.player &&
+            (this.player._state.status === 'buffering' || this.player._state.status === 'playing')
+        ) {
             // hace una array con las canciones selecionas
-            const removedMusic = this.playList.filter((n, i) => {
-                return songsIndex.includes(i + 1)
-            })
+            const removedMusic = this.playList.filter((n, i) => songsIndex.includes(i + 1));
 
             // elimina la 1r cancion de la lista de canciones a eliminar
-            songsIndex = songsIndex.filter(n => n !== 1)
+            songsIndex = songsIndex.filter((n) => n !== 1);
 
             // hace una array sin las canciones selecionas
-            this.playList = this.playList.filter((n, i) => {
-                return !songsIndex.includes(i + 1)
-            })
+            this.playList = this.playList.filter((n, i) => !songsIndex.includes(i + 1));
 
             // eliminamos la cancion que esta sonando via Skip
-            this.skipMusic()
+            this.skipMusic();
 
             return removedMusic;
         }
 
         // hace una array con las canciones selecionas
-        const removedMusic = this.playList.filter((n, i) => {
-            return songsIndex.includes(i + 1)
-        })
+        const removedMusic = this.playList.filter((n, i) => songsIndex.includes(i + 1));
 
         // hace una array sin las canciones selecionas
-        this.playList = this.playList.filter((n, i) => {
-            return !songsIndex.includes(i + 1)
-        })
+        this.playList = this.playList.filter((n, i) => !songsIndex.includes(i + 1));
 
         return removedMusic;
     }

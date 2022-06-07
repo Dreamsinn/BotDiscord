@@ -1,7 +1,7 @@
-const { Client, Intents } = require("discord.js");
+import { Client, Intents } from 'discord.js';
 
 export class Bot {
-    client: any;
+    client: Client;
     async createClient() {
         // Create a new client instance
         // intents -> BOTS PERMISSIONS IN SERVER
@@ -13,7 +13,7 @@ export class Bot {
                 Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
                 Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
                 Intents.FLAGS.GUILD_VOICE_STATES,
-            ]
+            ],
         });
 
         // When the client is ready, run this code (only once)
@@ -24,5 +24,4 @@ export class Bot {
         // Login to Discord with your client's token
         await this.client.login(process.env.TOKEN);
     }
-
 }

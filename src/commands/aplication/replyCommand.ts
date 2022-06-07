@@ -1,29 +1,28 @@
-import { CommandSchema } from "../domain/interfaces/commandSchema";
-import { ReplyCommandSchema } from "../domain/commandSchema/replyCommandSchema";
-import { CoolDown } from "./utils/coolDown";
-import { MessageCreator } from "./utils/messageCreator";
-import { Message } from "discord.js";
+import { Message } from 'discord.js';
+import { ReplyCommandSchema } from '../domain/commandSchema/replyCommandSchema';
+import { CommandSchema } from '../domain/interfaces/commandSchema';
+import { CoolDown } from './utils/coolDown';
+import { MessageCreator } from './utils/messageCreator';
 
 export class ReplyCommand {
     private replySchema: CommandSchema = ReplyCommandSchema;
     private coolDown = new CoolDown();
 
     public async call(event: Message): Promise<Message> {
-        console.log('ReplyCommand executed')
+        console.log('ReplyCommand executed');
         // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
         // concatenar if fa que sigui lios
-        this.replySchema.aliases.forEach(alias => {
+        this.replySchema.aliases.forEach((alias) => {
             // mirar si se encuntra el alias al principio, o ente ' '
             if (event.content.startsWith(alias) || event.content.includes(` ${alias} `)) {
-
                 // mirar si cumple la condicion de coolDown
                 const interrupt = this.coolDown.call(this.replySchema.coolDown);
                 if (interrupt === 1) {
-                    console.log('command interrupted by cooldown')
-                    return
+                    console.log('command interrupted by cooldown');
+                    return;
                 }
 
-                console.log('alias founded')
+                console.log('alias founded');
 
                 const output = new MessageCreator({
                     message: {
@@ -32,18 +31,18 @@ export class ReplyCommand {
                     embed: {
                         color: '#0099ff',
                         title: `${event.author.username} te falta calle`,
-                        description: `${this.mapAliases(alias)}`
-                    }
-                }).call()
+                        description: `${this.mapAliases(alias)}`,
+                    },
+                }).call();
 
                 return event.reply(output);
             }
-        })
-        return
+        });
+        return;
     }
 
     private mapAliases(alias: string) {
-        console.log(alias)
+        console.log(alias);
         if (alias.charAt(alias.length - 1) === ' ') {
             const aliasModified = alias.slice(0, -1);
             return replyCommandOptions[aliasModified];
@@ -64,4 +63,4 @@ export const replyCommandOptions = {
     hamburgessa: 'AMBULANCIA',
     // ino: 'PEPINO',
     // ano: 'AGARRAMELA CON LA MANO'
-}
+};

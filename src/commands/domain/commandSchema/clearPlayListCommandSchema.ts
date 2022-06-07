@@ -1,4 +1,4 @@
-import { CommandSchema } from '../interfaces/commandSchema'
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const ClearPlayListCommandSchema: CommandSchema = {
     aliases: ['c', 'clear'],
@@ -10,9 +10,7 @@ const ClearPlayListCommandSchema: CommandSchema = {
     usage: 'clear',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    ClearPlayListCommandSchema
-}
+export { ClearPlayListCommandSchema };

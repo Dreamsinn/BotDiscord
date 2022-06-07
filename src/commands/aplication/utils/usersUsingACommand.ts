@@ -1,19 +1,19 @@
 export class UsersUsingACommand {
     // esta clase es para cuando un comando espera una respuesta escrita no active otro comando
-    public static usersUsingACommand = new UsersUsingACommand()
+    public static usersUsingACommand = new UsersUsingACommand();
 
     private usersList = [];
 
     public updateUserList(userId: string) {
-        this.usersList.push(userId)
+        this.usersList.push(userId);
     }
 
     public removeUserList(userId: string) {
-        this.usersList = this.usersList.filter((id: string) => id !== userId)
+        this.usersList = this.usersList.filter((id: string) => id !== userId);
     }
 
     public searchIdInUserList(userId: string) {
-        return this.usersList.find((id) => id === userId)
+        return this.usersList.find((id) => id === userId);
     }
 
     // no usada en este momento, pero importante para logs

@@ -1,20 +1,18 @@
-import { CommandSchema } from "../../../domain/interfaces/commandSchema";
-import { PlayListCommandSchema } from "../../../domain/commandSchema/playListCommandSchema";
-import { PlayListHandler } from "../../playListHandler"
-import { CoolDown } from "../../utils/coolDown";
-import { Command } from "../../Command";
-import { songData } from '../../../domain/interfaces/songData'
-import { Message } from "discord.js";
-import { PaginatedMessage } from "../../utils/paginatedMessage";
+import { Message } from 'discord.js';
+import { PlayListCommandSchema } from '../../../domain/commandSchema/playListCommandSchema';
+import { Command } from '../../../domain/interfaces/Command';
+import { CommandSchema } from '../../../domain/interfaces/commandSchema';
+import { songData } from '../../../domain/interfaces/songData';
+import { PlayListHandler } from '../../playListHandler';
+import { CoolDown } from '../../utils/coolDown';
+import { PaginatedMessage } from '../../utils/paginatedMessage';
 
 export class PlayListCommand extends Command {
     private playListSchema: CommandSchema = PlayListCommandSchema;
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
 
-    constructor(
-        playListHandler: PlayListHandler,
-    ) {
+    constructor(playListHandler: PlayListHandler) {
         super();
         this.playListHandler = playListHandler;
     }
@@ -23,12 +21,11 @@ export class PlayListCommand extends Command {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.playListSchema.coolDown);
         if (interrupt === 1) {
-            console.log('command interrupted by cooldown')
+            console.log('command interrupted by cooldown');
             return;
         }
 
         const playList: songData[] = this.playListHandler.readPlayList();
-
 
         return await new PaginatedMessage({
             embed: {
@@ -42,9 +39,7 @@ export class PlayListCommand extends Command {
                 timeOut: 60000,
                 jsFormat: true,
                 reply: false,
-            }
+            },
         }).call();
-
-
     }
 }

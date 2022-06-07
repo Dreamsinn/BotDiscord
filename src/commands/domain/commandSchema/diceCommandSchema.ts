@@ -1,4 +1,4 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const DiceCommandSchema: CommandSchema = {
     aliases: ['D'],
@@ -10,9 +10,7 @@ const DiceCommandSchema: CommandSchema = {
     usage: ',',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    DiceCommandSchema
-}
+export { DiceCommandSchema };

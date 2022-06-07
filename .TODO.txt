@@ -29,3 +29,5 @@
 -- Usar message.content.split(",") para mejorar el diceCommand y (< y >)
 
 -comprobar bad request con vidios que me gustan o algo, ademas no para el metodo
+
+-rama master quitar eslint y mirar si hay algun prosproducion de ts

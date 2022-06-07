@@ -1,4 +1,4 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const UnpauseCommandSchema: CommandSchema = {
     aliases: ['unpause'],
@@ -10,9 +10,7 @@ const UnpauseCommandSchema: CommandSchema = {
     usage: 'unpause',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    UnpauseCommandSchema
-}
+export { UnpauseCommandSchema };

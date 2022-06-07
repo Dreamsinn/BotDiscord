@@ -1,18 +1,17 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const JoinChannelCommandSchema: CommandSchema = {
     aliases: ['j', 'join'],
     coolDown: 0,
     devOnly: false,
-    description: 'Join the bot to the current voice channel, no needed if bot is not already in a channel',
+    description:
+        'Join the bot to the current voice channel, no needed if bot is not already in a channel',
     category: 'prefix',
     name: 'Join',
     usage: 'join',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    JoinChannelCommandSchema
-}
+export { JoinChannelCommandSchema };

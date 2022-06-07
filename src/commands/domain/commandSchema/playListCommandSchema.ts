@@ -1,4 +1,4 @@
-import { CommandSchema } from "../interfaces/commandSchema"
+import { CommandSchema } from '../interfaces/commandSchema';
 
 const PlayListCommandSchema: CommandSchema = {
     aliases: ['playlist', 'pl'],
@@ -10,9 +10,7 @@ const PlayListCommandSchema: CommandSchema = {
     usage: 'playlist',
     slash: {},
     contextChat: '',
-    contextUser: ''
-}
+    contextUser: '',
+};
 
-export {
-    PlayListCommandSchema
-}
+export { PlayListCommandSchema };
