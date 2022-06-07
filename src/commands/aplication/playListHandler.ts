@@ -3,6 +3,7 @@ import { GuildMember, Message, MessageOptions } from 'discord.js';
 import { AudioPlayerState, createAudioPlayer, createAudioResource, joinVoiceChannel } from "@discordjs/voice";
 import { PlayDlHandler } from '../infrastructure/playDlHandler'
 import { MessageCreator } from './utils/messageCreator';
+import { PaginatedMessage } from './utils/paginatedMessage';
 
 export class PlayListHandler {
     private playList: songData[] = [];
@@ -25,17 +26,14 @@ export class PlayListHandler {
             this.playList.push(newSong);
         }
 
-        let output: MessageOptions;
         if (songList) {
-            output = this.newListToPlayListEmbed(member, songList)
+            await this.newListToPlayListEmbed(member, songList, channel)
         } else {
-            output = this.newSongToPlayListEmbed(member, newSong)
+            this.newSongToPlayListEmbed(member, newSong, channel)
         }
 
         // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
         this.playListDuration = this.calculateListDuration(this.playList, this.playListDuration);
-
-        channel.send(output)
 
         // si no hay conexion o se ha desconectado el bot dle canal de voz, que entablezca una nueva conexion
         if (!this.botConnection || this.botConnection._state.status === 'destroyed') {
@@ -48,34 +46,34 @@ export class PlayListHandler {
         }
     }
 
-    private newListToPlayListEmbed(member: GuildMember, songList: songData[]) {
+    private async newListToPlayListEmbed(member: GuildMember, songList: songData[], channel: Message["channel"]) {
         // TODO: descripcion con lista de todas las canciones, mas adelante, con paginacion de 20s y sin mensaje de Time Out
         let songListDuration: songDuration;
         songListDuration = this.calculateListDuration(songList, songListDuration);
 
-        let songNameList = '';
-        songList.forEach((song: songData, i: number) => {
-            songNameList += `${i + 1} - ${song.songName}\n`
-        })
-
-        const output = new MessageCreator({
+        return await new PaginatedMessage({
             embed: {
                 color: '#0099ff',
                 title: `${songList.length} added to playlist`,
                 author: { name: `${member.user.username}`, iconURL: `${member.user.displayAvatarURL()}` },
-                description: songNameList,
                 fields: [
                     { name: 'Duracion', value: `${this.getQeueDuration(songListDuration)}`, inline: true },
                     { name: 'Posicion', value: `${this.playList.length + 1 - songList.length}`, inline: true },
                     { name: 'Espera', value: `${this.getQeueDuration(this.playListDuration)}`, inline: true },
                 ]
+            },
+            pagination: {
+                channel: channel,
+                rawDataToPaginate: songList,
+                dataPerPage: 10,
+                timeOut: 60000,
+                jsFormat: true,
+                reply: false,
             }
         }).call()
-
-        return output;
     }
 
-    private newSongToPlayListEmbed(member: GuildMember, newSong: songData) {
+    private newSongToPlayListEmbed(member: GuildMember, newSong: songData, channel: Message["channel"]) {
         const output = new MessageCreator({
             embed: {
                 color: '#0099ff',
@@ -90,7 +88,7 @@ export class PlayListHandler {
             }
         }).call()
 
-        return output;
+        return channel.send(output);
     }
 
     private calculateListDuration(songList: songData[], listDuration: songDuration) {

@@ -3,13 +3,10 @@ import { RemoveSongsFromPlayListCommandSchema } from "../../../domain/commandSch
 import { PlayListHandler } from "../../playListHandler"
 import { CoolDown } from "../../utils/coolDown";
 import { Command } from "../../Command";
-import { PlayListCommand } from "./playListCommand";
 import { UsersUsingACommand } from "../../utils/usersUsingACommand"
-import { Message, MessageOptions } from 'discord.js';
-import { MessageCreator } from "../../utils/messageCreator";
+import { Message } from 'discord.js';
 import { songData } from "../../../domain/interfaces/songData";
-
-
+import { PaginatedMessage } from "../../utils/paginatedMessage";
 
 export class RemoveSongsFromPlayListCommand extends Command {
     private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
@@ -24,7 +21,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message> {
+    public async call(event: Message) {
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
         if (interrupt === 1) {
@@ -32,19 +29,35 @@ export class RemoveSongsFromPlayListCommand extends Command {
             return;
         }
 
-        // detecta y modifica el mensaje de PlayListCommand
-        this.detectPlayListCommandMessage(event)
+        const playList: songData[] = this.playListHandler.readPlayList();
 
-        // executamos PlayListCommand para tener la paginacion 
-        new PlayListCommand(this.playListHandler).call(event);
+        await new PaginatedMessage({
+            embed: {
+                color: 'ORANGE',
+                title: 'Remove songs from playlist:',
+                author: { name: `${event.member.user.username}`, iconURL: `${event.member.user.displayAvatarURL()}` },
+                description: 'Write the numbers of the songs you wish to remove split by " , " \nWrite " X " to cancel operation',
+            },
+            pagination: {
+                event: event,
+                rawDataToPaginate: playList,
+                dataPerPage: 10,
+                timeOut: 60000,
+                jsFormat: true,
+                reply: false,
+                author: event.author
+            }
+        }).call();
 
-        // usuario no pueda ejecutar otros comandos antes que se 
+        return this.messageCollector(event, playList)
+    }
+
+    private messageCollector(event: Message, playList: songData[]) {
+        // usuario no pueda ejecutar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id)
 
-        const playList = this.playListHandler.readPlayList();
         const lastSongIndex = playList.length;
 
-        // deteta siguiente mensaje del usuario
         const filter = (message: Message) => {
             const userConditions = event.author.id === message.author.id;
             const numbersArray = message.content.split(",");
@@ -69,9 +82,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
                     return
                 }
 
-                const output = this.removeSongFromPlayList(collectedMessage.content, event)
-
-                return event.channel.send(output)
+                return this.removeSongFromPlayList(collectedMessage.content, event)
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
@@ -84,25 +95,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 this.usersUsingACommand.removeUserList(event.author.id)
                 return;
             })
-
-    }
-
-    private detectPlayListCommandMessage(event: Message) {
-        const filter = (message: Message) => {
-            return message.embeds[0].title === 'Playlist' && message.author.bot;
-        };
-
-        // Cambia el titulo del embed original y le pone una descripcion
-        const collector = event.channel.createMessageCollector({ filter, max: 1, time: 5000 });
-        collector.on('collect', message => {
-            const newEmbed = message.embeds[0]
-            newEmbed.setTitle('Remove song from playlist')
-            newEmbed.setDescription('Write - X - to cancel operation');
-            const output: MessageOptions = {
-                embeds: [newEmbed],
-            }
-            message.edit(output)
-        });
     }
 
     private removeSongFromPlayList(content: string, event: Message) {
@@ -117,32 +109,27 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 numberArray.push(Number(str));
             }
         });
-        // recive las canciones borradas 
+
+        // recive las canciones borradas y hace embed de las canciones borradas
         const removedMusic = this.playListHandler.removeSongsFromPlayList(numberArray);
-        // hace embed de las canciones borradas
         return this.removedMusicEmbed(removedMusic, event)
     }
 
-    private removedMusicEmbed(removedMusic: songData[], event: Message) {
-        let removedMusicString = '';
-
-        removedMusic.forEach((song) => {
-            removedMusicString += `${song.songName}\n`
-        })
-
-        // TODO paginar
-        const output = new MessageCreator({
+    private async removedMusicEmbed(removedMusic: songData[], event: Message) {
+        return await new PaginatedMessage({
             embed: {
                 color: 'ORANGE',
+                title: `${removedMusic.length} songs removeds from Playlist`,
                 author: { name: `${event.member.user.username}`, iconURL: `${event.member.user.displayAvatarURL()}` },
-                field: {
-                    name: `Songs removeds from Playlist`,
-                    value: removedMusicString,
-                    inline: false
-                }
+            },
+            pagination: {
+                event: event,
+                rawDataToPaginate: removedMusic,
+                dataPerPage: 10,
+                timeOut: 30000,
+                reply: false,
+                jsFormat: true,
             }
         }).call()
-
-        return output;
     }
 }
