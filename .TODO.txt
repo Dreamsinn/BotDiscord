@@ -31,3 +31,7 @@
 -comprobar bad request con vidios que me gustan o algo, ademas no para el metodo
 
 -rama master quitar eslint y mirar si hay algun prosproducion de ts
+
+- handle devolver tambien argumento a las clases si lo tienene, para ahorra codgo 
+
+- Regex para las busqueda de un mensaje, para no tener que hacer opcion minuscula y mayusucla, un util
