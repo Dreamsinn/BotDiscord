@@ -17,6 +17,7 @@ export class PlayListHandler {
     private player: any;
     private playDlHandler: PlayDlHandler;
     private isMusicListenerActive = false;
+    private loopMode = false;
 
     constructor(playDlHandler: PlayDlHandler) {
         this.playDlHandler = playDlHandler;
@@ -81,6 +82,11 @@ export class PlayListHandler {
                         value: `${this.getQeueDuration(this.playListDuration)}`,
                         inline: true,
                     },
+                    {
+                        name: 'Loop',
+                        value: this.loopMode ? 'on' : 'off',
+                        inline: true,
+                    },
                 ],
             },
             pagination: {
@@ -112,6 +118,11 @@ export class PlayListHandler {
                     {
                         name: 'Espera',
                         value: `${this.getQeueDuration(this.playListDuration)}`,
+                        inline: true,
+                    },
+                    {
+                        name: 'Loop',
+                        value: this.loopMode ? 'on' : 'off',
                         inline: true,
                     },
                 ],
@@ -207,6 +218,9 @@ export class PlayListHandler {
         this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
             // cunado el player no esta reproduciendo
             if (newState.status === 'idle') {
+                if (this.loopMode) {
+                    this.playList.push(this.playList[0]);
+                }
                 this.playList.shift();
                 if (this.playList[0]) {
                     return this.playMusic();
@@ -302,5 +316,31 @@ export class PlayListHandler {
         this.playList = this.playList.filter((n, i) => !songsIndex.includes(i + 1));
 
         return removedMusic;
+    }
+
+    public shufflePlayList(): boolean {
+        if (!this.playList[0]) {
+            return false;
+        }
+        const newPlayList: songData[] = [];
+        for (let i = this.playList.length - 1; 0 <= i; i--) {
+            newPlayList.push(this.randomNextSong(i));
+        }
+        this.playList = newPlayList;
+        return true;
+    }
+
+    private randomNextSong(i: number): songData {
+        const randomIndex = Math.random() * Number(i);
+        const randomSong = this.playList.splice(randomIndex, 1);
+        return randomSong[0];
+    }
+
+    public setLoopMode(active: boolean): boolean {
+        if (this.loopMode === active) {
+            return false;
+        }
+        this.loopMode = active;
+        return true;
     }
 }

@@ -69,10 +69,7 @@ export class DiceCommand {
 
         if (comma_position === -1) {
             // sino hay ,
-            const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(
-                event.content,
-                D_position,
-            );
+            const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(event.content, D_position);
             diceNumberArray.push(diceNumber);
             diceFacesArray.push(diceFaces);
         } else {
