@@ -8,8 +8,7 @@ export class ReplyCommand {
     private replySchema: CommandSchema = ReplyCommandSchema;
     private coolDown = new CoolDown();
 
-    public async call(event: Message): Promise<Message> {
-        console.log('ReplyCommand executed');
+    public async call(event): Promise<Message> {
         // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
         // concatenar if fa que sigui lios
         this.replySchema.aliases.forEach((alias) => {
@@ -34,7 +33,9 @@ export class ReplyCommand {
                         description: `${this.mapAliases(alias)}`,
                     },
                 }).call();
-
+                console.log('ReplyCommand executed');
+                console.log(event.guild.name);
+                console.log(event.channel.name);
                 return event.reply(output);
             }
         });

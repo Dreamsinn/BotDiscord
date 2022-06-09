@@ -208,6 +208,7 @@ export class PlayCommand extends Command {
                 songName: songData.title,
                 songId: songData.id,
                 duration: songData.durationData,
+                thumbnails: songData.thumbnails,
             },
             channel: event.channel,
             member: event.member,
@@ -219,30 +220,35 @@ export class PlayCommand extends Command {
     private async mapSongData(event: Message, song: rawSongData): Promise<rawSongData> {
         // optenemos duracion y nombre
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
+
         try {
             const searchedSongData: YouTubeVideo = await this.playDlHandler.getSongInfo(song.id);
             if (!song.title) {
                 song.title = searchedSongData.title;
             }
             song.durationData = this.parseSongDuration(String(searchedSongData.durationInSec), true);
+            song.thumbnails = searchedSongData.thumbnails[3].url;
+            return song;
         } catch (err) {
-            event.channel.send(`Play-dl Data Error: ${err}`);
+            event.channel.send(`Play-dl Data Error: ${err},\n ${song.title}`);
             console.log(`Play-dl Data Error: ${err}`);
+        }
 
-            try {
-                // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
-                const searchedSongData: rawSongData = await this.youtubeAPIHandler.searchSongById(
-                    song.id,
-                );
-                if (!song.title) {
-                    song.title = searchedSongData.title;
-                }
-                song.durationData = this.parseSongDuration(searchedSongData.durationString, false);
-            } catch (err) {
-                event.channel.send(`It has not been possible to get song's information`);
-                event.channel.send(`YoutubeAPI Error: ${err}`);
-                console.log(`YoutubeAPI Error: ${err}`);
+        try {
+            // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
+            const searchedSongData: rawSongData = await this.youtubeAPIHandler.searchSongById(
+                song.id,
+            );
+            if (!song.title) {
+                song.title = searchedSongData.title;
             }
+            song.durationData = this.parseSongDuration(searchedSongData.durationString, false);
+            song.thumbnails = searchedSongData.thumbnails
+            return song;
+        } catch (err) {
+            event.channel.send(`It has not been possible to get song's information`);
+            event.channel.send(`YoutubeAPI Error: ${err}`);
+            console.log(`YoutubeAPI Error: ${err}`);
         }
         return song;
     }
@@ -374,6 +380,7 @@ export class PlayCommand extends Command {
                 songName: song.title,
                 songId: song.id,
                 duration: this.parseSongDuration(String(song.duration), true),
+                thumbnails: song.thumbnails,
             };
             playList.push(newSong);
         });
@@ -409,6 +416,7 @@ export class PlayCommand extends Command {
                 songName: songData.title,
                 songId: songData.id,
                 duration: songData.durationData,
+                thumbnails: songData.thumbnails,
             };
             playlist.push(newSong);
         }

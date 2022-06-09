@@ -4,6 +4,7 @@ export interface songData {
     songName: string;
     songId: string;
     duration: songDuration;
+    thumbnails: string;
 }
 
 export interface newSongData {
@@ -26,4 +27,5 @@ export interface rawSongData {
     duration?: number;
     durationString?: string;
     durationData?: songDuration;
+    thumbnails?: string;
 }
