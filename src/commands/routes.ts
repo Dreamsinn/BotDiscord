@@ -2,6 +2,7 @@ import { PlayListHandler } from './aplication/playListHandler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
 import { ClearPlayListCommand } from './aplication/prefixCommands/musicCommands/ClearPlayListCommand';
 import { DisconnectCommand } from './aplication/prefixCommands/musicCommands/disconnectCommand';
+import { DisplayPlayListCommand } from './aplication/prefixCommands/musicCommands/displayPlayListCommand';
 import { JoinChannelCommand } from './aplication/prefixCommands/musicCommands/JoinChannelCommand';
 import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicCommands/loopPlayListModeCommand';
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
@@ -13,6 +14,7 @@ import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/Skip
 import { UnpauseCommand } from './aplication/prefixCommands/musicCommands/UnpauseCommand';
 import { ClearPlayListCommandSchema } from './domain/commandSchema/clearPlayListCommandSchema';
 import { DisconnectCommandSchema } from './domain/commandSchema/DisconnectCommandSchema';
+import { DisplayPlayListCommandSchema } from './domain/commandSchema/displayPlayListCommandSchema';
 import { HelpCommandSchema } from './domain/commandSchema/helpCommandSchema';
 import { JoinChannelCommandSchema } from './domain/commandSchema/joinChannelCommandSchema';
 import { LoopPlayListModeCommandSchema } from './domain/commandSchema/loopPlayListModeCommandSchema';
@@ -85,5 +87,9 @@ export const routes: Route[] = [
     {
         alias: LoopPlayListModeCommandSchema.aliases,
         command: new LoopPlayListModeCommand(playListHandler),
+    },
+    {
+        alias: DisplayPlayListCommandSchema.aliases,
+        command: new DisplayPlayListCommand(playListHandler),
     },
 ];

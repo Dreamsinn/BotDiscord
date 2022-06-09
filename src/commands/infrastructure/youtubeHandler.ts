@@ -70,6 +70,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
         const response: rawSongData = {
             title: searched.data.items[0].snippet.title,
             durationString: searched.data.items[0].contentDetails.duration,
+            thumbnails: searched.data.items[0].snippet.thumbnails.medium.url,
         };
 
         return response;

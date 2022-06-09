@@ -24,7 +24,7 @@ export class LoopPlayListModeCommand extends Command {
         }
 
         if (event.content.includes('on')) {
-            const haveBeenActived = this.playListHandler.setLoopMode(true);
+            const haveBeenActived = this.playListHandler.toggleLoopMode(true);
             if (haveBeenActived) {
                 event.channel.send('Loop mode active');
             }
@@ -32,7 +32,7 @@ export class LoopPlayListModeCommand extends Command {
         }
 
         if (event.content.includes('off')) {
-            const haveBeenDeactivate = this.playListHandler.setLoopMode(false);
+            const haveBeenDeactivate = this.playListHandler.toggleLoopMode(false);
             if (haveBeenDeactivate) {
                 event.channel.send('Loop mode deactive');
             }

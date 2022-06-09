@@ -3,4 +3,17 @@ export const discordEmojis = {
     x: '❌',
     '<-': '◀️',
     '->': '▶️',
+    help: '❔',
+    musicEmojis: {
+        pause: '⏸️',
+        playing: '🎶',
+        playOrPause: '⏯️',
+        nextSong: '⏭️',
+        stop: '⏹️',
+        shuffle: '🔀',
+        loop: '🔁',
+        clear: '🧹',
+    },
+    problem: '⛔',
+    readme: '📄',
 };

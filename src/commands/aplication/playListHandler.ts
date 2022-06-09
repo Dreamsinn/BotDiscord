@@ -5,6 +5,7 @@ import {
     joinVoiceChannel,
 } from '@discordjs/voice';
 import { GuildMember, Message } from 'discord.js';
+import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { newSongData, songData, songDuration } from '../domain/interfaces/songData';
 import { PlayDlHandler } from '../infrastructure/playDlHandler';
 import { MessageCreator } from './utils/messageCreator';
@@ -24,6 +25,7 @@ export class PlayListHandler {
     }
 
     public async update({ member, channel, songList, newSong }: newSongData) {
+        // // si no estas en un canal de voz
         if (songList) {
             this.playList.push(...songList);
         } else {
@@ -41,6 +43,10 @@ export class PlayListHandler {
 
         // si no hay conexion o se ha desconectado el bot dle canal de voz, que entablezca una nueva conexion
         if (!this.botConnection || this.botConnection._state.status === 'destroyed') {
+            if (!member.voice.channel) {
+                channel.send('Tienes que estar en un canal de voz!');
+                return;
+            }
             this.joinToChannel(member, channel);
         }
 
@@ -126,6 +132,7 @@ export class PlayListHandler {
                         inline: true,
                     },
                 ],
+                thumbnailUrl: newSong.thumbnails ? newSong.thumbnails : null,
             },
         }).call();
 
@@ -162,7 +169,7 @@ export class PlayListHandler {
         }
 
         if (hours == 0 && minutes !== 0) {
-            return `${minutes}m ${seconds}s`;
+            return `${minutes}m${seconds}s`;
         }
 
         return `${seconds}s`;
@@ -276,6 +283,17 @@ export class PlayListHandler {
         return playList;
     }
 
+    public readPlayListStatusData(): PlayListStatus {
+        const playListData = {
+            playList: this.playList,
+            playListDuration: this.getQeueDuration(this.calculateListDuration(this.playList)),
+            loop: this.loopMode,
+            playerStatus: this.player ? this.player._state.status : undefined,
+            conectionStatus: this.botConnection ? this.botConnection._state.status : undefined,
+        };
+        return playListData;
+    }
+
     public deletePlayList() {
         if (
             (this.player && this.player._state.status === 'idle') ||
@@ -336,7 +354,7 @@ export class PlayListHandler {
         return randomSong[0];
     }
 
-    public setLoopMode(active: boolean): boolean {
+    public toggleLoopMode(active: boolean): boolean {
         if (this.loopMode === active) {
             return false;
         }
