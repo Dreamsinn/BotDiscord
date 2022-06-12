@@ -5,34 +5,42 @@ import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
 import { routes } from './routes';
 
 export class CommandHandler {
-    diceCommand: DiceCommand;
-    replyCommand: ReplyCommand;
+    private diceCommand: DiceCommand;
+    private replyCommand: ReplyCommand;
     constructor(diceCommand: DiceCommand, replyCommand: ReplyCommand) {
         this.diceCommand = diceCommand;
         this.replyCommand = replyCommand;
     }
 
     public async isCommand(event: Message) {
+        // si el comando tiene prefijo, para comandos con prefijo
         if (event.content.startsWith(`${process.env.PREFIX}`)) {
-            // si el comando tiene prefijo, para comandos con prefijo
             console.log('prefix founded');
             return this.isPrefixCommand(event);
         }
 
+        // si el comando tien D para dados
         if (event.content.includes(`${DiceCommandSchema.aliases[0]}`)) {
-            // si el comando tien D para dados
-            console.log('contains D');
-            return await this.diceCommand.call(event);
+            // si los dados estan activos
+            if (DiceCommand.isDiceCommandActive) {
+                console.log('contains D');
+                return await this.diceCommand.call(event);
+            }
+            return;
         }
 
-        for (const key of Object.keys(replyCommandOptions)) {
+        // si la funcion de respuesta
+        if (ReplyCommand.isReplyCommandActive) {
             // mirar si tiene ciertas palabras, para la respuesta
-            console.log(event.content.includes(`${key}`), key);
-            if (event.content.includes(`${key}`)) {
-                console.log('is in replyCommandOptions');
-                return await this.replyCommand.call(event);
+            for (const key of Object.keys(replyCommandOptions)) {
+                console.log(event.content.includes(`${key}`), key);
+                if (event.content.includes(`${key}`)) {
+                    return await this.replyCommand.call(event);
+                }
             }
+            return;
         }
+
         console.log('it is not a command');
         return;
     }

@@ -1,4 +1,5 @@
 import { PlayListHandler } from './aplication/playListHandler';
+import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
 import { ClearPlayListCommand } from './aplication/prefixCommands/musicCommands/ClearPlayListCommand';
 import { DisconnectCommand } from './aplication/prefixCommands/musicCommands/disconnectCommand';
@@ -12,7 +13,9 @@ import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musi
 import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommands/shufflePlayListCommand';
 import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/SkipMusicCommand';
 import { UnpauseCommand } from './aplication/prefixCommands/musicCommands/UnpauseCommand';
+import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { ClearPlayListCommandSchema } from './domain/commandSchema/clearPlayListCommandSchema';
+import { DiceCommandTogglerSchema } from './domain/commandSchema/diceCommandTogglerSchema';
 import { DisconnectCommandSchema } from './domain/commandSchema/DisconnectCommandSchema';
 import { DisplayPlayListCommandSchema } from './domain/commandSchema/displayPlayListCommandSchema';
 import { HelpCommandSchema } from './domain/commandSchema/helpCommandSchema';
@@ -22,6 +25,7 @@ import { PauseCommandSchema } from './domain/commandSchema/PauseCommandSchema';
 import { PlayCommandSchema } from './domain/commandSchema/playCommandSchema';
 import { PlayListCommandSchema } from './domain/commandSchema/playListCommandSchema';
 import { RemoveSongsFromPlayListCommandSchema } from './domain/commandSchema/removeSongsFromPlayListCommandSchema';
+import { ReplyCommandTogglerSchema } from './domain/commandSchema/replyCommandTogglerSchema';
 import { ShufflePlayListCommandSchema } from './domain/commandSchema/shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from './domain/commandSchema/SkipMusicCommandSchema';
 import { UnpauseCommandSchema } from './domain/commandSchema/UnpauseCommandSchema';
@@ -91,5 +95,13 @@ export const routes: Route[] = [
     {
         alias: DisplayPlayListCommandSchema.aliases,
         command: new DisplayPlayListCommand(playListHandler),
+    },
+    {
+        alias: DiceCommandTogglerSchema.aliases,
+        command: new DiceCommandToggler(),
+    },
+    {
+        alias: ReplyCommandTogglerSchema.aliases,
+        command: new ReplyCommandToggler(),
     },
 ];

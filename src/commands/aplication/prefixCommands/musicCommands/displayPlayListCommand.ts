@@ -30,8 +30,10 @@ export class DisplayPlayListCommand extends Command {
             console.log('command interrupted by cooldown');
             return;
         }
-        // TODO, que sea el ultimo mensaje
+
         // TODO, cerrar display cunado suena peta bot
+
+        // si ya hay un display activo
         if (this.isDisplayActive) {
             event.channel
                 .send('Ya hay un display activo')
@@ -242,21 +244,22 @@ export class DisplayPlayListCommand extends Command {
         const collector = displayMessage.createReactionCollector({ filter, time: 36000000 });
         collector.on('collect', (collected, user) => {
             this.deleteUserReaction(displayMessage, user);
+            // si x borra el msenaje
             if (collected.emoji.name === discordEmojis.x) {
                 return collector.stop();
             }
+            // si readme, y no esta el readme activo
             if (collected.emoji.name === discordEmojis.readme && !this.showingReadme) {
                 return this.createReadmeEmbed(event);
             }
 
-            return this.reactionHandler(collected, user);
+            return this.reactionHandler(collected);
         });
 
         collector.on('end', async () => {
-            // gestionar
+            // cuando acaba borra mensaje, y pone disponible otra vez el display
             displayMessage.delete();
             this.isDisplayActive = false;
-            this.playListHandler.toggleDisplayStatus(false);
             if (displayMessage) {
                 return await displayMessage.edit('Display ha cesado su funcionamiento');
             }
@@ -364,7 +367,7 @@ export class DisplayPlayListCommand extends Command {
         return;
     }
 
-    private reactionHandler(collected: MessageReaction, user: User) {
+    private reactionHandler(collected: MessageReaction) {
         const emoji = collected.emoji.name;
 
         if (emoji === discordEmojis.musicEmojis.playOrPause) {

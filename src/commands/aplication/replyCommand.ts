@@ -7,6 +7,16 @@ import { MessageCreator } from './utils/messageCreator';
 export class ReplyCommand {
     private replySchema: CommandSchema = ReplyCommandSchema;
     private coolDown = new CoolDown();
+    public static isReplyCommandActive = false;
+
+    // activa o desactuva las respuestas
+    public static toggleReplyCommand(active: boolean): boolean {
+        if (this.isReplyCommandActive === active) {
+            return false;
+        }
+        this.isReplyCommandActive = active;
+        return true;
+    }
 
     public async call(event): Promise<Message> {
         // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
