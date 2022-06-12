@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, MessageOptions } from 'discord.js';
 import { DiceCommandSchema } from '../domain/commandSchema/diceCommandSchema';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
 import { CoolDown } from './utils/coolDown';
@@ -19,16 +19,6 @@ export class DiceCommand {
     }
 
     public async call(event: Message): Promise<Message> {
-
-        console.log('asdfasf')
-        // buscar la posicion de la D, y la de la , (-1 si no hay)
-        const { D_position, comma_position } = this.searchDandCommaPosition(event.content);
-
-        // valida que la tirada sea correcta
-        if (this.checkValidRoll(event.content, D_position, comma_position)) {
-            return;
-        }
-
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.diceSchema.coolDown);
         if (interrupt === 1) {
@@ -36,117 +26,234 @@ export class DiceCommand {
             return;
         }
 
-        const output = this.rolDices(event, D_position, comma_position);
+        // para tiradas que incluyen < o >
+        if (event.content.includes('<') || event.content.includes('>')) {
+            if (event.content.includes(',')) {
+                return;
+            }
+            // valida que las tiradas sean correctas
+            if (!this.checkValidRoll(event.content)) {
+                return;
+            }
+            const output = this.rollSuccesses(event.content);
+            return event.reply(output);
+        }
 
+        // las demas tiradas
+        const rollsList = event.content.split(',');
+
+        const nonValidRoll = rollsList.map((roll: string) => {
+            if (!this.checkValidRoll(roll)) {
+                return roll;
+            }
+        });
+
+        if (nonValidRoll[0]) {
+            return;
+        }
+
+        const output = this.rolDices(rollsList);
         return event.reply(output);
     }
 
-    private searchDandCommaPosition(messageContent: string) {
-        const D_position = messageContent.search(this.diceSchema.aliases[0]);
-        const comma_position = messageContent.search(',');
-
-        return { D_position, comma_position };
-    }
-
-    private checkValidRoll(messageContent: string, D_position: number, comma_position: number) {
-        // que comience por D o numero
-        if (!Number(messageContent.charAt(0)) && messageContent.charAt(0) != 'D') {
-            return true;
+    private checkValidRoll(roll: string): boolean {
+        const D_position = roll.search(this.diceSchema.aliases[0]);
+        // si comienza por algo que no es D o un numero
+        if (isNaN(Number(roll.substring(0, D_position))) && roll.charAt(0) !== 'D') {
+            return false;
         }
 
-        // si incluye una , comprobar si antes de la coma hay un numero, repite el metodo para ver si el siguiente esta bien
-        if (comma_position != -1) {
-            if (!Number(messageContent.substring(D_position + 1, comma_position))) {
-                return true;
+        if (roll.includes('<') || roll.includes('>')) {
+            const symbol = this.findSuccessSymbol(roll);
+            // antes y despues del simbolo sea u numero
+            if (Number(roll.substring(D_position + 1, symbol.symbolPosition))) {
+                // si tiene =, despues de <= sea un nuemero
+                if (symbol.plusSymbol && Number(roll.substring(symbol.symbolPosition + 2))) {
+                    return true;
+                }
+                // sino tiene =, despues de < sea un numero
+                if (Number(roll.substring(symbol.symbolPosition + 1))) {
+                    return true;
+                }
             }
-            const modifiedMessage = messageContent.substring(comma_position + 2);
-            const newPossition = this.searchDandCommaPosition(modifiedMessage);
-            return this.checkValidRoll(
-                modifiedMessage,
-                newPossition.D_position,
-                newPossition.comma_position,
-            );
+            return false;
         }
 
-        // despues de la D sea un numero
-        if (!Number(messageContent.substring(D_position + 1))) {
-            return true;
+        // si despues de la D no hay un numero
+        if (!Number(roll.substring(D_position + 1))) {
+            return false;
         }
-        return false;
+
+        return true;
     }
 
-    private rolDices(event: Message, D_position: number, comma_position: number) {
-        let diceNumberArray: number[] = [];
-        let diceFacesArray: number[] = [];
-
-        if (comma_position === -1) {
-            // sino hay ,
-            const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(event.content, D_position);
-            diceNumberArray.push(diceNumber);
-            diceFacesArray.push(diceFaces);
+    private findSuccessSymbol(messageContent: string) {
+        let symbol: string;
+        let symbolPosition: number;
+        let plusSymbol = false;
+        if (messageContent.includes('<')) {
+            symbol = '<';
+            symbolPosition = messageContent.search('<');
         } else {
-            // si hay ,
-            const rols = this.rolMultipleDices(event.content);
-            diceNumberArray = rols.diceNumberArray;
-            diceFacesArray = rols.diceFacesArray;
+            symbol = '>';
+            symbolPosition = messageContent.search('>');
         }
+        if (messageContent.includes('=')) {
+            plusSymbol = true;
+        }
+
+        return { symbol, symbolPosition, plusSymbol };
+    }
+
+    private rollSuccesses(messageContent: string) {
+        const symbolData = this.findSuccessSymbol(messageContent);
+
+        const roll = messageContent.substring(0, symbolData.symbolPosition);
+        const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(roll);
+        const diceResult = this.mapRandomNumberString(diceNumber, diceFaces);
 
         // comprobar que no se supera el limite de caras y tiradas
-        const notAllowdRoll = this.rollLimitation(diceNumberArray, diceFacesArray);
-        if (this.rollLimitation(diceNumberArray, diceFacesArray)) {
-            return notAllowdRoll;
+        const notAllowedRoll = this.rollLimitation([diceNumber], [diceFaces]);
+        if (notAllowedRoll) {
+            return notAllowedRoll;
         }
 
-        // tirar los dados
+        let successesCondition: number;
+        if (symbolData.plusSymbol) {
+            successesCondition = Number(messageContent.substring(symbolData.symbolPosition + 2));
+        } else {
+            successesCondition = Number(messageContent.substring(symbolData.symbolPosition + 1));
+        }
+
+        const { diceString, results } = this.mapRollSuccessesString(
+            diceResult,
+            diceNumber,
+            diceFaces,
+            successesCondition,
+            symbolData,
+        );
+
+        return this.embedConstructor(results, diceString);
+    }
+
+    private mapRollSuccessesString(
+        diceResult: { rollString: string; diceTotal: number },
+        diceNumber: number,
+        diceFaces: number,
+        successesCondition: number,
+        symbolData: { symbol: string; symbolPosition: number; plusSymbol: boolean },
+    ) {
+        let diceString = '';
+        if (diceNumber !== 1) {
+            diceString += `${diceNumber} `;
+        }
+        diceString += `D${diceFaces}= `;
+
+        diceString += '{' + diceResult.rollString + '}';
+        diceString += ' ' + symbolData.symbol;
+        if (symbolData.plusSymbol) {
+            diceString += '=';
+        }
+        diceString += ` ${successesCondition}`;
+
+        const numberSuccesses = this.findNumberOfSuccesses(
+            symbolData,
+            diceResult.rollString,
+            successesCondition,
+        );
+
+        let results = `**${numberSuccesses}**`;
+        if (numberSuccesses === 1) {
+            results += ` éxito`;
+        } else {
+            results += ` éxitos`;
+        }
+
+        return { diceString, results };
+    }
+
+    private findNumberOfSuccesses(
+        symbolData: { symbol: string; symbolPosition: number; plusSymbol: boolean },
+        rollString: string,
+        successesCondition: number,
+    ) {
+        const diceResultNumbers = rollString.split('+');
+
+        const successes = [];
+
+        if (symbolData.symbol === '>' && symbolData.plusSymbol) {
+            diceResultNumbers.forEach((result: string) => {
+                if (Number(result) >= successesCondition) {
+                    successes.push(true);
+                }
+                return;
+            });
+        }
+
+        if (symbolData.symbol === '>' && !symbolData.plusSymbol) {
+            diceResultNumbers.forEach((result: string) => {
+                if (Number(result) > successesCondition) {
+                    successes.push(true);
+                }
+                return;
+            });
+        }
+
+        if (symbolData.symbol === '<' && symbolData.plusSymbol) {
+            diceResultNumbers.forEach((result: string) => {
+                if (Number(result) <= successesCondition) {
+                    successes.push(true);
+                }
+                return;
+            });
+        }
+
+        if (symbolData.symbol === '<' && !symbolData.plusSymbol) {
+            diceResultNumbers.forEach((result: string) => {
+                if (Number(result) < successesCondition) {
+                    successes.push(true);
+                }
+                return;
+            });
+        }
+
+        return successes.length;
+    }
+
+    private rolDices(rollsList: string[]) {
+        const diceNumberArray: number[] = [];
+        const diceFacesArray: number[] = [];
+
+        rollsList.forEach((roll: string) => {
+            const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(roll);
+            diceNumberArray.push(diceNumber);
+            diceFacesArray.push(diceFaces);
+        });
+
+        // comprobar que no se supera el limite de caras y tiradas
+        const notAllowedRoll = this.rollLimitation(diceNumberArray, diceFacesArray);
+        if (notAllowedRoll) {
+            return notAllowedRoll;
+        }
+
         return this.mapRollString(diceNumberArray, diceFacesArray);
     }
 
-    private numberOfDicesAndDicesFaces(messageContent: string, D_position: number) {
+    private numberOfDicesAndDicesFaces(roll: string) {
+        const D_position = roll.search(this.diceSchema.aliases[0]);
         let diceNumber = 1;
         //mirar si antes de la D es un numero
-        if (Number(messageContent.substring(0, D_position))) {
+        if (Number(roll.substring(0, D_position))) {
             // ese numero = numero dados
-            diceNumber = Number(messageContent.substring(0, D_position));
+            diceNumber = Number(roll.substring(0, D_position));
         }
 
-        const diceFaces = Number(messageContent.substring(D_position + 1));
+        const diceFaces = Number(roll.substring(D_position + 1));
 
         return { diceNumber, diceFaces };
     }
 
-    private rolMultipleDices(messageContent: string) {
-        // numero de comas
-        const numberOfCommas = messageContent.split(',').length - 1;
-        let modifiedMessage = messageContent;
-        let dice: string;
-        const diceNumberArray: number[] = [];
-        const diceFacesArray: number[] = [];
-        for (let i = 0; i <= numberOfCommas; i++) {
-            if (i != numberOfCommas) {
-                const { D_position, comma_position } = this.searchDandCommaPosition(modifiedMessage);
-                // dado = lo que haya antes de la coma
-                dice = modifiedMessage.substring(0, comma_position);
-                // nuevo mensage = todo lo que haya despues de la coma
-                modifiedMessage = modifiedMessage.substring(comma_position + 1);
-                const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(dice, D_position);
-                diceNumberArray.push(diceNumber);
-                diceFacesArray.push(diceFaces);
-            } else {
-                // ultimo dado, destras de la ultima ,
-                const position = this.searchDandCommaPosition(modifiedMessage);
-                dice = modifiedMessage;
-                const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(
-                    dice,
-                    position.D_position,
-                );
-                diceNumberArray.push(diceNumber);
-                diceFacesArray.push(diceFaces);
-            }
-        }
-        return { diceNumberArray, diceFacesArray };
-    }
-
-    private rollLimitation(diceNumberArray: number[], diceFacesArray: number[]) {
+    private rollLimitation(diceNumberArray: number[], diceFacesArray: number[]): MessageOptions {
         let numberOfDices = 0;
         for (const value of diceNumberArray) {
             numberOfDices += value;
@@ -159,7 +266,7 @@ export class DiceCommand {
                 embed: {
                     color: 'RED',
                     title: 'Tirada no permitida',
-                    description: 'Como maximo se puede lanzar 30 dados de 10000 caras',
+                    description: 'Como máximo se puede lanzar 30 dados de 10000 caras',
                 },
             }).call();
             return output;
@@ -167,7 +274,7 @@ export class DiceCommand {
         return;
     }
 
-    private mapRollString(diceNumberArray: number[], diceFacesArray: number[]) {
+    private mapRollString(diceNumberArray: number[], diceFacesArray: number[]): MessageOptions {
         let total = 0;
         let rollStringSum: string;
 
@@ -196,30 +303,29 @@ export class DiceCommand {
             total += diceTotal;
         }
 
-        return this.embedConstructor(total, rollStringSum);
+        return this.embedConstructor(`${total}`, rollStringSum);
     }
 
-    private mapRandomNumberString(diceNumber: number, diceFaces: number, rollString: string) {
-        let diceTotal: number;
+    private mapRandomNumberString(diceNumber: number, diceFaces: number, rollString = '') {
+        let diceTotal = 0;
         for (let i = 0; i <= diceNumber - 1; i++) {
-            const roll = Math.floor(Math.random() * Number(diceFaces)) + 1;
+            const roll = Math.floor(Math.random() * diceFaces) + 1;
             if (i === 0) {
-                diceTotal = roll;
                 rollString = rollString + `${roll}`;
             } else {
-                diceTotal = diceTotal + roll;
                 rollString = rollString + ` + ${roll}`;
             }
+            diceTotal = diceTotal + roll;
         }
         return { rollString, diceTotal };
     }
 
-    private embedConstructor(diceTotal: number, rollStringArray: string) {
+    private embedConstructor(results: string, rollStringArray: string): MessageOptions {
         const output = new MessageCreator({
             embed: {
                 color: 'GREEN',
                 title: rollStringArray,
-                description: `${diceTotal}`,
+                description: results,
             },
         }).call();
         return output;
