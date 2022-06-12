@@ -236,14 +236,12 @@ export class PlayCommand extends Command {
 
         try {
             // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
-            const searchedSongData: rawSongData = await this.youtubeAPIHandler.searchSongById(
-                song.id,
-            );
+            const searchedSongData: rawSongData = await this.youtubeAPIHandler.searchSongById(song.id);
             if (!song.title) {
                 song.title = searchedSongData.title;
             }
             song.durationData = this.parseSongDuration(searchedSongData.durationString, false);
-            song.thumbnails = searchedSongData.thumbnails
+            song.thumbnails = searchedSongData.thumbnails;
             return song;
         } catch (err) {
             event.channel.send(`It has not been possible to get song's information`);

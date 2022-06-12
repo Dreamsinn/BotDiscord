@@ -7,8 +7,20 @@ import { MessageCreator } from './utils/messageCreator';
 export class DiceCommand {
     private diceSchema: CommandSchema = DiceCommandSchema;
     private coolDown = new CoolDown();
+    public static isDiceCommandActive = false;
+
+    // activa o desactuva los dados
+    public static toggleDiceCommand(active: boolean): boolean {
+        if (this.isDiceCommandActive === active) {
+            return false;
+        }
+        this.isDiceCommandActive = active;
+        return true;
+    }
 
     public async call(event: Message): Promise<Message> {
+
+        console.log('asdfasf')
         // buscar la posicion de la D, y la de la , (-1 si no hay)
         const { D_position, comma_position } = this.searchDandCommaPosition(event.content);
 
