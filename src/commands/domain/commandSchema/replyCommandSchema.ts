@@ -1,12 +1,16 @@
+import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const ReplyCommandSchema: CommandSchema = {
-    aliases: ['cinco', '5', 'trece', '13', 'javi', 'ino ', 'ano '],
+    aliases: ['cinco', '5', 'trece', '13', 'javi'],
     coolDown: 0,
     devOnly: false,
-    description: 'ofrece una respuesta cuando uno de los alias es escrito en el chat',
-    category: 'test',
-    name: 'reply',
+    description:
+        'Requiere de un comando de prefijo para ser activado:\n' +
+        '- `reply on`, de la misma forma, off para desactivarla.\n' +
+        'Este comando cuando este activo leerá todos los mensajes y al encontrar un alias ara una chanza.',
+    category: CommandsCategoryEnum.NONPREFIX,
+    name: 'Commando de respuesta',
 };
 
 export { ReplyCommandSchema };

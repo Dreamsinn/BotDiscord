@@ -1,3 +1,4 @@
+import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const RemoveSongsFromPlayListCommandSchema: CommandSchema = {
@@ -5,12 +6,14 @@ const RemoveSongsFromPlayListCommandSchema: CommandSchema = {
     coolDown: 0,
     devOnly: false,
     description:
-        'Remove n songs form playlist, at execute the comand a paginated playlist appears.' +
-        'The bot will read the next message you write and delete selected muscis.' +
-        'To select music just write the number of the music, to slect more of one split them with " , "\n' +
-        'Ex: 1, 6, 23',
-    category: 'prefix',
-    name: 'Remove Songs',
+        'Elimina n canciones de la playlist.\n' +
+        'Al ejecutar el comando aparecerá una lista paginada de la playlist, y el bot leerá el siguiente mensaje.' +
+        'En este se deberá escribir el número de las canciones que se quieran borrar separadas por ",".\n' +
+        'El bot solo leerá los mensajes bien escritos, es decir, mensajes con números más grandes de lo que toca, con letras, etc, serán ignorados.\n' +
+        'Ejemplo: 1, 6, 23\n' +
+        '__Durante este proceso no se podrán usar otros comandos.__',
+    category: CommandsCategoryEnum.MUSIC,
+    name: 'Eliminar canciones de la playlist',
 };
 
 export { RemoveSongsFromPlayListCommandSchema };

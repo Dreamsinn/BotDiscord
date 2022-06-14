@@ -1,3 +1,4 @@
+import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const LoopPlayListModeCommandSchema: CommandSchema = {
@@ -5,12 +6,11 @@ const LoopPlayListModeCommandSchema: CommandSchema = {
     coolDown: 0,
     devOnly: false,
     description:
-        'Put the playlist in loop mode.\n' +
-        'When music is played, this will go to the end of the playlist.\n' +
-        'This command must go followed by ON of OFF\n' +
-        `Example: \n${process.env.PREFIX}loop on`,
-    category: 'prefix',
-    name: 'loop',
+        'Este comando debe ir seguido de `on` u `off` para activar o desactivar el modo loop\n' +
+        'Cuando este activo la canción que acabe de sonar se pondrá la última de la playlist\n' +
+        `Ejemplo: ${process.env.PREFIX}loop on`,
+    category: CommandsCategoryEnum.MUSIC,
+    name: 'Loop playlist',
 };
 
 export { LoopPlayListModeCommandSchema };

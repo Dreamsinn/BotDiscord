@@ -1,21 +1,43 @@
-import { EmbedFieldData, Message, MessageOptions, MessageReaction, User } from 'discord.js';
+import { EmbedFieldData, Message } from 'discord.js';
+import { CommandsCategoryEnum } from '../../domain/commandsCategoryEnum';
+import { ClearPlayListCommandSchema } from '../../domain/commandSchema/clearPlayListCommandSchema';
 import { DiceCommandSchema } from '../../domain/commandSchema/diceCommandSchema';
+import { DiceCommandTogglerSchema } from '../../domain/commandSchema/diceCommandTogglerSchema';
+import { DisconnectCommandSchema } from '../../domain/commandSchema/disconnectCommandSchema';
+import { DisplayPlayListCommandSchema } from '../../domain/commandSchema/displayPlayListCommandSchema';
 import { HelpCommandSchema } from '../../domain/commandSchema/helpCommandSchema';
+import { JoinChannelCommandSchema } from '../../domain/commandSchema/joinChannelCommandSchema';
+import { LoopPlayListModeCommandSchema } from '../../domain/commandSchema/loopPlayListModeCommandSchema';
+import { PauseCommandSchema } from '../../domain/commandSchema/pauseCommandSchema';
 import { PlayCommandSchema } from '../../domain/commandSchema/playCommandSchema';
 import { PlayListCommandSchema } from '../../domain/commandSchema/playListCommandSchema';
+import { RemoveSongsFromPlayListCommandSchema } from '../../domain/commandSchema/removeSongsFromPlayListCommandSchema';
 import { ReplyCommandSchema } from '../../domain/commandSchema/replyCommandSchema';
-import { discordEmojis } from '../../domain/discordEmojis';
+import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyCommandTogglerSchema';
+import { ShufflePlayListCommandSchema } from '../../domain/commandSchema/shufflePlayListCommandSchema';
+import { SkipMusicCommandSchema } from '../../domain/commandSchema/skipMusicCommandSchema';
+import { UnpauseCommandSchema } from '../../domain/commandSchema/unpauseCommandSchema';
+import { HelpEmbedsTitlesEnum } from '../../domain/helpEmbedsTitlesEnum';
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
+import { embedOptions } from '../../domain/interfaces/createEmbedOptions';
+import { HelpCommandData } from '../../domain/interfaces/helpCommandData';
 import { CoolDown } from '../utils/coolDown';
 import { MessageCreator } from '../utils/messageCreator';
+import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class HelpCommand extends Command {
     // TODO, poner schemas como dependencias?
-    helpSchema: CommandSchema = HelpCommandSchema;
-    coolDown = new CoolDown();
+    private helpSchema: CommandSchema = HelpCommandSchema;
+    private coolDown = new CoolDown();
+    private commandList = {
+        prefix: prefixCommandList,
+        nonPrefix: nonPrefixCommandList,
+        music: musicCommandList,
+    };
+    private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
 
-    public async call(event: Message): Promise<Message> {
+    public async call(event: Message) {
         console.log('help command');
         // coolDown
         const interrupt = this.coolDown.call(this.helpSchema.coolDown);
@@ -23,193 +45,448 @@ export class HelpCommand extends Command {
             console.log('command interrupted by cooldown');
             return;
         }
-
+        // creamos embed para elejir entre comandos de prfijo o no prefijo, y lo enviamos
         const output = this.createTypeOfCommandsEmbed();
 
-        const message = await event.reply(output);
+        const typeCommandMessage = await event.channel.send(output);
 
-        // crear botones de reaccion
-        this.messageReaction(message, event, 'typeOFCommand');
+        return this.messageResponseListener(typeCommandMessage, event, HelpEmbedsTitlesEnum.TYPES);
     }
 
     private createTypeOfCommandsEmbed() {
-        const embedContent = Object.entries(typesOfCommands).map((typeCommand, i) =>
-            this.mapTypeCommandsAddFiledsEmbed(typeCommand, i),
-        );
-
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',
-                title: `Tipos de comandos`,
-                fields: embedContent,
+                title: HelpEmbedsTitlesEnum.TYPES,
+                fields: [
+                    { name: '\u200b', value: `**1 - ${HelpEmbedsTitlesEnum.PREFIX}**`, inline: false },
+                    {
+                        name: '\u200b',
+                        value: `**2 - ${HelpEmbedsTitlesEnum.NONPREFIX}**`,
+                        inline: false,
+                    },
+                ],
+                field: {
+                    name: '\u200b',
+                    value:
+                        'Escriba: \n- El número del tipo de comando que desee consultar.\n' +
+                        '- X para cancelar el comando. __Mientras help este activo no podra usar otro comando.__',
+                    inline: false,
+                },
             },
         }).call();
 
         return output;
     }
 
-    private mapTypeCommandsAddFiledsEmbed(typeCommand, index) {
-        return {
-            name: '\u200b',
-            value: `${index + 1} - ${typeCommand[1].typeDescription}`,
-            inline: false,
-        };
-    }
+    private messageResponseListener(helpEmbed: Message, event: Message, typeOfEmbed: string) {
+        // usuario en la lista de no poder usar comandos
+        this.usersUsingACommand.updateUserList(event.author.id);
 
-    private messageReaction(message: Message, event: Message, type: string) {
-        let dataLength: number;
-        // determinar cuando se ha ejecutado el metodo
-        if (type === 'typeOFCommand') {
-            dataLength = Object.keys(typesOfCommands).length;
-        }
-        if (type === 'prefix') {
-            message.reactions.removeAll();
-            dataLength = Object.keys(typesOfCommands.prefixCommand).length - 1;
-        }
+        const filter = (reaction: Message) => {
+            const authorCondition = event.author.id === reaction.author.id;
 
-        // crear reaccion
-        for (let i = 0; i < dataLength; i++) {
-            message.react(discordEmojis.numberEmojis[i]);
-        }
+            // el primer embed de todos no tiene 'b', porque no puede ir para atras
+            let letterCondition = ['x', 'X', 'b', 'B', 'back', 'BACK'].includes(reaction.content);
+            if (typeOfEmbed === HelpEmbedsTitlesEnum.TYPES) {
+                letterCondition = ['x', 'X'].includes(reaction.content);
+            }
+            // los embeds con la descripcion de comandos no tienen condicion numerica, porque no tienen que elegir nada llegado el punto
+            if (
+                typeOfEmbed === HelpEmbedsTitlesEnum.TYPES ||
+                typeOfEmbed === HelpEmbedsTitlesEnum.PREFIX ||
+                typeOfEmbed === HelpEmbedsTitlesEnum.MUSIC ||
+                typeOfEmbed === HelpEmbedsTitlesEnum.NONPREFIX
+            ) {
+                const numberCondition =
+                    Number(reaction.content) <= helpEmbed.embeds[0].fields.length &&
+                    Number(reaction.content) > 0;
+                return authorCondition && (letterCondition || numberCondition);
+            }
 
-        // detectar cuando el usuario reaciona
-        const filter = (reaction: MessageReaction, user: User) => {
-            const emojiCondition = discordEmojis.numberEmojis.find((e) => e === reaction.emoji.name);
-            const userCondition = user.id === event.author.id;
-            return emojiCondition && userCondition;
+            return authorCondition && letterCondition;
         };
 
-        message
-            .awaitReactions({ filter, max: 1, time: 20000, errors: ['time'] })
-            .then((collected) => {
-                let collectedMessage: MessageReaction;
-                collected.map((e) => (collectedMessage = e));
+        event.channel
+            .awaitMessages({ filter, time: 60000, max: 1, errors: ['time'] })
+            .then(async (collected) => {
+                // eliminamos a la persona de la lista de no poder usar comandos
+                this.usersUsingACommand.removeUserList(event.author.id);
+                let collectedMessage: Message;
+                collected.map((e: Message) => (collectedMessage = e));
 
-                return this.createCommandsEmbed(collectedMessage, message, event);
+                collectedMessage.delete();
+                // quitamos usuario de la lista de no poder usar comandos
+                this.usersUsingACommand.removeUserList(event.author.id);
+
+                // Si se responde una X se borra el mensaje
+                if (['x', 'X'].includes(collectedMessage.content)) {
+                    console.log('Help Command cancelled');
+                    event.reply('Help Command ha expirado');
+
+                    return;
+                }
+                // ir al embed anterior
+                if (['b', 'B', 'back', 'BACK'].includes(collectedMessage.content)) {
+                    return this.findPreviousEmbed(helpEmbed, event, typeOfEmbed);
+                }
+                // ir al siguiente embed
+                return this.findNextEmbedToCreate(collectedMessage, helpEmbed, event);
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
                     console.log(err);
                     event.channel.send(`Error: ${err.message}`);
                 } else {
-                    console.log('No reaction');
+                    // sino contesta
+                    console.log(`Help Command time out`);
+                    event.reply('Time out');
                 }
+                // quitamos usuario de la lista de no poder usar comandos
+                this.usersUsingACommand.removeUserList(event.author.id);
+
                 return;
             });
     }
 
-    private async createCommandsEmbed(collected: MessageReaction, message: Message, event: Message) {
-        // determinar a que ha reaccionado
-        const typeCommand = this.commandSelected(collected, message);
-        let output: MessageOptions;
-        let needReaction: boolean;
-        if (typeCommand[0] === 'prefixCommand') {
-            needReaction = true;
-            output = this.createPrefixTypeEmbed();
-        } else {
-            // crear embed de comando
-            output = this.createCommandEmbed(typeCommand);
+    private async findPreviousEmbed(helpEmbed: Message, event: Message, typeOfEmbed: string) {
+        // creamos el embed anterior, lo enviamos y le escuchamos la respuesta
+        if (
+            typeOfEmbed === HelpEmbedsTitlesEnum.PREFIX ||
+            typeOfEmbed === HelpEmbedsTitlesEnum.NONPREFIX
+        ) {
+            const output = this.createTypeOfCommandsEmbed();
+            const message = await helpEmbed.edit(output);
+            return this.messageResponseListener(message, event, HelpEmbedsTitlesEnum.TYPES);
         }
 
-        await message.edit(output);
-        // const newMessage = await event.reply(output)
+        if (typeOfEmbed === HelpEmbedsTitlesEnum.MUSIC) {
+            const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
+            const prefixMessage = await helpEmbed.edit(prefixOutput);
+            return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
+        }
 
-        if (needReaction) {
-            this.messageReaction(message, event, 'prefix');
+        if (typeOfEmbed === CommandsCategoryEnum.PREFIX) {
+            const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
+            const prefixMessage = await helpEmbed.edit(prefixOutput);
+            return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
+        }
+
+        if (typeOfEmbed === CommandsCategoryEnum.NONPREFIX) {
+            const nonPrefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.NONPREFIX);
+            const nonPrefixMessage = await helpEmbed.edit(nonPrefixOutput);
+            return this.messageResponseListener(nonPrefixMessage, event, HelpEmbedsTitlesEnum.NONPREFIX);
+        }
+
+        if (typeOfEmbed === CommandsCategoryEnum.MUSIC) {
+            const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.MUSIC);
+            const prefixMessage = await helpEmbed.edit(prefixOutput);
+            return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.MUSIC);
         }
     }
 
-    private commandSelected(collected: MessageReaction, message: Message) {
-        const emoji = collected.emoji.name;
+    private async findNextEmbedToCreate(collectedMessage: Message, helpEmbed: Message, event: Message) {
+        // creamos el embed selecionado, lo enviamos y le escuchamos la respuesta
+        if (helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.TYPES) {
+            if (collectedMessage.content === '1') {
+                const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
+                const prefixMessage = await helpEmbed.edit(prefixOutput);
+                return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
+            }
 
-        const arrayIndex = discordEmojis.numberEmojis.findIndex((e) => e === emoji);
-
-        if (message.embeds[0].title === 'Tipos de comandos') {
-            return Object.entries(typesOfCommands)[arrayIndex];
-        }
-        if (message.embeds[0].title === `${typesOfCommands.prefixCommand.typeDescription}`) {
-            const prefixCommands = typesOfCommands.prefixCommand;
-            return Object.entries(prefixCommands)[arrayIndex + 1];
-        }
-    }
-
-    private createPrefixTypeEmbed() {
-        const embedContent: EmbedFieldData[] = [];
-        for (let i = 0; i < Object.entries(typesOfCommands.prefixCommand).length; i++) {
-            // el 0 seria typeDescription: 'Commandos con prefijo',
-            if (i != 0) {
-                const typeCommand = Object.entries(typesOfCommands.prefixCommand)[i];
-                embedContent.push(this.mapTypeCommandsAddFiledsEmbed(typeCommand, i - 1));
+            if (collectedMessage.content === '2') {
+                const nonPrefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.NONPREFIX);
+                const nonPrefixMessage = await helpEmbed.edit(nonPrefixOutput);
+                return this.messageResponseListener(
+                    nonPrefixMessage,
+                    event,
+                    HelpEmbedsTitlesEnum.NONPREFIX,
+                );
             }
         }
 
+        if (helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.PREFIX) {
+            if (collectedMessage.content === '1') {
+                const musicOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.MUSIC);
+                const musicMessage = await helpEmbed.edit(musicOutput);
+                return this.messageResponseListener(musicMessage, event, HelpEmbedsTitlesEnum.MUSIC);
+            }
+        }
+
+        const { output, category } = this.createCommandEmbed(
+            helpEmbed,
+            Number(collectedMessage.content),
+        );
+        const commandMessage = await helpEmbed.edit(output);
+        return this.messageResponseListener(commandMessage, event, category);
+    }
+
+    private createSubTypeCommandsEmbed(commandCategory: string) {
+        let index = 0;
+        const embedFileds: EmbedFieldData[] = [];
+        let title: string;
+
+        if (commandCategory === CommandsCategoryEnum.PREFIX) {
+            title = HelpEmbedsTitlesEnum.PREFIX;
+            index += 1;
+            embedFileds.push({
+                name: '\u200b',
+                value: `**${index} - ${HelpEmbedsTitlesEnum.MUSIC}**`,
+                inline: false,
+            });
+            this.commandList.prefix.forEach((commandData: HelpCommandData) => {
+                index += 1;
+                embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
+            });
+        }
+
+        if (commandCategory === CommandsCategoryEnum.MUSIC) {
+            title = HelpEmbedsTitlesEnum.MUSIC;
+            this.commandList.music.forEach((commandData: HelpCommandData) => {
+                index += 1;
+                embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
+            });
+        }
+
+        if (commandCategory === CommandsCategoryEnum.NONPREFIX) {
+            title = HelpEmbedsTitlesEnum.NONPREFIX;
+            this.commandList.nonPrefix.forEach((commandData: HelpCommandData) => {
+                index += 1;
+                embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
+            });
+        }
+
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',
-                title: typesOfCommands.prefixCommand.typeDescription,
-                description: `Estos comandos requieren de '${process.env.PREFIX}' antes del alias`,
-                fields: embedContent,
+                title,
+                fields: embedFileds,
+                field: {
+                    name: '\u200b',
+                    value:
+                        'Escriba:\n' +
+                        '- El número del tipo de comando que desee consultar.\n' +
+                        '- b o back para ir hacia atras.\n' +
+                        '- X para cancelar el comando. __Mientras help este activo no podra usar otro comando.__',
+                    inline: false,
+                },
             },
         }).call();
 
         return output;
     }
 
-    private createCommandEmbed(typeCommand) {
-        const output = new MessageCreator({
-            embed: {
-                color: '#BFFF00',
-                title: typeCommand[1].typeDescription,
-                description: `El alias es la parte necesaria para llamar a un comando`,
-                fields: [
-                    { name: 'Descripcion', value: `${typeCommand[1].description}`, inline: false },
-                    { name: 'Alias', value: `${typeCommand[1].aliases}`, inline: false },
-                    { name: 'Cooldown', value: `${typeCommand[1].coolDown} ms`, inline: false },
-                ],
+    private mapTypeCommandsFieldsData(commandData: HelpCommandData, index: number) {
+        return { name: '\u200b', value: `**${index} - ${commandData.name}**`, inline: false };
+    }
+
+    private createCommandEmbed(helpEmbed: Message, selected: number) {
+        const selectedCommand = this.findSelectedCommand(helpEmbed, selected);
+
+        let description = '';
+        if (selectedCommand.category !== CommandsCategoryEnum.NONPREFIX) {
+            description += `**Este comando requiere del prefijo: \`${process.env.PREFIX}\` delante del alias para ser llamado**.\n`;
+        }
+        description +=
+            'El alias es la parte necesaria para llamar a un comando, ' +
+            'el comando puede tener mas de un alias.\n';
+
+        let aliases = '';
+        selectedCommand.aliases.forEach((alias: string, i: number) => {
+            if (i === 0) {
+                aliases += alias;
+            } else {
+                aliases += `, ${alias}`;
+            }
+        });
+
+        const embed: embedOptions = {
+            color: '#BFFF00',
+            title: selectedCommand.name,
+            description,
+            fields: [
+                { name: 'Alias', value: aliases, inline: false },
+                { name: 'Descripcion', value: selectedCommand.description, inline: false },
+                { name: 'Cooldown', value: `${selectedCommand.coolDown} ms`, inline: false },
+            ],
+            field: {
+                name: '\u200b',
+                value:
+                    'Escriba:\n' +
+                    '- El número del tipo de comando que desee consultar.\n' +
+                    '- b o back para ir hacia atras.\n' +
+                    '- X para cancelar el comando. __Mientras help este activo no podra usar otro comando.__',
+                inline: false,
             },
+        };
+
+        const output = new MessageCreator({
+            embed,
         }).call();
 
-        return output;
+        return { output, category: selectedCommand.category };
+    }
+
+    private findSelectedCommand(helpEmbed: Message, selected: number) {
+        const fields = helpEmbed.embeds[0].fields;
+        const typeOfComand = helpEmbed.embeds[0].title;
+
+        const rawCommandTitile = fields[selected - 1].value;
+
+        let commandSelected: HelpCommandData;
+
+        if (typeOfComand === HelpEmbedsTitlesEnum.PREFIX) {
+            this.commandList.prefix.forEach((commandData: HelpCommandData) => {
+                if (rawCommandTitile.includes(commandData.name)) {
+                    commandSelected = commandData;
+                }
+            });
+        }
+
+        if (typeOfComand === HelpEmbedsTitlesEnum.NONPREFIX) {
+            this.commandList.nonPrefix.forEach((commandData: HelpCommandData) => {
+                if (rawCommandTitile.includes(commandData.name)) {
+                    commandSelected = commandData;
+                }
+            });
+        }
+
+        if (typeOfComand === HelpEmbedsTitlesEnum.MUSIC) {
+            this.commandList.music.forEach((commandData: HelpCommandData) => {
+                if (rawCommandTitile.includes(commandData.name)) {
+                    commandSelected = commandData;
+                }
+            });
+        }
+
+        return commandSelected;
     }
 }
 
-const typesOfCommands = {
-    prefixCommand: {
-        typeDescription: 'Commandos con prefijo',
-        helpCommand: {
-            typeDescription: 'Commando de ayuda',
-            name: HelpCommandSchema.name,
-            description: HelpCommandSchema.description,
-            aliases: HelpCommandSchema.aliases,
-            coolDown: HelpCommandSchema.coolDown,
-        },
-        playCommand: {
-            typeDescription: 'Commando de play',
-            name: PlayCommandSchema.name,
-            description: PlayCommandSchema.description,
-            aliases: PlayCommandSchema.aliases,
-            coolDown: PlayCommandSchema.coolDown,
-        },
-        playListCommand: {
-            typeDescription: 'Commando de playList',
-            name: PlayListCommandSchema.name,
-            description: PlayListCommandSchema.description,
-            aliases: PlayListCommandSchema.aliases,
-            coolDown: PlayListCommandSchema.coolDown,
-        },
-    },
-    diceCommand: {
-        typeDescription: 'Commando de dados',
+const nonPrefixCommandList: HelpCommandData[] = [
+    {
         name: DiceCommandSchema.name,
         description: DiceCommandSchema.description,
         aliases: DiceCommandSchema.aliases,
         coolDown: DiceCommandSchema.coolDown,
+        category: DiceCommandSchema.category,
     },
-    replyCommand: {
-        typeDescription: 'Commando de respuesta',
+    {
         name: ReplyCommandSchema.name,
         description: ReplyCommandSchema.description,
         aliases: ReplyCommandSchema.aliases,
         coolDown: ReplyCommandSchema.coolDown,
+        category: ReplyCommandSchema.category,
     },
-};
+];
+
+const prefixCommandList: HelpCommandData[] = [
+    {
+        name: HelpCommandSchema.name,
+        description: HelpCommandSchema.description,
+        aliases: HelpCommandSchema.aliases,
+        coolDown: HelpCommandSchema.coolDown,
+        category: HelpCommandSchema.category,
+    },
+    {
+        name: DiceCommandTogglerSchema.name,
+        description: DiceCommandTogglerSchema.description,
+        aliases: DiceCommandTogglerSchema.aliases,
+        coolDown: DiceCommandTogglerSchema.coolDown,
+        category: DiceCommandTogglerSchema.category,
+    },
+    {
+        name: ReplyCommandTogglerSchema.name,
+        description: ReplyCommandTogglerSchema.description,
+        aliases: ReplyCommandTogglerSchema.aliases,
+        coolDown: ReplyCommandTogglerSchema.coolDown,
+        category: ReplyCommandTogglerSchema.category,
+    },
+];
+
+const musicCommandList: HelpCommandData[] = [
+    {
+        name: PlayCommandSchema.name,
+        description: PlayCommandSchema.description,
+        aliases: PlayCommandSchema.aliases,
+        coolDown: PlayCommandSchema.coolDown,
+        category: PlayCommandSchema.category,
+    },
+    {
+        name: PlayListCommandSchema.name,
+        description: PlayListCommandSchema.description,
+        aliases: PlayListCommandSchema.aliases,
+        coolDown: PlayListCommandSchema.coolDown,
+        category: PlayListCommandSchema.category,
+    },
+    {
+        name: PauseCommandSchema.name,
+        description: PauseCommandSchema.description,
+        aliases: PauseCommandSchema.aliases,
+        coolDown: PauseCommandSchema.coolDown,
+        category: PauseCommandSchema.category,
+    },
+    {
+        name: UnpauseCommandSchema.name,
+        description: UnpauseCommandSchema.description,
+        aliases: UnpauseCommandSchema.aliases,
+        coolDown: UnpauseCommandSchema.coolDown,
+        category: UnpauseCommandSchema.category,
+    },
+    {
+        name: SkipMusicCommandSchema.name,
+        description: SkipMusicCommandSchema.description,
+        aliases: SkipMusicCommandSchema.aliases,
+        coolDown: SkipMusicCommandSchema.coolDown,
+        category: SkipMusicCommandSchema.category,
+    },
+    {
+        name: RemoveSongsFromPlayListCommandSchema.name,
+        description: RemoveSongsFromPlayListCommandSchema.description,
+        aliases: RemoveSongsFromPlayListCommandSchema.aliases,
+        coolDown: RemoveSongsFromPlayListCommandSchema.coolDown,
+        category: RemoveSongsFromPlayListCommandSchema.category,
+    },
+    {
+        name: ClearPlayListCommandSchema.name,
+        description: ClearPlayListCommandSchema.description,
+        aliases: ClearPlayListCommandSchema.aliases,
+        coolDown: ClearPlayListCommandSchema.coolDown,
+        category: ClearPlayListCommandSchema.category,
+    },
+    {
+        name: DisplayPlayListCommandSchema.name,
+        description: DisplayPlayListCommandSchema.description,
+        aliases: DisplayPlayListCommandSchema.aliases,
+        coolDown: DisplayPlayListCommandSchema.coolDown,
+        category: DisplayPlayListCommandSchema.category,
+    },
+    {
+        name: LoopPlayListModeCommandSchema.name,
+        description: LoopPlayListModeCommandSchema.description,
+        aliases: LoopPlayListModeCommandSchema.aliases,
+        coolDown: LoopPlayListModeCommandSchema.coolDown,
+        category: LoopPlayListModeCommandSchema.category,
+    },
+    {
+        name: ShufflePlayListCommandSchema.name,
+        description: ShufflePlayListCommandSchema.description,
+        aliases: ShufflePlayListCommandSchema.aliases,
+        coolDown: ShufflePlayListCommandSchema.coolDown,
+        category: ShufflePlayListCommandSchema.category,
+    },
+    {
+        name: JoinChannelCommandSchema.name,
+        description: JoinChannelCommandSchema.description,
+        aliases: JoinChannelCommandSchema.aliases,
+        coolDown: JoinChannelCommandSchema.coolDown,
+        category: JoinChannelCommandSchema.category,
+    },
+    {
+        name: DisconnectCommandSchema.name,
+        description: DisconnectCommandSchema.description,
+        aliases: DisconnectCommandSchema.aliases,
+        coolDown: DisconnectCommandSchema.coolDown,
+        category: DisconnectCommandSchema.category,
+    },
+];

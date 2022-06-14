@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { SkipMusicCommandSchema } from '../../../domain/commandSchema/SkipMusicCommandSchema';
+import { SkipMusicCommandSchema } from '../../../domain/commandSchema/skipMusicCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { songData } from '../../../domain/interfaces/songData';

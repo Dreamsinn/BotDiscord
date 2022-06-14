@@ -1,3 +1,4 @@
+import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const ReplyCommandTogglerSchema: CommandSchema = {
@@ -6,10 +7,10 @@ const ReplyCommandTogglerSchema: CommandSchema = {
     devOnly: false,
     description:
         'Activa o desactiva el comando de respuestas.\n' +
-        'Este comando debe ir seguido de ON o OFF\n' +
-        `Egemplo: \n${process.env.PREFIX}reply on`,
-    category: 'prefix',
-    name: 'toggleReplyCommand',
+        'Este comando debe ir seguido de `on` u `off`\n' +
+        `Ejemplo: reply on`,
+    category: CommandsCategoryEnum.PREFIX,
+    name: 'Activador del commando de respuestas',
 };
 
 export { ReplyCommandTogglerSchema };

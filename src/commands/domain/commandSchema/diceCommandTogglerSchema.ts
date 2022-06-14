@@ -1,3 +1,4 @@
+import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const DiceCommandTogglerSchema: CommandSchema = {
@@ -6,10 +7,10 @@ const DiceCommandTogglerSchema: CommandSchema = {
     devOnly: false,
     description:
         'Activa o desactiva el comando de dados.\n' +
-        'Este comando debe ir seguido de ON u OFF\n' +
-        `Egemplo: \n${process.env.PREFIX}dice on`,
-    category: 'prefix',
-    name: 'toggleDiceCommand',
+        'Este comando debe ir seguido de `on` u `off`\n' +
+        `Ejemplo: dice on`,
+    category: CommandsCategoryEnum.PREFIX,
+    name: 'Activador del comando de dados',
 };
 
 export { DiceCommandTogglerSchema };

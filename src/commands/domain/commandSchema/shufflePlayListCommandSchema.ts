@@ -1,12 +1,13 @@
+import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const ShufflePlayListCommandSchema: CommandSchema = {
     aliases: ['shuffle', 'pls'],
     coolDown: 120,
     devOnly: false,
-    description: 'Randomize the order of songs on the playlist',
-    category: 'prefix',
-    name: 'shuffle',
+    description: 'Aleatoriza el orden de las canciones de la playlist.',
+    category: CommandsCategoryEnum.MUSIC,
+    name: 'Barajar el orden de las canciones',
 };
 
 export { ShufflePlayListCommandSchema };

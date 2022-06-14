@@ -1,13 +1,13 @@
+import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const JoinChannelCommandSchema: CommandSchema = {
     aliases: ['j', 'join'],
     coolDown: 0,
     devOnly: false,
-    description:
-        'Join the bot to the current voice channel, no needed if bot is not already in a channel',
-    category: 'prefix',
-    name: 'Join',
+    description: 'Conecta el bot al canal de voz del usuario, requiere estar en un canal de voz',
+    category: CommandsCategoryEnum.MUSIC,
+    name: 'Conectar bot al canal de voz',
 };
 
 export { JoinChannelCommandSchema };
