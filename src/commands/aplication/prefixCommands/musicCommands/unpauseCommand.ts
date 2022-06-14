@@ -1,4 +1,4 @@
-import { UnpauseCommandSchema } from '../../../domain/commandSchema/UnpauseCommandSchema';
+import { UnpauseCommandSchema } from '../../../domain/commandSchema/unpauseCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';

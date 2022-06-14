@@ -1,4 +1,4 @@
-import { DisconnectCommandSchema } from '../../../domain/commandSchema/DisconnectCommandSchema';
+import { DisconnectCommandSchema } from '../../../domain/commandSchema/disconnectCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';

@@ -1,3 +1,5 @@
+import { CommandsCategoryEnum } from '../commandsCategoryEnum';
+import { discordEmojis } from '../discordEmojis';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const DisplayPlayListCommandSchema: CommandSchema = {
@@ -5,10 +7,11 @@ const DisplayPlayListCommandSchema: CommandSchema = {
     coolDown: 0,
     devOnly: false,
     description:
-        'Send an embed message to the channel that shows all the playlist data,' +
-        'in which you have access to all playlist commands just by clicking emojis.',
-    category: 'prefix',
-    name: 'disconnect',
+        'Envía un mensaje al canal de voz que muestra toda la información de la playlist.\n' +
+        'En este mensaje se tienen disponibles casi todos los comandos de música mediante emojis.\n' +
+        `Para más información, en el ${discordEmojis.readme} del display.`,
+    category: CommandsCategoryEnum.MUSIC,
+    name: 'Mostrar display',
 };
 
 export { DisplayPlayListCommandSchema };
