@@ -3,7 +3,7 @@ import { discordEmojis } from '../discordEmojis';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const DisplayPlayListCommandSchema: CommandSchema = {
-    aliases: ['display'],
+    aliases: ['display', 'dp'],
     coolDown: 0,
     devOnly: false,
     description:

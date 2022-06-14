@@ -2,7 +2,7 @@ import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const PlayCommandSchema: CommandSchema = {
-    aliases: ['p'],
+    aliases: ['p', 'play'],
     coolDown: 0,
     devOnly: false,
     description:

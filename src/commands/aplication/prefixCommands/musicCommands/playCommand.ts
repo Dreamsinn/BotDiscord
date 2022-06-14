@@ -32,8 +32,9 @@ export class PlayCommand extends Command {
     }
 
     public call(event: Message) {
-        // si el mensaje no es mas largo que "~p " no tiene contenido
-        if (event.content.length < 3) {
+        // si no hay espacio vacio es que no hay argumento
+        const emptySpacePosition = event.content.search(' ');
+        if (emptySpacePosition === -1) {
             return;
         }
 
@@ -50,7 +51,7 @@ export class PlayCommand extends Command {
             return;
         }
 
-        const argument = event.content.substring(3);
+        const argument = event.content.substring(emptySpacePosition);
 
         // si es una lista de youtube
         if (argument.includes('youtube.com/playlist?list=')) {

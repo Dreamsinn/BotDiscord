@@ -23,16 +23,8 @@
                     return route.command.call(event);
                 }
 
-- Mirar si los datos del schema son necesarios
-
-- Reacer dice y reply commands
--- Usar message.content.split(",") para mejorar el diceCommand y (< y >)
--- Un comando para activar y desactivarlos
-
 -rama master quitar eslint y mirar si hay algun prosproducion de ts
 
 - handle devolver tambien argumento a las clases si lo tienene, para ahorra codgo 
 
 - Regex para las busqueda de un mensaje, para no tener que hacer opcion minuscula y mayusucla, un util
-
-- HELP actualizar
