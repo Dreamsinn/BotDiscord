@@ -2,7 +2,7 @@ import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const ShufflePlayListCommandSchema: CommandSchema = {
-    aliases: ['shuffle', 'pls'],
+    aliases: ['shuffle'],
     coolDown: 120,
     devOnly: false,
     description: 'Aleatoriza el orden de las canciones de la playlist.',

@@ -1,5 +1,3 @@
-- En comandos de prefijos con contenido pasar aparte el mensaje sin prefijo, y if con longitud de prefijo y comando hacer un .lenght para que nos ea tan dummy
-
 - Un cliente distinto por servidor (intancia / base de datos?)
 
     // static instancia;
@@ -23,8 +21,8 @@
                     return route.command.call(event);
                 }
 
--rama master quitar eslint y mirar si hay algun prosproducion de ts
-
-- handle devolver tambien argumento a las clases si lo tienene, para ahorra codgo 
+- Rama master quitar eslint y mirar si hay algun prosproducion de ts
 
 - Regex para las busqueda de un mensaje, para no tener que hacer opcion minuscula y mayusucla, un util
+
+- Test
