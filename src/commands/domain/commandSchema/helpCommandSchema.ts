@@ -2,7 +2,7 @@ import { CommandsCategoryEnum } from '../commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const HelpCommandSchema: CommandSchema = {
-    aliases: ['help'],
+    aliases: ['help', 'h'],
     coolDown: 0,
     devOnly: false,
     description:
