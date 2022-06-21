@@ -26,3 +26,7 @@
 - Regex para las busqueda de un mensaje, para no tener que hacer opcion minuscula y mayusucla, un util
 
 - Test
+
+- Mirar si cuando falla una playlist o una cancion es dado a que se ha cogido mal la id
+
+- Shuffle que no cambie la primera cacion si esta sonando

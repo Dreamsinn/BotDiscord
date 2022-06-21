@@ -1,11 +1,8 @@
-import { EmbedFieldData, Message, MessageReaction, User } from 'discord.js';
+import { Message, MessageReaction, User } from 'discord.js';
 import { DisplayPlayListCommandSchema } from '../../../domain/commandSchema/displayPlayListCommandSchema';
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { embedOptions } from '../../../domain/interfaces/createEmbedOptions';
-import { PlayListStatus } from '../../../domain/interfaces/PlayListStatus';
-import { songData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageCreator } from '../../utils/messageCreator';
@@ -14,7 +11,6 @@ export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
     private coolDown = new CoolDown();
     private playListHandler: PlayListHandler;
-    private playListStatus: PlayListStatus;
     private isDisplayActive = false;
     private showingReadme = false;
 
@@ -30,8 +26,6 @@ export class DisplayPlayListCommand extends Command {
             console.log('command interrupted by cooldown');
             return;
         }
-
-        // TODO, cerrar display cunado suena peta bot
 
         // si ya hay un display activo
         if (this.isDisplayActive) {
@@ -50,189 +44,18 @@ export class DisplayPlayListCommand extends Command {
         }
         this.isDisplayActive = true;
 
-        const output = new MessageCreator({
-            embed: await this.setEmbedOptionsData(),
-        }).call();
+        // pasa estado activo playListHandler y le devuelve el mensaje
+        const displayMessage = await this.playListHandler.activateDispaly(event);
 
-        const displayMessage = await event.channel.send(output);
-
-        this.updateDisplatEmbed(displayMessage);
-
-        return this.reactionListener(event, displayMessage);
-    }
-
-    public async updateDisplatEmbed(displayMessage: Message) {
         if (displayMessage) {
-            setTimeout(async () => {
-                const output = new MessageCreator({
-                    embed: await this.setEmbedOptionsData(),
-                }).call();
-
-                await displayMessage.edit(output);
-                return this.updateDisplatEmbed(displayMessage);
-            }, 1000);
-        }
-    }
-
-    private async setEmbedOptionsData(): Promise<embedOptions> {
-        this.playListStatus = this.playListHandler.readPlayListStatusData();
-        const { title, URL } = this.mapTitleAndURlData(
-            this.playListStatus.playList[0],
-            this.playListStatus.playerStatus,
-            this.playListStatus.conectionStatus,
-        );
-
-        const fields = this.mapFieldData(this.playListStatus);
-
-        const thumbnailUrl = await this.searchSongThumbnailUrl(
-            this.playListStatus.playList[0],
-            this.playListStatus.playerStatus,
-            this.playListStatus.conectionStatus,
-        );
-
-        const embed: embedOptions = {
-            color: 'RANDOM',
-            title,
-            URL,
-            fields,
-            thumbnailUrl,
-        };
-
-        return embed;
-    }
-
-    private mapTitleAndURlData(playinSong: songData, playerStatus: string, conectionStatus: string) {
-        let title: string;
-        let URL: string | null;
-        if (!playerStatus || !conectionStatus) {
-            title = `${discordEmojis.problem} La función de música aún no está activada, añada alguna cancion`;
-            URL = null;
-            return { title, URL };
-        }
-        if (conectionStatus === 'destroyed') {
-            title =
-                `${discordEmojis.problem} Es necesario reconectar el bot, usa los comandos:` +
-                `${process.env.PREFIX}p o ${process.env.PREFIX}join`;
-            URL = null;
-            return { title, URL };
-        }
-        if (playerStatus === 'idle') {
-            title = '**Ready to play!**';
-            URL = null;
-            return { title, URL };
-        }
-        if (playerStatus === 'paused') {
-            title = `${discordEmojis.musicEmojis.pause} Pausado\n` + `${playinSong.songName}`;
-            URL = `https://www.youtube.com/watch?v=${playinSong.songId}`;
-            return { title, URL };
-        }
-
-        title =
-            `${discordEmojis.musicEmojis.playing} Playing ${discordEmojis.musicEmojis.playing}\n` +
-            `${playinSong.songName}`;
-        URL = `https://www.youtube.com/watch?v=${playinSong.songId}`;
-        return { title, URL };
-    }
-
-    private mapFieldData(playListStatus: PlayListStatus): EmbedFieldData[] {
-        const { duration, queueData } = this.mapDutarionQueueData(playListStatus);
-
-        const loop = this.mapLoopData(
-            playListStatus.loop,
-            playListStatus.playerStatus,
-            playListStatus.conectionStatus,
-        );
-
-        const nextSong = this.mapNextSongData(playListStatus.playList);
-
-        if (nextSong) {
-            return [
-                nextSong,
-                { name: 'Duración', value: duration, inline: true },
-                { name: 'Playlist', value: queueData, inline: true },
-                { name: 'Loop', value: loop, inline: true },
-                { name: 'Readme', value: `${discordEmojis.readme}`, inline: true },
-            ];
-        }
-        return [
-            { name: 'Duración', value: duration, inline: true },
-            { name: 'Playlist', value: queueData, inline: true },
-            { name: 'Loop', value: loop, inline: true },
-            { name: 'Readme', value: `${discordEmojis.readme}`, inline: true },
-        ];
-    }
-
-    private mapLoopData(loop: boolean, playerStatus: string, conectionStatus: string): string {
-        if (!playerStatus || !conectionStatus) {
-            return '---';
-        }
-        if (loop) {
-            return '`on`';
-        }
-        return '`off`';
-    }
-
-    private mapDutarionQueueData({
-        playList,
-        playListDuration,
-        playerStatus,
-        conectionStatus,
-        ...playListStatus
-    }: PlayListStatus) {
-        let duration: string;
-        let queueData: string;
-
-        if (!playerStatus || !conectionStatus || conectionStatus === 'destroyed') {
-            duration = queueData = '---';
-            return { duration, queueData };
-        }
-
-        if (!playList[0] || playerStatus === 'idle') {
-            queueData = '`0` - Canciones: `0s`';
-            duration = '`0s`';
-            return { duration, queueData };
-        }
-
-        duration = '`' + playList[0].duration.string + '`';
-        queueData = `**${playList.length}**`;
-        if (playList.length === 1) {
-            queueData += ' - cancion: ';
-        } else queueData += ' - canciones: ';
-        queueData += '`' + playListDuration + '`';
-        return { duration, queueData };
-    }
-
-    private async searchSongThumbnailUrl(
-        playinSong: songData,
-        playerStatus: string,
-        conectionStatus: string,
-    ) {
-        if (!playerStatus || !conectionStatus || conectionStatus === 'destroyed' || !playinSong) {
-            return;
-        }
-        if (playinSong.thumbnails) {
-            return playinSong.thumbnails;
-        }
-        return;
-    }
-
-    private mapNextSongData(playList: songData[]) {
-        if (playList[1]) {
-            return {
-                name: 'Siguiente cancion',
-                value:
-                    `[${playList[1].songName}](https://www.youtube.com/watch?v=${playList[1].songId}) - ` +
-                    '`' +
-                    `${playList[1].duration.string}` +
-                    '`',
-                inline: false,
-            };
+            return this.reactionListener(event, displayMessage);
         }
         return;
     }
 
     private reactionListener(event: Message, displayMessage: Message) {
-        const emojiList = this.addReactions(event, displayMessage);
+        // Añade reacciones y escucha las reacciones recibidas, si se reacciona una de las añadidas: se borra relación y actúa dependiendo relación
+        const emojiList = this.addReactions(displayMessage);
 
         const filter = (reaction: MessageReaction, user: User) => {
             const userCondition = !user.bot;
@@ -257,32 +80,28 @@ export class DisplayPlayListCommand extends Command {
         });
 
         collector.on('end', async () => {
-            // cuando acaba borra mensaje, y pone disponible otra vez el display
-            displayMessage.delete();
             this.isDisplayActive = false;
-            if (displayMessage) {
-                return await displayMessage.edit('Display ha cesado su funcionamiento');
-            }
+            this.playListHandler.deactivateDisplay();
+
+            displayMessage.delete().catch(() => console.log('Display has been deleted.'));
+            await event.channel.send('Display ha cesado su funcionamiento.');
             return;
         });
     }
 
-    private addReactions(event: Message, displayMessage: Message) {
-        try {
-            displayMessage.react(discordEmojis.musicEmojis.playOrPause);
-            displayMessage.react(discordEmojis.musicEmojis.nextSong);
-            displayMessage.react(discordEmojis.musicEmojis.loop);
-            displayMessage.react(discordEmojis.musicEmojis.shuffle);
-            displayMessage.react(discordEmojis.musicEmojis.clear);
-            displayMessage.react(discordEmojis.readme);
-            displayMessage.react(discordEmojis.x);
-        } catch (err) {
-            console.log(err);
-            event.channel.send(err);
-            event.channel.send(
-                'Ha havido un error a la hora de añadir las reaciones, porfavor, vuelva a usar el comando',
-            );
-        }
+    private addReactions(displayMessage: Message) {
+        displayMessage
+            .react(discordEmojis.musicEmojis.playOrPause)
+            .then(() => displayMessage.react(discordEmojis.musicEmojis.nextSong))
+            .then(() => displayMessage.react(discordEmojis.musicEmojis.loop))
+            .then(() => displayMessage.react(discordEmojis.musicEmojis.shuffle))
+            .then(() => displayMessage.react(discordEmojis.musicEmojis.clear))
+            .then(() => displayMessage.react(discordEmojis.readme))
+            .then(() => displayMessage.react(discordEmojis.x))
+            .catch((err) => {
+                console.log(err);
+            });
+
         return [
             discordEmojis.musicEmojis.playOrPause,
             discordEmojis.musicEmojis.nextSong,
@@ -299,11 +118,14 @@ export class DisplayPlayListCommand extends Command {
             reaction.users.cache.has(user.id),
         );
 
-        try {
-            userReactions.map(async (reaction) => await reaction.users.remove(user.id));
-        } catch (err) {
-            console.error('Failed to remove reactions.');
-        }
+        userReactions.map(
+            async (reaction) =>
+                await reaction.users.remove(user.id).catch(() => {
+                    console.error('Failed to remove reactions.');
+                }),
+        );
+
+        return;
     }
 
     private createReadmeEmbed(event: Message) {
@@ -392,8 +214,10 @@ export class DisplayPlayListCommand extends Command {
     }
 
     private togglePlayPause() {
-        const player = this.playListStatus.playerStatus;
-        const connection = this.playListStatus.conectionStatus;
+        const playListStatus = this.playListHandler.readPlayListStatus();
+
+        const player = playListStatus.playerStatus;
+        const connection = playListStatus.conectionStatus;
         if (!player || !connection || connection === 'destroyed') {
             return;
         }
@@ -408,7 +232,9 @@ export class DisplayPlayListCommand extends Command {
     }
 
     private toggleLoopMode() {
-        if (this.playListStatus.loop) {
+        const playListStatus = this.playListHandler.readPlayListStatus();
+
+        if (playListStatus.loop) {
             return this.playListHandler.toggleLoopMode(false);
         }
         return this.playListHandler.toggleLoopMode(true);

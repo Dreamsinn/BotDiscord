@@ -24,16 +24,16 @@ export class LoopPlayListModeCommand extends Command {
         }
 
         if (event.content.includes('on')) {
-            const haveBeenActived = this.playListHandler.toggleLoopMode(true);
-            if (haveBeenActived) {
+            const hasBeenActived = this.playListHandler.toggleLoopMode(true);
+            if (hasBeenActived) {
                 event.channel.send('Loop mode active');
             }
             return;
         }
 
         if (event.content.includes('off')) {
-            const haveBeenDeactivate = this.playListHandler.toggleLoopMode(false);
-            if (haveBeenDeactivate) {
+            const hasBeenDeactivate = this.playListHandler.toggleLoopMode(false);
+            if (hasBeenDeactivate) {
                 event.channel.send('Loop mode deactive');
             }
             return;

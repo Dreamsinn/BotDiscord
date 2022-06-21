@@ -5,9 +5,11 @@ import {
     joinVoiceChannel,
 } from '@discordjs/voice';
 import { GuildMember, Message } from 'discord.js';
+import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { newSongData, songData, songDuration } from '../domain/interfaces/songData';
 import { PlayDlHandler } from '../infrastructure/playDlHandler';
+import { DisplayEmbedBuilder } from './utils/displayEmbedBuilder';
 import { MessageCreator } from './utils/messageCreator';
 import { PaginatedMessage } from './utils/paginatedMessage';
 
@@ -17,15 +19,18 @@ export class PlayListHandler {
     private botConnection: any;
     private player: any;
     private playDlHandler: PlayDlHandler;
+    private displayEmbedBuilder: DisplayEmbedBuilder;
     private isMusicListenerActive = false;
     private loopMode = false;
+    private isDisplay: IsDisplayActive = { active: false, event: undefined };
 
-    constructor(playDlHandler: PlayDlHandler) {
+    constructor(playDlHandler: PlayDlHandler, displayEmbedBuilder: DisplayEmbedBuilder) {
         this.playDlHandler = playDlHandler;
+        this.displayEmbedBuilder = displayEmbedBuilder;
     }
 
     public async update({ member, channel, songList, newSong }: newSongData) {
-        // // si no estas en un canal de voz
+        // si no estas en un canal de voz
         if (songList) {
             this.playList.push(...songList);
         } else {
@@ -36,6 +41,11 @@ export class PlayListHandler {
             await this.newListToPlayListEmbed(member, songList, channel);
         } else {
             this.newSongToPlayListEmbed(member, newSong, channel);
+        }
+
+        // si display está activo le pasa información al constructor del embed
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
         }
 
         // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
@@ -141,6 +151,9 @@ export class PlayListHandler {
 
     private calculateListDuration(songList: songData[]) {
         const listDuration: songDuration = { hours: 0, minutes: 0, seconds: 0 };
+        if (!songList[0]) {
+            return listDuration;
+        }
         songList.forEach((song) => {
             listDuration.seconds += song.duration.seconds;
             listDuration.minutes += song.duration.minutes;
@@ -178,7 +191,7 @@ export class PlayListHandler {
     private joinToChannel(member: GuildMember, channel: any) {
         // une al bot al canal de discord y da la capacidad de reproducir musica
 
-        // // si no estas en un canal de voz
+        // si no estas en un canal de voz
         if (!member.voice.channel) {
             channel.send('Tienes que estar en un canal de voz!');
             return;
@@ -194,6 +207,10 @@ export class PlayListHandler {
         this.player = createAudioPlayer();
 
         this.botConnection.subscribe(this.player);
+
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
+        }
     }
 
     private async playMusic() {
@@ -210,14 +227,20 @@ export class PlayListHandler {
             this.player.play(resources);
         } catch (err) {
             console.log('ERROR', err);
-            // necesario?
-            this.skipMusic();
+            this.playList.shift();
+            if (this.playList[0]) {
+                return this.pauseMusic();
+            }
             return;
         }
 
         if (!this.isMusicListenerActive) {
             this.isMusicListenerActive = true;
             this.musicEventListener();
+        }
+
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
         }
     }
 
@@ -237,9 +260,25 @@ export class PlayListHandler {
         });
     }
 
+    public readPlayListStatus() {
+        const playListData: PlayListStatus = {
+            playList: this.playList,
+            playListDuration: this.getQeueDuration(this.calculateListDuration(this.playList)),
+            loop: this.loopMode,
+            playerStatus: this.player ? this.player._state.status : undefined,
+            conectionStatus: this.botConnection ? this.botConnection._state.status : undefined,
+        };
+
+        return playListData;
+    }
+
     public botDisconnect() {
         if (this.botConnection) {
-            return this.botConnection.destroy();
+            this.botConnection.destroy();
+            if (this.isDisplay.active) {
+                this.sendPlayListDataToDisplay(false);
+            }
+            return;
         }
         return;
     }
@@ -249,6 +288,9 @@ export class PlayListHandler {
         if (this.player) {
             musicToSkip = this.playList[0];
             this.player.stop();
+            if (this.isDisplay.active) {
+                this.sendPlayListDataToDisplay(false);
+            }
         }
         return musicToSkip;
     }
@@ -257,7 +299,11 @@ export class PlayListHandler {
         if (!this.player || this.player._state.status === 'idle') {
             return;
         }
-        return this.player.pause();
+        this.player.pause();
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
+        }
+        return;
     }
 
     public unpauseMusic() {
@@ -267,7 +313,11 @@ export class PlayListHandler {
         if (this.player._state.status === 'idle' && this.playList[0]) {
             return this.playMusic();
         }
-        return this.player.unpause();
+        this.player.unpause();
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
+        }
+        return;
     }
 
     public changeBotVoiceChanel(event: Message) {
@@ -283,26 +333,21 @@ export class PlayListHandler {
         return playList;
     }
 
-    public readPlayListStatusData(): PlayListStatus {
-        const playListData = {
-            playList: this.playList,
-            playListDuration: this.getQeueDuration(this.calculateListDuration(this.playList)),
-            loop: this.loopMode,
-            playerStatus: this.player ? this.player._state.status : undefined,
-            conectionStatus: this.botConnection ? this.botConnection._state.status : undefined,
-        };
-        return playListData;
-    }
-
     public deletePlayList() {
         if (
             (this.player && this.player._state.status === 'idle') ||
             (this.botConnection && this.botConnection._state.status === 'destroyed')
         ) {
-            return (this.playList = []);
+            this.playList = [];
+        } else {
+            // eleminamos todos menos el primero, que al ser el que esta sonando
+            this.playList = [this.playList[0]];
         }
-        // eleminamos todos menos el primero, que al ser el que esta sonando
-        return (this.playList = [this.playList[0]]);
+
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
+        }
+        return;
     }
 
     public removeSongsFromPlayList(songsIndex: number[]) {
@@ -324,6 +369,9 @@ export class PlayListHandler {
             // eliminamos la cancion que esta sonando via Skip
             this.skipMusic();
 
+            if (this.isDisplay.active) {
+                this.sendPlayListDataToDisplay(false);
+            }
             return removedMusic;
         }
 
@@ -333,6 +381,9 @@ export class PlayListHandler {
         // hace una array sin las canciones selecionas
         this.playList = this.playList.filter((n, i) => !songsIndex.includes(i + 1));
 
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
+        }
         return removedMusic;
     }
 
@@ -345,6 +396,11 @@ export class PlayListHandler {
             newPlayList.push(this.randomNextSong(i));
         }
         this.playList = newPlayList;
+
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
+        }
+
         return true;
     }
 
@@ -359,6 +415,30 @@ export class PlayListHandler {
             return false;
         }
         this.loopMode = active;
+
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay(false);
+        }
+
         return true;
+    }
+
+    public deactivateDisplay() {
+        this.isDisplay.active = false;
+        this.isDisplay.event = undefined;
+        return;
+    }
+
+    public activateDispaly(event: Message) {
+        this.isDisplay.active = true;
+        this.isDisplay.event = event;
+
+        return this.sendPlayListDataToDisplay(true);
+    }
+
+    private sendPlayListDataToDisplay(newEmbed: boolean) {
+        const playListData = this.readPlayListStatus();
+
+        return this.displayEmbedBuilder.call(playListData, this.isDisplay.event, newEmbed);
     }
 }
