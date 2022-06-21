@@ -392,9 +392,20 @@ export class PlayListHandler {
             return false;
         }
         const newPlayList: songData[] = [];
+
+        // si esta sonando, para que no cambie el orden de la primera
+        if (
+            this.player &&
+            (this.player._state.status === 'buffering' || this.player._state.status === 'playing')
+        ) {
+            newPlayList.push(this.playList[0]);
+            this.playList.shift();
+        }
+
         for (let i = this.playList.length - 1; 0 <= i; i--) {
             newPlayList.push(this.randomNextSong(i));
         }
+
         this.playList = newPlayList;
 
         if (this.isDisplay.active) {
