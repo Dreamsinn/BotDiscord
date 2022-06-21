@@ -14,6 +14,7 @@ import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommand
 import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/SkipMusicCommand';
 import { UnpauseCommand } from './aplication/prefixCommands/musicCommands/UnpauseCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
+import { DisplayEmbedBuilder } from './aplication/utils/displayEmbedBuilder';
 import { ClearPlayListCommandSchema } from './domain/commandSchema/clearPlayListCommandSchema';
 import { DiceCommandTogglerSchema } from './domain/commandSchema/diceCommandTogglerSchema';
 import { DisconnectCommandSchema } from './domain/commandSchema/disconnectCommandSchema';
@@ -40,7 +41,8 @@ export interface Route {
 
 const youtubeSearch = new YoutubeAPIHandler();
 const playDlHandler = new PlayDlHandler();
-const playListHandler = new PlayListHandler(playDlHandler);
+const displayEmbedBuilder = new DisplayEmbedBuilder();
+const playListHandler = new PlayListHandler(playDlHandler, displayEmbedBuilder);
 
 // se podria tambien un switch
 export const routes: Route[] = [

@@ -116,19 +116,19 @@ export class PaginatedMessage {
                     this.paginatedStringData.length === 1 && this.embed.description
                         ? this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`
                         : this.paginatedStringData.length === 1
-                        ? this.paginatedStringData[this.page - 1]
-                        : this.embed.description
-                        ? this.embed.description
-                        : null,
+                            ? this.paginatedStringData[this.page - 1]
+                            : this.embed.description
+                                ? this.embed.description
+                                : null,
                 thumbnailUrl: this.embed.thumbnailUrl ? this.embed.thumbnailUrl : null,
                 fields: this.embed.fields ? this.embed.fields : null,
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                              value: `${this.paginatedStringData[this.page - 1]}`,
-                              inline: false,
-                          }
+                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                            value: `${this.paginatedStringData[this.page - 1]}`,
+                            inline: false,
+                        }
                         : null,
                 imageUrl: this.embed.imageUrl ? this.embed.imageUrl : null,
                 timeStamp: this.embed.timeStamp ? this.embed.timeStamp : null,
