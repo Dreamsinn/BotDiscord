@@ -1,22 +1,22 @@
 import { Message, MessageReaction, User } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import {
-    createMessageOptions,
-    embedOptions,
-    messageOptions,
-    paginationOptions,
+    CreateMessageOptions,
+    EmbedOptions,
+    MessageContent,
+    PaginationOptions,
 } from '../../domain/interfaces/createEmbedOptions';
-import { songData } from '../../domain/interfaces/songData';
+import { SongData } from '../../domain/interfaces/songData';
 import { MessageCreator } from './messageCreator';
 
 export class PaginatedMessage {
-    private message: messageOptions;
-    private embed: embedOptions;
-    private pagination: paginationOptions;
+    private message: MessageContent;
+    private embed: EmbedOptions;
+    private pagination: PaginationOptions;
     private page = 1;
     private paginatedStringData: string[];
 
-    constructor(messageData: createMessageOptions) {
+    constructor(messageData: CreateMessageOptions) {
         this.message = messageData.message;
         this.embed = messageData.embed;
         this.pagination = messageData.pagination;
@@ -32,11 +32,11 @@ export class PaginatedMessage {
 
         const output = this.createPageEmbed();
 
-        let message: Message;
+        let paginatedMessage: Message;
         if (this.pagination.reply) {
-            message = await this.pagination.event.reply(output);
+            paginatedMessage = await this.pagination.event.reply(output);
         } else
-            message = this.pagination.event
+            paginatedMessage = this.pagination.event
                 ? await this.pagination.event.channel.send(output)
                 : await this.pagination.channel.send(output);
 
@@ -45,25 +45,25 @@ export class PaginatedMessage {
             return;
         }
 
-        message.react(discordEmojis['<-']);
-        message.react(discordEmojis['->']);
-        message.react(discordEmojis.x);
+        paginatedMessage.react(discordEmojis['<-']);
+        paginatedMessage.react(discordEmojis['->']);
+        paginatedMessage.react(discordEmojis.x);
 
-        this.reactionListener(message, maxPage);
+        this.reactionListener(paginatedMessage, maxPage);
 
-        return message;
+        return paginatedMessage;
     }
 
     private createPaginationData() {
         const playListString: string[] = [];
 
-        this.pagination.rawDataToPaginate.forEach((e: songData, i: number) => {
+        this.pagination.rawDataToPaginate.forEach((e: SongData, i: number) => {
             playListString.push(this.mapPagesData(e, i));
         });
         return playListString;
     }
 
-    private mapPagesData(songData: songData, index: number) {
+    private mapPagesData(songData: SongData, index: number) {
         const songsString = `${index + 1} - ${songData.songName} '${songData.duration.string}'\n`;
 
         return songsString;
@@ -116,19 +116,19 @@ export class PaginatedMessage {
                     this.paginatedStringData.length === 1 && this.embed.description
                         ? this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`
                         : this.paginatedStringData.length === 1
-                        ? this.paginatedStringData[this.page - 1]
-                        : this.embed.description
-                        ? this.embed.description
-                        : null,
+                            ? this.paginatedStringData[this.page - 1]
+                            : this.embed.description
+                                ? this.embed.description
+                                : null,
                 thumbnailUrl: this.embed.thumbnailUrl ? this.embed.thumbnailUrl : null,
                 fields: this.embed.fields ? this.embed.fields : null,
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                              value: `${this.paginatedStringData[this.page - 1]}`,
-                              inline: false,
-                          }
+                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                            value: `${this.paginatedStringData[this.page - 1]}`,
+                            inline: false,
+                        }
                         : null,
                 imageUrl: this.embed.imageUrl ? this.embed.imageUrl : null,
                 timeStamp: this.embed.timeStamp ? this.embed.timeStamp : null,

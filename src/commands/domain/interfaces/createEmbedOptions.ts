@@ -6,16 +6,16 @@ import {
     Message,
     User,
 } from 'discord.js';
-import { songData } from './songData';
+import { SongData } from './songData';
 
 // hay mas opciones disponibles en MessageOptions
-export interface createMessageOptions {
-    message?: messageOptions;
-    embed?: embedOptions;
-    pagination?: paginationOptions;
+export interface CreateMessageOptions {
+    message?: MessageContent;
+    embed?: EmbedOptions;
+    pagination?: PaginationOptions;
 }
 
-export interface embedOptions {
+export interface EmbedOptions {
     color?: ColorResolvable;
     title?: string;
     URL?: string;
@@ -33,14 +33,14 @@ export interface embedOptions {
     footer?: EmbedFooterData;
 }
 
-export interface messageOptions {
+export interface MessageContent {
     content: string;
 }
 
-export interface paginationOptions {
+export interface PaginationOptions {
     event?: Message;
     channel?: Message['channel'];
-    rawDataToPaginate?: songData[];
+    rawDataToPaginate?: SongData[];
     dataToPaginate?: string[];
     dataPerPage: number;
     timeOut: number;

@@ -20,7 +20,7 @@ import { UnpauseCommandSchema } from '../../domain/commandSchema/unpauseCommandS
 import { HelpEmbedsTitlesEnum } from '../../domain/helpEmbedsTitlesEnum';
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
-import { embedOptions } from '../../domain/interfaces/createEmbedOptions';
+import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { HelpCommandData } from '../../domain/interfaces/helpCommandData';
 import { CoolDown } from '../utils/coolDown';
 import { MessageCreator } from '../utils/messageCreator';
@@ -300,7 +300,7 @@ export class HelpCommand extends Command {
             }
         });
 
-        const embed: embedOptions = {
+        const embed: EmbedOptions = {
             color: '#BFFF00',
             title: selectedCommand.name,
             description,

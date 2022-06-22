@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { PlayListCommandSchema } from '../../../domain/commandSchema/playListCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { songData } from '../../../domain/interfaces/songData';
+import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
@@ -25,7 +25,7 @@ export class PlayListCommand extends Command {
             return;
         }
 
-        const playList: songData[] = this.playListHandler.readPlayList();
+        const playList: SongData[] = this.playListHandler.readPlayList();
 
         return await new PaginatedMessage({
             embed: {

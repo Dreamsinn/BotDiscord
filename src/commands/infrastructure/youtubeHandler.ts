@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { rawSongData } from '../domain/interfaces/songData';
+import { RawSongData } from '../domain/interfaces/songData';
 import { YoutubeAPI } from '../domain/interfaces/youtubeAPI';
 
 export class YoutubeAPIHandler implements YoutubeAPI {
-    public async searchSongByName(song: string): Promise<rawSongData[]> {
+    public async searchSongByName(song: string): Promise<RawSongData[]> {
         const order = 'relevance';
         const part = 'snippet';
         const maxResults = '9';
@@ -18,7 +18,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 throw new Error(`YoutubeAPI Search Error: ${err.code}, ${err}`);
             });
 
-        const response: rawSongData[] = [];
+        const response: RawSongData[] = [];
         searched.data.items.forEach((songData: any) => {
             response.push({
                 id: songData.id.videoId,
@@ -29,7 +29,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
         return response;
     }
 
-    public async searchPlaylist(playListId: string): Promise<rawSongData[]> {
+    public async searchPlaylist(playListId: string): Promise<RawSongData[]> {
         const part = 'snippet';
         const playlistId = playListId;
         const maxResults = '30';
@@ -43,7 +43,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 throw new Error(`YoutubeAPI PlayList Error:, ${err.code}, ${err}`);
             });
 
-        const response: rawSongData[] = [];
+        const response: RawSongData[] = [];
         searched.data.items.forEach((songData: any) => {
             response.push({
                 id: songData.snippet.resourceId.videoId,
@@ -54,7 +54,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
         return response;
     }
 
-    public async searchSongById(songId: string): Promise<rawSongData> {
+    public async searchSongById(songId: string): Promise<RawSongData> {
         const part = 'snippet,contentDetails';
         const maxResults = '1';
         const id = songId;
@@ -67,7 +67,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 throw new Error(`YoutubeAPI Data Error:, ${err.code}, ${err}`);
             });
 
-        const response: rawSongData = {
+        const response: RawSongData = {
             title: searched.data.items[0].snippet.title,
             durationString: searched.data.items[0].contentDetails.duration,
             thumbnails: searched.data.items[0].snippet.thumbnails.medium.url,

@@ -1,31 +1,31 @@
 import { GuildMember, Message } from 'discord.js';
 
-export interface songData {
+export interface SongData {
     songName: string;
     songId: string;
-    duration: songDuration;
+    duration: SongDuration;
     thumbnails: string;
 }
 
-export interface newSongData {
-    newSong?: songData;
-    songList?: songData[];
+export interface NewSongData {
+    newSong?: SongData;
+    songList?: SongData[];
     channel: Message['channel'];
     member: GuildMember;
 }
 
-export interface songDuration {
+export interface SongDuration {
     hours: number;
     minutes: number;
     seconds: number;
     string?: string;
 }
 
-export interface rawSongData {
+export interface RawSongData {
     id?: string;
     title?: string;
     duration?: number;
     durationString?: string;
-    durationData?: songDuration;
+    durationData?: SongDuration;
     thumbnails?: string;
 }

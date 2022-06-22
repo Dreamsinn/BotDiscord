@@ -4,7 +4,7 @@ import { PlayCommandSchema } from '../../../domain/commandSchema/playCommandSche
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { newSongData, rawSongData, songData } from '../../../domain/interfaces/songData';
+import { NewSongData, RawSongData, SongData } from '../../../domain/interfaces/songData';
 import { PlayDlHandler } from '../../../infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from '../../../infrastructure/youtubeHandler';
 import { PlayListHandler } from '../../playListHandler';
@@ -72,7 +72,7 @@ export class PlayCommand extends Command {
     }
 
     private async searchBySongName(argument: string, event: Message) {
-        let response: rawSongData[];
+        let response: RawSongData[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
         try {
             response = await this.playDlHandler.searchSongByName(argument);
@@ -132,7 +132,7 @@ export class PlayCommand extends Command {
 
                 const numberSelected = Number(collectedMessage.content) - 1;
 
-                const song: rawSongData = response[numberSelected];
+                const song: RawSongData = response[numberSelected];
 
                 // eleminamos opciones
                 message.delete();
@@ -157,7 +157,7 @@ export class PlayCommand extends Command {
             });
     }
 
-    private createSelectChoicesEmbed(songList: rawSongData[]) {
+    private createSelectChoicesEmbed(songList: RawSongData[]) {
         // pasa un embed al discord para que elija exactamente cual quiere
         let embedContent = '```js\n';
 
@@ -192,20 +192,20 @@ export class PlayCommand extends Command {
         const URLParametersPosition = rawSongId.indexOf('&');
 
         if (URLParametersPosition === -1) {
-            const song: rawSongData = { id: rawSongId };
+            const song: RawSongData = { id: rawSongId };
             return this.updateToPlayList(event, song);
         }
 
-        const song: rawSongData = { id: rawSongId.substring(0, URLParametersPosition) };
+        const song: RawSongData = { id: rawSongId.substring(0, URLParametersPosition) };
 
         return this.updateToPlayList(event, song);
     }
 
-    private async updateToPlayList(event: Message, song: rawSongData) {
-        const songData: rawSongData = await this.mapSongData(event, song);
+    private async updateToPlayList(event: Message, song: RawSongData) {
+        const songData: RawSongData = await this.mapSongData(event, song);
 
         if (songData.title && songData.duration) {
-            const newSong: newSongData = {
+            const newSong: NewSongData = {
                 newSong: {
                     songName: songData.title,
                     songId: songData.id,
@@ -221,7 +221,7 @@ export class PlayCommand extends Command {
         return;
     }
 
-    private async mapSongData(event: Message, song: rawSongData): Promise<rawSongData> {
+    private async mapSongData(event: Message, song: RawSongData): Promise<RawSongData> {
         // optenemos duracion y nombre
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
 
@@ -239,7 +239,7 @@ export class PlayCommand extends Command {
 
         try {
             // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
-            const searchedSongData: rawSongData = await this.youtubeAPIHandler.searchSongById(song.id);
+            const searchedSongData: RawSongData = await this.youtubeAPIHandler.searchSongById(song.id);
             if (!song.title) {
                 song.title = searchedSongData.title;
             }
@@ -269,7 +269,7 @@ export class PlayCommand extends Command {
 
             // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
             try {
-                const playListData: rawSongData[] = await this.playDlHandler.getSognsInfoFromPlayList(
+                const playListData: RawSongData[] = await this.playDlHandler.getSognsInfoFromPlayList(
                     url,
                 );
                 return this.mapPlayDLPlayListData(event, playListData);
@@ -346,7 +346,7 @@ export class PlayCommand extends Command {
                 if (['y', 'Y'].includes(collectedMessage.content)) {
                     message.delete();
                     try {
-                        const playListData: rawSongData[] =
+                        const playListData: RawSongData[] =
                             await this.playDlHandler.getSognsInfoFromPlayList(url);
 
                         return this.mapPlayDLPlayListData(event, playListData);
@@ -373,10 +373,10 @@ export class PlayCommand extends Command {
             });
     }
 
-    private mapPlayDLPlayListData(event: Message, rawPlayList: rawSongData[]) {
-        const playList: songData[] = [];
-        rawPlayList.forEach((song: rawSongData) => {
-            const newSong: songData = {
+    private mapPlayDLPlayListData(event: Message, rawPlayList: RawSongData[]) {
+        const playList: SongData[] = [];
+        rawPlayList.forEach((song: RawSongData) => {
+            const newSong: SongData = {
                 songName: song.title,
                 songId: song.id,
                 duration: this.parseSongDuration(String(song.duration), true),
@@ -389,7 +389,7 @@ export class PlayCommand extends Command {
 
     private async fetchYoutubePlayListData(event: Message, playListId: string, url: string) {
         // llama a la API de youtube, si esta tambien falla y esta sonando un video reproduce el video
-        let rawPlayList: rawSongData[];
+        let rawPlayList: RawSongData[];
         try {
             rawPlayList = await this.youtubeAPIHandler.searchPlaylist(playListId);
         } catch (err) {
@@ -402,17 +402,17 @@ export class PlayCommand extends Command {
             return;
         }
         // por cada video llama a la api para obtener la informacion
-        const playlist: songData[] = await this.mapSongListData(event, rawPlayList);
+        const playlist: SongData[] = await this.mapSongListData(event, rawPlayList);
 
         return this.updatePlayListWithAPlayList(event, playlist);
     }
 
-    private async mapSongListData(event: Message, rawPlayList: rawSongData[]): Promise<songData[]> {
-        const playlist: songData[] = [];
+    private async mapSongListData(event: Message, rawPlayList: RawSongData[]): Promise<SongData[]> {
+        const playlist: SongData[] = [];
         for (let i = 0; rawPlayList.length > i; i++) {
             const songData = await this.mapSongData(event, rawPlayList[i]);
             if (songData.title && songData.thumbnails) {
-                const newSong: songData = {
+                const newSong: SongData = {
                     songName: songData.title,
                     songId: songData.id,
                     duration: songData.durationData,
@@ -424,8 +424,8 @@ export class PlayCommand extends Command {
         return playlist;
     }
 
-    private async updatePlayListWithAPlayList(event, playList?: songData[]) {
-        const newSongList: newSongData = {
+    private async updatePlayListWithAPlayList(event, playList?: SongData[]) {
+        const newSongList: NewSongData = {
             songList: playList,
             channel: event.channel,
             member: event.member,

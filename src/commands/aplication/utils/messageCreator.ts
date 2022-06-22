@@ -1,15 +1,15 @@
 import { MessageEmbed, MessageOptions } from 'discord.js';
 import {
-    createMessageOptions,
-    embedOptions,
-    messageOptions,
+    CreateMessageOptions,
+    EmbedOptions,
+    MessageContent,
 } from '../../domain/interfaces/createEmbedOptions';
 
 export class MessageCreator {
-    private message: messageOptions;
-    private embed: embedOptions;
+    private message: MessageContent;
+    private embed: EmbedOptions;
 
-    constructor(messageData: createMessageOptions) {
+    constructor(messageData: CreateMessageOptions) {
         this.message = messageData.message;
         this.embed = messageData.embed;
     }
