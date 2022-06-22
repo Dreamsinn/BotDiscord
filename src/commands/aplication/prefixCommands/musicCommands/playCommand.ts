@@ -204,18 +204,21 @@ export class PlayCommand extends Command {
     private async updateToPlayList(event: Message, song: rawSongData) {
         const songData: rawSongData = await this.mapSongData(event, song);
 
-        const newSong: newSongData = {
-            newSong: {
-                songName: songData.title,
-                songId: songData.id,
-                duration: songData.durationData,
-                thumbnails: songData.thumbnails,
-            },
-            channel: event.channel,
-            member: event.member,
-        };
+        if (songData.title && songData.duration) {
+            const newSong: newSongData = {
+                newSong: {
+                    songName: songData.title,
+                    songId: songData.id,
+                    duration: songData.durationData,
+                    thumbnails: songData.thumbnails,
+                },
+                channel: event.channel,
+                member: event.member,
+            };
 
-        return this.playListHandler.update(newSong);
+            return this.playListHandler.update(newSong);
+        }
+        return;
     }
 
     private async mapSongData(event: Message, song: rawSongData): Promise<rawSongData> {
@@ -231,7 +234,6 @@ export class PlayCommand extends Command {
             song.thumbnails = searchedSongData.thumbnails[3].url;
             return song;
         } catch (err) {
-            event.channel.send(`Play-dl Data Error: ${err},\n ${song.title}`);
             console.log(`Play-dl Data Error: ${err}`);
         }
 
@@ -246,7 +248,6 @@ export class PlayCommand extends Command {
             return song;
         } catch (err) {
             event.channel.send(`It has not been possible to get song's information`);
-            event.channel.send(`YoutubeAPI Error: ${err}`);
             console.log(`YoutubeAPI Error: ${err}`);
         }
         return song;
@@ -392,7 +393,6 @@ export class PlayCommand extends Command {
         try {
             rawPlayList = await this.youtubeAPIHandler.searchPlaylist(playListId);
         } catch (err) {
-            event.channel.send(`YoutubeAPI Error: ${err}`);
             console.log(`YoutubeAPI Error: ${err}`);
             event.channel.send(`It has not been possible to get playList`);
             if (url.includes('watch?v=')) {
@@ -411,13 +411,15 @@ export class PlayCommand extends Command {
         const playlist: songData[] = [];
         for (let i = 0; rawPlayList.length > i; i++) {
             const songData = await this.mapSongData(event, rawPlayList[i]);
-            const newSong: songData = {
-                songName: songData.title,
-                songId: songData.id,
-                duration: songData.durationData,
-                thumbnails: songData.thumbnails,
-            };
-            playlist.push(newSong);
+            if (songData.title && songData.thumbnails) {
+                const newSong: songData = {
+                    songName: songData.title,
+                    songId: songData.id,
+                    duration: songData.durationData,
+                    thumbnails: songData.thumbnails,
+                };
+                playlist.push(newSong);
+            }
         }
         return playlist;
     }
