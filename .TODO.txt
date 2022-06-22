@@ -29,4 +29,6 @@
 
 - Mirar si cuando falla una playlist o una cancion es dado a que se ha cogido mal la id
 
-- Shuffle que no cambie la primera cacion si esta sonando
+- Skipear no quita cancion de la cola (por lomenos con los mebeds no sale asi)
+
+- Skip en modo loop para la musica y unpause o pause no hace nada
