@@ -1,8 +1,8 @@
 import { EmbedFieldData, Message } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
-import { embedOptions } from '../../domain/interfaces/createEmbedOptions';
+import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { PlayListStatus } from '../../domain/interfaces/PlayListStatus';
-import { songData } from '../../domain/interfaces/songData';
+import { SongData } from '../../domain/interfaces/songData';
 import { MessageCreator } from '../utils/messageCreator';
 
 export class DisplayEmbedBuilder {
@@ -28,7 +28,7 @@ export class DisplayEmbedBuilder {
         return;
     }
 
-    private async setEmbedOptionsData(): Promise<embedOptions> {
+    private async setEmbedOptionsData(): Promise<EmbedOptions> {
         const { title, URL } = this.mapTitleAndURlData(
             this.playListStatus.playList[0],
             this.playListStatus.playerStatus,
@@ -43,7 +43,7 @@ export class DisplayEmbedBuilder {
             this.playListStatus.conectionStatus,
         );
 
-        const embed: embedOptions = {
+        const embed: EmbedOptions = {
             color: 'RANDOM',
             title,
             URL,
@@ -54,7 +54,7 @@ export class DisplayEmbedBuilder {
         return embed;
     }
 
-    private mapTitleAndURlData(playinSong: songData, playerStatus: string, conectionStatus: string) {
+    private mapTitleAndURlData(playinSong: SongData, playerStatus: string, conectionStatus: string) {
         let title: string;
         let URL: string | null;
         if (!playerStatus || !conectionStatus) {
@@ -155,7 +155,7 @@ export class DisplayEmbedBuilder {
         return { duration, queueData };
     }
 
-    private mapSongThumbnailUrl(playinSong: songData, playerStatus: string, conectionStatus: string) {
+    private mapSongThumbnailUrl(playinSong: SongData, playerStatus: string, conectionStatus: string) {
         if (!playerStatus || !conectionStatus || conectionStatus === 'destroyed' || !playinSong) {
             return;
         }
@@ -165,7 +165,7 @@ export class DisplayEmbedBuilder {
         return;
     }
 
-    private mapNextSongData(playList: songData[]) {
+    private mapNextSongData(playList: SongData[]) {
         if (playList[1]) {
             return {
                 name: 'Siguiente cancion',

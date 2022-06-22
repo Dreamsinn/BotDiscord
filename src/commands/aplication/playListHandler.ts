@@ -7,15 +7,15 @@ import {
 import { GuildMember, Message } from 'discord.js';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
-import { newSongData, songData, songDuration } from '../domain/interfaces/songData';
+import { NewSongData, SongData, SongDuration } from '../domain/interfaces/songData';
 import { PlayDlHandler } from '../infrastructure/playDlHandler';
 import { DisplayEmbedBuilder } from './utils/displayEmbedBuilder';
 import { MessageCreator } from './utils/messageCreator';
 import { PaginatedMessage } from './utils/paginatedMessage';
 
 export class PlayListHandler {
-    private playList: songData[] = [];
-    private playListDuration: songDuration = { hours: 0, minutes: 0, seconds: 0 };
+    private playList: SongData[] = [];
+    private playListDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0 };
     private botConnection: any;
     private player: any;
     private playDlHandler: PlayDlHandler;
@@ -29,7 +29,7 @@ export class PlayListHandler {
         this.displayEmbedBuilder = displayEmbedBuilder;
     }
 
-    public async update({ member, channel, songList, newSong }: newSongData) {
+    public async update({ member, channel, songList, newSong }: NewSongData) {
         // si no estas en un canal de voz
         if (songList) {
             this.playList.push(...songList);
@@ -68,7 +68,7 @@ export class PlayListHandler {
 
     private async newListToPlayListEmbed(
         member: GuildMember,
-        songList: songData[],
+        songList: SongData[],
         channel: Message['channel'],
     ) {
         // TODO: descripcion con lista de todas las canciones, mas adelante, con paginacion de 20s y sin mensaje de Time Out
@@ -116,7 +116,7 @@ export class PlayListHandler {
         }).call();
     }
 
-    private newSongToPlayListEmbed(member: GuildMember, newSong: songData, channel: Message['channel']) {
+    private newSongToPlayListEmbed(member: GuildMember, newSong: SongData, channel: Message['channel']) {
         const output = new MessageCreator({
             embed: {
                 color: '#0099ff',
@@ -149,8 +149,8 @@ export class PlayListHandler {
         return channel.send(output);
     }
 
-    private calculateListDuration(songList: songData[]) {
-        const listDuration: songDuration = { hours: 0, minutes: 0, seconds: 0 };
+    private calculateListDuration(songList: SongData[]) {
+        const listDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0 };
         if (!songList[0]) {
             return listDuration;
         }
@@ -172,7 +172,7 @@ export class PlayListHandler {
         return listDuration;
     }
 
-    private getQeueDuration(listDuration: songDuration) {
+    private getQeueDuration(listDuration: SongDuration) {
         const hours = listDuration.hours;
         const minutes = listDuration.minutes;
         const seconds = listDuration.seconds;
@@ -284,7 +284,7 @@ export class PlayListHandler {
     }
 
     public skipMusic() {
-        let musicToSkip: songData;
+        let musicToSkip: SongData;
         if (this.player) {
             musicToSkip = this.playList[0];
             this.player.stop();
@@ -391,7 +391,7 @@ export class PlayListHandler {
         if (!this.playList[0]) {
             return false;
         }
-        const newPlayList: songData[] = [];
+        const newPlayList: SongData[] = [];
 
         // si esta sonando, para que no cambie el orden de la primera
         if (
@@ -415,7 +415,7 @@ export class PlayListHandler {
         return true;
     }
 
-    private randomNextSong(i: number): songData {
+    private randomNextSong(i: number): SongData {
         const randomIndex = Math.random() * Number(i);
         const randomSong = this.playList.splice(randomIndex, 1);
         return randomSong[0];

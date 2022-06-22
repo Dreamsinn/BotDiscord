@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { SkipMusicCommandSchema } from '../../../domain/commandSchema/skipMusicCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { songData } from '../../../domain/interfaces/songData';
+import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageCreator } from '../../utils/messageCreator';
@@ -25,7 +25,7 @@ export class SkipMusicCommand extends Command {
             return;
         }
 
-        const skipedMusic: songData = this.playListHandler.skipMusic();
+        const skipedMusic: SongData = this.playListHandler.skipMusic();
 
         if (!skipedMusic) {
             return;

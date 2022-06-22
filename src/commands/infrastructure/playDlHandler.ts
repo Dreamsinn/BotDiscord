@@ -1,12 +1,12 @@
 import play, { InfoData, SoundCloudStream, YouTubePlayList, YouTubeStream, YouTubeVideo } from 'play-dl';
 import { PlayDlAPI } from '../domain/interfaces/playDlAPI';
-import { rawSongData } from '../domain/interfaces/songData';
+import { RawSongData } from '../domain/interfaces/songData';
 
 export class PlayDlHandler implements PlayDlAPI {
-    public async searchSongByName(songString: string): Promise<rawSongData[]> {
+    public async searchSongByName(songString: string): Promise<RawSongData[]> {
         const searched = await play.search(songString, { source: { youtube: 'video' }, limit: 9 });
 
-        const response: rawSongData[] = [];
+        const response: RawSongData[] = [];
         searched.forEach((songData) => {
             response.push({
                 id: songData.id,
@@ -26,14 +26,14 @@ export class PlayDlHandler implements PlayDlAPI {
         return songData;
     }
 
-    public async getSognsInfoFromPlayList(url: string): Promise<rawSongData[]> {
+    public async getSognsInfoFromPlayList(url: string): Promise<RawSongData[]> {
         const rawPlayList: YouTubePlayList = await play.playlist_info(url, { incomplete: true });
 
         const platlistData = await rawPlayList.all_videos();
 
-        const playList: rawSongData[] = [];
+        const playList: RawSongData[] = [];
         platlistData.forEach((songData: YouTubeVideo) => {
-            const newSong: rawSongData = {
+            const newSong: RawSongData = {
                 title: songData.title,
                 id: songData.id,
                 duration: songData.durationInSec,
