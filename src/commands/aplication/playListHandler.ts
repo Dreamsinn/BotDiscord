@@ -246,6 +246,10 @@ export class PlayListHandler {
 
     private musicEventListener() {
         this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
+            if (this.isDisplay.active) {
+                this.sendPlayListDataToDisplay(false);
+            }
+
             // cunado el player no esta reproduciendo
             if (newState.status === 'idle') {
                 if (this.loopMode) {
@@ -288,9 +292,6 @@ export class PlayListHandler {
         if (this.player) {
             musicToSkip = this.playList[0];
             this.player.stop();
-            if (this.isDisplay.active) {
-                this.sendPlayListDataToDisplay(false);
-            }
         }
         return musicToSkip;
     }
@@ -300,9 +301,6 @@ export class PlayListHandler {
             return;
         }
         this.player.pause();
-        if (this.isDisplay.active) {
-            this.sendPlayListDataToDisplay(false);
-        }
         return;
     }
 
@@ -314,9 +312,6 @@ export class PlayListHandler {
             return this.playMusic();
         }
         this.player.unpause();
-        if (this.isDisplay.active) {
-            this.sendPlayListDataToDisplay(false);
-        }
         return;
     }
 
@@ -369,9 +364,6 @@ export class PlayListHandler {
             // eliminamos la cancion que esta sonando via Skip
             this.skipMusic();
 
-            if (this.isDisplay.active) {
-                this.sendPlayListDataToDisplay(false);
-            }
             return removedMusic;
         }
 

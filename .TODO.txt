@@ -1,14 +1,5 @@
 - Un cliente distinto por servidor (intancia / base de datos?)
 
-    // static instancia;
-    // private client: any;
-
-    // constructor(client: any) {
-    //     PlayListHandler.instancia = this;
-    //     this.client = client;
-    // }
-
-
     en handler
     private playListIntanceServers = [];
 
@@ -27,8 +18,8 @@
 
 - Test
 
-- Mirar si cuando falla una playlist o una cancion es dado a que se ha cogido mal la id
-
 - Skipear no quita cancion de la cola (por lomenos con los mebeds no sale asi)
 
 - Skip en modo loop para la musica y unpause o pause no hace nada
+
+- Ha tocado una cancion hasta el final, ha acabado, y al poner la siguiente a sonado la primera, y no se podia pasar
