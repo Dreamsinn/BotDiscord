@@ -187,7 +187,8 @@ export class PlayCommand extends Command {
         const rawSongId = url
             .replace('https://', '')
             .replace('www.', '')
-            .replace('youtube.com/watch?v=', '');
+            .replace('youtube.com/watch?v=', '')
+            .replace(/^./, '');
 
         const URLParametersPosition = rawSongId.indexOf('&');
 
@@ -204,7 +205,7 @@ export class PlayCommand extends Command {
     private async updateToPlayList(event: Message, song: RawSongData) {
         const songData: RawSongData = await this.mapSongData(event, song);
 
-        if (songData.title && songData.duration) {
+        if (songData.title && songData.durationData) {
             const newSong: NewSongData = {
                 newSong: {
                     songName: songData.title,
@@ -261,7 +262,8 @@ export class PlayCommand extends Command {
             playListId = url
                 .replace('https://', '')
                 .replace('www.', '')
-                .replace('youtube.com/playlist?list=', '');
+                .replace('youtube.com/playlist?list=', '')
+                .replace(/^./, '');
 
             if (playListId.length < 3) {
                 return event.reply('Palylist bad request');

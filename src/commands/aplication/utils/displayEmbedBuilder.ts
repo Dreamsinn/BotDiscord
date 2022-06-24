@@ -65,7 +65,7 @@ export class DisplayEmbedBuilder {
         if (conectionStatus === 'destroyed') {
             title =
                 `${discordEmojis.problem} Es necesario reconectar el bot, usa los comandos:` +
-                `${process.env.PREFIX}p o ${process.env.PREFIX}join`;
+                ` ${process.env.PREFIX}p o ${process.env.PREFIX}join`;
             URL = null;
             return { title, URL };
         }
@@ -116,7 +116,7 @@ export class DisplayEmbedBuilder {
     }
 
     private mapLoopData(loop: boolean, playerStatus: string, conectionStatus: string): string {
-        if (!playerStatus || !conectionStatus) {
+        if (!playerStatus || !conectionStatus || conectionStatus === 'destroyed') {
             return '---';
         }
         if (loop) {
@@ -156,7 +156,13 @@ export class DisplayEmbedBuilder {
     }
 
     private mapSongThumbnailUrl(playinSong: SongData, playerStatus: string, conectionStatus: string) {
-        if (!playerStatus || !conectionStatus || conectionStatus === 'destroyed' || !playinSong) {
+        if (
+            !playerStatus ||
+            !conectionStatus ||
+            conectionStatus === 'destroyed' ||
+            !playinSong ||
+            playerStatus === 'idle'
+        ) {
             return;
         }
         if (playinSong.thumbnails) {
