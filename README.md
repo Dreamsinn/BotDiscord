@@ -34,6 +34,7 @@ Planned changes in the future:
 Let's take as an example that prefix is: ~
 
 **Music commands**
+
 `~p` or `~play`: Plays YouTube video audio. A song name or YouTube URL must follow it.
 
 `~pl` or `~playlist`: Send a message with the playlist.
@@ -59,6 +60,7 @@ Let's take as an example that prefix is: ~
 `~dc` or `~disconnect`: Disconnect the bot from the bot's current voice channel.
 
 **Others prefix commands**
+
 `~help` Creates an interactive message with which you can learn in-depth all the commands.
 
 `~dice` or `~roll`: Must be followed by on or off. Anable or disable dice command.
@@ -66,6 +68,7 @@ Let's take as an example that prefix is: ~
 `~reply`: Must be followed by on or off. Anable or disable reply command.
 
 **Non-prefix commands**
+
 These commands need to be activated by one of _Others prefix commands_. Once activated will read all messages and send a message if the content is correct.
 
 -   Dice command: Activated with YDX or DX, or YDX > Z being Y, X and Z numbers. Example: 3D5, D6, 7D10 or 3D6 <= 3.
