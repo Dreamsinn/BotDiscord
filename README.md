@@ -1,7 +1,8 @@
 # About
 
-An intuitive, easy to use, and designed by and for the user, single guild, music discord's bot, with dice function, in BETA state.\n
-Right now, it's only available in the spanish language and made to work only one guild at once.\n
+An intuitive, easy to use, and designed by and for the user, single guild, music discord's bot, with dice function, in BETA state.
+
+Right now, it's only available in the spanish language and made to work only one guild at once.
 Planned changes in the future:
 
 -   Language as env param.
