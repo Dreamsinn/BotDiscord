@@ -23,3 +23,5 @@
 - Skip en modo loop para la musica y unpause o pause no hace nada
 
 - Ha tocado una cancion hasta el final, ha acabado, y al poner la siguiente a sonado la primera, y no se podia pasar
+
+- limpiar lista no te resetea el timepo total playlist en los embeds de nueva cancion

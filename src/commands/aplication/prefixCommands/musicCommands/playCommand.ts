@@ -53,6 +53,11 @@ export class PlayCommand extends Command {
 
         const argument = event.content.substring(emptySpacePosition);
 
+        // si video desde mobil
+        if (argument.includes('https://youtu.be/')) {
+            return this.findSongIdFromMobileURL(argument, event);
+        }
+
         // si es una lista de youtube
         if (argument.includes('youtube.com/playlist?list=')) {
             return this.findYoutubePlayList(argument, event);
@@ -198,6 +203,17 @@ export class PlayCommand extends Command {
         }
 
         const song: RawSongData = { id: rawSongId.substring(0, URLParametersPosition) };
+
+        return this.updateToPlayList(event, song);
+    }
+
+    private findSongIdFromMobileURL(url: string, event: Message) {
+        // encontramos la id del video compartido desde el movil
+        const songId = url
+            .replace('https://youtu.be/', '')
+            .replace(/^./, '');
+
+        const song: RawSongData = { id: songId };
 
         return this.updateToPlayList(event, song);
     }
