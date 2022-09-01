@@ -49,6 +49,7 @@ export class PlayDlHandler implements PlayDlAPI {
         const song: YouTubeStream | SoundCloudStream = await play.stream(
             `https://www.youtube.com/watch?v=${songId}`,
         );
+        console.log('streming response:', song)
         return song;
     }
 }

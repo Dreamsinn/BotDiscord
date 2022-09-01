@@ -25,3 +25,16 @@
 - Ha tocado una cancion hasta el final, ha acabado, y al poner la siguiente a sonado la primera, y no se podia pasar
 
 - limpiar lista no te resetea el timepo total playlist en los embeds de nueva cancion
+
+- displayer: que este en un hilo creado para el
+
+buttons logic:    const interaction  = displayMessage.createMessageComponentCollector({ componentType: 'BUTTON', time: 15000 })
+
+                       interaction.on('collect', (collected) => {
+                           collected.deferUpdate()
+                           console.log(collected)
+                           if(collected.customId === 'next'){
+                               console.log('bien')
+                               return
+                           }
+                       })

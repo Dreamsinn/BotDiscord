@@ -6,13 +6,19 @@ import {
     Message,
     User,
 } from 'discord.js';
+import { MessageButtonStyles } from 'discord.js/typings/enums';
 import { SongData } from './songData';
 
 // hay mas opciones disponibles en MessageOptions
 export interface CreateMessageOptions {
     message?: MessageContent;
     embed?: EmbedOptions;
+    buttons?: ButtonRowList;
     pagination?: PaginationOptions;
+}
+
+export interface MessageContent {
+    content: string;
 }
 
 export interface EmbedOptions {
@@ -33,8 +39,24 @@ export interface EmbedOptions {
     footer?: EmbedFooterData;
 }
 
-export interface MessageContent {
-    content: string;
+export type ButtonRowList = [ButtonRow?, ButtonRow?, ButtonRow?, ButtonRow?, ButtonRow?];
+
+export type ButtonRow = [Button?, Button?, Button?, Button?, Button?];
+
+export interface Button {
+    style: ButtonsStyle;
+    label?: string;
+    custom_id?: string;
+    url?: string;
+    disabled?: boolean;
+}
+
+export enum ButtonsStyle{
+    BLUE = MessageButtonStyles.PRIMARY,
+    GREY = MessageButtonStyles.SECONDARY,
+    GRENN = MessageButtonStyles.SUCCESS,
+    RED = MessageButtonStyles.DANGER,
+    LINK = MessageButtonStyles.LINK
 }
 
 export interface PaginationOptions {
