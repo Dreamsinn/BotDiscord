@@ -3,9 +3,12 @@ import { DisplayPlayListCommandSchema } from '../../../domain/commandSchema/disp
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
+import {ButtonRowList, ButtonsStyle } from '../../../domain/interfaces/createEmbedOptions';
 import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
+import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
+import {DisplayButtonsIdEnum} from '../../../domain/displayButtonsIdEnum'
 
 export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
@@ -55,29 +58,27 @@ export class DisplayPlayListCommand extends Command {
 
     private reactionListener(event: Message, displayMessage: Message) {
         // Añade reacciones y escucha las reacciones recibidas, si se reacciona una de las añadidas: se borra relación y actúa dependiendo relación
-        const emojiList = this.addReactions(displayMessage);
+        this.addButtonsReactions(displayMessage);
 
-        const filter = (reaction: MessageReaction, user: User) => {
-            const userCondition = !user.bot;
-            const emojiCondition = emojiList.includes(reaction.emoji.name);
+        const collector  = displayMessage.createMessageComponentCollector({ componentType: 'BUTTON', time: 86400000 })
 
-            return userCondition && emojiCondition;
-        };
+        collector.on('collect', (collected) => {
+            // anular mensage de Interacción fallida
+            collected.deferUpdate()
 
-        const collector = displayMessage.createReactionCollector({ filter, time: 36000000 });
-        collector.on('collect', (collected, user) => {
-            this.deleteUserReaction(displayMessage, user);
             // si x borra el msenaje
-            if (collected.emoji.name === discordEmojis.x) {
+            if(collected.customId === DisplayButtonsIdEnum.CLOSE){
                 return collector.stop();
             }
+
             // si readme, y no esta el readme activo
-            if (collected.emoji.name === discordEmojis.readme && !this.showingReadme) {
+            if (collected.customId === DisplayButtonsIdEnum.README && !this.showingReadme) {
                 return this.createReadmeEmbed(event);
             }
 
-            return this.reactionHandler(collected);
-        });
+            this.reactionHandler(collected);
+            return
+        })
 
         collector.on('end', async () => {
             this.isDisplayActive = false;
@@ -89,43 +90,52 @@ export class DisplayPlayListCommand extends Command {
         });
     }
 
-    private addReactions(displayMessage: Message) {
-        displayMessage
-            .react(discordEmojis.musicEmojis.playOrPause)
-            .then(() => displayMessage.react(discordEmojis.musicEmojis.nextSong))
-            .then(() => displayMessage.react(discordEmojis.musicEmojis.loop))
-            .then(() => displayMessage.react(discordEmojis.musicEmojis.shuffle))
-            .then(() => displayMessage.react(discordEmojis.musicEmojis.clear))
-            .then(() => displayMessage.react(discordEmojis.readme))
-            .then(() => displayMessage.react(discordEmojis.x))
-            .catch((err) => {
-                console.log(err);
-            });
+    private addButtonsReactions(displayMessage: Message) {
+        const buttons: ButtonRowList = [
+            [
+                {
+                    style: ButtonsStyle.BLUE,
+                    label: `${discordEmojis.musicEmojis.playOrPause} Play/Pause`,
+                    custom_id: DisplayButtonsIdEnum.PLAY_PAUSE,
+                },
+                {
+                    style: ButtonsStyle.BLUE,
+                    label: `${discordEmojis.musicEmojis.nextSong} Next song`,
+                    custom_id: DisplayButtonsIdEnum.NEXT,
+                },
+                {
+                    style: ButtonsStyle.BLUE,
+                    label: `${discordEmojis.musicEmojis.loop} Loop mode`,
+                    custom_id: DisplayButtonsIdEnum.LOOP,
+                },
+                {
+                    style: ButtonsStyle.BLUE,
+                    label: `${discordEmojis.musicEmojis.shuffle} Shuffle`,
+                    custom_id: DisplayButtonsIdEnum.SHUFFLE,
+                }
+            ],
+            [
+                {
+                    style: ButtonsStyle.GRENN,
+                    label: `${discordEmojis.musicEmojis.clear} Clear Platlist`,
+                    custom_id: DisplayButtonsIdEnum.CLEAR,
+                },
+                {
+                    style: ButtonsStyle.GREY,
+                    label: `${discordEmojis.readme} Readme`,
+                    custom_id: DisplayButtonsIdEnum.README,
+                },
+                {
+                    style: ButtonsStyle.RED,
+                    label: `${discordEmojis.x} Close`,
+                    custom_id: DisplayButtonsIdEnum.CLOSE,
+                }
+            ]
+        ]
 
-        return [
-            discordEmojis.musicEmojis.playOrPause,
-            discordEmojis.musicEmojis.nextSong,
-            discordEmojis.musicEmojis.loop,
-            discordEmojis.musicEmojis.shuffle,
-            discordEmojis.musicEmojis.clear,
-            discordEmojis.readme,
-            discordEmojis.x,
-        ];
-    }
+        displayMessage.edit({components: new MessageButtonsCreator(buttons).call()})
 
-    private async deleteUserReaction(displayMessage: Message, user: User) {
-        const userReactions = displayMessage.reactions.cache.filter((reaction) =>
-            reaction.users.cache.has(user.id),
-        );
-
-        userReactions.map(
-            async (reaction) =>
-                await reaction.users.remove(user.id).catch(() => {
-                    console.error('Failed to remove reactions.');
-                }),
-        );
-
-        return;
+        return
     }
 
     private createReadmeEmbed(event: Message) {
@@ -189,26 +199,26 @@ export class DisplayPlayListCommand extends Command {
         return;
     }
 
-    private reactionHandler(collected: MessageReaction) {
-        const emoji = collected.emoji.name;
+    private reactionHandler(collected) {
+        const buttonId = collected.customId;
 
-        if (emoji === discordEmojis.musicEmojis.playOrPause) {
+        if (buttonId === DisplayButtonsIdEnum.PLAY_PAUSE) {
             return this.togglePlayPause();
         }
 
-        if (emoji === discordEmojis.musicEmojis.nextSong) {
+        if (buttonId === DisplayButtonsIdEnum.NEXT) {
             return this.playListHandler.skipMusic();
         }
 
-        if (emoji === discordEmojis.musicEmojis.loop) {
+        if (buttonId === DisplayButtonsIdEnum.LOOP) {
             return this.toggleLoopMode();
         }
 
-        if (emoji === discordEmojis.musicEmojis.shuffle) {
+        if (buttonId === DisplayButtonsIdEnum.SHUFFLE) {
             return this.playListHandler.shufflePlayList();
         }
 
-        if (emoji === discordEmojis.musicEmojis.clear) {
+        if (buttonId === DisplayButtonsIdEnum.CLEAR) {
             return this.playListHandler.deletePlayList();
         }
     }
