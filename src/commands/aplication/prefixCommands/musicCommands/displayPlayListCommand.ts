@@ -62,7 +62,7 @@ export class DisplayPlayListCommand extends Command {
 
         const collector  = displayMessage.createMessageComponentCollector({ componentType: 'BUTTON', time: 86400000 })
 
-        collector.on('collect', (collected) => {
+        collector.on('collect', async (collected) => {
             // anular mensage de Interacción fallida
             collected.deferUpdate()
 
@@ -76,7 +76,7 @@ export class DisplayPlayListCommand extends Command {
                 return this.createReadmeEmbed(event);
             }
 
-            this.reactionHandler(collected);
+            await this.reactionHandler(collected);
             return
         })
 
@@ -199,7 +199,7 @@ export class DisplayPlayListCommand extends Command {
         return;
     }
 
-    private reactionHandler(collected) {
+    private async reactionHandler(collected) {
         const buttonId = collected.customId;
 
         if (buttonId === DisplayButtonsIdEnum.PLAY_PAUSE) {
@@ -207,7 +207,7 @@ export class DisplayPlayListCommand extends Command {
         }
 
         if (buttonId === DisplayButtonsIdEnum.NEXT) {
-            return this.playListHandler.skipMusic();
+            return await this.playListHandler.skipMusic();
         }
 
         if (buttonId === DisplayButtonsIdEnum.LOOP) {

@@ -25,7 +25,7 @@ export class SkipMusicCommand extends Command {
             return;
         }
 
-        const skipedMusic: SongData = this.playListHandler.skipMusic();
+        const skipedMusic: SongData = await this.playListHandler.skipMusic();
 
         if (!skipedMusic) {
             return;
