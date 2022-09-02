@@ -283,8 +283,31 @@ export class PlayListHandler {
         return;
     }
 
-    public skipMusic() {
+    public async skipMusic() {
         let musicToSkip: SongData;
+
+        if(this.player._state.status === 'paused'){
+            // arregla el bug que el display no saltava las canciones cuando la musica estava en pause
+            // buscar mejor solucion que modificar un readonly
+            musicToSkip = this.playList[0];
+            if (this.loopMode) {
+                this.playList.push(this.playList[0]);
+            }
+            this.playList.shift()
+
+            if(this.playList[0]){
+                await this.playMusic()
+                this.player._state.status = 'paused'
+            } else {
+                this.player._state.status = 'idle'
+            }
+
+            if (this.isDisplay.active) {
+                this.sendPlayListDataToDisplay(false);
+            }
+            return musicToSkip;
+        }
+
         if (this.player) {
             musicToSkip = this.playList[0];
             this.player.stop();
