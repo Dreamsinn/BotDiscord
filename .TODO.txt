@@ -28,13 +28,48 @@
 
 - displayer: que este en un hilo creado para el
 
-buttons logic:    const interaction  = displayMessage.createMessageComponentCollector({ componentType: 'BUTTON', time: 15000 })
+- delet emojis:  private async deleteUserReaction(displayMessage: Message, user: User) {
+                        const userReactions = displayMessage.reactions.cache.filter((reaction) =>
+                            reaction.users.cache.has(user.id),
+                        );
 
-                       interaction.on('collect', (collected) => {
-                           collected.deferUpdate()
-                           console.log(collected)
-                           if(collected.customId === 'next'){
-                               console.log('bien')
-                               return
-                           }
-                       })
+                        userReactions.map(
+                            async (reaction) =>
+                                await reaction.users.remove(user.id).catch(() => {
+                                    console.error('Failed to remove reactions.');
+                                }),
+                        );
+
+                        return;
+                    }
+
+- recion a emojis: const filter = (reaction: MessageReaction, user: User) => {
+                           //     const userCondition = !user.bot;
+                           //     const emojiCondition = emojiList.includes(reaction.emoji.name);
+                           //
+                           //     return userCondition && emojiCondition;
+                           // };
+
+                           // const collector = displayMessage.createReactionCollector({ filter, time: 36000000 });
+                           // collector.on('collect', (collected, user) => {
+                           //     this.deleteUserReaction(displayMessage, user);
+                           //     // si x borra el msenaje
+                           //     if (collected.emoji.name === discordEmojis.x) {
+                           //         return collector.stop();
+                           //     }
+                           //     // si readme, y no esta el readme activo
+                           //     if (collected.emoji.name === discordEmojis.readme && !this.showingReadme) {
+                           //         return this.createReadmeEmbed(event);
+                           //     }
+                           //
+                           //     return this.reactionHandler(collected);
+                           // });
+                           //
+                           // collector.on('end', async () => {
+                           //     this.isDisplayActive = false;
+                           //     this.playListHandler.deactivateDisplay();
+                           //
+                           //     displayMessage.delete().catch(() => console.log('Display has been deleted.'));
+                           //     await event.channel.send('Display ha cesado su funcionamiento.');
+                           //     return;
+                           // });
