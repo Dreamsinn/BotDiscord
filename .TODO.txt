@@ -12,22 +12,6 @@
                     return route.command.call(event);
                 }
 
-- Rama master quitar eslint y mirar si hay algun prosproducion de ts
-
-- Regex para las busqueda de un mensaje, para no tener que hacer opcion minuscula y mayusucla, un util
-
-- Test
-
-- Skipear no quita cancion de la cola (por lomenos con los mebeds no sale asi)
-
-- Skip en modo loop para la musica y unpause o pause no hace nada
-
-- Ha tocado una cancion hasta el final, ha acabado, y al poner la siguiente a sonado la primera, y no se podia pasar
-
-- limpiar lista no te resetea el timepo total playlist en los embeds de nueva cancion
-
-- displayer: que este en un hilo creado para el
-
 - delet emojis:  private async deleteUserReaction(displayMessage: Message, user: User) {
                         const userReactions = displayMessage.reactions.cache.filter((reaction) =>
                             reaction.users.cache.has(user.id),
@@ -73,3 +57,14 @@
                            //     await event.channel.send('Display ha cesado su funcionamiento.');
                            //     return;
                            // });
+- Rama master quitar eslint y mirar si hay algun prosproducion de ts
+
+- Regex para las busqueda de un mensaje, para no tener que hacer opcion minuscula y mayusucla, un util
+
+- Test
+
+- Ha tocado una cancion hasta el final, ha acabado, y al poner la siguiente a sonado la primera, y no se podia pasar
+
+- limpiar lista no te resetea el timepo total playlist en los embeds de nueva cancion
+
+- Si getSongInfo, no tiene duracion y la cancion no llega tocarse

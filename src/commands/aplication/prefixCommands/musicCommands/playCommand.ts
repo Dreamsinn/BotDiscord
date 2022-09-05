@@ -3,6 +3,7 @@ import { YouTubeVideo } from 'play-dl';
 import { PlayCommandSchema } from '../../../domain/commandSchema/playCommandSchema';
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { Command } from '../../../domain/interfaces/Command';
+import { APIResponse } from '../../../domain/interfaces/APIResponse';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { NewSongData, RawSongData, SongData } from '../../../domain/interfaces/songData';
 import { PlayDlHandler } from '../../../infrastructure/playDlHandler';
@@ -77,30 +78,33 @@ export class PlayCommand extends Command {
     }
 
     private async searchBySongName(argument: string, event: Message) {
-        let response: RawSongData[];
+        let musicData: RawSongData[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
-        try {
-            response = await this.playDlHandler.searchSongByName(argument);
-        } catch (err) {
-            console.log(`Play-dl Search Error: ${err}`);
-            event.channel.send(`Play-dl Search Error: ${err}`);
 
-            try {
-                response = await this.youtubeAPIHandler.searchSongByName(argument);
-            } catch (err) {
-                console.log(err);
-                event.channel.send(err);
-                event.channel.send(`It has not been possible to get song's options`);
+        const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.searchSongByName(argument);
+
+        if(playDlResponse.isError){
+            console.log(`Play-dl Search by name Error: ${playDlResponse.errorData}`);
+
+            const youtubeResponse = await this.youtubeAPIHandler.searchSongByName(argument);
+
+            if(youtubeResponse.isError){
+                console.log('Youtube Search by name Error:', youtubeResponse.errorData);
+                event.channel.send(`It has not been possible to get song's data`);
                 return;
             }
+
+            musicData = youtubeResponse.data
+        } else {
+            musicData = playDlResponse.data
         }
 
-        if (!response[0]) {
+        if (!musicData[0]) {
             event.channel.send('No hay coincidencias');
             return;
         }
 
-        const { output, numberChoices } = this.createSelectChoicesEmbed(response);
+        const { output, numberChoices } = this.createSelectChoicesEmbed(musicData);
 
         // subimos al usuario a la lista para que no pueda usar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id);
@@ -137,7 +141,7 @@ export class PlayCommand extends Command {
 
                 const numberSelected = Number(collectedMessage.content) - 1;
 
-                const song: RawSongData = response[numberSelected];
+                const song: RawSongData = musicData[numberSelected];
 
                 // eleminamos opciones
                 message.delete();
@@ -148,7 +152,7 @@ export class PlayCommand extends Command {
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
-                    console.log(err);
+                    console.log('Select music colector error: ', err);
                     event.channel.send(`Error: ${err.message}`);
                 } else {
                     // sino contesta
@@ -218,7 +222,6 @@ export class PlayCommand extends Command {
 
     private async updateToPlayList(event: Message, song: RawSongData) {
         const songData: RawSongData = await this.mapSongData(event, song);
-
         if (songData.title && songData.durationData) {
             const newSong: NewSongData = {
                 newSong: {
@@ -239,32 +242,30 @@ export class PlayCommand extends Command {
     private async mapSongData(event: Message, song: RawSongData): Promise<RawSongData> {
         // optenemos duracion y nombre
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
-
-        try {
-            const searchedSongData: YouTubeVideo = await this.playDlHandler.getSongInfo(song.id);
+        const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlHandler.getSongInfo(song.id);
+        if(!playDlResponse.isError){
             if (!song.title) {
-                song.title = searchedSongData.title;
+                song.title = playDlResponse.data.title;
             }
-            song.durationData = this.parseSongDuration(String(searchedSongData.durationInSec), true);
-            song.thumbnails = searchedSongData.thumbnails[3].url;
+            song.durationData = this.parseSongDuration(String(playDlResponse.data.durationInSec), true);
+            song.thumbnails = playDlResponse.data.thumbnails[3].url;
             return song;
-        } catch (err) {
-            console.log(`Play-dl Data Error: ${err}`);
+        }
+        console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
+
+        // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
+        const youtubeResponse: APIResponse<RawSongData> = await this.youtubeAPIHandler.searchSongById(song.id);
+        if(!youtubeResponse.isError){
+            if (!song.title) {
+                song.title = youtubeResponse.data.title;
+            }
+            song.durationData = this.parseSongDuration(youtubeResponse.data.durationString, false);
+            song.thumbnails = youtubeResponse.data.thumbnails;
+            return song;
         }
 
-        try {
-            // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
-            const searchedSongData: RawSongData = await this.youtubeAPIHandler.searchSongById(song.id);
-            if (!song.title) {
-                song.title = searchedSongData.title;
-            }
-            song.durationData = this.parseSongDuration(searchedSongData.durationString, false);
-            song.thumbnails = searchedSongData.thumbnails;
-            return song;
-        } catch (err) {
-            event.channel.send(`It has not been possible to get song's information`);
-            console.log(`YoutubeAPI Error: ${err}`);
-        }
+        event.channel.send(`It has not been possible to get song's information`);
+        console.log(`YoutubeAPI getSongInfo Error: ${youtubeResponse.errorData}`);
         return song;
     }
 
@@ -284,17 +285,19 @@ export class PlayCommand extends Command {
             }
 
             // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
-            try {
-                const playListData: RawSongData[] = await this.playDlHandler.getSognsInfoFromPlayList(
-                    url,
-                );
-                return this.mapPlayDLPlayListData(event, playListData);
-            } catch (err) {
-                event.channel.send(
-                    'Play-dl failed to fectch PlayList, it will be tried with Youtube API',
-                );
-                return this.fetchYoutubePlayListData(event, playListId, url);
+            const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.getSognsInfoFromPlayList(
+                url,
+            );
+
+            if(!playDlResponse.isError){
+                return this.mapPlayDLPlayListData(event, playDlResponse.data);
             }
+            // si Play-dl falla
+            event.channel.send(
+                'Play-dl failed to fectch PlayList, it will be tried with Youtube API',
+            );
+            console.log('PlayDl getSognsInfoFromPlayList Error:', playDlResponse.errorData)
+            return this.fetchYoutubePlayListData(event, playListId, url);
         }
         // si esta reproduciendo un video
         const playListIdPosition = url.search('&list=');
@@ -361,16 +364,17 @@ export class PlayCommand extends Command {
                 // play playList
                 if (['y', 'Y'].includes(collectedMessage.content)) {
                     message.delete();
-                    try {
-                        const playListData: RawSongData[] =
-                            await this.playDlHandler.getSognsInfoFromPlayList(url);
-
-                        return this.mapPlayDLPlayListData(event, playListData);
-                    } catch (err) {
-                        event.channel.send(
-                            'Play-dl failed to fectch PlayList, it will be tried with Youtube API',
-                        );
+                    const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.getSognsInfoFromPlayList(
+                        url,
+                    );
+                    if(!playDlResponse.isError){
+                        return this.mapPlayDLPlayListData(event, playDlResponse.data);
                     }
+
+                    console.log('playDl getSognsInfoFromPlayList Error: ', playDlResponse.errorData)
+                    event.channel.send(
+                        'Play-dl failed to fectch PlayList, it will be tried with Youtube API',
+                    );
                     return this.fetchYoutubePlayListData(event, playListId, url);
                 }
             })
@@ -405,11 +409,10 @@ export class PlayCommand extends Command {
 
     private async fetchYoutubePlayListData(event: Message, playListId: string, url: string) {
         // llama a la API de youtube, si esta tambien falla y esta sonando un video reproduce el video
-        let rawPlayList: RawSongData[];
-        try {
-            rawPlayList = await this.youtubeAPIHandler.searchPlaylist(playListId);
-        } catch (err) {
-            console.log(`YoutubeAPI Error: ${err}`);
+        const youtubeResponse: APIResponse<RawSongData[]> = await this.youtubeAPIHandler.searchPlaylist(playListId);
+
+        if(youtubeResponse.isError){
+            console.log(`YoutubeAPI searchPlaylist Error: ${youtubeResponse.errorData}`);
             event.channel.send(`It has not been possible to get playList`);
             if (url.includes('watch?v=')) {
                 event.channel.send(`Instead, song will be played`);
@@ -417,8 +420,9 @@ export class PlayCommand extends Command {
             }
             return;
         }
+
         // por cada video llama a la api para obtener la informacion
-        const playlist: SongData[] = await this.mapSongListData(event, rawPlayList);
+        const playlist: SongData[] = await this.mapSongListData(event, youtubeResponse.data);
 
         return this.updatePlayListWithAPlayList(event, playlist);
     }
