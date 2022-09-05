@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from 'discord.js';
+import { EmbedFieldData, Message, TextChannel } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { PlayListStatus } from '../../domain/interfaces/PlayListStatus';
@@ -17,8 +17,12 @@ export class DisplayEmbedBuilder {
             embed: await this.setEmbedOptionsData(),
         }).call();
 
+
+        const thread = await this.selectChannel(event)
+
+
         if (newEmbed) {
-            return (this.displayMessage = await event.channel.send(output));
+            return (this.displayMessage = await thread.send(output));
         }
 
         await this.displayMessage.edit(output).catch(() => {
@@ -26,6 +30,30 @@ export class DisplayEmbedBuilder {
         });
 
         return;
+    }
+
+    private async selectChannel(event){
+        let threadChannel;
+
+        event.channel.threads.cache.find((thread)=>{
+            if(thread.name === 'Displayer'){
+                threadChannel = thread
+            }
+        })
+        if(threadChannel){
+            return threadChannel
+        }
+
+        if(!event.channel.isThread()){
+            return await event.startThread({
+                name: 'Displayer',
+                autoArchiveDuration: 60,
+                reason: 'Hilo para el controlador de musica',
+            });
+
+        }
+
+        return event.channel
     }
 
     private async setEmbedOptionsData(): Promise<EmbedOptions> {
