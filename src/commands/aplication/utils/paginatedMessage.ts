@@ -9,7 +9,7 @@ import {
     PaginationOptions,
 } from '../../domain/interfaces/createEmbedOptions';
 import { SongData } from '../../domain/interfaces/songData';
-import { PaginationButtonsId } from '../../domain/paginationButtonsId';
+import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 import { MessageCreator } from './messageCreator';
 
@@ -146,17 +146,17 @@ export class PaginatedMessage {
                 {
                     style: ButtonsStyle.BLUE,
                     label: discordEmojis['<-'],
-                    custom_id: PaginationButtonsId.PREV,
+                    custom_id: PaginationButtonsIdEnum.PREV,
                 },
                 {
                     style: ButtonsStyle.BLUE,
                     label: discordEmojis['->'],
-                    custom_id: PaginationButtonsId.NEXT,
+                    custom_id: PaginationButtonsIdEnum.NEXT,
                 },
                 {
                     style: ButtonsStyle.RED,
                     label: discordEmojis.x,
-                    custom_id: PaginationButtonsId.X,
+                    custom_id: PaginationButtonsIdEnum.X,
                 },
             ],
         ];
@@ -174,7 +174,7 @@ export class PaginatedMessage {
         collector.on('collect', (collected) => {
             // anular mensage de Interacción fallida
             collected.deferUpdate();
-            if (collected.customId === PaginationButtonsId.X) {
+            if (collected.customId === PaginationButtonsIdEnum.X) {
                 // kill collector
                 return collector.stop();
             }
@@ -200,12 +200,12 @@ export class PaginatedMessage {
 
         const collectedId = collected.customId;
         // si se ha tirado hacia atras, y la pagina es superior a 0: disminuimos pagina
-        if (collectedId === PaginationButtonsId.PREV && this.page > 1) {
+        if (collectedId === PaginationButtonsIdEnum.PREV && this.page > 1) {
             pageChanged = true;
             this.page--;
         }
         // si se ha tiarado hacia delante, y la pagina es inferior a la pagina maxima: aumentamos pagina
-        if (collectedId === PaginationButtonsId.NEXT && this.page < maxPage) {
+        if (collectedId === PaginationButtonsIdEnum.NEXT && this.page < maxPage) {
             pageChanged = true;
             this.page++;
         }
