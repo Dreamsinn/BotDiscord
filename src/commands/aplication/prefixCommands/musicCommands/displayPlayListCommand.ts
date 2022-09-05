@@ -16,6 +16,7 @@ export class DisplayPlayListCommand extends Command {
     private playListHandler: PlayListHandler;
     private isDisplayActive = false;
     private showingReadme = false;
+    private collector;
 
     constructor(playListHandler: PlayListHandler) {
         super();
@@ -29,7 +30,11 @@ export class DisplayPlayListCommand extends Command {
             console.log('command interrupted by cooldown');
             return;
         }
-
+        
+        if(event.content.includes('kill')){
+            return this.collector.stop()
+        }
+        
         // si ya hay un display activo
         if (this.isDisplayActive) {
             event.channel
@@ -60,15 +65,15 @@ export class DisplayPlayListCommand extends Command {
         // Añade reacciones y escucha las reacciones recibidas, si se reacciona una de las añadidas: se borra relación y actúa dependiendo relación
         this.addButtonsReactions(displayMessage);
 
-        const collector  = displayMessage.createMessageComponentCollector({ componentType: 'BUTTON', time: 86400000 })
+        this.collector = displayMessage.createMessageComponentCollector({ componentType: 'BUTTON', time: 86400000 })
 
-        collector.on('collect', async (collected) => {
+        this.collector.on('collect', async (collected) => {
             // anular mensage de Interacción fallida
             collected.deferUpdate()
 
             // si x borra el msenaje
             if(collected.customId === DisplayButtonsIdEnum.CLOSE){
-                return collector.stop();
+                return  this.collector.stop();
             }
 
             // si readme, y no esta el readme activo
@@ -80,7 +85,7 @@ export class DisplayPlayListCommand extends Command {
             return
         })
 
-        collector.on('end', async () => {
+        this.collector.on('end', async () => {
             this.isDisplayActive = false;
             this.playListHandler.deactivateDisplay();
 
