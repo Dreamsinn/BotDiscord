@@ -61,7 +61,11 @@ export class PlayDlHandler implements PlayDlAPI {
                     title: songData.title,
                     id: songData.id,
                     duration: songData.durationInSec,
-                    thumbnails: songData.thumbnails[4].url,
+                    thumbnails: songData.thumbnails[3] ? songData.thumbnails[3].url :
+                        songData.thumbnails[2] ? songData.thumbnails[2].url :
+                            songData.thumbnails[1] ? songData.thumbnails[1].url :
+                                songData.thumbnails[0] ? songData.thumbnails[0].url :
+                                    null,
                 };
                 playList.push(newSong);
             });
