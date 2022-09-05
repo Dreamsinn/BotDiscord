@@ -1,4 +1,4 @@
-import { Message, MessageReaction, User } from 'discord.js';
+import { Message } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import {
     ButtonRowList,
@@ -8,8 +8,8 @@ import {
     MessageContent,
     PaginationOptions,
 } from '../../domain/interfaces/createEmbedOptions';
-import { PaginationButtonsId } from '../../domain/paginationButtonsId'
 import { SongData } from '../../domain/interfaces/songData';
+import { PaginationButtonsId } from '../../domain/paginationButtonsId';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 import { MessageCreator } from './messageCreator';
 
@@ -49,7 +49,7 @@ export class PaginatedMessage {
             return;
         }
 
-        this.addButtonsReactions(paginatedMessage)
+        this.addButtonsReactions(paginatedMessage);
 
         this.reactionListener(paginatedMessage, maxPage);
 
@@ -118,19 +118,19 @@ export class PaginatedMessage {
                     this.paginatedStringData.length === 1 && this.embed.description
                         ? this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`
                         : this.paginatedStringData.length === 1
-                            ? this.paginatedStringData[this.page - 1]
-                            : this.embed.description
-                                ? this.embed.description
-                                : null,
+                        ? this.paginatedStringData[this.page - 1]
+                        : this.embed.description
+                        ? this.embed.description
+                        : null,
                 thumbnailUrl: this.embed.thumbnailUrl ? this.embed.thumbnailUrl : null,
                 fields: this.embed.fields ? this.embed.fields : null,
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                            value: `${this.paginatedStringData[this.page - 1]}`,
-                            inline: false,
-                        }
+                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                              value: `${this.paginatedStringData[this.page - 1]}`,
+                              inline: false,
+                          }
                         : null,
                 imageUrl: this.embed.imageUrl ? this.embed.imageUrl : null,
                 timeStamp: this.embed.timeStamp ? this.embed.timeStamp : null,
@@ -140,7 +140,7 @@ export class PaginatedMessage {
         return output;
     }
 
-    private addButtonsReactions(paginatedMessage: Message){
+    private addButtonsReactions(paginatedMessage: Message) {
         const buttons: ButtonRowList = [
             [
                 {
@@ -157,27 +157,29 @@ export class PaginatedMessage {
                     style: ButtonsStyle.RED,
                     label: discordEmojis.x,
                     custom_id: PaginationButtonsId.X,
-                }
-            ]
-        ]
-        paginatedMessage.edit({components: new MessageButtonsCreator(buttons).call()})
+                },
+            ],
+        ];
+        paginatedMessage.edit({ components: new MessageButtonsCreator(buttons).call() });
 
-        return
+        return;
     }
 
     private reactionListener(message: Message, maxPage: number) {
+        const collector = message.createMessageComponentCollector({
+            componentType: 'BUTTON',
+            time: this.pagination.timeOut,
+        });
 
-        const collector = message.createMessageComponentCollector({ componentType: 'BUTTON', time: this.pagination.timeOut })
-        
-        collector.on('collect', collected => {
+        collector.on('collect', (collected) => {
             // anular mensage de Interacción fallida
-            collected.deferUpdate()
+            collected.deferUpdate();
             if (collected.customId === PaginationButtonsId.X) {
                 // kill collector
                 return collector.stop();
             }
             this.reactionHandler(message, collected, maxPage);
-        })
+        });
 
         collector.on('end', async () => {
             const output = new MessageCreator({

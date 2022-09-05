@@ -1,5 +1,5 @@
-import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { discordEmojis } from '../discordEmojis';
+import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const DisplayPlayListCommandSchema: CommandSchema = {

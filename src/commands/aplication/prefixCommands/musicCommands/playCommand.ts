@@ -209,9 +209,7 @@ export class PlayCommand extends Command {
 
     private findSongIdFromMobileURL(url: string, event: Message) {
         // encontramos la id del video compartido desde el movil
-        const songId = url
-            .replace('https://youtu.be/', '')
-            .replace(/^./, '');
+        const songId = url.replace('https://youtu.be/', '').replace(/^./, '');
 
         const song: RawSongData = { id: songId };
 
