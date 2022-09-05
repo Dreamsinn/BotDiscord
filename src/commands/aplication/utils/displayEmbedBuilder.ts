@@ -22,7 +22,10 @@ export class DisplayEmbedBuilder {
 
 
         if (newEmbed) {
-            return (this.displayMessage = await thread.send(output));
+            return {
+                thread: thread,
+                message: this.displayMessage = await thread.send(output)
+            };
         }
 
         await this.displayMessage.edit(output).catch(() => {
