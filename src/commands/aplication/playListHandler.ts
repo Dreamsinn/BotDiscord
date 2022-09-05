@@ -37,6 +37,9 @@ export class PlayListHandler {
             this.playList.push(newSong);
         }
 
+        // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
+        this.playListDuration = this.calculateListDuration(this.playList);
+
         if (songList) {
             await this.newListToPlayListEmbed(member, songList, channel);
         } else {
@@ -47,9 +50,6 @@ export class PlayListHandler {
         if (this.isDisplay.active) {
             this.sendPlayListDataToDisplay(false);
         }
-
-        // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
-        this.playListDuration = this.calculateListDuration(this.playList);
 
         // si no hay conexion o se ha desconectado el bot dle canal de voz, que entablezca una nueva conexion
         if (!this.botConnection || this.botConnection._state.status === 'destroyed') {
@@ -85,7 +85,7 @@ export class PlayListHandler {
                 fields: [
                     {
                         name: 'Duracion',
-                        value: `${this.getQeueDuration(songListDuration)}`,
+                        value: this.getQeueDuration(songListDuration),
                         inline: true,
                     },
                     {
@@ -95,7 +95,7 @@ export class PlayListHandler {
                     },
                     {
                         name: 'Espera',
-                        value: `${this.getQeueDuration(this.playListDuration)}`,
+                        value: this.getQeueDuration(this.playListDuration),
                         inline: true,
                     },
                     {
@@ -133,7 +133,7 @@ export class PlayListHandler {
                     { name: 'Posicion', value: `${this.playList.length}`, inline: true },
                     {
                         name: 'Espera',
-                        value: `${this.getQeueDuration(this.playListDuration)}`,
+                        value: this.getQeueDuration(this.playListDuration),
                         inline: true,
                     },
                     {
