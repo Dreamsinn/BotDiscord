@@ -1,12 +1,16 @@
 import { Message, MessageReaction, User } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import {
+    ButtonRowList,
+    ButtonsStyle,
     CreateMessageOptions,
     EmbedOptions,
     MessageContent,
     PaginationOptions,
 } from '../../domain/interfaces/createEmbedOptions';
+import { PaginationButtonsId } from '../../domain/paginationButtonsId'
 import { SongData } from '../../domain/interfaces/songData';
+import { MessageButtonsCreator } from './messageButtonsCreator';
 import { MessageCreator } from './messageCreator';
 
 export class PaginatedMessage {
@@ -45,9 +49,7 @@ export class PaginatedMessage {
             return;
         }
 
-        paginatedMessage.react(discordEmojis['<-']);
-        paginatedMessage.react(discordEmojis['->']);
-        paginatedMessage.react(discordEmojis.x);
+        this.addButtonsReactions(paginatedMessage)
 
         this.reactionListener(paginatedMessage, maxPage);
 
@@ -138,32 +140,44 @@ export class PaginatedMessage {
         return output;
     }
 
+    private addButtonsReactions(paginatedMessage: Message){
+        const buttons: ButtonRowList = [
+            [
+                {
+                    style: ButtonsStyle.BLUE,
+                    label: discordEmojis['<-'],
+                    custom_id: PaginationButtonsId.PREV,
+                },
+                {
+                    style: ButtonsStyle.BLUE,
+                    label: discordEmojis['->'],
+                    custom_id: PaginationButtonsId.NEXT,
+                },
+                {
+                    style: ButtonsStyle.RED,
+                    label: discordEmojis.x,
+                    custom_id: PaginationButtonsId.X,
+                }
+            ]
+        ]
+        paginatedMessage.edit({components: new MessageButtonsCreator(buttons).call()})
+
+        return
+    }
+
     private reactionListener(message: Message, maxPage: number) {
-        const filter = (reaction: MessageReaction, user: User) => {
-            let userCondition: boolean;
-            if (this.pagination.author) {
-                userCondition = this.pagination.author.id === user.id;
-            } else {
-                userCondition = !user.bot;
-            }
-            const emojiCondition = [discordEmojis['<-'], discordEmojis['->'], discordEmojis.x].includes(
-                reaction.emoji.name,
-            );
 
-            return userCondition && emojiCondition;
-        };
-
-        const collector = message.createReactionCollector({
-            filter,
-            time: this.pagination.timeOut,
-        });
-        collector.on('collect', (collected, user) => {
-            if (collected.emoji.name === discordEmojis.x) {
+        const collector = message.createMessageComponentCollector({ componentType: 'BUTTON', time: this.pagination.timeOut })
+        
+        collector.on('collect', collected => {
+            // anular mensage de Interacción fallida
+            collected.deferUpdate()
+            if (collected.customId === PaginationButtonsId.X) {
                 // kill collector
                 return collector.stop();
             }
-            return this.reactionHandler(message, collected, user, maxPage);
-        });
+            this.reactionHandler(message, collected, maxPage);
+        })
 
         collector.on('end', async () => {
             const output = new MessageCreator({
@@ -179,19 +193,17 @@ export class PaginatedMessage {
         });
     }
 
-    private reactionHandler(message: Message, collected: MessageReaction, user: User, maxPage: number) {
-        this.deleteUserReaction(message, user);
-
+    private reactionHandler(message: Message, collected, maxPage: number) {
         let pageChanged: boolean;
 
-        const emoji = collected.emoji.name;
+        const collectedId = collected.customId;
         // si se ha tirado hacia atras, y la pagina es superior a 0: disminuimos pagina
-        if (emoji === discordEmojis['<-'] && this.page > 1) {
+        if (collectedId === PaginationButtonsId.PREV && this.page > 1) {
             pageChanged = true;
             this.page--;
         }
         // si se ha tiarado hacia delante, y la pagina es inferior a la pagina maxima: aumentamos pagina
-        if (emoji === discordEmojis['->'] && this.page < maxPage) {
+        if (collectedId === PaginationButtonsId.NEXT && this.page < maxPage) {
             pageChanged = true;
             this.page++;
         }
@@ -203,17 +215,5 @@ export class PaginatedMessage {
             return message.edit(output);
         }
         return;
-    }
-
-    private async deleteUserReaction(message: Message, user: User) {
-        const userReactions = message.reactions.cache.filter((reaction) =>
-            reaction.users.cache.has(user.id),
-        );
-
-        try {
-            userReactions.map(async (reaction) => await reaction.users.remove(user.id));
-        } catch (error) {
-            console.error('Failed to remove reactions.');
-        }
     }
 }
