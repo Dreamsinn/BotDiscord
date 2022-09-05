@@ -1,4 +1,4 @@
-export enum PaginationButtonsId {
+export enum PaginationButtonsIdEnum {
     PREV = 'prevPageButton',
     NEXT = 'nextPageButton',
     X = 'closePagination',
