@@ -51,12 +51,12 @@ export interface Button {
     disabled?: boolean;
 }
 
-export enum ButtonsStyle{
+export enum ButtonsStyle {
     BLUE = MessageButtonStyles.PRIMARY,
     GREY = MessageButtonStyles.SECONDARY,
     GRENN = MessageButtonStyles.SUCCESS,
     RED = MessageButtonStyles.DANGER,
-    LINK = MessageButtonStyles.LINK
+    LINK = MessageButtonStyles.LINK,
 }
 
 export interface PaginationOptions {

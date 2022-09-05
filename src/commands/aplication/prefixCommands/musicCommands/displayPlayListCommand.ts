@@ -1,15 +1,15 @@
-import { Message, MessageReaction, User } from 'discord.js';
+import { Message } from 'discord.js';
 import { DisplayPlayListCommandSchema } from '../../../domain/commandSchema/displayPlayListCommandSchema';
 import { discordEmojis } from '../../../domain/discordEmojis';
+import { DisplayButtonsIdEnum } from '../../../domain/enums/displayButtonsIdEnum';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import {ButtonRowList, ButtonsStyle } from '../../../domain/interfaces/createEmbedOptions';
+import { ButtonRowList, ButtonsStyle } from '../../../domain/interfaces/createEmbedOptions';
+import { DisplayMessage } from '../../../domain/interfaces/displayMessage';
 import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
-import {DisplayButtonsIdEnum} from '../../../domain/enums/displayButtonsIdEnum'
-import { DisplayMessage } from '../../../domain/interfaces/displayMessage'
 
 export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
@@ -31,11 +31,11 @@ export class DisplayPlayListCommand extends Command {
             console.log('command interrupted by cooldown');
             return;
         }
-        
-        if(event.content.includes('kill')){
-            return this.collector.stop()
+
+        if (event.content.includes('kill')) {
+            return this.collector.stop();
         }
-        
+
         // si ya hay un display activo
         if (this.isDisplayActive) {
             event.channel
@@ -66,15 +66,18 @@ export class DisplayPlayListCommand extends Command {
         // Añade reacciones y escucha las reacciones recibidas, si se reacciona una de las añadidas: se borra relación y actúa dependiendo relación
         this.addButtonsReactions(display.message);
 
-        this.collector = display.message.createMessageComponentCollector({ componentType: 'BUTTON', time: 86400000 })
+        this.collector = display.message.createMessageComponentCollector({
+            componentType: 'BUTTON',
+            time: 86400000,
+        });
 
         this.collector.on('collect', async (collected) => {
             // anular mensage de Interacción fallida
-            collected.deferUpdate()
+            collected.deferUpdate();
 
             // si x borra el msenaje
-            if(collected.customId === DisplayButtonsIdEnum.CLOSE){
-                return  this.collector.stop();
+            if (collected.customId === DisplayButtonsIdEnum.CLOSE) {
+                return this.collector.stop();
             }
 
             // si readme, y no esta el readme activo
@@ -83,14 +86,14 @@ export class DisplayPlayListCommand extends Command {
             }
 
             await this.reactionHandler(collected);
-            return
-        })
+            return;
+        });
 
         this.collector.on('end', async () => {
             this.isDisplayActive = false;
             this.playListHandler.deactivateDisplay();
-            
-            display.thread.delete().catch(() => console.log('Display\' thread has been deleted.'))
+
+            display.thread.delete().catch(() => console.log("Display' thread has been deleted."));
             display.message.delete().catch(() => console.log('Display has been deleted.'));
             await event.channel.send('Display ha cesado su funcionamiento.');
             return;
@@ -119,7 +122,7 @@ export class DisplayPlayListCommand extends Command {
                     style: ButtonsStyle.BLUE,
                     label: `${discordEmojis.musicEmojis.shuffle} Shuffle`,
                     custom_id: DisplayButtonsIdEnum.SHUFFLE,
-                }
+                },
             ],
             [
                 {
@@ -136,13 +139,13 @@ export class DisplayPlayListCommand extends Command {
                     style: ButtonsStyle.RED,
                     label: `${discordEmojis.x} Close`,
                     custom_id: DisplayButtonsIdEnum.CLOSE,
-                }
-            ]
-        ]
+                },
+            ],
+        ];
 
-        displayMessage.edit({components: new MessageButtonsCreator(buttons).call()})
+        displayMessage.edit({ components: new MessageButtonsCreator(buttons).call() });
 
-        return
+        return;
     }
 
     private createReadmeEmbed(display: DisplayMessage) {

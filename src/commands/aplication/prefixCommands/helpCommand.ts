@@ -1,5 +1,4 @@
 import { EmbedFieldData, Message } from 'discord.js';
-import { CommandsCategoryEnum } from '../../domain/enums/commandsCategoryEnum';
 import { ClearPlayListCommandSchema } from '../../domain/commandSchema/clearPlayListCommandSchema';
 import { DiceCommandSchema } from '../../domain/commandSchema/diceCommandSchema';
 import { DiceCommandTogglerSchema } from '../../domain/commandSchema/diceCommandTogglerSchema';
@@ -17,6 +16,7 @@ import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyComma
 import { ShufflePlayListCommandSchema } from '../../domain/commandSchema/shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from '../../domain/commandSchema/skipMusicCommandSchema';
 import { UnpauseCommandSchema } from '../../domain/commandSchema/unpauseCommandSchema';
+import { CommandsCategoryEnum } from '../../domain/enums/commandsCategoryEnum';
 import { HelpEmbedsTitlesEnum } from '../../domain/enums/helpEmbedsTitlesEnum';
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';

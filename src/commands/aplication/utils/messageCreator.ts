@@ -1,17 +1,11 @@
-import { ButtonStyle } from 'discord-api-types';
-import {MessageActionRow, MessageButton, MessageEmbed, MessageOptions } from 'discord.js';
-import { MessageButtonStyles } from 'discord.js/typings/enums';
-import { discordEmojis } from '../../domain/discordEmojis';
-import { MessageButtonsCreator } from './messageButtonsCreator'
+import { MessageEmbed, MessageOptions } from 'discord.js';
 import {
-    ButtonRow,
-    ButtonsStyle,
+    ButtonRowList,
     CreateMessageOptions,
     EmbedOptions,
-    Button,
     MessageContent,
-    ButtonRowList,
 } from '../../domain/interfaces/createEmbedOptions';
+import { MessageButtonsCreator } from './messageButtonsCreator';
 
 export class MessageCreator {
     private message: MessageContent;
@@ -42,7 +36,7 @@ export class MessageCreator {
             this.embed.timeStamp ? embed.setTimestamp(this.embed.timeStamp) : null;
             this.embed.footer ? embed.setFooter(this.embed.footer) : null;
         }
-        
+
         const output: MessageOptions = {
             components: this.buttons ? new MessageButtonsCreator(this.buttons).call() : null,
             content: this.message ? this.message.content : null,
