@@ -1,4 +1,4 @@
-import { CommandsCategoryEnum } from '../commandsCategoryEnum';
+import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { discordEmojis } from '../discordEmojis';
 import { CommandSchema } from '../interfaces/commandSchema';
 

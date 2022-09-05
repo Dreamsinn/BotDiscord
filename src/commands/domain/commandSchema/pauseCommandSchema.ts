@@ -1,4 +1,4 @@
-import { CommandsCategoryEnum } from '../commandsCategoryEnum';
+import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const PauseCommandSchema: CommandSchema = {

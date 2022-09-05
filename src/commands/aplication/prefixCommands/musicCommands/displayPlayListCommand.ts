@@ -8,7 +8,7 @@ import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
-import {DisplayButtonsIdEnum} from '../../../domain/displayButtonsIdEnum'
+import {DisplayButtonsIdEnum} from '../../../domain/enums/displayButtonsIdEnum'
 import { DisplayMessage } from '../../../domain/interfaces/displayMessage'
 
 export class DisplayPlayListCommand extends Command {
