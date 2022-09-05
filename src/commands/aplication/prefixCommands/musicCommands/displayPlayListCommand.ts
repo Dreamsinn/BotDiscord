@@ -9,6 +9,7 @@ import { CoolDown } from '../../utils/coolDown';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
 import {DisplayButtonsIdEnum} from '../../../domain/displayButtonsIdEnum'
+import { DisplayMessage } from '../../../domain/interfaces/displayMessage'
 
 export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
@@ -53,19 +54,19 @@ export class DisplayPlayListCommand extends Command {
         this.isDisplayActive = true;
 
         // pasa estado activo playListHandler y le devuelve el mensaje
-        const displayMessage = await this.playListHandler.activateDispaly(event);
+        const display: DisplayMessage = await this.playListHandler.activateDispaly(event);
 
-        if (displayMessage) {
-            return this.reactionListener(event, displayMessage);
+        if (display.message) {
+            return this.reactionListener(event, display);
         }
         return;
     }
 
-    private reactionListener(event: Message, displayMessage: Message) {
+    private reactionListener(event: Message, display: DisplayMessage) {
         // Añade reacciones y escucha las reacciones recibidas, si se reacciona una de las añadidas: se borra relación y actúa dependiendo relación
-        this.addButtonsReactions(displayMessage);
+        this.addButtonsReactions(display.message);
 
-        this.collector = displayMessage.createMessageComponentCollector({ componentType: 'BUTTON', time: 86400000 })
+        this.collector = display.message.createMessageComponentCollector({ componentType: 'BUTTON', time: 86400000 })
 
         this.collector.on('collect', async (collected) => {
             // anular mensage de Interacción fallida
@@ -78,7 +79,7 @@ export class DisplayPlayListCommand extends Command {
 
             // si readme, y no esta el readme activo
             if (collected.customId === DisplayButtonsIdEnum.README && !this.showingReadme) {
-                return this.createReadmeEmbed(event);
+                return this.createReadmeEmbed(display);
             }
 
             await this.reactionHandler(collected);
@@ -88,8 +89,9 @@ export class DisplayPlayListCommand extends Command {
         this.collector.on('end', async () => {
             this.isDisplayActive = false;
             this.playListHandler.deactivateDisplay();
-
-            displayMessage.delete().catch(() => console.log('Display has been deleted.'));
+            
+            display.thread.delete().catch(() => console.log('Display\' thread has been deleted.'))
+            display.message.delete().catch(() => console.log('Display has been deleted.'));
             await event.channel.send('Display ha cesado su funcionamiento.');
             return;
         });
@@ -143,7 +145,7 @@ export class DisplayPlayListCommand extends Command {
         return
     }
 
-    private createReadmeEmbed(event: Message) {
+    private createReadmeEmbed(display: DisplayMessage) {
         this.showingReadme = true;
         const output = new MessageCreator({
             embed: {
@@ -187,7 +189,7 @@ export class DisplayPlayListCommand extends Command {
             },
         }).call();
 
-        event.channel
+        display.thread
             .send(output)
             .then((msg: Message) => {
                 setTimeout(() => {
