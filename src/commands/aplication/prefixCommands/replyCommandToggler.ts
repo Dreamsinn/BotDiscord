@@ -3,8 +3,8 @@ import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyComma
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { ReplyCommand } from '../replyCommand';
-import { CoolDown } from '../utils/coolDown';
 import { CheckDevRole } from '../utils/checkDevRole';
+import { CoolDown } from '../utils/coolDown';
 
 export class ReplyCommandToggler extends Command {
     private toggleDiceSchema: CommandSchema = ReplyCommandTogglerSchema;
@@ -14,10 +14,10 @@ export class ReplyCommandToggler extends Command {
 
     public async call(event: Message): Promise<Message> {
         //role check
-        if(this.toggleDiceSchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
-            if(!interrupt){
-                return
+        if (this.toggleDiceSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
             }
         }
 

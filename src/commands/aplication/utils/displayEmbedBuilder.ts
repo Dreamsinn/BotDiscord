@@ -26,7 +26,7 @@ export class DisplayEmbedBuilder {
             };
         }
 
-        if(this.displayMessage){
+        if (this.displayMessage) {
             await this.displayMessage.edit(output).catch(() => {
                 console.log('Error editing display');
             });
@@ -37,7 +37,7 @@ export class DisplayEmbedBuilder {
 
     private async selectChannel(event) {
         // si el chat es un hilo lo devolvemos
-        if(event.channel.isThread()){
+        if (event.channel.isThread()) {
             return event.channel;
         }
 

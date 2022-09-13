@@ -3,8 +3,8 @@ import { LogPlaylistStatusSchema } from '../../../domain/commandSchema/logPlayli
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
-import { CoolDown } from '../../utils/coolDown';
 import { CheckDevRole } from '../../utils/checkDevRole';
+import { CoolDown } from '../../utils/coolDown';
 
 export class LogPlaylistStatusCommand extends Command {
     private logSchema: CommandSchema = LogPlaylistStatusSchema;
@@ -18,16 +18,16 @@ export class LogPlaylistStatusCommand extends Command {
     }
 
     public async call(event: Message) {
-        event.delete()
-        
+        event.delete();
+
         //role check
-        if(this.logSchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
-            if(!interrupt){
-                return
+        if (this.logSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
             }
         }
-        
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.logSchema.coolDown);
         if (interrupt === 1) {

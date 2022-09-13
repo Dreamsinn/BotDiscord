@@ -7,10 +7,10 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { ButtonRowList, ButtonsStyle } from '../../../domain/interfaces/createEmbedOptions';
 import { DisplayMessage } from '../../../domain/interfaces/displayMessage';
 import { PlayListHandler } from '../../playListHandler';
+import { CheckDevRole } from '../../utils/checkDevRole';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
-import { CheckDevRole } from '../../utils/checkDevRole';
 
 export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
@@ -28,14 +28,14 @@ export class DisplayPlayListCommand extends Command {
 
     public async call(event: Message) {
         //role check
-        if(this.displaySchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
+        if (this.displaySchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
 
-            if(!interrupt){
-                return
+            if (!interrupt) {
+                return;
             }
         }
-        
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.displaySchema.coolDown);
         if (interrupt === 1) {
@@ -63,7 +63,7 @@ export class DisplayPlayListCommand extends Command {
             return;
         }
         this.isDisplayActive = true;
-        console.log('hemos  llegado')
+        console.log('hemos  llegado');
         // pasa estado activo playListHandler y le devuelve el mensaje
         const display: DisplayMessage = await this.playListHandler.activateDispaly(event);
 
@@ -86,11 +86,11 @@ export class DisplayPlayListCommand extends Command {
             // anular mensage de Interacción fallida
             collected.deferUpdate();
 
-            if(this.displaySchema.devOnly){
-                const interrupt = this.checkDevRole.call(event)
+            if (this.displaySchema.devOnly) {
+                const interrupt = this.checkDevRole.call(event);
 
-                if(!interrupt){
-                    return
+                if (!interrupt) {
+                    return;
                 }
             }
 
@@ -216,7 +216,9 @@ export class DisplayPlayListCommand extends Command {
             .then((msg: Message) => {
                 setTimeout(() => {
                     if (msg) {
-                        msg.delete().catch((err)=>{console.log("Display's README error:", err)});
+                        msg.delete().catch((err) => {
+                            console.log("Display's README error:", err);
+                        });
                     }
                     this.showingReadme = false;
                 }, 20000);
@@ -232,7 +234,7 @@ export class DisplayPlayListCommand extends Command {
         const buttonId = collected.customId;
 
         if (buttonId === DisplayButtonsIdEnum.PLAY_PAUSE) {
-            return  this.playListHandler.togglePauseMusic()
+            return this.playListHandler.togglePauseMusic();
         }
 
         if (buttonId === DisplayButtonsIdEnum.NEXT) {

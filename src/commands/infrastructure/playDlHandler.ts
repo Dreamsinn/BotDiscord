@@ -1,11 +1,11 @@
 import play, { InfoData, SoundCloudStream, YouTubePlayList, YouTubeStream, YouTubeVideo } from 'play-dl';
+import { APIResponse } from '../domain/interfaces/APIResponse';
 import { PlayDlAPI } from '../domain/interfaces/playDlAPI';
 import { RawSongData } from '../domain/interfaces/songData';
-import { APIResponse } from '../domain/interfaces/APIResponse';
 
 export class PlayDlHandler implements PlayDlAPI {
     public async searchSongByName(songString: string): Promise<APIResponse<RawSongData[]>> {
-        try{
+        try {
             const searched = await play.search(songString, { source: { youtube: 'video' }, limit: 9 });
 
             const response: RawSongData[] = [];
@@ -19,38 +19,40 @@ export class PlayDlHandler implements PlayDlAPI {
 
             return {
                 isError: false,
-                data: response
+                data: response,
             };
-        } catch (err){
+        } catch (err) {
             return {
                 isError: true,
                 data: null,
-                errorData: err
+                errorData: err,
             };
         }
     }
 
     public async getSongInfo(songId: string): Promise<APIResponse<YouTubeVideo>> {
-        try{
-            const song: InfoData = await play.video_basic_info(`https://www.youtube.com/watch?v=${songId}`);
+        try {
+            const song: InfoData = await play.video_basic_info(
+                `https://www.youtube.com/watch?v=${songId}`,
+            );
 
             const songData: YouTubeVideo = song.video_details;
 
             return {
                 isError: false,
-                data: songData
+                data: songData,
             };
-        } catch (err){
+        } catch (err) {
             return {
                 isError: true,
                 data: null,
-                errorData: err
+                errorData: err,
             };
         }
     }
 
     public async getSognsInfoFromPlayList(url: string): Promise<APIResponse<RawSongData[]>> {
-        try{
+        try {
             const rawPlayList: YouTubePlayList = await play.playlist_info(url, { incomplete: true });
 
             const platlistData = await rawPlayList.all_videos();
@@ -72,13 +74,13 @@ export class PlayDlHandler implements PlayDlAPI {
 
             return {
                 isError: false,
-                data: playList
+                data: playList,
             };
-        } catch (err){
+        } catch (err) {
             return {
                 isError: true,
                 data: null,
-                errorData: err
+                errorData: err,
             };
         }
     }

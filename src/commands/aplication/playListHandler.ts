@@ -5,10 +5,10 @@ import {
     joinVoiceChannel,
 } from '@discordjs/voice';
 import { GuildMember, Message } from 'discord.js';
+import { TogglePauseOutputEnums } from '../domain/enums/togglePauseOutputEnums';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { NewSongData, SongData, SongDuration } from '../domain/interfaces/songData';
-import { TogglePauseOutputEnums } from '../domain/enums/togglePauseOutputEnums';
 import { PlayDlHandler } from '../infrastructure/playDlHandler';
 import { DisplayEmbedBuilder } from './utils/displayEmbedBuilder';
 import { MessageCreator } from './utils/messageCreator';
@@ -285,8 +285,8 @@ export class PlayListHandler {
 
     public async skipMusic() {
         let musicToSkip: SongData;
-        
-        if(!this.player){
+
+        if (!this.player) {
             return null;
         }
 
@@ -323,7 +323,7 @@ export class PlayListHandler {
         if (!this.player) {
             return TogglePauseOutputEnums.NO_PLAYLIST;
         }
-        console.log(this.player._state.status)
+        console.log(this.player._state.status);
         if (this.player._state.status === 'paused') {
             this.player.unpause();
             return TogglePauseOutputEnums.PLAY;
@@ -347,20 +347,20 @@ export class PlayListHandler {
     }
 
     public deletePlayList() {
-        if(!this.playList[0]){
+        if (!this.playList[0]) {
             return false;
         }
-        
-        if(this.player){
-            this.playList = [];
-            this.player.stop()
 
-            this.player._state.status = 'idle'
+        if (this.player) {
+            this.playList = [];
+            this.player.stop();
+
+            this.player._state.status = 'idle';
 
             if (this.isDisplay.active) {
                 this.sendPlayListDataToDisplay(false);
             }
-            return true
+            return true;
         }
     }
 
@@ -434,15 +434,15 @@ export class PlayListHandler {
 
     public toggleLoopMode(): boolean {
         if (this.loopMode) {
-            this.loopMode = false
-        } else{
+            this.loopMode = false;
+        } else {
             this.loopMode = true;
         }
-        
+
         if (this.isDisplay.active) {
             this.sendPlayListDataToDisplay(false);
         }
-        
+
         return this.loopMode;
     }
 
@@ -455,7 +455,7 @@ export class PlayListHandler {
     public activateDispaly(event: Message) {
         this.isDisplay.active = true;
         this.isDisplay.event = event;
-       
+
         return this.sendPlayListDataToDisplay(true);
     }
 
@@ -466,9 +466,9 @@ export class PlayListHandler {
     }
 
     public logPlaylistStatus() {
-        console.log("PLAYER: ", this.player ? this.player : null)
-        console.log("BOTCONNECTION: ", this.botConnection ? this.botConnection : null)
-        console.log("PLAYLIST: ", this.playList)
-        return
+        console.log('PLAYER: ', this.player ? this.player : null);
+        console.log('BOTCONNECTION: ', this.botConnection ? this.botConnection : null);
+        console.log('PLAYLIST: ', this.playList);
+        return;
     }
 }

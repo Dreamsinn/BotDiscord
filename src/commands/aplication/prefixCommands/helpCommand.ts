@@ -21,10 +21,10 @@ import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { HelpCommandData } from '../../domain/interfaces/helpCommandData';
+import { CheckDevRole } from '../utils/checkDevRole';
 import { CoolDown } from '../utils/coolDown';
 import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
-import { CheckDevRole } from '../utils/checkDevRole';
 
 export class HelpCommand extends Command {
     // TODO, poner schemas como dependencias?
@@ -40,10 +40,10 @@ export class HelpCommand extends Command {
 
     public async call(event: Message) {
         //role check
-        if(this.helpSchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
-            if(!interrupt){
-                return
+        if (this.helpSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
             }
         }
 

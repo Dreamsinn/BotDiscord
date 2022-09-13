@@ -3,8 +3,8 @@ import { JoinChannelCommandSchema } from '../../../domain/commandSchema/joinChan
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
-import { CoolDown } from '../../utils/coolDown';
 import { CheckDevRole } from '../../utils/checkDevRole';
+import { CoolDown } from '../../utils/coolDown';
 
 export class JoinChannelCommand extends Command {
     private joinSchema: CommandSchema = JoinChannelCommandSchema;
@@ -19,13 +19,13 @@ export class JoinChannelCommand extends Command {
 
     public async call(event: Message) {
         //role check
-        if(this.joinSchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
-            if(!interrupt){
-                return
+        if (this.joinSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
             }
         }
-        
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.joinSchema.coolDown);
         if (interrupt === 1) {

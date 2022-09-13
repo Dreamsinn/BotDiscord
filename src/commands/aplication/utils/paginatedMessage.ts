@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
+import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
 import {
     ButtonRowList,
     ButtonsStyle,
@@ -9,7 +10,6 @@ import {
     PaginationOptions,
 } from '../../domain/interfaces/createEmbedOptions';
 import { SongData } from '../../domain/interfaces/songData';
-import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 import { MessageCreator } from './messageCreator';
 

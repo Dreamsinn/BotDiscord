@@ -1,9 +1,9 @@
 import { Message, MessageOptions } from 'discord.js';
 import { DiceCommandSchema } from '../domain/commandSchema/diceCommandSchema';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
+import { CheckDevRole } from './utils/checkDevRole';
 import { CoolDown } from './utils/coolDown';
 import { MessageCreator } from './utils/messageCreator';
-import { CheckDevRole } from './utils/checkDevRole';
 
 export class DiceCommand {
     private diceSchema: CommandSchema = DiceCommandSchema;
@@ -22,13 +22,13 @@ export class DiceCommand {
 
     public async call(event: Message): Promise<Message> {
         //role check
-        if(this.diceSchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
-            if(!interrupt){
-                return
+        if (this.diceSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
             }
         }
-        
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.diceSchema.coolDown);
         if (interrupt === 1) {
