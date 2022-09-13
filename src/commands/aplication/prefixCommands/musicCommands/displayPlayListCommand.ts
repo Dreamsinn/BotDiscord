@@ -260,14 +260,8 @@ export class DisplayPlayListCommand extends Command {
         if (!player || !connection || connection === 'destroyed') {
             return;
         }
-
-        if (!(player === 'paused')) {
-            return this.playListHandler.pauseMusic();
-        }
-        if (player === 'paused') {
-            this.playListHandler.unpauseMusic();
-        }
-        return this.playListHandler.unpauseMusic();
+        
+        return this.playListHandler.togglePauseMusic();
     }
 
     private toggleLoopMode() {

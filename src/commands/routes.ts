@@ -12,7 +12,6 @@ import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playL
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
 import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommands/shufflePlayListCommand';
 import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/SkipMusicCommand';
-import { UnpauseCommand } from './aplication/prefixCommands/musicCommands/UnpauseCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { DisplayEmbedBuilder } from './aplication/utils/displayEmbedBuilder';
 import { ClearPlayListCommandSchema } from './domain/commandSchema/clearPlayListCommandSchema';
@@ -29,7 +28,6 @@ import { RemoveSongsFromPlayListCommandSchema } from './domain/commandSchema/rem
 import { ReplyCommandTogglerSchema } from './domain/commandSchema/replyCommandTogglerSchema';
 import { ShufflePlayListCommandSchema } from './domain/commandSchema/shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from './domain/commandSchema/skipMusicCommandSchema';
-import { UnpauseCommandSchema } from './domain/commandSchema/unpauseCommandSchema';
 import { Command } from './domain/interfaces/Command';
 import { PlayDlHandler } from './infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from './infrastructure/youtubeHandler';
@@ -60,10 +58,6 @@ export const routes: Route[] = [
     {
         alias: HelpCommandSchema.aliases,
         command: new HelpCommand(),
-    },
-    {
-        alias: UnpauseCommandSchema.aliases,
-        command: new UnpauseCommand(playListHandler),
     },
     {
         alias: PauseCommandSchema.aliases,

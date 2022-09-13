@@ -4,6 +4,8 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { CheckDevRole } from '../../utils/checkDevRole';
+import { TogglePauseOutputEnums } from '../../../domain/enums/togglePauseOutputEnums';
+import { Message } from 'discord.js';
 
 export class PauseCommand extends Command {
     private pauseSchema: CommandSchema = PauseCommandSchema;
@@ -16,7 +18,7 @@ export class PauseCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event) {
+    public async call(event: Message) {
         //role check
         if(this.pauseSchema.devOnly){
             const interrupt = this.checkDevRole.call(event)
@@ -32,6 +34,16 @@ export class PauseCommand extends Command {
             return;
         }
 
-        return this.playListHandler.pauseMusic();
+        const pausedResposne = this.playListHandler.togglePauseMusic();
+
+        if(pausedResposne === TogglePauseOutputEnums.NO_PLAYLIST){
+            return event.reply('There is no playList');
+        }
+
+        if(pausedResposne === TogglePauseOutputEnums.PAUSE){
+            return event.reply('PlayList has been paused');
+        }
+
+        return event.reply('PlayList has been unpaused');;
     }
 }

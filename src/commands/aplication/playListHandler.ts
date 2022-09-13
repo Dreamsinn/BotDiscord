@@ -8,6 +8,7 @@ import { GuildMember, Message } from 'discord.js';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { NewSongData, SongData, SongDuration } from '../domain/interfaces/songData';
+import { TogglePauseOutputEnums } from '../domain/enums/togglePauseOutputEnums';
 import { PlayDlHandler } from '../infrastructure/playDlHandler';
 import { DisplayEmbedBuilder } from './utils/displayEmbedBuilder';
 import { MessageCreator } from './utils/messageCreator';
@@ -223,7 +224,7 @@ export class PlayListHandler {
             console.log('Play ERROR', err);
             this.playList.shift();
             if (this.playList[0]) {
-                return this.pauseMusic();
+                return this.playMusic();
             }
             return;
         }
@@ -318,23 +319,18 @@ export class PlayListHandler {
         return musicToSkip;
     }
 
-    public pauseMusic() {
-        if (!this.player || this.player._state.status === 'idle') {
-            return;
-        }
-        this.player.pause();
-        return;
-    }
-
-    public unpauseMusic() {
+    public togglePauseMusic(): string {
         if (!this.player) {
-            return;
+            return TogglePauseOutputEnums.NO_PLAYLIST;
         }
-        if (this.player._state.status === 'idle' && this.playList[0]) {
-            return this.playMusic();
+        console.log(this.player._state.status)
+        if (this.player._state.status === 'paused') {
+            this.player.unpause();
+            return TogglePauseOutputEnums.PLAY;
         }
-        this.player.unpause();
-        return;
+
+        this.player.pause();
+        return TogglePauseOutputEnums.PAUSE;
     }
 
     public changeBotVoiceChanel(event: Message) {
