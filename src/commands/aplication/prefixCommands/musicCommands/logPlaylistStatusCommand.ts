@@ -19,6 +19,8 @@ export class LogPlaylistStatusCommand extends Command {
 
     public async call(event: Message) {
         event.delete()
+        
+        //role check
         if(this.logSchema.devOnly){
             const interrupt = this.checkDevRole.call(event)
             if(!interrupt){

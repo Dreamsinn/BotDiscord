@@ -453,7 +453,7 @@ export class PlayListHandler {
     public activateDispaly(event: Message) {
         this.isDisplay.active = true;
         this.isDisplay.event = event;
-
+       
         return this.sendPlayListDataToDisplay(true);
     }
 

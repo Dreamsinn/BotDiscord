@@ -25,11 +25,13 @@ import { HelpCommandData } from '../../domain/interfaces/helpCommandData';
 import { CoolDown } from '../utils/coolDown';
 import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
+import { CheckDevRole } from '../utils/checkDevRole';
 
 export class HelpCommand extends Command {
     // TODO, poner schemas como dependencias?
     private helpSchema: CommandSchema = HelpCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private commandList = {
         prefix: prefixCommandList,
         nonPrefix: nonPrefixCommandList,
@@ -38,6 +40,14 @@ export class HelpCommand extends Command {
     private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
 
     public async call(event: Message) {
+        //role check
+        if(this.helpSchema.devOnly){
+            const interrupt = this.checkDevRole.call(event)
+            if(!interrupt){
+                return
+            }
+        }
+
         console.log('help command');
         // coolDown
         const interrupt = this.coolDown.call(this.helpSchema.coolDown);

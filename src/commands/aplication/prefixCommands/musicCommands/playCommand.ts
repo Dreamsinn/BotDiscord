@@ -12,10 +12,12 @@ import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageCreator } from '../../utils/messageCreator';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
+import { CheckDevRole } from '../../utils/checkDevRole';
 
 export class PlayCommand extends Command {
     private playSchema: CommandSchema = PlayCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
     private youtubeAPIHandler: YoutubeAPIHandler;
     private playListHandler: PlayListHandler;
@@ -33,6 +35,14 @@ export class PlayCommand extends Command {
     }
 
     public call(event: Message) {
+        //role check
+        if(this.playSchema.devOnly){
+            const interrupt = this.checkDevRole.call(event)
+            if(!interrupt){
+                return
+            }
+        }
+
         // si no hay espacio vacio es que no hay argumento
         const emptySpacePosition = event.content.search(' ');
         if (emptySpacePosition === -1) {
