@@ -57,7 +57,7 @@ export class CommandHandler {
         }
         console.log(command);
         for (const route of routes) {
-            if (route.alias.find((alias) => alias === command)) {
+            if (route.alias.find((alias) => alias === command.toLowerCase())) {
                 // mirar si se encuentra el comando en los alias
                 return route.command.call(event);
             }

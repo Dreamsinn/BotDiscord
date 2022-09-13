@@ -68,5 +68,3 @@
 - Si getSongInfo no tiene duracion, la cancion no llega tocarse
 
 - poner musica no hizo entrar el bot
-
-- Clear borrar toda la playlist incluso la que suena
