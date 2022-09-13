@@ -68,3 +68,9 @@
 - limpiar lista no te resetea el timepo total playlist en los embeds de nueva cancion
 
 - Si getSongInfo, no tiene duracion y la cancion no llega tocarse
+
+- poner musica no hizo entrar el bot
+
+- si no esta activa player peta cuando se usan comandos de muscia
+
+- loopCommand, que no necesite off o on. Que envie un mensaje con el nuevo estado de loop

@@ -33,6 +33,9 @@ import { UnpauseCommandSchema } from './domain/commandSchema/unpauseCommandSchem
 import { Command } from './domain/interfaces/Command';
 import { PlayDlHandler } from './infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from './infrastructure/youtubeHandler';
+import { LogPlaylistStatusSchema } from './domain/commandSchema/logPlaylistStatusSchema';
+import { LogPlaylistStatusCommand } from './aplication/prefixCommands/musicCommands/logPlaylistStatusCommand';
+
 
 export interface Route {
     alias: string[];
@@ -105,5 +108,9 @@ export const routes: Route[] = [
     {
         alias: ReplyCommandTogglerSchema.aliases,
         command: new ReplyCommandToggler(),
+    },
+    {
+        alias: LogPlaylistStatusSchema.aliases,
+        command: new LogPlaylistStatusCommand(playListHandler),
     },
 ];

@@ -462,4 +462,11 @@ export class PlayListHandler {
 
         return this.displayEmbedBuilder.call(playListData, this.isDisplay.event, newEmbed);
     }
+
+    public logPlaylistStatus() {
+        console.log("PLAYER: ", this.player ? this.player : null)
+        console.log("BOTCONNECTION: ", this.botConnection ? this.botConnection : null)
+        console.log("PLAYLIST: ", this.playList)
+        return
+    }
 }
