@@ -6,7 +6,7 @@ import { APIResponse } from '../domain/interfaces/APIResponse';
 export class PlayDlHandler implements PlayDlAPI {
     public async searchSongByName(songString: string): Promise<APIResponse<RawSongData[]>> {
         try{
-            const searched = await play.search(undefined, { source: { youtube: 'video' }, limit: 9 });
+            const searched = await play.search(songString, { source: { youtube: 'video' }, limit: 9 });
 
             const response: RawSongData[] = [];
             searched.forEach((songData) => {

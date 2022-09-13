@@ -92,7 +92,7 @@ export class PlayCommand extends Command {
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
 
         const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.searchSongByName(argument);
-
+        console.log(playDlResponse)
         if(playDlResponse.isError){
             console.log(`Play-dl Search by name Error: ${playDlResponse.errorData}`);
 

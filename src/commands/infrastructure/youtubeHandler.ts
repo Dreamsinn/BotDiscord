@@ -15,10 +15,6 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 .get(
                     `https://www.googleapis.com/youtube/v3/search?key=${process.env.API_KEY_YOUTUBE}&order=${order}&part=${part}&maxResults=${maxResults}&type=${type}&q=${song}`,
                 )
-                .catch((err) => {
-                    console.log('YoutubeAPI Search Error:', err);
-                    throw new Error(`YoutubeAPI Search Error: ${err.code}, ${err}`);
-                });
 
             const response: RawSongData[] = [];
             searched.data.items.forEach((songData: any) => {
@@ -51,10 +47,6 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 .get(
                     `https://youtube.googleapis.com/youtube/v3/playlistItems?part=${part}&playlistId=${playlistId}&key=${process.env.API_KEY_YOUTUBE}&maxResults=${maxResults}`,
                 )
-                .catch((err) => {
-                    console.log('YoutubeAPI PlayList Error:', err);
-                    throw new Error(`YoutubeAPI PlayList Error:, ${err.code}, ${err}`);
-                });
 
             const response: RawSongData[] = [];
             searched.data.items.forEach((songData: any) => {
@@ -87,10 +79,6 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 .get(
                     `https://www.googleapis.com/youtube/v3/videos?key=${process.env.API_KEY_YOUTUBE}&part=${part}&maxResults=${maxResults}&id=${id}`,
                 )
-                .catch((err) => {
-                    console.log(`YoutubeAPI Data Error: ${err}`);
-                    throw new Error(`YoutubeAPI Data Error:, ${err.code}, ${err}`);
-                });
 
             const response: RawSongData = {
                 title: searched.data.items[0].snippet.title,
