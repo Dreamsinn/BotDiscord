@@ -6,10 +6,12 @@ import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
+import { CheckDevRole } from '../../utils/checkDevRole';
 
 export class PlayListCommand extends Command {
     private playListSchema: CommandSchema = PlayListCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
 
     constructor(playListHandler: PlayListHandler) {
@@ -18,6 +20,14 @@ export class PlayListCommand extends Command {
     }
 
     public async call(event: Message) {
+        //role check
+        if(this.playListSchema.devOnly){
+            const interrupt = this.checkDevRole.call(event)
+            if(!interrupt){
+                return
+            }
+        }
+        
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.playListSchema.coolDown);
         if (interrupt === 1) {

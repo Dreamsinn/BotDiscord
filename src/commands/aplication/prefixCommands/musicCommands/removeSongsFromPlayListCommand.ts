@@ -7,10 +7,12 @@ import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
+import { CheckDevRole } from '../../utils/checkDevRole';
 
 export class RemoveSongsFromPlayListCommand extends Command {
     private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
     private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
 
@@ -20,6 +22,14 @@ export class RemoveSongsFromPlayListCommand extends Command {
     }
 
     public async call(event: Message) {
+        //role check
+        if(this.removeSchema.devOnly){
+            const interrupt = this.checkDevRole.call(event)
+            if(!interrupt){
+                return
+            }
+        }
+        
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
         if (interrupt === 1) {

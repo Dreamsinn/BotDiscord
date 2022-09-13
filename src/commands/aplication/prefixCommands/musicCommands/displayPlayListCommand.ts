@@ -10,10 +10,12 @@ import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
+import { CheckDevRole } from '../../utils/checkDevRole';
 
 export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
     private isDisplayActive = false;
     private showingReadme = false;
@@ -25,6 +27,15 @@ export class DisplayPlayListCommand extends Command {
     }
 
     public async call(event: Message) {
+        //role check
+        if(this.displaySchema.devOnly){
+            const interrupt = this.checkDevRole.call(event)
+
+            if(!interrupt){
+                return
+            }
+        }
+        
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.displaySchema.coolDown);
         if (interrupt === 1) {
@@ -52,7 +63,7 @@ export class DisplayPlayListCommand extends Command {
             return;
         }
         this.isDisplayActive = true;
-
+        console.log('hemos  llegado')
         // pasa estado activo playListHandler y le devuelve el mensaje
         const display: DisplayMessage = await this.playListHandler.activateDispaly(event);
 
@@ -74,6 +85,14 @@ export class DisplayPlayListCommand extends Command {
         this.collector.on('collect', async (collected) => {
             // anular mensage de Interacción fallida
             collected.deferUpdate();
+
+            if(this.displaySchema.devOnly){
+                const interrupt = this.checkDevRole.call(event)
+
+                if(!interrupt){
+                    return
+                }
+            }
 
             // si x borra el msenaje
             if (collected.customId === DisplayButtonsIdEnum.CLOSE) {

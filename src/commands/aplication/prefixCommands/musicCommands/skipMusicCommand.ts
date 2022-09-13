@@ -6,10 +6,12 @@ import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageCreator } from '../../utils/messageCreator';
+import { CheckDevRole } from '../../utils/checkDevRole';
 
 export class SkipMusicCommand extends Command {
     private skipSchema: CommandSchema = SkipMusicCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
 
     constructor(playListHandler: PlayListHandler) {
@@ -18,6 +20,14 @@ export class SkipMusicCommand extends Command {
     }
 
     public async call(event: Message): Promise<Message> {
+        //role check
+        if(this.skipSchema.devOnly){
+            const interrupt = this.checkDevRole.call(event)
+            if(!interrupt){
+                return
+            }
+        }
+        
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.skipSchema.coolDown);
         if (interrupt === 1) {

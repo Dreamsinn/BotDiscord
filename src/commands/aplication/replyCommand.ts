@@ -3,10 +3,12 @@ import { ReplyCommandSchema } from '../domain/commandSchema/replyCommandSchema';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
 import { CoolDown } from './utils/coolDown';
 import { MessageCreator } from './utils/messageCreator';
+import { CheckDevRole } from './utils/checkDevRole';
 
 export class ReplyCommand {
     private replySchema: CommandSchema = ReplyCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     public static isReplyCommandActive = false;
 
     // activa o desactuva las respuestas
@@ -19,17 +21,26 @@ export class ReplyCommand {
     }
 
     public async call(event): Promise<Message> {
-        // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
+        //role check
+        if(this.replySchema.devOnly){
+            const interrupt = this.checkDevRole.call(event)
+            if(!interrupt){
+                return
+            }
+        }
+
+        const interrupt = this.coolDown.call(this.replySchema.coolDown);
+        if (interrupt === 1) {
+            console.log('command interrupted by cooldown');
+            return;
+        }
+
+        // TODO: no fer recorsivitat de if, es podria fer un filter
         // concatenar if fa que sigui lios
         this.replySchema.aliases.forEach((alias) => {
             // mirar si se encuntra el alias al principio, o ente ' '
             if (event.content.startsWith(alias) || event.content.includes(` ${alias} `)) {
                 // mirar si cumple la condicion de coolDown
-                const interrupt = this.coolDown.call(this.replySchema.coolDown);
-                if (interrupt === 1) {
-                    console.log('command interrupted by cooldown');
-                    return;
-                }
 
                 console.log('alias founded');
 
