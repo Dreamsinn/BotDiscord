@@ -232,7 +232,7 @@ export class DisplayPlayListCommand extends Command {
         const buttonId = collected.customId;
 
         if (buttonId === DisplayButtonsIdEnum.PLAY_PAUSE) {
-            return this.togglePlayPause();
+            return  this.playListHandler.togglePauseMusic()
         }
 
         if (buttonId === DisplayButtonsIdEnum.NEXT) {
@@ -240,7 +240,7 @@ export class DisplayPlayListCommand extends Command {
         }
 
         if (buttonId === DisplayButtonsIdEnum.LOOP) {
-            return this.toggleLoopMode();
+            return this.playListHandler.toggleLoopMode();
         }
 
         if (buttonId === DisplayButtonsIdEnum.SHUFFLE) {
@@ -250,21 +250,5 @@ export class DisplayPlayListCommand extends Command {
         if (buttonId === DisplayButtonsIdEnum.CLEAR) {
             return this.playListHandler.deletePlayList();
         }
-    }
-
-    private togglePlayPause() {
-        const playListStatus = this.playListHandler.readPlayListStatus();
-
-        const player = playListStatus.playerStatus;
-        const connection = playListStatus.conectionStatus;
-        if (!player || !connection || connection === 'destroyed') {
-            return;
-        }
-        
-        return this.playListHandler.togglePauseMusic();
-    }
-
-    private toggleLoopMode() {
-        return this.playListHandler.toggleLoopMode();
     }
 }

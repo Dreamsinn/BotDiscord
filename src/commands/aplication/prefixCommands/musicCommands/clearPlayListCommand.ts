@@ -32,6 +32,11 @@ export class ClearPlayListCommand extends Command {
             return;
         }
 
-        return this.playListHandler.deletePlayList();
+        const deleteResponse = await this.playListHandler.deletePlayList();
+
+        if(!deleteResponse){
+            return event.reply('There is no playList');
+        }
+        return event.reply('Playlist has been cleared');
     }
 }
