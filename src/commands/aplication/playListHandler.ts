@@ -347,20 +347,21 @@ export class PlayListHandler {
     }
 
     public deletePlayList() {
-        if (
-            (this.player && this.player._state.status === 'idle') ||
-            (this.botConnection && this.botConnection._state.status === 'destroyed')
-        ) {
+        if(!this.playList[0]){
+            return false;
+        }
+        
+        if(this.player){
             this.playList = [];
-        } else {
-            // eleminamos todos menos el primero, que al ser el que esta sonando
-            this.playList = [this.playList[0]];
-        }
+            this.player.stop()
 
-        if (this.isDisplay.active) {
-            this.sendPlayListDataToDisplay(false);
+            this.player._state.status = 'idle'
+
+            if (this.isDisplay.active) {
+                this.sendPlayListDataToDisplay(false);
+            }
+            return true
         }
-        return;
     }
 
     public removeSongsFromPlayList(songsIndex: number[]) {
