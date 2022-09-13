@@ -34,8 +34,13 @@ export class DisplayEmbedBuilder {
     }
 
     private async selectChannel(event) {
-        let threadChannel;
+        // si el chat es un hilo lo devolvemos
+        if(event.channel.isThread()){
+            return event.channel;
+        }
 
+        // buscamos si el chat tiene un hilo con el nombre de displayer, y si existe se fevuelve
+        let threadChannel;
         event.channel.threads.cache.find((thread) => {
             if (thread.name === 'Displayer') {
                 threadChannel = thread;
@@ -45,15 +50,12 @@ export class DisplayEmbedBuilder {
             return threadChannel;
         }
 
-        if (!event.channel.isThread()) {
-            return await event.startThread({
-                name: 'Displayer',
-                autoArchiveDuration: 60,
-                reason: 'Hilo para el controlador de musica',
-            });
-        }
-
-        return event.channel;
+        // si es un chat y no tiene u hilo con nombre de displayer, crea el hilo
+        return await event.startThread({
+            name: 'Displayer',
+            autoArchiveDuration: 60,
+            reason: 'Hilo para el controlador de musica',
+        });
     }
 
     private async setEmbedOptionsData(): Promise<EmbedOptions> {
