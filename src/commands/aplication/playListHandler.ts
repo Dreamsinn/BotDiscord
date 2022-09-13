@@ -435,17 +435,18 @@ export class PlayListHandler {
         return randomSong[0];
     }
 
-    public toggleLoopMode(active: boolean): boolean {
-        if (this.loopMode === active) {
-            return false;
+    public toggleLoopMode(): boolean {
+        if (this.loopMode) {
+            this.loopMode = false
+        } else{
+            this.loopMode = true;
         }
-        this.loopMode = active;
-
+        
         if (this.isDisplay.active) {
             this.sendPlayListDataToDisplay(false);
         }
-
-        return true;
+        
+        return this.loopMode;
     }
 
     public deactivateDisplay() {
