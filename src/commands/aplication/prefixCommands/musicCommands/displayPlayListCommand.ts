@@ -216,7 +216,7 @@ export class DisplayPlayListCommand extends Command {
             .then((msg: Message) => {
                 setTimeout(() => {
                     if (msg) {
-                        msg.delete();
+                        msg.delete().catch((err)=>{console.log("Display's README error:", err)});
                     }
                     this.showingReadme = false;
                 }, 20000);
