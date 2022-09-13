@@ -284,6 +284,10 @@ export class PlayListHandler {
 
     public async skipMusic() {
         let musicToSkip: SongData;
+        
+        if(!this.player){
+            return null;
+        }
 
         if (this.player._state.status === 'paused') {
             // arregla el bug que el display no saltava las canciones cuando la musica estava en pause

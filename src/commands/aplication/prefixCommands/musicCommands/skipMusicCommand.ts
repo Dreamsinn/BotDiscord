@@ -38,7 +38,7 @@ export class SkipMusicCommand extends Command {
         const skipedMusic: SongData = await this.playListHandler.skipMusic();
 
         if (!skipedMusic) {
-            return;
+            return event.reply('There is no playList');;
         }
 
         const output = new MessageCreator({
