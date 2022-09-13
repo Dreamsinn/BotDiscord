@@ -39,6 +39,10 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
         const playList: SongData[] = this.playListHandler.readPlayList();
 
+        if(!playList[0]){
+            return event.reply('There is no playList');
+        }
+
         await new PaginatedMessage({
             embed: {
                 color: 'ORANGE',
