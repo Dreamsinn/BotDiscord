@@ -15,7 +15,6 @@ import { ReplyCommandSchema } from '../../domain/commandSchema/replyCommandSchem
 import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyCommandTogglerSchema';
 import { ShufflePlayListCommandSchema } from '../../domain/commandSchema/shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from '../../domain/commandSchema/skipMusicCommandSchema';
-import { UnpauseCommandSchema } from '../../domain/commandSchema/unpauseCommandSchema';
 import { CommandsCategoryEnum } from '../../domain/enums/commandsCategoryEnum';
 import { HelpEmbedsTitlesEnum } from '../../domain/enums/helpEmbedsTitlesEnum';
 import { Command } from '../../domain/interfaces/Command';
@@ -435,13 +434,6 @@ const musicCommandList: HelpCommandData[] = [
         aliases: PauseCommandSchema.aliases,
         coolDown: PauseCommandSchema.coolDown,
         category: PauseCommandSchema.category,
-    },
-    {
-        name: UnpauseCommandSchema.name,
-        description: UnpauseCommandSchema.description,
-        aliases: UnpauseCommandSchema.aliases,
-        coolDown: UnpauseCommandSchema.coolDown,
-        category: UnpauseCommandSchema.category,
     },
     {
         name: SkipMusicCommandSchema.name,
