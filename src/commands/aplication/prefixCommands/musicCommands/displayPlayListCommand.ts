@@ -271,11 +271,6 @@ export class DisplayPlayListCommand extends Command {
     }
 
     private toggleLoopMode() {
-        const playListStatus = this.playListHandler.readPlayListStatus();
-
-        if (playListStatus.loop) {
-            return this.playListHandler.toggleLoopMode(false);
-        }
-        return this.playListHandler.toggleLoopMode(true);
+        return this.playListHandler.toggleLoopMode();
     }
 }

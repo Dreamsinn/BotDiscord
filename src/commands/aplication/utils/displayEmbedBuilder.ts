@@ -26,9 +26,11 @@ export class DisplayEmbedBuilder {
             };
         }
 
-        await this.displayMessage.edit(output).catch(() => {
-            console.log('Error editing display');
-        });
+        if(this.displayMessage){
+            await this.displayMessage.edit(output).catch(() => {
+                console.log('Error editing display');
+            });
+        }
 
         return;
     }

@@ -71,6 +71,4 @@
 
 - loopCommand, que no necesite off o on. Que envie un mensaje con el nuevo estado de loop ------- pause y unpause mismo comando
 
-- Remove, si no hay canciones que lo indique
-
 - Clear borrar toda la playlist incluso la que suena
