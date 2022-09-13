@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
 import { ReplyCommandSchema } from '../domain/commandSchema/replyCommandSchema';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
+import { CheckDevRole } from './utils/checkDevRole';
 import { CoolDown } from './utils/coolDown';
 import { MessageCreator } from './utils/messageCreator';
-import { CheckDevRole } from './utils/checkDevRole';
 
 export class ReplyCommand {
     private replySchema: CommandSchema = ReplyCommandSchema;
@@ -22,10 +22,10 @@ export class ReplyCommand {
 
     public async call(event): Promise<Message> {
         //role check
-        if(this.replySchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
-            if(!interrupt){
-                return
+        if (this.replySchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
             }
         }
 

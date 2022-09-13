@@ -4,10 +4,10 @@ import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
+import { CheckDevRole } from '../../utils/checkDevRole';
 import { CoolDown } from '../../utils/coolDown';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
-import { CheckDevRole } from '../../utils/checkDevRole';
 
 export class RemoveSongsFromPlayListCommand extends Command {
     private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
@@ -23,13 +23,13 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
     public async call(event: Message) {
         //role check
-        if(this.removeSchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
-            if(!interrupt){
-                return
+        if (this.removeSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
             }
         }
-        
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
         if (interrupt === 1) {
@@ -39,7 +39,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
         const playList: SongData[] = this.playListHandler.readPlayList();
 
-        if(!playList[0]){
+        if (!playList[0]) {
             return event.reply('There is no playList');
         }
 

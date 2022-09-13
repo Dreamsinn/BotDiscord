@@ -5,6 +5,7 @@ import { ClearPlayListCommand } from './aplication/prefixCommands/musicCommands/
 import { DisconnectCommand } from './aplication/prefixCommands/musicCommands/disconnectCommand';
 import { DisplayPlayListCommand } from './aplication/prefixCommands/musicCommands/displayPlayListCommand';
 import { JoinChannelCommand } from './aplication/prefixCommands/musicCommands/JoinChannelCommand';
+import { LogPlaylistStatusCommand } from './aplication/prefixCommands/musicCommands/logPlaylistStatusCommand';
 import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicCommands/loopPlayListModeCommand';
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
 import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
@@ -20,6 +21,7 @@ import { DisconnectCommandSchema } from './domain/commandSchema/disconnectComman
 import { DisplayPlayListCommandSchema } from './domain/commandSchema/displayPlayListCommandSchema';
 import { HelpCommandSchema } from './domain/commandSchema/helpCommandSchema';
 import { JoinChannelCommandSchema } from './domain/commandSchema/joinChannelCommandSchema';
+import { LogPlaylistStatusSchema } from './domain/commandSchema/logPlaylistStatusSchema';
 import { LoopPlayListModeCommandSchema } from './domain/commandSchema/loopPlayListModeCommandSchema';
 import { PauseCommandSchema } from './domain/commandSchema/pauseCommandSchema';
 import { PlayCommandSchema } from './domain/commandSchema/playCommandSchema';
@@ -31,9 +33,6 @@ import { SkipMusicCommandSchema } from './domain/commandSchema/skipMusicCommandS
 import { Command } from './domain/interfaces/Command';
 import { PlayDlHandler } from './infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from './infrastructure/youtubeHandler';
-import { LogPlaylistStatusSchema } from './domain/commandSchema/logPlaylistStatusSchema';
-import { LogPlaylistStatusCommand } from './aplication/prefixCommands/musicCommands/logPlaylistStatusCommand';
-
 
 export interface Route {
     alias: string[];

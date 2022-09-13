@@ -1,5 +1,5 @@
-export enum TogglePauseOutputEnums{
+export enum TogglePauseOutputEnums {
     NO_PLAYLIST = 'noPlaylist',
     PAUSE = 'pause',
-    PLAY = 'play'
+    PLAY = 'play',
 }

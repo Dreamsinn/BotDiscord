@@ -2,8 +2,8 @@ import { ClearPlayListCommandSchema } from '../../../domain/commandSchema/clearP
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
-import { CoolDown } from '../../utils/coolDown';
 import { CheckDevRole } from '../../utils/checkDevRole';
+import { CoolDown } from '../../utils/coolDown';
 
 export class ClearPlayListCommand extends Command {
     private clearSchema: CommandSchema = ClearPlayListCommandSchema;
@@ -18,13 +18,13 @@ export class ClearPlayListCommand extends Command {
 
     public async call(event) {
         //role check
-        if(this.clearSchema.devOnly){
-            const interrupt = this.checkDevRole.call(event)
-            if(!interrupt){
-                return
+        if (this.clearSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
             }
         }
-        
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.clearSchema.coolDown);
         if (interrupt === 1) {
@@ -34,7 +34,7 @@ export class ClearPlayListCommand extends Command {
 
         const deleteResponse = await this.playListHandler.deletePlayList();
 
-        if(!deleteResponse){
+        if (!deleteResponse) {
             return event.reply('There is no playList');
         }
         return event.reply('Playlist has been cleared');

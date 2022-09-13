@@ -10,11 +10,10 @@ export class YoutubeAPIHandler implements YoutubeAPI {
         const maxResults = '9';
         const type = 'video,playlist';
 
-        try{
-            const searched = await axios
-                .get(
-                    `https://www.googleapis.com/youtube/v3/search?key=${process.env.API_KEY_YOUTUBE}&order=${order}&part=${part}&maxResults=${maxResults}&type=${type}&q=${song}`,
-                )
+        try {
+            const searched = await axios.get(
+                `https://www.googleapis.com/youtube/v3/search?key=${process.env.API_KEY_YOUTUBE}&order=${order}&part=${part}&maxResults=${maxResults}&type=${type}&q=${song}`,
+            );
 
             const response: RawSongData[] = [];
             searched.data.items.forEach((songData: any) => {
@@ -26,13 +25,13 @@ export class YoutubeAPIHandler implements YoutubeAPI {
 
             return {
                 isError: false,
-                data: response
+                data: response,
             };
-        } catch (err){
+        } catch (err) {
             return {
                 isError: true,
                 data: null,
-                errorData: err
+                errorData: err,
             };
         }
     }
@@ -42,11 +41,10 @@ export class YoutubeAPIHandler implements YoutubeAPI {
         const playlistId = playListId;
         const maxResults = '30';
 
-        try{
-            const searched: any = await axios
-                .get(
-                    `https://youtube.googleapis.com/youtube/v3/playlistItems?part=${part}&playlistId=${playlistId}&key=${process.env.API_KEY_YOUTUBE}&maxResults=${maxResults}`,
-                )
+        try {
+            const searched: any = await axios.get(
+                `https://youtube.googleapis.com/youtube/v3/playlistItems?part=${part}&playlistId=${playlistId}&key=${process.env.API_KEY_YOUTUBE}&maxResults=${maxResults}`,
+            );
 
             const response: RawSongData[] = [];
             searched.data.items.forEach((songData: any) => {
@@ -58,13 +56,13 @@ export class YoutubeAPIHandler implements YoutubeAPI {
 
             return {
                 isError: false,
-                data: response
+                data: response,
             };
-        } catch (err){
+        } catch (err) {
             return {
                 isError: true,
                 data: null,
-                errorData: err
+                errorData: err,
             };
         }
     }
@@ -75,10 +73,9 @@ export class YoutubeAPIHandler implements YoutubeAPI {
         const id = songId;
 
         try {
-            const searched = await axios
-                .get(
-                    `https://www.googleapis.com/youtube/v3/videos?key=${process.env.API_KEY_YOUTUBE}&part=${part}&maxResults=${maxResults}&id=${id}`,
-                )
+            const searched = await axios.get(
+                `https://www.googleapis.com/youtube/v3/videos?key=${process.env.API_KEY_YOUTUBE}&part=${part}&maxResults=${maxResults}&id=${id}`,
+            );
 
             const response: RawSongData = {
                 title: searched.data.items[0].snippet.title,
@@ -88,13 +85,13 @@ export class YoutubeAPIHandler implements YoutubeAPI {
 
             return {
                 isError: false,
-                data: response
+                data: response,
             };
-        } catch (err){
+        } catch (err) {
             return {
                 isError: true,
                 data: null,
-                errorData: err
+                errorData: err,
             };
         }
     }
