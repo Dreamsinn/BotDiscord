@@ -1,16 +1,9 @@
 import { Message } from 'discord.js';
 import * as dotenv from 'dotenv';
 import { Bot } from './bot';
-import { DiceCommand } from './commands/aplication/diceCommand';
-import { ReplyCommand } from './commands/aplication/replyCommand';
-import { UsersUsingACommand } from './commands/aplication/utils/usersUsingACommand';
 import { ServerRouting } from './serverRouting'
 
 dotenv.config();
-
-const diceCommand = new DiceCommand();
-const replyCommand = new ReplyCommand();
-const usersUsingACommand = UsersUsingACommand.usersUsingACommand;
 
 async function server() {
     // TODO crear 1 cliente por servidor (a futuro)
@@ -25,7 +18,6 @@ async function server() {
 
     bot.client.on('messageCreate', async (event: Message) => {
         if (event.author.bot) return false;
-        if (usersUsingACommand.searchIdInUserList(event.author.id)) return false;
 
         // si el autor del mensaje no es el bot
         return await serverRouting.call(event)

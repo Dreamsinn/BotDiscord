@@ -18,7 +18,7 @@ export class PlayCommand extends Command {
     private playSchema: CommandSchema = PlayCommandSchema;
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
-    private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
+    private usersUsingACommand: UsersUsingACommand;
     private youtubeAPIHandler: YoutubeAPIHandler;
     private playListHandler: PlayListHandler;
     private playDlHandler: PlayDlHandler;
@@ -34,7 +34,7 @@ export class PlayCommand extends Command {
         this.playDlHandler = playDlHandler;
     }
 
-    public call(event: Message) {
+    public call(event: Message, usersUsingACommand: UsersUsingACommand) {
         //role check
         if (this.playSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
@@ -42,6 +42,8 @@ export class PlayCommand extends Command {
                 return;
             }
         }
+
+        this.usersUsingACommand = usersUsingACommand;
 
         // si no hay espacio vacio es que no hay argumento
         const emptySpacePosition = event.content.search(' ');
