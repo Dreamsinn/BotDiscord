@@ -94,7 +94,7 @@ export class PlayCommand extends Command {
         const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.searchSongByName(
             argument,
         );
-        console.log(playDlResponse);
+
         if (playDlResponse.isError) {
             console.log(`Play-dl Search by name Error: ${playDlResponse.errorData}`);
 

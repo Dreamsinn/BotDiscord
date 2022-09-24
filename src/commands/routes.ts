@@ -34,76 +34,77 @@ import { Command } from './domain/interfaces/Command';
 import { PlayDlHandler } from './infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from './infrastructure/youtubeHandler';
 
-export interface Route {
+interface Route {
     alias: string[];
     command: Command;
 }
 
-const youtubeSearch = new YoutubeAPIHandler();
-const playDlHandler = new PlayDlHandler();
-const displayEmbedBuilder = new DisplayEmbedBuilder();
-const playListHandler = new PlayListHandler(playDlHandler, displayEmbedBuilder);
+export class Routes{
+    private youtubeSearch = new YoutubeAPIHandler();
+    private playDlHandler = new PlayDlHandler();
+    private displayEmbedBuilder = new DisplayEmbedBuilder();
+    private playListHandler = new PlayListHandler(this.playDlHandler, this.displayEmbedBuilder);
 
-// se podria tambien un switch
-export const routes: Route[] = [
-    {
-        alias: PlayCommandSchema.aliases,
-        command: new PlayCommand(youtubeSearch, playListHandler, playDlHandler),
-    },
-    {
-        alias: PlayListCommandSchema.aliases,
-        command: new PlayListCommand(playListHandler),
-    },
-    {
-        alias: HelpCommandSchema.aliases,
-        command: new HelpCommand(),
-    },
-    {
-        alias: PauseCommandSchema.aliases,
-        command: new PauseCommand(playListHandler),
-    },
-    {
-        alias: SkipMusicCommandSchema.aliases,
-        command: new SkipMusicCommand(playListHandler),
-    },
-    {
-        alias: DisconnectCommandSchema.aliases,
-        command: new DisconnectCommand(playListHandler),
-    },
-    {
-        alias: JoinChannelCommandSchema.aliases,
-        command: new JoinChannelCommand(playListHandler),
-    },
-    {
-        alias: ClearPlayListCommandSchema.aliases,
-        command: new ClearPlayListCommand(playListHandler),
-    },
-    {
-        alias: RemoveSongsFromPlayListCommandSchema.aliases,
-        command: new RemoveSongsFromPlayListCommand(playListHandler),
-    },
-    {
-        alias: ShufflePlayListCommandSchema.aliases,
-        command: new ShufflePlayListCommand(playListHandler),
-    },
-    {
-        alias: LoopPlayListModeCommandSchema.aliases,
-        command: new LoopPlayListModeCommand(playListHandler),
-    },
-    {
-        alias: DisplayPlayListCommandSchema.aliases,
-        command: new DisplayPlayListCommand(playListHandler),
-    },
-    {
-        alias: DiceCommandTogglerSchema.aliases,
-        command: new DiceCommandToggler(),
-    },
-    {
-        alias: ReplyCommandTogglerSchema.aliases,
-        command: new ReplyCommandToggler(),
-    },
-    {
-        alias: LogPlaylistStatusSchema.aliases,
-        command: new LogPlaylistStatusCommand(playListHandler),
-    },
-];
+    public routeList: Route[] = [
+        {
+            alias: PlayCommandSchema.aliases,
+            command: new PlayCommand(this.youtubeSearch, this.playListHandler, this.playDlHandler),
+        },
+        {
+            alias: PlayListCommandSchema.aliases,
+            command: new PlayListCommand(this.playListHandler),
+        },
+        {
+            alias: HelpCommandSchema.aliases,
+            command: new HelpCommand(),
+        },
+        {
+            alias: PauseCommandSchema.aliases,
+            command: new PauseCommand(this.playListHandler),
+        },
+        {
+            alias: SkipMusicCommandSchema.aliases,
+            command: new SkipMusicCommand(this.playListHandler),
+        },
+        {
+            alias: DisconnectCommandSchema.aliases,
+            command: new DisconnectCommand(this.playListHandler),
+        },
+        {
+            alias: JoinChannelCommandSchema.aliases,
+            command: new JoinChannelCommand(this.playListHandler),
+        },
+        {
+            alias: ClearPlayListCommandSchema.aliases,
+            command: new ClearPlayListCommand(this.playListHandler),
+        },
+        {
+            alias: RemoveSongsFromPlayListCommandSchema.aliases,
+            command: new RemoveSongsFromPlayListCommand(this.playListHandler),
+        },
+        {
+            alias: ShufflePlayListCommandSchema.aliases,
+            command: new ShufflePlayListCommand(this.playListHandler),
+        },
+        {
+            alias: LoopPlayListModeCommandSchema.aliases,
+            command: new LoopPlayListModeCommand(this.playListHandler),
+        },
+        {
+            alias: DisplayPlayListCommandSchema.aliases,
+            command: new DisplayPlayListCommand(this.playListHandler),
+        },
+        {
+            alias: DiceCommandTogglerSchema.aliases,
+            command: new DiceCommandToggler(),
+        },
+        {
+            alias: ReplyCommandTogglerSchema.aliases,
+            command: new ReplyCommandToggler(),
+        },
+        {
+            alias: LogPlaylistStatusSchema.aliases,
+            command: new LogPlaylistStatusCommand(this.playListHandler),
+        },
+    ];
+}

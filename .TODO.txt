@@ -59,8 +59,6 @@
                            // });
 - Rama master quitar eslint y mirar si hay algun prosproducion de ts
 
-- Regex para las busqueda de un mensaje, para no tener que hacer opcion minuscula y mayusucla, un util
-
 - Test
 
 - Ha tocado una cancion hasta el final, ha acabado, y al poner la siguiente a sonado la primera, y no se podia pasar
