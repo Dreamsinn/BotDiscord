@@ -1,7 +1,5 @@
 export class UsersUsingACommand {
     // esta clase es para cuando un comando espera una respuesta escrita no active otro comando
-    public static usersUsingACommand = new UsersUsingACommand();
-
     private usersList: string[] = [];
 
     public updateUserList(userId: string) {

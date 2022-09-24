@@ -1,6 +1,7 @@
 import { Message } from 'discord.js';
 import { DiceCommand } from './aplication/diceCommand';
 import { ReplyCommand, replyCommandOptions } from './aplication/replyCommand';
+import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
 import { Routes } from './routes';
 
@@ -8,13 +9,20 @@ export class CommandHandler {
     private diceCommand: DiceCommand;
     private replyCommand: ReplyCommand;
     private routes: Routes;
-    constructor(diceCommand: DiceCommand, replyCommand: ReplyCommand, routes: Routes) {
+    private usersUsingACommand: UsersUsingACommand;
+    constructor(diceCommand: DiceCommand, replyCommand: ReplyCommand, routes: Routes, usersUsingACommand: UsersUsingACommand) {
         this.diceCommand = diceCommand;
         this.replyCommand = replyCommand;
         this.routes = routes;
+        this.usersUsingACommand = usersUsingACommand;
     }
 
-    public async call(event: Message) {
+    public async isCommand(event: Message) {
+        // si un comando esta a la espera de una respuesta por parte de un usario,
+        // ese usuario no podra interactuar con el bot
+        if (this.usersUsingACommand.searchIdInUserList(event.author.id)) return
+        console.log(event.guild.name)
+
         // si el comando tiene prefijo, para comandos con prefijo
         if (event.content.startsWith(`${process.env.PREFIX}`)) {
             console.log('prefix founded');
@@ -61,7 +69,7 @@ export class CommandHandler {
         for (const route of this.routes.routeList) {
             if (route.alias.find((alias) => alias === command.toLowerCase())) {
                 // mirar si se encuentra el comando en los alias
-                return route.command.call(event);
+                return route.command.call(event, this.usersUsingACommand);
             }
         }
         console.log('its not a command');

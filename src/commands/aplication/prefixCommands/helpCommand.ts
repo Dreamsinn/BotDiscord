@@ -36,9 +36,9 @@ export class HelpCommand extends Command {
         nonPrefix: nonPrefixCommandList,
         music: musicCommandList,
     };
-    private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
+    private usersUsingACommand: UsersUsingACommand;
 
-    public async call(event: Message) {
+    public async call(event: Message, usersUsingACommand: UsersUsingACommand) {
         //role check
         if (this.helpSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
@@ -46,6 +46,8 @@ export class HelpCommand extends Command {
                 return;
             }
         }
+
+        this.usersUsingACommand = usersUsingACommand;
 
         console.log('help command');
         // coolDown

@@ -14,14 +14,14 @@ export class RemoveSongsFromPlayListCommand extends Command {
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
-    private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
+    private usersUsingACommand: UsersUsingACommand;
 
     constructor(playListHandler: PlayListHandler) {
         super();
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message) {
+    public async call(event: Message, usersUsingACommand: UsersUsingACommand) {
         //role check
         if (this.removeSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
@@ -29,6 +29,8 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 return;
             }
         }
+
+        this.usersUsingACommand = usersUsingACommand;
 
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
