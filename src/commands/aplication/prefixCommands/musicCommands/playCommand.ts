@@ -301,9 +301,8 @@ export class PlayCommand extends Command {
             }
 
             // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
-            const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.getSognsInfoFromPlayList(
-                url,
-            );
+            const playDlResponse: APIResponse<RawSongData[]> =
+                await this.playDlHandler.getSognsInfoFromPlayList(url);
 
             if (!playDlResponse.isError) {
                 return this.mapPlayDLPlayListData(event, playDlResponse.data);
@@ -378,9 +377,8 @@ export class PlayCommand extends Command {
                 // play playList
                 if (['y', 'Y'].includes(collectedMessage.content)) {
                     message.delete();
-                    const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.getSognsInfoFromPlayList(
-                        url
-                    );
+                    const playDlResponse: APIResponse<RawSongData[]> =
+                        await this.playDlHandler.getSognsInfoFromPlayList(url);
                     if (!playDlResponse.isError) {
                         return this.mapPlayDLPlayListData(event, playDlResponse.data);
                     }

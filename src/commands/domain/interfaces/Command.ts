@@ -6,4 +6,3 @@ import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
 export abstract class Command {
     abstract call(event: Message, props?: UsersUsingACommand | DiceCommand | ReplyCommand);
 }
-

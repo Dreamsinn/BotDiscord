@@ -323,7 +323,6 @@ export class PlayListHandler {
         if (!this.player) {
             return TogglePauseOutputEnums.NO_PLAYLIST;
         }
-        console.log(this.player._state.status);
         if (this.player._state.status === 'paused') {
             this.player.unpause();
             return TogglePauseOutputEnums.PLAY;
