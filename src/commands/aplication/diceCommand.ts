@@ -9,10 +9,10 @@ export class DiceCommand {
     private diceSchema: CommandSchema = DiceCommandSchema;
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
-    public static isDiceCommandActive = false;
+    public isDiceCommandActive = false;
 
     // activa o desactuva los dados
-    public static toggleDiceCommand(active: boolean): boolean {
+    public toggleDiceCommand(active: boolean): boolean {
         if (this.isDiceCommandActive === active) {
             return false;
         }

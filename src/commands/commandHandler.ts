@@ -4,6 +4,12 @@ import { ReplyCommand, replyCommandOptions } from './aplication/replyCommand';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
 import { Routes } from './routes';
+import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
+import { HelpCommand } from './aplication/prefixCommands/helpCommand';
+import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
+import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
+import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
+import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 
 export class CommandHandler {
     private diceCommand: DiceCommand;
@@ -32,7 +38,7 @@ export class CommandHandler {
         // si el comando tien D para dados
         if (event.content.includes(`${DiceCommandSchema.aliases[0]}`)) {
             // si los dados estan activos
-            if (DiceCommand.isDiceCommandActive) {
+            if (this.diceCommand.isDiceCommandActive) {
                 console.log('contains D');
                 return await this.diceCommand.call(event);
             }
@@ -40,7 +46,7 @@ export class CommandHandler {
         }
 
         // si la funcion de respuesta
-        if (ReplyCommand.isReplyCommandActive) {
+        if (this.replyCommand.isReplyCommandActive) {
             // mirar si tiene ciertas palabras, para la respuesta
             for (const key of Object.keys(replyCommandOptions)) {
                 console.log(event.content.includes(`${key}`), key);
@@ -68,8 +74,20 @@ export class CommandHandler {
         console.log(command);
         for (const route of this.routes.routeList) {
             if (route.alias.find((alias) => alias === command.toLowerCase())) {
+                if (route.command instanceof HelpCommand || route.command instanceof PlayCommand || route.command instanceof RemoveSongsFromPlayListCommand){
+                    return route.command.call(event, this.usersUsingACommand)
+                }
+
+                if(route.command instanceof DiceCommandToggler){
+                    return route.command.call(event, this.diceCommand);
+                }
+
+                if(route.command instanceof ReplyCommandToggler){
+                    return route.command.call(event, this.replyCommand);
+                }
+
                 // mirar si se encuentra el comando en los alias
-                return route.command.call(event, this.usersUsingACommand);
+                return route.command.call(event);
             }
         }
         console.log('its not a command');

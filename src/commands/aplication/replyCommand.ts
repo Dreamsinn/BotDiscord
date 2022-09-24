@@ -9,10 +9,10 @@ export class ReplyCommand {
     private replySchema: CommandSchema = ReplyCommandSchema;
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
-    public static isReplyCommandActive = false;
+    public isReplyCommandActive = false;
 
     // activa o desactuva las respuestas
-    public static toggleReplyCommand(active: boolean): boolean {
+    public toggleReplyCommand(active: boolean): boolean {
         if (this.isReplyCommandActive === active) {
             return false;
         }

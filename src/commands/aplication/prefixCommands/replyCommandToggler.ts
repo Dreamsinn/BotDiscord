@@ -10,9 +10,9 @@ export class ReplyCommandToggler extends Command {
     private toggleDiceSchema: CommandSchema = ReplyCommandTogglerSchema;
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
-    private replyCommand = ReplyCommand;
+    private replyCommand: ReplyCommand;
 
-    public async call(event: Message): Promise<Message> {
+    public async call(event: Message, replyCommand): Promise<Message> {
         //role check
         if (this.toggleDiceSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
@@ -20,6 +20,8 @@ export class ReplyCommandToggler extends Command {
                 return;
             }
         }
+
+        this.replyCommand = replyCommand;
 
         // si on activa la respuestas de dados, si off la desactiva
         const interrupt = this.coolDown.call(this.toggleDiceSchema.coolDown);

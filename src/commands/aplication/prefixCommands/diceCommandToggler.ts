@@ -10,9 +10,9 @@ export class DiceCommandToggler extends Command {
     private toggleDiceSchema: CommandSchema = DiceCommandTogglerSchema;
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
-    private diceCommand = DiceCommand;
+    private diceCommand: DiceCommand;
 
-    public async call(event: Message): Promise<Message> {
+    public async call(event: Message, diceCommand): Promise<Message> {
         //role check
         if (this.toggleDiceSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
@@ -20,6 +20,8 @@ export class DiceCommandToggler extends Command {
                 return;
             }
         }
+
+        this.diceCommand = diceCommand;
 
         // si on activa la funcion de dados, si off la desactiva
         const interrupt = this.coolDown.call(this.toggleDiceSchema.coolDown);
