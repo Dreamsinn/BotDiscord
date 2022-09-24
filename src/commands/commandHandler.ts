@@ -2,17 +2,19 @@ import { Message } from 'discord.js';
 import { DiceCommand } from './aplication/diceCommand';
 import { ReplyCommand, replyCommandOptions } from './aplication/replyCommand';
 import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
-import { routes } from './routes';
+import { Routes } from './routes';
 
 export class CommandHandler {
     private diceCommand: DiceCommand;
     private replyCommand: ReplyCommand;
-    constructor(diceCommand: DiceCommand, replyCommand: ReplyCommand) {
+    private routes: Routes;
+    constructor(diceCommand: DiceCommand, replyCommand: ReplyCommand, routes: Routes) {
         this.diceCommand = diceCommand;
         this.replyCommand = replyCommand;
+        this.routes = routes;
     }
 
-    public async isCommand(event: Message) {
+    public async call(event: Message) {
         // si el comando tiene prefijo, para comandos con prefijo
         if (event.content.startsWith(`${process.env.PREFIX}`)) {
             console.log('prefix founded');
@@ -56,7 +58,7 @@ export class CommandHandler {
             command = event.content.substring(1);
         }
         console.log(command);
-        for (const route of routes) {
+        for (const route of this.routes.routeList) {
             if (route.alias.find((alias) => alias === command.toLowerCase())) {
                 // mirar si se encuentra el comando en los alias
                 return route.command.call(event);
