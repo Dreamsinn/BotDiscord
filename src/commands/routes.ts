@@ -39,7 +39,7 @@ interface Route {
     command: Command;
 }
 
-export class Routes{
+export class Routes {
     private youtubeSearch = new YoutubeAPIHandler();
     private playDlHandler = new PlayDlHandler();
     private displayEmbedBuilder = new DisplayEmbedBuilder();

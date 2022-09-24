@@ -3,26 +3,25 @@ import { DiceCommand } from './commands/aplication/diceCommand';
 import { ReplyCommand } from './commands/aplication/replyCommand';
 import { UsersUsingACommand } from './commands/aplication/utils/usersUsingACommand';
 import { CommandHandler } from './commands/commandHandler';
-import { Command } from './commands/domain/interfaces/Command';
 import { ServerList } from './commands/domain/interfaces/serverList';
 import { Routes } from './commands/routes';
 
 export class ServerRouting {
-    private serverList: ServerList[] = []
+    private serverList: ServerList[] = [];
 
-    public async call(event: Message){
+    public async call(event: Message) {
         // mira si el servidor ya ha sido instanciado, si es asi llama a la instancia
-        for(const server of this.serverList){
-            if(server.serverId === event.guildId){
-                return await server.instance.isCommand(event)
+        for (const server of this.serverList) {
+            if (server.serverId === event.guildId) {
+                return await server.instance.isCommand(event);
             }
         }
 
         // instancia el servidor y vuleve a llamar esta funcion
-        return this.addSeverToServerList(event)
+        return this.addSeverToServerList(event);
     }
 
-    private addSeverToServerList(event){
+    private addSeverToServerList(event) {
         const diceCommand = new DiceCommand();
         const replyCommand = new ReplyCommand();
         const routes = new Routes();
@@ -32,10 +31,10 @@ export class ServerRouting {
         const newServer: ServerList = {
             serverId: event.guildId,
             instance: commandHandler,
-        }
+        };
 
-        this.serverList.push(newServer)
+        this.serverList.push(newServer);
 
-        return this.call(event)
+        return this.call(event);
     }
 }
