@@ -81,8 +81,8 @@ export const replyCommandOptions = {
     5: 'POR EL CULO TE LA HINCO',
     trece: 'AGARRAMELA QUE ME CRECE',
     13: 'AGARRAMELA QUE ME CRECE',
-    javi: 'HAMBURGESSA',
-    hamburgessa: 'AMBULANCIA',
+    // javi: 'HAMBURGESSA',
+    // hamburgessa: 'AMBULANCIA',
     // ino: 'PEPINO',
     // ano: 'AGARRAMELA CON LA MANO'
 };

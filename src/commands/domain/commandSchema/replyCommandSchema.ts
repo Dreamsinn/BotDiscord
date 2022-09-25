@@ -2,7 +2,7 @@ import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const ReplyCommandSchema: CommandSchema = {
-    aliases: ['cinco', '5', 'trece', '13', 'javi'],
+    aliases: ['cinco', '5', 'trece', '13'],
     coolDown: 0,
     devOnly: false,
     description:
