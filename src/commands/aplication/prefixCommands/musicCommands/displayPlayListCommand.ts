@@ -114,7 +114,10 @@ export class DisplayPlayListCommand extends Command {
 
             display.thread.delete().catch(() => console.log("Display' thread has been deleted."));
             display.message.delete().catch(() => console.log('Display has been deleted.'));
-            await event.channel.send('Display ha cesado su funcionamiento.');
+
+            if(!display.channelEventWasThread){
+                await event.channel.send('Display ha cesado su funcionamiento.')
+            }
             return;
         });
     }

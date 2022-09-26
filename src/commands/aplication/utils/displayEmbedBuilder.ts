@@ -1,6 +1,7 @@
 import { EmbedFieldData, Message } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
+import { DisplayMessage } from '../../domain/interfaces/displayMessage';
 import { PlayListStatus } from '../../domain/interfaces/PlayListStatus';
 import { SongData } from '../../domain/interfaces/songData';
 import { MessageCreator } from '../utils/messageCreator';
@@ -20,10 +21,12 @@ export class DisplayEmbedBuilder {
         const thread = await this.selectChannel(event);
 
         if (newEmbed) {
-            return {
-                thread: thread,
+            const display: DisplayMessage ={
+                thread: await this.selectChannel(event),
+                channelEventWasThread: event.channel.isThread() ? true : false,
                 message: (this.displayMessage = await thread.send(output)),
             };
+            return display;
         }
 
         if (this.displayMessage) {
