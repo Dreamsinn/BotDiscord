@@ -1,12 +1,13 @@
-import { ClearPlayListCommandSchema } from '../../../domain/commandSchema/clearPlayListCommandSchema';
+import { Message } from 'discord.js';
+import { LogPlaylistStatusSchema } from '../../../domain/commandSchema/logPlaylistStatusSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 import { CheckDevRole } from '../../utils/checkDevRole';
 import { CoolDown } from '../../utils/coolDown';
 
-export class ClearPlayListCommand extends Command {
-    private clearSchema: CommandSchema = ClearPlayListCommandSchema;
+export class LogPlaylistStatusCommand extends Command {
+    private logSchema: CommandSchema = LogPlaylistStatusSchema;
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
@@ -16,9 +17,11 @@ export class ClearPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event) {
+    public async call(event: Message) {
+        event.delete();
+
         //role check
-        if (this.clearSchema.devOnly) {
+        if (this.logSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
             if (!interrupt) {
                 return;
@@ -26,17 +29,12 @@ export class ClearPlayListCommand extends Command {
         }
 
         //comprobar coolDown
-        const interrupt = this.coolDown.call(this.clearSchema.coolDown);
+        const interrupt = this.coolDown.call(this.logSchema.coolDown);
         if (interrupt === 1) {
             console.log('command interrupted by cooldown');
             return;
         }
 
-        const deleteResponse = await this.playListHandler.deletePlayList();
-
-        if (!deleteResponse) {
-            return event.reply('There is no playList');
-        }
-        return event.reply('Playlist has been cleared');
+        return await this.playListHandler.logPlaylistStatus();
     }
 }

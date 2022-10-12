@@ -4,4 +4,11 @@ export interface HelpCommandData {
     aliases: string[];
     coolDown: number;
     category: string;
+    roleRequired: boolean;
+}
+
+export interface HelpCommandList {
+    prefix: HelpCommandData[],
+    nonPrefix: HelpCommandData[],
+    music: HelpCommandData[],
 }

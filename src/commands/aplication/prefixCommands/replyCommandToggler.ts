@@ -3,14 +3,26 @@ import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyComma
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { ReplyCommand } from '../replyCommand';
+import { CheckDevRole } from '../utils/checkDevRole';
 import { CoolDown } from '../utils/coolDown';
 
 export class ReplyCommandToggler extends Command {
     private toggleDiceSchema: CommandSchema = ReplyCommandTogglerSchema;
     private coolDown = new CoolDown();
-    private replyCommand = ReplyCommand;
+    private checkDevRole = new CheckDevRole();
+    private replyCommand: ReplyCommand;
 
-    public async call(event: Message): Promise<Message> {
+    public async call(event: Message, replyCommand): Promise<Message> {
+        //role check
+        if (this.toggleDiceSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
+            }
+        }
+
+        this.replyCommand = replyCommand;
+
         // si on activa la respuestas de dados, si off la desactiva
         const interrupt = this.coolDown.call(this.toggleDiceSchema.coolDown);
         if (interrupt === 1) {

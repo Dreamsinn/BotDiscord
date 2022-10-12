@@ -3,11 +3,13 @@ import { LoopPlayListModeCommandSchema } from '../../../domain/commandSchema/loo
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
+import { CheckDevRole } from '../../utils/checkDevRole';
 import { CoolDown } from '../../utils/coolDown';
 
 export class LoopPlayListModeCommand extends Command {
     private loopSchema: CommandSchema = LoopPlayListModeCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
 
     constructor(playListHandler: PlayListHandler) {
@@ -16,6 +18,14 @@ export class LoopPlayListModeCommand extends Command {
     }
 
     public async call(event: Message): Promise<Message> {
+        //role check
+        if (this.loopSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
+            }
+        }
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.loopSchema.coolDown);
         if (interrupt === 1) {
@@ -23,21 +33,11 @@ export class LoopPlayListModeCommand extends Command {
             return;
         }
 
-        if (event.content.includes('on')) {
-            const hasBeenActived = this.playListHandler.toggleLoopMode(true);
-            if (hasBeenActived) {
-                event.channel.send('Loop mode active');
-            }
-            return;
+        const hasBeenActived = this.playListHandler.toggleLoopMode();
+        if (hasBeenActived) {
+            return event.channel.send('Loop mode active');
         }
 
-        if (event.content.includes('off')) {
-            const hasBeenDeactivate = this.playListHandler.toggleLoopMode(false);
-            if (hasBeenDeactivate) {
-                event.channel.send('Loop mode deactive');
-            }
-            return;
-        }
-        return;
+        return event.channel.send('Loop mode deactive');
     }
 }
