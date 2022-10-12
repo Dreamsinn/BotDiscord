@@ -4,6 +4,7 @@ import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
+import { CheckDevRole } from '../../utils/checkDevRole';
 import { CoolDown } from '../../utils/coolDown';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
@@ -11,15 +12,26 @@ import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 export class RemoveSongsFromPlayListCommand extends Command {
     private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
-    private usersUsingACommand = UsersUsingACommand.usersUsingACommand;
+    private usersUsingACommand: UsersUsingACommand;
 
     constructor(playListHandler: PlayListHandler) {
         super();
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message) {
+    public async call(event: Message, usersUsingACommand: UsersUsingACommand) {
+        //role check
+        if (this.removeSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
+            }
+        }
+
+        this.usersUsingACommand = usersUsingACommand;
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
         if (interrupt === 1) {
@@ -28,6 +40,10 @@ export class RemoveSongsFromPlayListCommand extends Command {
         }
 
         const playList: SongData[] = this.playListHandler.readPlayList();
+
+        if (!playList[0]) {
+            return event.reply('There is no playList');
+        }
 
         await new PaginatedMessage({
             embed: {

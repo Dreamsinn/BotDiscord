@@ -1,0 +1,25 @@
+- Un cliente distinto por servidor (intancia / base de datos?)
+
+    en handler
+    private playListIntanceServers = [];
+
+
+    if (route.category === 'music') {
+                    if (!this.playListIntanceServers.find((data: any) => data.id === event.guildId)) {
+                        this.playListIntanceServers.push({id: event.guildId, playList: new PlayListHandler(bot)})
+                    }
+                    const data = this.playListIntanceServers.find((data: any) => data.id === event.guildId)
+                    return route.command.call(event);
+                }
+
+- Rama master quitar eslint y mirar si hay algun prosproducion de ts
+
+- Regex para las busqueda de un mensaje, para no tener que hacer opcion minuscula y mayusucla, un util
+
+- Test
+
+- Skipear no quita cancion de la cola (por lomenos con los mebeds no sale asi)
+
+- Skip en modo loop para la musica y unpause o pause no hace nada
+
+- Ha tocado una cancion hasta el final, ha acabado, y al poner la siguiente a sonado la primera, y no se podia pasar

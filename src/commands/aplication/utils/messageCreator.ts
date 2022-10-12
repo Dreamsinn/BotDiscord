@@ -1,17 +1,21 @@
 import { MessageEmbed, MessageOptions } from 'discord.js';
 import {
+    ButtonRowList,
     CreateMessageOptions,
     EmbedOptions,
     MessageContent,
 } from '../../domain/interfaces/createEmbedOptions';
+import { MessageButtonsCreator } from './messageButtonsCreator';
 
 export class MessageCreator {
     private message: MessageContent;
     private embed: EmbedOptions;
+    private buttons: ButtonRowList;
 
     constructor(messageData: CreateMessageOptions) {
         this.message = messageData.message;
         this.embed = messageData.embed;
+        this.buttons = messageData.buttons;
     }
 
     public call() {
@@ -34,6 +38,7 @@ export class MessageCreator {
         }
 
         const output: MessageOptions = {
+            components: this.buttons ? new MessageButtonsCreator(this.buttons).call() : null,
             content: this.message ? this.message.content : null,
             embeds: embed ? [embed] : null,
         };

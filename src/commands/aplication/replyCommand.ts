@@ -1,16 +1,18 @@
 import { Message } from 'discord.js';
 import { ReplyCommandSchema } from '../domain/commandSchema/replyCommandSchema';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
+import { CheckDevRole } from './utils/checkDevRole';
 import { CoolDown } from './utils/coolDown';
 import { MessageCreator } from './utils/messageCreator';
 
 export class ReplyCommand {
     private replySchema: CommandSchema = ReplyCommandSchema;
     private coolDown = new CoolDown();
-    public static isReplyCommandActive = false;
+    private checkDevRole = new CheckDevRole();
+    public isReplyCommandActive = false;
 
     // activa o desactuva las respuestas
-    public static toggleReplyCommand(active: boolean): boolean {
+    public toggleReplyCommand(active: boolean): boolean {
         if (this.isReplyCommandActive === active) {
             return false;
         }
@@ -19,17 +21,26 @@ export class ReplyCommand {
     }
 
     public async call(event): Promise<Message> {
-        // TODO: jordi, no fer recorsivitat de if, es podria fer un filter
+        //role check
+        if (this.replySchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
+            }
+        }
+
+        const interrupt = this.coolDown.call(this.replySchema.coolDown);
+        if (interrupt === 1) {
+            console.log('command interrupted by cooldown');
+            return;
+        }
+
+        // TODO: no fer recorsivitat de if, es podria fer un filter
         // concatenar if fa que sigui lios
         this.replySchema.aliases.forEach((alias) => {
             // mirar si se encuntra el alias al principio, o ente ' '
             if (event.content.startsWith(alias) || event.content.includes(` ${alias} `)) {
                 // mirar si cumple la condicion de coolDown
-                const interrupt = this.coolDown.call(this.replySchema.coolDown);
-                if (interrupt === 1) {
-                    console.log('command interrupted by cooldown');
-                    return;
-                }
 
                 console.log('alias founded');
 
@@ -70,8 +81,8 @@ export const replyCommandOptions = {
     5: 'POR EL CULO TE LA HINCO',
     trece: 'AGARRAMELA QUE ME CRECE',
     13: 'AGARRAMELA QUE ME CRECE',
-    javi: 'HAMBURGESSA',
-    hamburgessa: 'AMBULANCIA',
+    // javi: 'HAMBURGESSA',
+    // hamburgessa: 'AMBULANCIA',
     // ino: 'PEPINO',
     // ano: 'AGARRAMELA CON LA MANO'
 };

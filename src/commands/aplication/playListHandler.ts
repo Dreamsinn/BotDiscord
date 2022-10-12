@@ -5,6 +5,7 @@ import {
     joinVoiceChannel,
 } from '@discordjs/voice';
 import { GuildMember, Message } from 'discord.js';
+import { TogglePauseOutputEnums } from '../domain/enums/togglePauseOutputEnums';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { NewSongData, SongData, SongDuration } from '../domain/interfaces/songData';
@@ -37,6 +38,9 @@ export class PlayListHandler {
             this.playList.push(newSong);
         }
 
+        // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
+        this.playListDuration = this.calculateListDuration(this.playList);
+
         if (songList) {
             await this.newListToPlayListEmbed(member, songList, channel);
         } else {
@@ -47,9 +51,6 @@ export class PlayListHandler {
         if (this.isDisplay.active) {
             this.sendPlayListDataToDisplay(false);
         }
-
-        // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
-        this.playListDuration = this.calculateListDuration(this.playList);
 
         // si no hay conexion o se ha desconectado el bot dle canal de voz, que entablezca una nueva conexion
         if (!this.botConnection || this.botConnection._state.status === 'destroyed') {
@@ -85,7 +86,7 @@ export class PlayListHandler {
                 fields: [
                     {
                         name: 'Duracion',
-                        value: `${this.getQeueDuration(songListDuration)}`,
+                        value: this.getQeueDuration(songListDuration),
                         inline: true,
                     },
                     {
@@ -95,7 +96,7 @@ export class PlayListHandler {
                     },
                     {
                         name: 'Espera',
-                        value: `${this.getQeueDuration(this.playListDuration)}`,
+                        value: this.getQeueDuration(this.playListDuration),
                         inline: true,
                     },
                     {
@@ -133,7 +134,7 @@ export class PlayListHandler {
                     { name: 'Posicion', value: `${this.playList.length}`, inline: true },
                     {
                         name: 'Espera',
-                        value: `${this.getQeueDuration(this.playListDuration)}`,
+                        value: this.getQeueDuration(this.playListDuration),
                         inline: true,
                     },
                     {
@@ -191,12 +192,6 @@ export class PlayListHandler {
     private joinToChannel(member: GuildMember, channel: any) {
         // une al bot al canal de discord y da la capacidad de reproducir musica
 
-        // si no estas en un canal de voz
-        if (!member.voice.channel) {
-            channel.send('Tienes que estar en un canal de voz!');
-            return;
-        }
-
         this.botConnection = joinVoiceChannel({
             channelId: member.voice.channel.id,
             guildId: channel.guild.id,
@@ -226,10 +221,10 @@ export class PlayListHandler {
             // pasa recurso al player
             this.player.play(resources);
         } catch (err) {
-            console.log('ERROR', err);
+            console.log('Play ERROR', err);
             this.playList.shift();
             if (this.playList[0]) {
-                return this.pauseMusic();
+                return this.playMusic();
             }
             return;
         }
@@ -242,6 +237,7 @@ export class PlayListHandler {
         if (this.isDisplay.active) {
             this.sendPlayListDataToDisplay(false);
         }
+        return;
     }
 
     private musicEventListener() {
@@ -287,8 +283,35 @@ export class PlayListHandler {
         return;
     }
 
-    public skipMusic() {
+    public async skipMusic() {
         let musicToSkip: SongData;
+
+        if (!this.player) {
+            return null;
+        }
+
+        if (this.player._state.status === 'paused') {
+            // arregla el bug que el display no saltava las canciones cuando la musica estava en pause
+            // buscar mejor solucion que modificar un readonly
+            musicToSkip = this.playList[0];
+            if (this.loopMode) {
+                this.playList.push(this.playList[0]);
+            }
+            this.playList.shift();
+
+            if (this.playList[0]) {
+                await this.playMusic();
+                this.player._state.status = 'paused';
+            } else {
+                this.player._state.status = 'idle';
+            }
+
+            if (this.isDisplay.active) {
+                this.sendPlayListDataToDisplay(false);
+            }
+            return musicToSkip;
+        }
+
         if (this.player) {
             musicToSkip = this.playList[0];
             this.player.stop();
@@ -296,23 +319,17 @@ export class PlayListHandler {
         return musicToSkip;
     }
 
-    public pauseMusic() {
-        if (!this.player || this.player._state.status === 'idle') {
-            return;
-        }
-        this.player.pause();
-        return;
-    }
-
-    public unpauseMusic() {
+    public togglePauseMusic(): string {
         if (!this.player) {
-            return;
+            return TogglePauseOutputEnums.NO_PLAYLIST;
         }
-        if (this.player._state.status === 'idle' && this.playList[0]) {
-            return this.playMusic();
+        if (this.player._state.status === 'paused') {
+            this.player.unpause();
+            return TogglePauseOutputEnums.PLAY;
         }
-        this.player.unpause();
-        return;
+
+        this.player.pause();
+        return TogglePauseOutputEnums.PAUSE;
     }
 
     public changeBotVoiceChanel(event: Message) {
@@ -329,20 +346,21 @@ export class PlayListHandler {
     }
 
     public deletePlayList() {
-        if (
-            (this.player && this.player._state.status === 'idle') ||
-            (this.botConnection && this.botConnection._state.status === 'destroyed')
-        ) {
-            this.playList = [];
-        } else {
-            // eleminamos todos menos el primero, que al ser el que esta sonando
-            this.playList = [this.playList[0]];
+        if (!this.playList[0]) {
+            return false;
         }
 
-        if (this.isDisplay.active) {
-            this.sendPlayListDataToDisplay(false);
+        if (this.player) {
+            this.playList = [];
+            this.player.stop();
+
+            this.player._state.status = 'idle';
+
+            if (this.isDisplay.active) {
+                this.sendPlayListDataToDisplay(false);
+            }
+            return true;
         }
-        return;
     }
 
     public removeSongsFromPlayList(songsIndex: number[]) {
@@ -413,17 +431,18 @@ export class PlayListHandler {
         return randomSong[0];
     }
 
-    public toggleLoopMode(active: boolean): boolean {
-        if (this.loopMode === active) {
-            return false;
+    public toggleLoopMode(): boolean {
+        if (this.loopMode) {
+            this.loopMode = false;
+        } else {
+            this.loopMode = true;
         }
-        this.loopMode = active;
 
         if (this.isDisplay.active) {
             this.sendPlayListDataToDisplay(false);
         }
 
-        return true;
+        return this.loopMode;
     }
 
     public deactivateDisplay() {
@@ -443,5 +462,12 @@ export class PlayListHandler {
         const playListData = this.readPlayListStatus();
 
         return this.displayEmbedBuilder.call(playListData, this.isDisplay.event, newEmbed);
+    }
+
+    public logPlaylistStatus() {
+        console.log('PLAYER: ', this.player ? this.player : null);
+        console.log('BOTCONNECTION: ', this.botConnection ? this.botConnection : null);
+        console.log('PLAYLIST: ', this.playList);
+        return;
     }
 }

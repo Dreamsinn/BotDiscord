@@ -1,6 +1,7 @@
 import { EmbedFieldData, Message } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
+import { DisplayMessage } from '../../domain/interfaces/displayMessage';
 import { PlayListStatus } from '../../domain/interfaces/PlayListStatus';
 import { SongData } from '../../domain/interfaces/songData';
 import { MessageCreator } from '../utils/messageCreator';
@@ -17,15 +18,49 @@ export class DisplayEmbedBuilder {
             embed: await this.setEmbedOptionsData(),
         }).call();
 
+        const thread = await this.selectChannel(event);
+
         if (newEmbed) {
-            return (this.displayMessage = await event.channel.send(output));
+            const display: DisplayMessage ={
+                thread: await this.selectChannel(event),
+                channelEventWasThread: event.channel.isThread() ? true : false,
+                message: (this.displayMessage = await thread.send(output)),
+            };
+            return display;
         }
 
-        await this.displayMessage.edit(output).catch(() => {
-            console.log('Error editing display');
-        });
+        if (this.displayMessage) {
+            await this.displayMessage.edit(output).catch(() => {
+                console.log('Error editing display');
+            });
+        }
 
         return;
+    }
+
+    private async selectChannel(event) {
+        // si el chat es un hilo lo devolvemos
+        if (event.channel.isThread()) {
+            return event.channel;
+        }
+
+        // buscamos si el chat tiene un hilo con el nombre de displayer, y si existe se fevuelve
+        let threadChannel;
+        event.channel.threads.cache.find((thread) => {
+            if (thread.name === 'Displayer') {
+                threadChannel = thread;
+            }
+        });
+        if (threadChannel) {
+            return threadChannel;
+        }
+
+        // si es un chat y no tiene u hilo con nombre de displayer, crea el hilo
+        return await event.startThread({
+            name: 'Displayer',
+            autoArchiveDuration: 60,
+            reason: 'Hilo para el controlador de musica',
+        });
     }
 
     private async setEmbedOptionsData(): Promise<EmbedOptions> {

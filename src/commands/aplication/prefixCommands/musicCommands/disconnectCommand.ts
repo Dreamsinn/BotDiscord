@@ -2,11 +2,13 @@ import { DisconnectCommandSchema } from '../../../domain/commandSchema/disconnec
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
+import { CheckDevRole } from '../../utils/checkDevRole';
 import { CoolDown } from '../../utils/coolDown';
 
 export class DisconnectCommand extends Command {
     private BotDisconnectSchema: CommandSchema = DisconnectCommandSchema;
     private coolDown = new CoolDown();
+    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
 
     constructor(playListHandler: PlayListHandler) {
@@ -14,7 +16,15 @@ export class DisconnectCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call() {
+    public async call(event) {
+        //role check
+        if (this.BotDisconnectSchema.devOnly) {
+            const interrupt = this.checkDevRole.call(event);
+            if (!interrupt) {
+                return;
+            }
+        }
+
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.BotDisconnectSchema.coolDown);
         if (interrupt === 1) {
