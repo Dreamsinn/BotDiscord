@@ -21,23 +21,21 @@ import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { HelpCommandData, HelpCommandList } from '../../domain/interfaces/helpCommandData';
-import { CheckDevRole } from '../utils/checkDevRole';
+import { CheckAdminRole } from '../utils/CheckAdminRole';
 import { CoolDown } from '../utils/coolDown';
 import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class HelpCommand extends Command {
-    // TODO, poner schemas como dependencias?
     private helpSchema: CommandSchema = HelpCommandSchema;
     private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
+    private checkAdminRole = new CheckAdminRole();
     private commandList: HelpCommandList;
     private usersUsingACommand: UsersUsingACommand;
 
     public async call(event: Message, usersUsingACommand: UsersUsingACommand) {
-        //role check
-        if (this.helpSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
+        if (this.helpSchema.adminOnly) {
+            const interrupt = this.checkAdminRole.call(event);
             if (!interrupt) {
                 return;
             }
@@ -45,27 +43,24 @@ export class HelpCommand extends Command {
 
         this.usersUsingACommand = usersUsingACommand;
 
-        // coolDown
         const interrupt = this.coolDown.call(this.helpSchema.coolDown);
         if (interrupt === 1) {
             console.log('command interrupted by cooldown');
             return;
         }
 
-        // creamos embed para elejir entre comandos de prfijo o no prefijo, y lo enviamos
         const output = this.createTypeOfCommandsEmbed();
 
         const typeCommandMessage = await event.channel.send(output);
 
-        // sino esta hecho, crea las listas de comandos, con su informacion
-        if(!this.commandList){
+        if (!this.commandList) {
             this.mapCommandListData()
         }
 
         return this.messageResponseListener(typeCommandMessage, event, HelpEmbedsTitlesEnum.TYPES);
     }
 
-    private mapCommandListData (){
+    private mapCommandListData() {
         const commandsSchemas = [DiceCommandSchema, ReplyCommandSchema, HelpCommandSchema, DiceCommandTogglerSchema,
             ReplyCommandTogglerSchema, PlayCommandSchema, PlayListCommandSchema, PauseCommandSchema, SkipMusicCommandSchema,
             RemoveSongsFromPlayListCommandSchema, ClearPlayListCommandSchema, DisplayPlayListCommandSchema,
@@ -75,25 +70,25 @@ export class HelpCommand extends Command {
         const nonCommandList = []
         const musicCommandList = []
 
-        commandsSchemas.forEach((schema: CommandSchema)=>{
+        commandsSchemas.forEach((schema: CommandSchema) => {
             const schemaData: HelpCommandData = {
                 name: schema.name,
                 description: schema.description,
                 aliases: schema.aliases,
                 coolDown: schema.coolDown,
                 category: schema.category,
-                roleRequired: schema.devOnly,
+                roleRequired: schema.adminOnly,
             }
 
-            if (schema.category === CommandsCategoryEnum.PREFIX){
+            if (schema.category === CommandsCategoryEnum.PREFIX) {
                 prefixCommandList.push(schemaData)
             }
 
-            if (schema.category === CommandsCategoryEnum.NONPREFIX){
+            if (schema.category === CommandsCategoryEnum.NONPREFIX) {
                 nonCommandList.push(schemaData)
             }
 
-            if (schema.category === CommandsCategoryEnum.MUSIC){
+            if (schema.category === CommandsCategoryEnum.MUSIC) {
                 musicCommandList.push(schemaData)
             }
         })
@@ -131,18 +126,15 @@ export class HelpCommand extends Command {
     }
 
     private messageResponseListener(helpEmbed: Message, event: Message, typeOfEmbed: string) {
-        // usuario en la lista de no poder usar comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
         const filter = (reaction: Message) => {
             const authorCondition = event.author.id === reaction.author.id;
 
-            // el primer embed de todos no tiene 'b', porque no puede ir para atras
             let letterCondition = ['x', 'X', 'b', 'B', 'back', 'BACK'].includes(reaction.content);
             if (typeOfEmbed === HelpEmbedsTitlesEnum.TYPES) {
                 letterCondition = ['x', 'X'].includes(reaction.content);
             }
-            // los embeds con la descripcion de comandos no tienen condicion numerica, porque no tienen que elegir nada llegado el punto
             if (
                 typeOfEmbed === HelpEmbedsTitlesEnum.TYPES ||
                 typeOfEmbed === HelpEmbedsTitlesEnum.PREFIX ||
@@ -161,27 +153,24 @@ export class HelpCommand extends Command {
         event.channel
             .awaitMessages({ filter, time: 60000, max: 1, errors: ['time'] })
             .then(async (collected) => {
-                // eliminamos a la persona de la lista de no poder usar comandos
                 this.usersUsingACommand.removeUserList(event.author.id);
                 let collectedMessage: Message;
                 collected.map((e: Message) => (collectedMessage = e));
 
                 collectedMessage.delete();
-                // quitamos usuario de la lista de no poder usar comandos
                 this.usersUsingACommand.removeUserList(event.author.id);
 
-                // Si se responde una X se borra el mensaje
                 if (['x', 'X'].includes(collectedMessage.content)) {
                     console.log('Help Command cancelled');
                     event.reply('Help Command ha expirado');
 
                     return;
                 }
-                // ir al embed anterior
+
                 if (['b', 'B', 'back', 'BACK'].includes(collectedMessage.content)) {
                     return this.findPreviousEmbed(helpEmbed, event, typeOfEmbed);
                 }
-                // ir al siguiente embed
+
                 return this.findNextEmbedToCreate(collectedMessage, helpEmbed, event);
             })
             .catch((err) => {
@@ -189,11 +178,10 @@ export class HelpCommand extends Command {
                     console.log(err);
                     event.channel.send(`Error: ${err.message}`);
                 } else {
-                    // sino contesta
                     console.log(`Help Command time out`);
                     event.reply('Time out');
                 }
-                // quitamos usuario de la lista de no poder usar comandos
+
                 this.usersUsingACommand.removeUserList(event.author.id);
 
                 return;
@@ -201,7 +189,6 @@ export class HelpCommand extends Command {
     }
 
     private async findPreviousEmbed(helpEmbed: Message, event: Message, typeOfEmbed: string) {
-        // creamos el embed anterior, lo enviamos y le escuchamos la respuesta
         if (
             typeOfEmbed === HelpEmbedsTitlesEnum.PREFIX ||
             typeOfEmbed === HelpEmbedsTitlesEnum.NONPREFIX
@@ -237,7 +224,6 @@ export class HelpCommand extends Command {
     }
 
     private async findNextEmbedToCreate(collectedMessage: Message, helpEmbed: Message, event: Message) {
-        // creamos el embed selecionado, lo enviamos y le escuchamos la respuesta
         if (helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.TYPES) {
             if (collectedMessage.content === '1') {
                 const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
@@ -352,9 +338,9 @@ export class HelpCommand extends Command {
         });
 
         let rol = 'No'
-        if(selectedCommand.roleRequired){
-            if (process.env.DEV_ROL){
-                rol = process.env.DEV_ROL
+        if (selectedCommand.roleRequired) {
+            if (process.env.ADMIN_ROL) {
+                rol = process.env.ADMIN_ROL
             } else {
                 rol = 'Requerido, pero no se ha definido el nombre del rol.'
             }

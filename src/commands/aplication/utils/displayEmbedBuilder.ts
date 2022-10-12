@@ -11,7 +11,6 @@ export class DisplayEmbedBuilder {
     private displayMessage: Message;
 
     public async call(playListStatus: PlayListStatus, event: Message, newEmbed: boolean) {
-        // si newEmbed crea un mensaje con toda la informacion, sino edita el mensaje ya creado
         this.playListStatus = playListStatus;
 
         const output = new MessageCreator({
@@ -21,7 +20,7 @@ export class DisplayEmbedBuilder {
         const thread = await this.selectChannel(event);
 
         if (newEmbed) {
-            const display: DisplayMessage ={
+            const display: DisplayMessage = {
                 thread: await this.selectChannel(event),
                 channelEventWasThread: event.channel.isThread() ? true : false,
                 message: (this.displayMessage = await thread.send(output)),
@@ -39,12 +38,10 @@ export class DisplayEmbedBuilder {
     }
 
     private async selectChannel(event) {
-        // si el chat es un hilo lo devolvemos
         if (event.channel.isThread()) {
             return event.channel;
         }
 
-        // buscamos si el chat tiene un hilo con el nombre de displayer, y si existe se fevuelve
         let threadChannel;
         event.channel.threads.cache.find((thread) => {
             if (thread.name === 'Displayer') {
@@ -55,7 +52,6 @@ export class DisplayEmbedBuilder {
             return threadChannel;
         }
 
-        // si es un chat y no tiene u hilo con nombre de displayer, crea el hilo
         return await event.startThread({
             name: 'Displayer',
             autoArchiveDuration: 60,

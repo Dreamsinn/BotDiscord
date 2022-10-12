@@ -27,7 +27,6 @@ export class PaginatedMessage {
     }
 
     public async call() {
-        // si la informacion es una lista de canciones, la convierte en un [] de estings
         if (this.pagination.rawDataToPaginate) {
             this.pagination.dataToPaginate = this.createPaginationData();
         }
@@ -74,7 +73,6 @@ export class PaginatedMessage {
     private paginateData() {
         const paginatedData: string[][] = [];
 
-        // convierte un arr
         while (this.pagination.dataToPaginate.length > 0) {
             paginatedData.push(this.pagination.dataToPaginate.splice(0, this.pagination.dataPerPage));
         }
@@ -118,19 +116,19 @@ export class PaginatedMessage {
                     this.paginatedStringData.length === 1 && this.embed.description
                         ? this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`
                         : this.paginatedStringData.length === 1
-                        ? this.paginatedStringData[this.page - 1]
-                        : this.embed.description
-                        ? this.embed.description
-                        : null,
+                            ? this.paginatedStringData[this.page - 1]
+                            : this.embed.description
+                                ? this.embed.description
+                                : null,
                 thumbnailUrl: this.embed.thumbnailUrl ? this.embed.thumbnailUrl : null,
                 fields: this.embed.fields ? this.embed.fields : null,
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                              value: `${this.paginatedStringData[this.page - 1]}`,
-                              inline: false,
-                          }
+                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                            value: `${this.paginatedStringData[this.page - 1]}`,
+                            inline: false,
+                        }
                         : null,
                 imageUrl: this.embed.imageUrl ? this.embed.imageUrl : null,
                 timeStamp: this.embed.timeStamp ? this.embed.timeStamp : null,
@@ -172,12 +170,12 @@ export class PaginatedMessage {
         });
 
         collector.on('collect', (collected) => {
-            // anular mensage de Interacción fallida
             collected.deferUpdate();
+
             if (collected.customId === PaginationButtonsIdEnum.X) {
-                // kill collector
                 return collector.stop();
             }
+
             this.reactionHandler(message, collected, maxPage);
         });
 
@@ -199,18 +197,17 @@ export class PaginatedMessage {
         let pageChanged: boolean;
 
         const collectedId = collected.customId;
-        // si se ha tirado hacia atras, y la pagina es superior a 0: disminuimos pagina
+
         if (collectedId === PaginationButtonsIdEnum.PREV && this.page > 1) {
             pageChanged = true;
             this.page--;
         }
-        // si se ha tiarado hacia delante, y la pagina es inferior a la pagina maxima: aumentamos pagina
+
         if (collectedId === PaginationButtonsIdEnum.NEXT && this.page < maxPage) {
             pageChanged = true;
             this.page++;
         }
 
-        // si se ha cambiado la pagina edita el embed con la info de la pagina actual
         if (pageChanged) {
             const output = this.createPageEmbed();
 

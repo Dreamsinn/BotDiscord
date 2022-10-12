@@ -11,7 +11,6 @@ export class CoolDown {
                 console.log('coolDown =', coolDown);
                 console.log(coolDown);
                 if (timeLapse < coolDown) {
-                    // TODO: arregalr harcoding
                     return 1;
                 }
             }

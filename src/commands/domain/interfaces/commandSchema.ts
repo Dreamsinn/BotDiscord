@@ -1,7 +1,7 @@
 export interface CommandSchema {
     aliases: string[];
     coolDown: number;
-    devOnly: boolean;
+    adminOnly: boolean;
     description: string;
     category: string;
     name: string;

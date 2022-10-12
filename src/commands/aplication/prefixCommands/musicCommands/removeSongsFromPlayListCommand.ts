@@ -4,7 +4,7 @@ import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
-import { CheckDevRole } from '../../utils/checkDevRole';
+import { CheckAdminRole } from '../../utils/CheckAdminRole';
 import { CoolDown } from '../../utils/coolDown';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
@@ -12,7 +12,7 @@ import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 export class RemoveSongsFromPlayListCommand extends Command {
     private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
     private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
+    private checkAdminRole = new CheckAdminRole();
     private playListHandler: PlayListHandler;
     private usersUsingACommand: UsersUsingACommand;
 
@@ -22,9 +22,8 @@ export class RemoveSongsFromPlayListCommand extends Command {
     }
 
     public async call(event: Message, usersUsingACommand: UsersUsingACommand) {
-        //role check
-        if (this.removeSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
+        if (this.removeSchema.adminOnly) {
+            const interrupt = this.checkAdminRole.call(event);
             if (!interrupt) {
                 return;
             }
@@ -32,7 +31,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
         this.usersUsingACommand = usersUsingACommand;
 
-        //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);
         if (interrupt === 1) {
             console.log('command interrupted by cooldown');
@@ -71,7 +69,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
     }
 
     private messageCollector(event: Message, playList: SongData[]) {
-        // usuario no pueda ejecutar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
         const lastSongIndex = playList.length;
@@ -85,20 +82,17 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 Math.min(Number(...numbersArray)) >= 1;
             const letterConditoin = message.content === 'x' || message.content === 'X';
 
-            // si la respuesta viene del mismo que el evento, todos son numeros, mayot que 0 y no mayor que el numero de items, o X
             return userConditions && (numbersConditions || letterConditoin);
         };
 
         event.channel
             .awaitMessages({ filter, time: 60000, max: 1, errors: ['time'] })
             .then((collected) => {
-                // usuario ya puede usar otros comandos
                 this.usersUsingACommand.removeUserList(event.author.id);
                 let collectedMessage: Message;
                 collected.map((e: Message) => (collectedMessage = e));
 
                 if (collectedMessage.content === 'x' || collectedMessage.content === 'X') {
-                    // cancela el comando
                     console.log('Remove command cancelled');
                     event.channel.send('Remove command cancelled');
                     return;
@@ -120,7 +114,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
     }
 
     private removeSongFromPlayList(content: string, event: Message) {
-        // pasa a playListHandler el indice(-1) de las canciones
         const stringNumbersArray = content.split(',');
 
         const numberArray: number[] = [];
@@ -132,7 +125,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
             }
         });
 
-        // recive las canciones borradas y hace embed de las canciones borradas
         const removedMusic = this.playListHandler.removeSongsFromPlayList(numberArray);
         return this.removedMusicEmbed(removedMusic, event);
     }

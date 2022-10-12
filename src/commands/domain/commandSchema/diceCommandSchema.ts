@@ -4,7 +4,7 @@ import { CommandSchema } from '../interfaces/commandSchema';
 const DiceCommandSchema: CommandSchema = {
     aliases: ['D'],
     coolDown: 120,
-    devOnly: false,
+    adminOnly: false,
     description:
         'Requiere de un comando de prefijo para ser activado:\n' +
         `- \`roll on\` o \`dice on\`, de la misma forma, off para desactivarla.\n` +

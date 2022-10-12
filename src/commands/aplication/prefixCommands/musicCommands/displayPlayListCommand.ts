@@ -7,7 +7,7 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { ButtonRowList, ButtonsStyle } from '../../../domain/interfaces/createEmbedOptions';
 import { DisplayMessage } from '../../../domain/interfaces/displayMessage';
 import { PlayListHandler } from '../../playListHandler';
-import { CheckDevRole } from '../../utils/checkDevRole';
+import { CheckAdminRole } from '../../utils/CheckAdminRole';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
@@ -15,7 +15,7 @@ import { MessageCreator } from '../../utils/messageCreator';
 export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
     private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
+    private checkAdminRole = new CheckAdminRole();
     private playListHandler: PlayListHandler;
     private isDisplayActive = false;
     private showingReadme = false;
@@ -27,16 +27,14 @@ export class DisplayPlayListCommand extends Command {
     }
 
     public async call(event: Message) {
-        //role check
-        if (this.displaySchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
+        if (this.displaySchema.adminOnly) {
+            const interrupt = this.checkAdminRole.call(event);
 
             if (!interrupt) {
                 return;
             }
         }
 
-        //comprobar coolDown
         const interrupt = this.coolDown.call(this.displaySchema.coolDown);
         if (interrupt === 1) {
             console.log('command interrupted by cooldown');
@@ -47,7 +45,6 @@ export class DisplayPlayListCommand extends Command {
             return this.collector.stop();
         }
 
-        // si ya hay un display activo
         if (this.isDisplayActive) {
             event.channel
                 .send('Ya hay un display activo')
@@ -64,7 +61,6 @@ export class DisplayPlayListCommand extends Command {
         }
         this.isDisplayActive = true;
         console.log('hemos  llegado');
-        // pasa estado activo playListHandler y le devuelve el mensaje
         const display: DisplayMessage = await this.playListHandler.activateDispaly(event);
 
         if (display.message) {
@@ -74,7 +70,6 @@ export class DisplayPlayListCommand extends Command {
     }
 
     private reactionListener(event: Message, display: DisplayMessage) {
-        // Añade reacciones y escucha las reacciones recibidas, si se reacciona una de las añadidas: se borra relación y actúa dependiendo relación
         this.addButtonsReactions(display.message);
 
         this.collector = display.message.createMessageComponentCollector({
@@ -83,23 +78,20 @@ export class DisplayPlayListCommand extends Command {
         });
 
         this.collector.on('collect', async (collected) => {
-            // anular mensage de Interacción fallida
             collected.deferUpdate();
 
-            if (this.displaySchema.devOnly) {
-                const interrupt = this.checkDevRole.call(event);
+            if (this.displaySchema.adminOnly) {
+                const interrupt = this.checkAdminRole.call(event);
 
                 if (!interrupt) {
                     return;
                 }
             }
 
-            // si x borra el msenaje
             if (collected.customId === DisplayButtonsIdEnum.CLOSE) {
                 return this.collector.stop();
             }
 
-            // si readme, y no esta el readme activo
             if (collected.customId === DisplayButtonsIdEnum.README && !this.showingReadme) {
                 return this.createReadmeEmbed(display);
             }
@@ -115,7 +107,7 @@ export class DisplayPlayListCommand extends Command {
             display.thread.delete().catch(() => console.log("Display' thread has been deleted."));
             display.message.delete().catch(() => console.log('Display has been deleted.'));
 
-            if(!display.channelEventWasThread){
+            if (!display.channelEventWasThread) {
                 await event.channel.send('Display ha cesado su funcionamiento.')
             }
             return;

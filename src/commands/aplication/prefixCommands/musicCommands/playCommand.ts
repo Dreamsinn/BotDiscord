@@ -9,7 +9,7 @@ import { NewSongData, RawSongData, SongData } from '../../../domain/interfaces/s
 import { PlayDlHandler } from '../../../infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from '../../../infrastructure/youtubeHandler';
 import { PlayListHandler } from '../../playListHandler';
-import { CheckDevRole } from '../../utils/checkDevRole';
+import { CheckAdminRole } from '../../utils/CheckAdminRole';
 import { CoolDown } from '../../utils/coolDown';
 import { MessageCreator } from '../../utils/messageCreator';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
@@ -17,7 +17,7 @@ import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 export class PlayCommand extends Command {
     private playSchema: CommandSchema = PlayCommandSchema;
     private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
+    private checkAdminRole = new CheckAdminRole();
     private usersUsingACommand: UsersUsingACommand;
     private youtubeAPIHandler: YoutubeAPIHandler;
     private playListHandler: PlayListHandler;
@@ -35,9 +35,8 @@ export class PlayCommand extends Command {
     }
 
     public call(event: Message, usersUsingACommand: UsersUsingACommand) {
-        //role check
-        if (this.playSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
+        if (this.playSchema.adminOnly) {
+            const interrupt = this.checkAdminRole.call(event);
             if (!interrupt) {
                 return;
             }
@@ -45,19 +44,16 @@ export class PlayCommand extends Command {
 
         this.usersUsingACommand = usersUsingACommand;
 
-        // si no hay espacio vacio es que no hay argumento
         const emptySpacePosition = event.content.search(' ');
         if (emptySpacePosition === -1) {
             return;
         }
 
-        // // si no estas en un canal de voz
         if (!event.member.voice.channel) {
             event.channel.send('Tienes que estar en un canal de voz!');
             return;
         }
 
-        //comprobar coolDown
         const interrupt = this.coolDown.call(this.playSchema.coolDown);
         if (interrupt === 1) {
             console.log('command interrupted by cooldown');
@@ -66,32 +62,27 @@ export class PlayCommand extends Command {
 
         const argument = event.content.substring(emptySpacePosition);
 
-        // si video desde mobil
         if (argument.includes('https://youtu.be/')) {
             return this.findSongIdFromMobileURL(argument, event);
         }
 
-        // si es una lista de youtube
         if (argument.includes('youtube.com/playlist?list=')) {
             return this.findYoutubePlayList(argument, event);
         }
-        // es lista, y se esta reproduciendo una cancion
+
         if (argument.includes('youtube.com') && argument.includes('&list=')) {
             return this.findYoutubePlayList(argument, event, true);
         }
 
-        // si buscas por enlace de youtube
         if (argument.includes('youtube.com/watch?v=')) {
             return this.findSongIdFromYoutubeURL(argument, event);
         }
 
-        // si buscas por nombre de cancion
         return this.searchBySongName(argument, event);
     }
 
     private async searchBySongName(argument: string, event: Message) {
         let musicData: RawSongData[];
-        // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
 
         const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.searchSongByName(
             argument,
@@ -120,7 +111,6 @@ export class PlayCommand extends Command {
 
         const { output, numberChoices } = this.createSelectChoicesEmbed(musicData);
 
-        // subimos al usuario a la lista para que no pueda usar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
         const message = await event.reply(output);
@@ -132,19 +122,17 @@ export class PlayCommand extends Command {
                 Number(reaction.content) &&
                 Number(reaction.content) > 0 &&
                 Number(reaction.content) < numberChoices;
-            // si el autor es el mismo, y el mensaje contiene X, 0 o un numero entre 0 y las numero de opciones
+
             return authorCondition && (letterCondition || numberCondition);
         };
 
         message.channel
             .awaitMessages({ filter, time: 20000, max: 1, errors: ['time'] })
             .then((collected) => {
-                // eliminamos a la persona de la lista de no poder usar comandos
                 this.usersUsingACommand.removeUserList(event.author.id);
                 let collectedMessage: Message;
                 collected.map((e: Message) => (collectedMessage = e));
 
-                // Si se responde una X se borra el mensaje
                 if (collectedMessage.content === 'x') {
                     console.log('Search cancelled');
                     event.reply('Search cancelled');
@@ -157,9 +145,8 @@ export class PlayCommand extends Command {
 
                 const song: RawSongData = musicData[numberSelected];
 
-                // eleminamos opciones
                 message.delete();
-                // eliminamos la respuesta a la opciones
+
                 collectedMessage.delete();
 
                 return this.updateToPlayList(event, song);
@@ -169,7 +156,6 @@ export class PlayCommand extends Command {
                     console.log('Select music colector error: ', err);
                     event.channel.send(`Error: ${err.message}`);
                 } else {
-                    // sino contesta
                     console.log(`No answer`);
                     event.reply('Time out');
                 }
@@ -181,7 +167,6 @@ export class PlayCommand extends Command {
     }
 
     private createSelectChoicesEmbed(songList: RawSongData[]) {
-        // pasa un embed al discord para que elija exactamente cual quiere
         let embedContent = '```js\n';
 
         songList.forEach((song, i) => {
@@ -201,12 +186,10 @@ export class PlayCommand extends Command {
             },
         }).call();
 
-        // devuelve el embed y el numero de eleciones
         return { output, numberChoices: songList.length };
     }
 
     private findSongIdFromYoutubeURL(url: string, event: Message) {
-        // encontramos la id del video
         const rawSongId = url
             .replace('https://', '')
             .replace('www.', '')
@@ -226,7 +209,6 @@ export class PlayCommand extends Command {
     }
 
     private findSongIdFromMobileURL(url: string, event: Message) {
-        // encontramos la id del video compartido desde el movil
         const songId = url.replace('https://youtu.be/', '').replace(/^./, '');
 
         const song: RawSongData = { id: songId };
@@ -254,8 +236,6 @@ export class PlayCommand extends Command {
     }
 
     private async mapSongData(event: Message, song: RawSongData): Promise<RawSongData> {
-        // optenemos duracion y nombre
-        // llama primero a Play-dl y si falla a Youtube API para no gastar el token
         const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlHandler.getSongInfo(song.id);
         if (!playDlResponse.isError) {
             if (!song.title) {
@@ -267,7 +247,6 @@ export class PlayCommand extends Command {
         }
         console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
 
-        // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
         const youtubeResponse: APIResponse<RawSongData> = await this.youtubeAPIHandler.searchSongById(
             song.id,
         );
@@ -289,7 +268,6 @@ export class PlayCommand extends Command {
         let playListId: string;
 
         if (!watch) {
-            // sino se esta rerpoduciendo un video
             playListId = url
                 .replace('https://', '')
                 .replace('www.', '')
@@ -300,19 +278,18 @@ export class PlayCommand extends Command {
                 return event.reply('Palylist bad request');
             }
 
-            // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
             const playDlResponse: APIResponse<RawSongData[]> =
                 await this.playDlHandler.getSognsInfoFromPlayList(url);
 
             if (!playDlResponse.isError) {
                 return this.mapPlayDLPlayListData(event, playDlResponse.data);
             }
-            // si Play-dl falla
+
             event.channel.send('Play-dl failed to fectch PlayList, it will be tried with Youtube API');
             console.log('PlayDl getSognsInfoFromPlayList Error:', playDlResponse.errorData);
             return this.fetchYoutubePlayListData(event, playListId, url);
         }
-        // si esta reproduciendo un video
+
         const playListIdPosition = url.search('&list=');
         const rawPlayListId = url.substring(playListIdPosition + 6);
 
@@ -332,7 +309,6 @@ export class PlayCommand extends Command {
     }
 
     private async isPlayListDesired(event: Message, playListId: string, url: string) {
-        // preguntamos al usuario si quiere reproducir la cancion el la playlist
         const output = new MessageCreator({
             embed: {
                 color: '#40b3ff',
@@ -348,7 +324,6 @@ export class PlayCommand extends Command {
         const filter = (reaction: Message) => {
             const authorCondition = event.author.id === reaction.author.id;
             const contentCondition = ['y', 'Y', 'n', 'N', 'x', 'X'].includes(reaction.content);
-            // si el autor es el mismo, y el mensaje contiene Y, N, o X
             return authorCondition && contentCondition;
         };
 
@@ -359,7 +334,6 @@ export class PlayCommand extends Command {
                 let collectedMessage: Message;
                 collected.map((e: Message) => (collectedMessage = e));
 
-                // Si se responde una X se borra el mensaje
                 if (['x', 'X'].includes(collectedMessage.content)) {
                     console.log('Search cancelled');
                     event.reply('Search cancelled');
@@ -368,13 +342,11 @@ export class PlayCommand extends Command {
                     return;
                 }
 
-                // N que toque la cancion del enlace
                 if (['n', 'N'].includes(collectedMessage.content)) {
                     message.delete();
                     return this.findSongIdFromYoutubeURL(url, event);
                 }
 
-                // play playList
                 if (['y', 'Y'].includes(collectedMessage.content)) {
                     message.delete();
                     const playDlResponse: APIResponse<RawSongData[]> =
@@ -395,7 +367,6 @@ export class PlayCommand extends Command {
                     console.log(err);
                     event.channel.send(`Error: ${err.message}`);
                 } else {
-                    // sino contesta
                     console.log(`No answer`);
                     event.reply('Time out');
                 }
@@ -420,7 +391,6 @@ export class PlayCommand extends Command {
     }
 
     private async fetchYoutubePlayListData(event: Message, playListId: string, url: string) {
-        // llama a la API de youtube, si esta tambien falla y esta sonando un video reproduce el video
         const youtubeResponse: APIResponse<RawSongData[]> = await this.youtubeAPIHandler.searchPlaylist(
             playListId,
         );
@@ -435,7 +405,6 @@ export class PlayCommand extends Command {
             return;
         }
 
-        // por cada video llama a la api para obtener la informacion
         const playlist: SongData[] = await this.mapSongListData(event, youtubeResponse.data);
 
         return this.updatePlayListWithAPlayList(event, playlist);
@@ -470,7 +439,6 @@ export class PlayCommand extends Command {
 
     private parseSongDuration(durationString = '', onlySeconds: boolean) {
         if (onlySeconds) {
-            // si cojemos la de play-dl, lo pasamos al formato de la respuesta de youtube
             const duration = Number(durationString);
             const hours = Math.floor(duration / 3600);
             const minutes = Math.floor((duration % 3600) / 60);

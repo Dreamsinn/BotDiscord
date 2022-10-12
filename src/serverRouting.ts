@@ -10,14 +10,12 @@ export class ServerRouting {
     private serverList: ServerList[] = [];
 
     public async call(event: Message) {
-        // mira si el servidor ya ha sido instanciado, si es asi llama a la instancia
         for (const server of this.serverList) {
             if (server.serverId === event.guildId) {
                 return await server.instance.isCommand(event);
             }
         }
 
-        // instancia el servidor y vuleve a llamar esta funcion
         return this.addSeverToServerList(event);
     }
 

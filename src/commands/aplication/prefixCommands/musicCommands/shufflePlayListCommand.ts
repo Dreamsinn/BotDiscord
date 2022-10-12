@@ -3,13 +3,13 @@ import { ShufflePlayListCommandSchema } from '../../../domain/commandSchema/shuf
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
-import { CheckDevRole } from '../../utils/checkDevRole';
+import { CheckAdminRole } from '../../utils/CheckAdminRole';
 import { CoolDown } from '../../utils/coolDown';
 
 export class ShufflePlayListCommand extends Command {
     private shuffleSchema: CommandSchema = ShufflePlayListCommandSchema;
     private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
+    private checkAdminRole = new CheckAdminRole();
     private playListHandler: PlayListHandler;
 
     constructor(playListHandler: PlayListHandler) {
@@ -18,15 +18,13 @@ export class ShufflePlayListCommand extends Command {
     }
 
     public async call(event: Message): Promise<Message> {
-        //role check
-        if (this.shuffleSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
+        if (this.shuffleSchema.adminOnly) {
+            const interrupt = this.checkAdminRole.call(event);
             if (!interrupt) {
                 return;
             }
         }
 
-        //comprobar coolDown
         const interrupt = this.coolDown.call(this.shuffleSchema.coolDown);
         if (interrupt === 1) {
             console.log('command interrupted by cooldown');

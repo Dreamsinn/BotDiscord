@@ -46,12 +46,12 @@ Planned changes in the future:
 
     The symbol that the bot will detect to run a command.
 
-  - DEV_ROL:
+  - ADMIN_ROL:
 
-    Name of the role that will be able to run devOnly commands.
+    Name of the role that will be able to run adminOnly commands.
     Optional, if not needed, left it blank.
   
-    > Can be put as devOnly by writing true in this option on the commands' schema. 
+    > A command can be put as adminOnly by writing true in this option on the commands' schema. 
     > 
     > All schemas are in this route: 
      src/commands/domain/commandSchema

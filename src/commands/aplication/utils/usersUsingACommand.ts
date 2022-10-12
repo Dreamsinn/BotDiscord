@@ -1,5 +1,4 @@
 export class UsersUsingACommand {
-    // esta clase es para cuando un comando espera una respuesta escrita no active otro comando
     private usersList: string[] = [];
 
     public updateUserList(userId: string) {
@@ -14,7 +13,6 @@ export class UsersUsingACommand {
         return this.usersList.find((id) => id === userId);
     }
 
-    // no usada en este momento, pero importante para logs
     public readUserList() {
         return this.usersList;
     }
