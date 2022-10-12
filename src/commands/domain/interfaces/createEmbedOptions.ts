@@ -9,7 +9,6 @@ import {
 import { MessageButtonStyles } from 'discord.js/typings/enums';
 import { SongData } from './songData';
 
-// hay mas opciones disponibles en MessageOptions
 export interface CreateMessageOptions {
     message?: MessageContent;
     embed?: EmbedOptions;

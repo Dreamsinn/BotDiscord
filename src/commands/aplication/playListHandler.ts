@@ -31,14 +31,12 @@ export class PlayListHandler {
     }
 
     public async update({ member, channel, songList, newSong }: NewSongData) {
-        // si no estas en un canal de voz
         if (songList) {
             this.playList.push(...songList);
         } else {
             this.playList.push(newSong);
         }
 
-        // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
         this.playListDuration = this.calculateListDuration(this.playList);
 
         if (songList) {
@@ -47,12 +45,10 @@ export class PlayListHandler {
             this.newSongToPlayListEmbed(member, newSong, channel);
         }
 
-        // si display está activo le pasa información al constructor del embed
         if (this.isDisplay.active) {
             this.sendPlayListDataToDisplay(false);
         }
 
-        // si no hay conexion o se ha desconectado el bot dle canal de voz, que entablezca una nueva conexion
         if (!this.botConnection || this.botConnection._state.status === 'destroyed') {
             if (!member.voice.channel) {
                 channel.send('Tienes que estar en un canal de voz!');
@@ -61,7 +57,6 @@ export class PlayListHandler {
             this.joinToChannel(member, channel);
         }
 
-        // si el player no esta reproduciendo
         if (this.player._state.status === 'idle') {
             this.playMusic();
         }
@@ -72,7 +67,6 @@ export class PlayListHandler {
         songList: SongData[],
         channel: Message['channel'],
     ) {
-        // TODO: descripcion con lista de todas las canciones, mas adelante, con paginacion de 20s y sin mensaje de Time Out
         const songListDuration = this.calculateListDuration(songList);
 
         return await new PaginatedMessage({
@@ -190,8 +184,6 @@ export class PlayListHandler {
     }
 
     private joinToChannel(member: GuildMember, channel: any) {
-        // une al bot al canal de discord y da la capacidad de reproducir musica
-
         this.botConnection = joinVoiceChannel({
             channelId: member.voice.channel.id,
             guildId: channel.guild.id,
@@ -210,15 +202,12 @@ export class PlayListHandler {
 
     private async playMusic() {
         try {
-            // descarga cancion
             const song = await this.playDlHandler.getSongStream(this.playList[0].songId);
 
-            // craa recurso
             const resources = createAudioResource(song.stream, {
                 inputType: song.type,
             });
 
-            // pasa recurso al player
             this.player.play(resources);
         } catch (err) {
             console.log('Play ERROR', err);
@@ -246,7 +235,6 @@ export class PlayListHandler {
                 this.sendPlayListDataToDisplay(false);
             }
 
-            // cunado el player no esta reproduciendo
             if (newState.status === 'idle') {
                 if (this.loopMode) {
                     this.playList.push(this.playList[0]);
@@ -291,8 +279,6 @@ export class PlayListHandler {
         }
 
         if (this.player._state.status === 'paused') {
-            // arregla el bug que el display no saltava las canciones cuando la musica estava en pause
-            // buscar mejor solucion que modificar un readonly
             musicToSkip = this.playList[0];
             if (this.loopMode) {
                 this.playList.push(this.playList[0]);
@@ -364,31 +350,24 @@ export class PlayListHandler {
     }
 
     public removeSongsFromPlayList(songsIndex: number[]) {
-        // si esta sonando y se quiere eliminar la primera cancion
         if (
             songsIndex.find((n) => n === 1) &&
             this.player &&
             (this.player._state.status === 'buffering' || this.player._state.status === 'playing')
         ) {
-            // hace una array con las canciones selecionas
             const removedMusic = this.playList.filter((n, i) => songsIndex.includes(i + 1));
 
-            // elimina la 1r cancion de la lista de canciones a eliminar
             songsIndex = songsIndex.filter((n) => n !== 1);
 
-            // hace una array sin las canciones selecionas
             this.playList = this.playList.filter((n, i) => !songsIndex.includes(i + 1));
 
-            // eliminamos la cancion que esta sonando via Skip
             this.skipMusic();
 
             return removedMusic;
         }
 
-        // hace una array con las canciones selecionas
         const removedMusic = this.playList.filter((n, i) => songsIndex.includes(i + 1));
 
-        // hace una array sin las canciones selecionas
         this.playList = this.playList.filter((n, i) => !songsIndex.includes(i + 1));
 
         if (this.isDisplay.active) {
@@ -403,7 +382,6 @@ export class PlayListHandler {
         }
         const newPlayList: SongData[] = [];
 
-        // si esta sonando, para que no cambie el orden de la primera
         if (
             this.player &&
             (this.player._state.status === 'buffering' || this.player._state.status === 'playing')

@@ -29,7 +29,6 @@ export class MessageButtonsCreator {
                 .setDisabled(buttonData.disabled ? buttonData.disabled : null);
 
             if (buttonData.url) {
-                // urls no puede ser null
                 button.setURL(buttonData.url);
             }
 

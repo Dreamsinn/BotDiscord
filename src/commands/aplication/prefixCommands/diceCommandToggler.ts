@@ -3,19 +3,18 @@ import { DiceCommandTogglerSchema } from '../../domain/commandSchema/diceCommand
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { DiceCommand } from '../diceCommand';
-import { CheckDevRole } from '../utils/checkDevRole';
+import { CheckAdminRole } from '../utils/CheckAdminRole';
 import { CoolDown } from '../utils/coolDown';
 
 export class DiceCommandToggler extends Command {
     private toggleDiceSchema: CommandSchema = DiceCommandTogglerSchema;
     private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
+    private checkAdminRole = new CheckAdminRole();
     private diceCommand: DiceCommand;
 
     public async call(event: Message, diceCommand): Promise<Message> {
-        //role check
-        if (this.toggleDiceSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
+        if (this.toggleDiceSchema.adminOnly) {
+            const interrupt = this.checkAdminRole.call(event);
             if (!interrupt) {
                 return;
             }
@@ -23,7 +22,6 @@ export class DiceCommandToggler extends Command {
 
         this.diceCommand = diceCommand;
 
-        // si on activa la funcion de dados, si off la desactiva
         const interrupt = this.coolDown.call(this.toggleDiceSchema.coolDown);
         if (interrupt === 1) {
             console.log('command interrupted by cooldown');

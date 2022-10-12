@@ -1,17 +1,16 @@
 import { Message, MessageOptions } from 'discord.js';
 import { DiceCommandSchema } from '../domain/commandSchema/diceCommandSchema';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
-import { CheckDevRole } from './utils/checkDevRole';
+import { CheckAdminRole } from './utils/CheckAdminRole';
 import { CoolDown } from './utils/coolDown';
 import { MessageCreator } from './utils/messageCreator';
 
 export class DiceCommand {
     private diceSchema: CommandSchema = DiceCommandSchema;
     private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
+    private checkAdminRole = new CheckAdminRole();
     public isDiceCommandActive = false;
 
-    // activa o desactuva los dados
     public toggleDiceCommand(active: boolean): boolean {
         if (this.isDiceCommandActive === active) {
             return false;
@@ -21,27 +20,23 @@ export class DiceCommand {
     }
 
     public async call(event: Message): Promise<Message> {
-        //role check
-        if (this.diceSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
+        if (this.diceSchema.adminOnly) {
+            const interrupt = this.checkAdminRole.call(event);
             if (!interrupt) {
                 return;
             }
         }
 
-        //comprobar coolDown
         const interrupt = this.coolDown.call(this.diceSchema.coolDown);
         if (interrupt === 1) {
             console.log('command interrupted by cooldown');
             return;
         }
 
-        // para tiradas que incluyen < o >
         if (event.content.includes('<') || event.content.includes('>')) {
             if (event.content.includes(',')) {
                 return;
             }
-            // valida que las tiradas sean correctas
             if (!this.checkValidRoll(event.content)) {
                 return;
             }
@@ -49,7 +44,6 @@ export class DiceCommand {
             return event.reply(output);
         }
 
-        // las demas tiradas
         const rollsList = event.content.split(',');
 
         const nonValidRoll = rollsList.map((roll: string) => {
@@ -68,20 +62,17 @@ export class DiceCommand {
 
     private checkValidRoll(roll: string): boolean {
         const D_position = roll.search(this.diceSchema.aliases[0]);
-        // si comienza por algo que no es D o un numero
         if (isNaN(Number(roll.substring(0, D_position))) && roll.charAt(0) !== 'D') {
             return false;
         }
 
         if (roll.includes('<') || roll.includes('>')) {
             const symbol = this.findSuccessSymbol(roll);
-            // antes y despues del simbolo sea u numero
             if (Number(roll.substring(D_position + 1, symbol.symbolPosition))) {
-                // si tiene =, despues de <= sea un nuemero
                 if (symbol.plusSymbol && Number(roll.substring(symbol.symbolPosition + 2))) {
                     return true;
                 }
-                // sino tiene =, despues de < sea un numero
+
                 if (Number(roll.substring(symbol.symbolPosition + 1))) {
                     return true;
                 }
@@ -89,7 +80,6 @@ export class DiceCommand {
             return false;
         }
 
-        // si despues de la D no hay un numero
         if (!Number(roll.substring(D_position + 1))) {
             return false;
         }
@@ -122,7 +112,6 @@ export class DiceCommand {
         const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(roll);
         const diceResult = this.mapRandomNumberString(diceNumber, diceFaces);
 
-        // comprobar que no se supera el limite de caras y tiradas
         const notAllowedRoll = this.rollLimitation([diceNumber], [diceFaces]);
         if (notAllowedRoll) {
             return notAllowedRoll;
@@ -240,7 +229,6 @@ export class DiceCommand {
             diceFacesArray.push(diceFaces);
         });
 
-        // comprobar que no se supera el limite de caras y tiradas
         const notAllowedRoll = this.rollLimitation(diceNumberArray, diceFacesArray);
         if (notAllowedRoll) {
             return notAllowedRoll;
@@ -252,9 +240,8 @@ export class DiceCommand {
     private numberOfDicesAndDicesFaces(roll: string) {
         const D_position = roll.search(this.diceSchema.aliases[0]);
         let diceNumber = 1;
-        //mirar si antes de la D es un numero
+
         if (Number(roll.substring(0, D_position))) {
-            // ese numero = numero dados
             diceNumber = Number(roll.substring(0, D_position));
         }
 
@@ -288,9 +275,7 @@ export class DiceCommand {
         let total = 0;
         let rollStringSum: string;
 
-        // mapear a string todos dados
         for (let i = 0; i <= diceNumberArray.length - 1; i++) {
-            // numero de dados y caras a string
             let diceString: string;
             if (diceNumberArray[i] === 1) {
                 diceString = `D${diceFacesArray[i]}= `;
@@ -298,7 +283,6 @@ export class DiceCommand {
                 diceString = `${diceNumberArray[i]} D${diceFacesArray[i]}= `;
             }
 
-            // numeros randoms, suma de estos, y el estring de las tiradas
             const { rollString, diceTotal } = this.mapRandomNumberString(
                 diceNumberArray[i],
                 diceFacesArray[i],

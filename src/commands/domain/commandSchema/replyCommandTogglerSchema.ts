@@ -4,7 +4,7 @@ import { CommandSchema } from '../interfaces/commandSchema';
 const ReplyCommandTogglerSchema: CommandSchema = {
     aliases: ['reply'],
     coolDown: 0,
-    devOnly: false,
+    adminOnly: false,
     description:
         'Activa o desactiva el comando de respuestas.\n' +
         'Este comando debe ir seguido de `on` u `off`\n' +

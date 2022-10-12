@@ -4,7 +4,7 @@ import { CommandSchema } from '../interfaces/commandSchema';
 const LoopPlayListModeCommandSchema: CommandSchema = {
     aliases: ['loop'],
     coolDown: 0,
-    devOnly: false,
+    adminOnly: false,
     description:
         'Cuando este activo la canción que acabe de sonar se pondrá la última de la playlist\n' +
         'Si esta activo el comando lo desactiva, si esta desactivado, lo activa.',

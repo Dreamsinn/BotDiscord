@@ -4,7 +4,7 @@ import { CommandSchema } from '../interfaces/commandSchema';
 const DiceCommandTogglerSchema: CommandSchema = {
     aliases: ['dice', 'roll'],
     coolDown: 0,
-    devOnly: false,
+    adminOnly: false,
     description:
         'Activa o desactiva el comando de dados.\n' +
         'Este comando debe ir seguido de `on` u `off`\n' +

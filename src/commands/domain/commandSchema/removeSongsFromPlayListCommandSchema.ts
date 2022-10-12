@@ -4,7 +4,7 @@ import { CommandSchema } from '../interfaces/commandSchema';
 const RemoveSongsFromPlayListCommandSchema: CommandSchema = {
     aliases: ['rm', 'remove'],
     coolDown: 0,
-    devOnly: false,
+    adminOnly: false,
     description:
         'Elimina n canciones de la playlist.\n' +
         'Al ejecutar el comando aparecerá una lista paginada de la playlist, y el bot leerá el siguiente mensaje.' +
