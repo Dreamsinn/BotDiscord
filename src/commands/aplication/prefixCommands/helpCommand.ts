@@ -32,9 +32,14 @@ export class HelpCommand extends Command {
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
     private commandList: HelpCommandList;
-    private usersUsingACommand: UsersUsingACommand;
 
-    public async call(event: Message, usersUsingACommand: UsersUsingACommand) {
+    constructor(
+        private usersUsingACommand: UsersUsingACommand
+    ) {
+        super();
+    }
+
+    public async call(event: Message) {
         //role check
         if (this.helpSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
@@ -42,8 +47,6 @@ export class HelpCommand extends Command {
                 return;
             }
         }
-
-        this.usersUsingACommand = usersUsingACommand;
 
         // coolDown
         const interrupt = this.coolDown.call(this.helpSchema.coolDown);
@@ -58,14 +61,14 @@ export class HelpCommand extends Command {
         const typeCommandMessage = await event.channel.send(output);
 
         // sino esta hecho, crea las listas de comandos, con su informacion
-        if(!this.commandList){
+        if (!this.commandList) {
             this.mapCommandListData()
         }
 
         return this.messageResponseListener(typeCommandMessage, event, HelpEmbedsTitlesEnum.TYPES);
     }
 
-    private mapCommandListData (){
+    private mapCommandListData() {
         const commandsSchemas = [DiceCommandSchema, ReplyCommandSchema, HelpCommandSchema, DiceCommandTogglerSchema,
             ReplyCommandTogglerSchema, PlayCommandSchema, PlayListCommandSchema, PauseCommandSchema, SkipMusicCommandSchema,
             RemoveSongsFromPlayListCommandSchema, ClearPlayListCommandSchema, DisplayPlayListCommandSchema,
@@ -75,7 +78,7 @@ export class HelpCommand extends Command {
         const nonCommandList = []
         const musicCommandList = []
 
-        commandsSchemas.forEach((schema: CommandSchema)=>{
+        commandsSchemas.forEach((schema: CommandSchema) => {
             const schemaData: HelpCommandData = {
                 name: schema.name,
                 description: schema.description,
@@ -85,15 +88,15 @@ export class HelpCommand extends Command {
                 roleRequired: schema.devOnly,
             }
 
-            if (schema.category === CommandsCategoryEnum.PREFIX){
+            if (schema.category === CommandsCategoryEnum.PREFIX) {
                 prefixCommandList.push(schemaData)
             }
 
-            if (schema.category === CommandsCategoryEnum.NONPREFIX){
+            if (schema.category === CommandsCategoryEnum.NONPREFIX) {
                 nonCommandList.push(schemaData)
             }
 
-            if (schema.category === CommandsCategoryEnum.MUSIC){
+            if (schema.category === CommandsCategoryEnum.MUSIC) {
                 musicCommandList.push(schemaData)
             }
         })
@@ -352,8 +355,8 @@ export class HelpCommand extends Command {
         });
 
         let rol = 'No'
-        if(selectedCommand.roleRequired){
-            if (process.env.DEV_ROL){
+        if (selectedCommand.roleRequired) {
+            if (process.env.DEV_ROL) {
                 rol = process.env.DEV_ROL
             } else {
                 rol = 'Requerido, pero no se ha definido el nombre del rol.'

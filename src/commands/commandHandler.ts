@@ -1,9 +1,6 @@
 import { Message } from 'discord.js';
 import { DiceCommand } from './aplication/diceCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
-import { HelpCommand } from './aplication/prefixCommands/helpCommand';
-import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
-import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { ReplyCommand, replyCommandOptions } from './aplication/replyCommand';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
@@ -78,14 +75,6 @@ export class CommandHandler {
         console.log(command);
         for (const route of this.routes.routeList) {
             if (route.alias.find((alias) => alias === command.toLowerCase())) {
-                if (
-                    route.command instanceof HelpCommand ||
-                    route.command instanceof PlayCommand ||
-                    route.command instanceof RemoveSongsFromPlayListCommand
-                ) {
-                    return route.command.call(event, this.usersUsingACommand);
-                }
-
                 if (route.command instanceof DiceCommandToggler) {
                     return route.command.call(event, this.diceCommand);
                 }

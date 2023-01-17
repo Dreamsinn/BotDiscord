@@ -13,15 +13,15 @@ export class RemoveSongsFromPlayListCommand extends Command {
     private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
-    private playListHandler: PlayListHandler;
-    private usersUsingACommand: UsersUsingACommand;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(
+        private playListHandler: PlayListHandler,
+        private usersUsingACommand: UsersUsingACommand
+    ) {
         super();
-        this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message, usersUsingACommand: UsersUsingACommand) {
+    public async call(event: Message,) {
         //role check
         if (this.removeSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
@@ -29,8 +29,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 return;
             }
         }
-
-        this.usersUsingACommand = usersUsingACommand;
 
         //comprobar coolDown
         const interrupt = this.coolDown.call(this.removeSchema.coolDown);

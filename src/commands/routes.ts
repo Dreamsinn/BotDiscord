@@ -8,13 +8,16 @@ import { JoinChannelCommand } from './aplication/prefixCommands/musicCommands/Jo
 import { LogPlaylistStatusCommand } from './aplication/prefixCommands/musicCommands/logPlaylistStatusCommand';
 import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicCommands/loopPlayListModeCommand';
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
-import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
+import { PlayCommandHandler } from './aplication/prefixCommands/musicCommands/playCommand/playCommandHandler';
+import { PlayMusicByName } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByName';
+import { PlayMusicByYouTubeMobileURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByYouTubeMobileURL';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
 import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommands/shufflePlayListCommand';
 import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/SkipMusicCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { DisplayEmbedBuilder } from './aplication/utils/displayEmbedBuilder';
+import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { ClearPlayListCommandSchema } from './domain/commandSchema/clearPlayListCommandSchema';
 import { DiceCommandTogglerSchema } from './domain/commandSchema/diceCommandTogglerSchema';
 import { DisconnectCommandSchema } from './domain/commandSchema/disconnectCommandSchema';
@@ -33,22 +36,36 @@ import { SkipMusicCommandSchema } from './domain/commandSchema/skipMusicCommandS
 import { Command } from './domain/interfaces/Command';
 import { PlayDlHandler } from './infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from './infrastructure/youtubeHandler';
-
 interface Route {
     alias: string[];
     command: Command;
 }
 
 export class Routes {
-    private youtubeSearch = new YoutubeAPIHandler();
-    private playDlHandler = new PlayDlHandler();
+    private musicAPIs = {
+        youtubeAPI: new YoutubeAPIHandler(),
+        playDlAPI: new PlayDlHandler()
+    }
     private displayEmbedBuilder = new DisplayEmbedBuilder();
-    private playListHandler = new PlayListHandler(this.playDlHandler, this.displayEmbedBuilder);
+    private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
+    private playMusicByName = new PlayMusicByName(this.musicAPIs, this.usersUsingACommand);
+    private playMusicByYouTubeMobileURL = new PlayMusicByYouTubeMobileURL(this.musicAPIs)
+
+    constructor(
+        private usersUsingACommand: UsersUsingACommand
+    ) { }
 
     public routeList: Route[] = [
         {
             alias: PlayCommandSchema.aliases,
-            command: new PlayCommand(this.youtubeSearch, this.playListHandler, this.playDlHandler),
+            command: new PlayCommandHandler(
+                this.musicAPIs.youtubeAPI,
+                this.playListHandler,
+                this.musicAPIs.playDlAPI,
+                this.playMusicByName,
+                this.playMusicByYouTubeMobileURL,
+                this.usersUsingACommand,
+            ),
         },
         {
             alias: PlayListCommandSchema.aliases,
@@ -56,7 +73,7 @@ export class Routes {
         },
         {
             alias: HelpCommandSchema.aliases,
-            command: new HelpCommand(),
+            command: new HelpCommand(this.usersUsingACommand),
         },
         {
             alias: PauseCommandSchema.aliases,
@@ -80,7 +97,7 @@ export class Routes {
         },
         {
             alias: RemoveSongsFromPlayListCommandSchema.aliases,
-            command: new RemoveSongsFromPlayListCommand(this.playListHandler),
+            command: new RemoveSongsFromPlayListCommand(this.playListHandler, this.usersUsingACommand,),
         },
         {
             alias: ShufflePlayListCommandSchema.aliases,

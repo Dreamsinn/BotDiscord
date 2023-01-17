@@ -1,40 +1,38 @@
 import { Message } from 'discord.js';
 import { YouTubeVideo } from 'play-dl';
-import { PlayCommandSchema } from '../../../domain/commandSchema/playCommandSchema';
-import { discordEmojis } from '../../../domain/discordEmojis';
-import { APIResponse } from '../../../domain/interfaces/APIResponse';
-import { Command } from '../../../domain/interfaces/Command';
-import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { NewSongData, RawSongData, SongData } from '../../../domain/interfaces/songData';
-import { PlayDlHandler } from '../../../infrastructure/playDlHandler';
-import { YoutubeAPIHandler } from '../../../infrastructure/youtubeHandler';
-import { PlayListHandler } from '../../playListHandler';
-import { CheckDevRole } from '../../utils/checkDevRole';
-import { CoolDown } from '../../utils/coolDown';
-import { MessageCreator } from '../../utils/messageCreator';
-import { UsersUsingACommand } from '../../utils/usersUsingACommand';
+import { PlayCommandSchema } from '../../../../domain/commandSchema/playCommandSchema';
+import { APIResponse } from '../../../../domain/interfaces/APIResponse';
+import { Command } from '../../../../domain/interfaces/Command';
+import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
+import { NewSongData, RawSongData, SongData } from '../../../../domain/interfaces/songData';
+import { PlayDlHandler } from '../../../../infrastructure/playDlHandler';
+import { YoutubeAPIHandler } from '../../../../infrastructure/youtubeHandler';
+import { PlayListHandler } from '../../../playListHandler';
+import { CheckDevRole } from '../../../utils/checkDevRole';
+import { CoolDown } from '../../../utils/coolDown';
+import { MessageCreator } from '../../../utils/messageCreator';
+import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
+import { PlayMusicByName } from './playMusicByName';
+import { PlayMusicByYouTubeMobileURL } from './playMusicByYouTubeMobileURL';
 
-export class PlayCommand extends Command {
+export class PlayCommandHandler extends Command {
     private playSchema: CommandSchema = PlayCommandSchema;
     private coolDown = new CoolDown();
     private checkDevRole = new CheckDevRole();
-    private usersUsingACommand: UsersUsingACommand;
-    private youtubeAPIHandler: YoutubeAPIHandler;
-    private playListHandler: PlayListHandler;
-    private playDlHandler: PlayDlHandler;
 
     constructor(
-        youtubeAPIHandler: YoutubeAPIHandler,
-        playListHandler: PlayListHandler,
-        playDlHandler: PlayDlHandler,
+        private youtubeAPIHandler: YoutubeAPIHandler,
+        private playListHandler: PlayListHandler,
+        private playDlHandler: PlayDlHandler,
+        private playMusicByName: PlayMusicByName,
+        private playMusicByYouTubeMobileURL: PlayMusicByYouTubeMobileURL,
+        private usersUsingACommand: UsersUsingACommand
     ) {
         super();
-        this.youtubeAPIHandler = youtubeAPIHandler;
-        this.playListHandler = playListHandler;
-        this.playDlHandler = playDlHandler;
     }
 
-    public call(event: Message, usersUsingACommand: UsersUsingACommand) {
+    public async call(event: Message) {
+
         //role check
         if (this.playSchema.devOnly) {
             const interrupt = this.checkDevRole.call(event);
@@ -43,16 +41,14 @@ export class PlayCommand extends Command {
             }
         }
 
-        this.usersUsingACommand = usersUsingACommand;
-
         // si no hay espacio vacio es que no hay argumento
         const emptySpacePosition = event.content.search(' ');
         if (emptySpacePosition === -1) {
             return;
         }
 
-        // // si no estas en un canal de voz
-        if (!event.member.voice.channel) {
+        // si no estas en un canal de voz
+        if (!event.member?.voice.channel) {
             event.channel.send('Tienes que estar en un canal de voz!');
             return;
         }
@@ -66,143 +62,38 @@ export class PlayCommand extends Command {
 
         const argument = event.content.substring(emptySpacePosition);
 
-        // si video desde mobil
-        if (argument.includes('https://youtu.be/')) {
-            return this.findSongIdFromMobileURL(argument, event);
-        }
-
-        // si es una lista de youtube
-        if (argument.includes('youtube.com/playlist?list=')) {
-            return this.findYoutubePlayList(argument, event);
-        }
-        // es lista, y se esta reproduciendo una cancion
-        if (argument.includes('youtube.com') && argument.includes('&list=')) {
-            return this.findYoutubePlayList(argument, event, true);
-        }
-
-        // si buscas por enlace de youtube
-        if (argument.includes('youtube.com/watch?v=')) {
-            return this.findSongIdFromYoutubeURL(argument, event);
-        }
-
-        // si buscas por nombre de cancion
-        return this.searchBySongName(argument, event);
-    }
-
-    private async searchBySongName(argument: string, event: Message) {
-        let musicData: RawSongData[];
-        // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
-
-        const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.searchSongByName(
-            argument,
-        );
-
-        if (playDlResponse.isError) {
-            console.log(`Play-dl Search by name Error: ${playDlResponse.errorData}`);
-
-            const youtubeResponse = await this.youtubeAPIHandler.searchSongByName(argument);
-
-            if (youtubeResponse.isError) {
-                console.log('Youtube Search by name Error:', youtubeResponse.errorData);
-                event.channel.send(`It has not been possible to get song's data`);
-                return;
+        const argumentTpeDictionary = {
+            mobil: {
+                condition: Boolean(argument.includes('https://youtu.be/')),
+                route: this.playMusicByYouTubeMobileURL,
+            },
+            // youtubeList: {
+            //     condition: Boolean(argument.includes('youtube.com/playlist?list=')),
+            //     route: this.findYoutubePlayList(argument, event)
+            // },
+            // youtubeStartedList: {
+            //     condition: Boolean(argument.includes('youtube.com') && argument.includes('&list=')),
+            //     route: this.findYoutubePlayList(argument, event, true)
+            // },
+            // youtubeURLSong: {
+            //     condition: Boolean(argument.includes('youtube.com/watch?v=')),
+            //     route: this.findSongIdFromYoutubeURL(argument, event)
+            // },
+            songName: { //default
+                condition: true,
+                route: this.playMusicByName,
             }
-
-            musicData = youtubeResponse.data;
-        } else {
-            musicData = playDlResponse.data;
         }
 
-        if (!musicData[0]) {
-            event.channel.send('No hay coincidencias');
+        const argumentType = Object.values(argumentTpeDictionary).find((value) => value.condition)
+        console.log({ argumentType })
+        const song = await argumentType?.route.call(event, argument);
+
+        if (!song) {
             return;
         }
 
-        const { output, numberChoices } = this.createSelectChoicesEmbed(musicData);
-
-        // subimos al usuario a la lista para que no pueda usar otros comandos
-        this.usersUsingACommand.updateUserList(event.author.id);
-
-        const message = await event.reply(output);
-
-        const filter = (reaction: Message) => {
-            const authorCondition = event.author.id === reaction.author.id;
-            const letterCondition = reaction.content === 'x';
-            const numberCondition =
-                Number(reaction.content) &&
-                Number(reaction.content) > 0 &&
-                Number(reaction.content) < numberChoices;
-            // si el autor es el mismo, y el mensaje contiene X, 0 o un numero entre 0 y las numero de opciones
-            return authorCondition && (letterCondition || numberCondition);
-        };
-
-        message.channel
-            .awaitMessages({ filter, time: 20000, max: 1, errors: ['time'] })
-            .then((collected) => {
-                // eliminamos a la persona de la lista de no poder usar comandos
-                this.usersUsingACommand.removeUserList(event.author.id);
-                let collectedMessage: Message;
-                collected.map((e: Message) => (collectedMessage = e));
-
-                // Si se responde una X se borra el mensaje
-                if (collectedMessage.content === 'x') {
-                    console.log('Search cancelled');
-                    event.reply('Search cancelled');
-                    message.delete();
-                    collectedMessage.delete();
-                    return;
-                }
-
-                const numberSelected = Number(collectedMessage.content) - 1;
-
-                const song: RawSongData = musicData[numberSelected];
-
-                // eleminamos opciones
-                message.delete();
-                // eliminamos la respuesta a la opciones
-                collectedMessage.delete();
-
-                return this.updateToPlayList(event, song);
-            })
-            .catch((err) => {
-                if (err instanceof TypeError) {
-                    console.log('Select music colector error: ', err);
-                    event.channel.send(`Error: ${err.message}`);
-                } else {
-                    // sino contesta
-                    console.log(`No answer`);
-                    event.reply('Time out');
-                }
-
-                this.usersUsingACommand.removeUserList(event.author.id);
-                message.delete();
-                return;
-            });
-    }
-
-    private createSelectChoicesEmbed(songList: RawSongData[]) {
-        // pasa un embed al discord para que elija exactamente cual quiere
-        let embedContent = '```js\n';
-
-        songList.forEach((song, i) => {
-            embedContent += `${i + 1} - ${song.title}\n`;
-        });
-
-        embedContent += `${discordEmojis.x} - Cancel\n` + '```';
-
-        const output = new MessageCreator({
-            embed: {
-                color: '#40b3ff',
-                field: {
-                    name: 'Escriba el número de la canción que quiera seleccionar',
-                    value: embedContent,
-                    inline: false,
-                },
-            },
-        }).call();
-
-        // devuelve el embed y el numero de eleciones
-        return { output, numberChoices: songList.length };
+        return this.updateToPlayList(event, song)
     }
 
     private findSongIdFromYoutubeURL(url: string, event: Message) {
@@ -234,8 +125,8 @@ export class PlayCommand extends Command {
         return this.updateToPlayList(event, song);
     }
 
-    private async updateToPlayList(event: Message, song: RawSongData) {
-        const songData: RawSongData = await this.mapSongData(event, song);
+    private async updateToPlayList(event: Message, songData: RawSongData) {
+        // const songData: RawSongData = await this.mapSongData(event, song);
         if (songData.title && songData.durationData) {
             const newSong: NewSongData = {
                 newSong: {

@@ -24,8 +24,8 @@ export class ServerRouting {
     private addSeverToServerList(event) {
         const diceCommand = new DiceCommand();
         const replyCommand = new ReplyCommand();
-        const routes = new Routes();
         const usersUsingACommand = new UsersUsingACommand();
+        const routes = new Routes(usersUsingACommand);
         const commandHandler = new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand);
 
         const newServer: ServerList = {
