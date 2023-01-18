@@ -4,7 +4,7 @@ import { UsersUsingACommand } from "../../aplication/utils/usersUsingACommand";
 import { PlayDlHandler } from "../../infrastructure/playDlHandler";
 import { YoutubeAPIHandler } from "../../infrastructure/youtubeHandler";
 import { APIResponse } from "./APIResponse";
-import { RawSongData } from "./songData";
+import { RawSongData, SongData } from "./songData";
 
 export abstract class PlayCommand {
     protected youtubeAPIHandler: YoutubeAPIHandler;
@@ -13,10 +13,29 @@ export abstract class PlayCommand {
     constructor({ youtubeAPI, playDlAPI }) {
         this.youtubeAPIHandler = youtubeAPI;
         this.playDlHandler = playDlAPI;
-        this
     }
 
-    abstract call(event: Message, argument: string, usersUsingACommand?: UsersUsingACommand): Promise<RawSongData | undefined>;
+    abstract call(event: Message, argument: string, usersUsingACommand?: UsersUsingACommand): Promise<RawSongData | SongData[] | Message | undefined>;
+
+    protected findSongIdFromYoutubeURL(event: Message, url: string) {
+        // encontramos la id del video
+        const rawSongId = url
+            .replace('https://', '')
+            .replace('www.', '')
+            .replace('youtube.com/watch?v=', '')
+            .replace(/^./, '');
+
+        const URLParametersPosition = rawSongId.indexOf('&');
+
+        if (URLParametersPosition === -1) {
+            const song: RawSongData = { id: rawSongId };
+            return this.mapSongData(event, song);
+        }
+
+        const song: RawSongData = { id: rawSongId.substring(0, URLParametersPosition) };
+
+        return this.mapSongData(event, song);
+    }
 
     protected async mapSongData(event: Message, song: RawSongData): Promise<RawSongData> {
         // optenemos duracion y nombre
@@ -50,7 +69,7 @@ export abstract class PlayCommand {
         return song;
     }
 
-    private parseSongDuration(durationString = '', onlySeconds: boolean) {
+    protected parseSongDuration(durationString = '', onlySeconds: boolean) {
         if (onlySeconds) {
             // si cojemos la de play-dl, lo pasamos al formato de la respuesta de youtube
             const duration = Number(durationString);

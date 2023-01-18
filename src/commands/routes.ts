@@ -11,6 +11,8 @@ import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCom
 import { PlayCommandHandler } from './aplication/prefixCommands/musicCommands/playCommand/playCommandHandler';
 import { PlayMusicByName } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByName';
 import { PlayMusicByYouTubeMobileURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByYouTubeMobileURL';
+import { PlayMusicByYouTubeURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByYouTubeURL';
+import { PlayPlayListByYoutubeURL } from './aplication/prefixCommands/musicCommands/playCommand/playPlayListByYoutubeURL';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
 import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommands/shufflePlayListCommand';
@@ -50,6 +52,8 @@ export class Routes {
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
     private playMusicByName = new PlayMusicByName(this.musicAPIs, this.usersUsingACommand);
     private playMusicByYouTubeMobileURL = new PlayMusicByYouTubeMobileURL(this.musicAPIs)
+    private playPlayListByYoutubeURL = new PlayPlayListByYoutubeURL(this.musicAPIs, this.usersUsingACommand)
+    private playMusicByYouTubeURL = new PlayMusicByYouTubeURL(this.musicAPIs)
 
     constructor(
         private usersUsingACommand: UsersUsingACommand
@@ -59,12 +63,11 @@ export class Routes {
         {
             alias: PlayCommandSchema.aliases,
             command: new PlayCommandHandler(
-                this.musicAPIs.youtubeAPI,
                 this.playListHandler,
-                this.musicAPIs.playDlAPI,
                 this.playMusicByName,
                 this.playMusicByYouTubeMobileURL,
-                this.usersUsingACommand,
+                this.playPlayListByYoutubeURL,
+                this.playMusicByYouTubeURL
             ),
         },
         {
