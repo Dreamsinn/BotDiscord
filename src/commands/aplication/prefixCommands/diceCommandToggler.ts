@@ -3,35 +3,18 @@ import { DiceCommandTogglerSchema } from '../../domain/commandSchema/diceCommand
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { DiceCommand } from '../diceCommand';
-import { CheckDevRole } from '../utils/checkDevRole';
-import { CoolDown } from '../utils/coolDown';
 
 export class DiceCommandToggler extends Command {
     private toggleDiceSchema: CommandSchema = DiceCommandTogglerSchema;
-    private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
-    private diceCommand: DiceCommand;
 
-    public async call(event: Message, diceCommand): Promise<Message> {
-        //role check
-        if (this.toggleDiceSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        this.diceCommand = diceCommand;
-
-        // si on activa la funcion de dados, si off la desactiva
-        const interrupt = this.coolDown.call(this.toggleDiceSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
+    public async call(event: Message, diceCommand: DiceCommand) {
+        if (this.roleAndCooldownValidation(event, this.toggleDiceSchema)) {
             return;
         }
 
+        // si on activa la funcion de dados, si off la desactiva
         if (event.content.includes('on')) {
-            const hasBeenActived = this.diceCommand.toggleDiceCommand(true);
+            const hasBeenActived = diceCommand.toggleDiceCommand(true);
             if (hasBeenActived) {
                 event.channel.send('Dados activados');
             }
@@ -39,7 +22,7 @@ export class DiceCommandToggler extends Command {
         }
 
         if (event.content.includes('off')) {
-            const hasBeenDeactivate = this.diceCommand.toggleDiceCommand(false);
+            const hasBeenDeactivate = diceCommand.toggleDiceCommand(false);
             if (hasBeenDeactivate) {
                 event.channel.send('Dados desactivados');
             }

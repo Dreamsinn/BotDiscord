@@ -21,16 +21,12 @@ import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { HelpCommandData, HelpCommandList } from '../../domain/interfaces/helpCommandData';
-import { CheckDevRole } from '../utils/checkDevRole';
-import { CoolDown } from '../utils/coolDown';
 import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class HelpCommand extends Command {
     // TODO, poner schemas como dependencias?
     private helpSchema: CommandSchema = HelpCommandSchema;
-    private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
     private commandList: HelpCommandList;
 
     constructor(
@@ -40,18 +36,7 @@ export class HelpCommand extends Command {
     }
 
     public async call(event: Message) {
-        //role check
-        if (this.helpSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        // coolDown
-        const interrupt = this.coolDown.call(this.helpSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
+        if (this.roleAndCooldownValidation(event, this.helpSchema)) {
             return;
         }
 

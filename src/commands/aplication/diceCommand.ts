@@ -1,14 +1,11 @@
 import { Message, MessageOptions } from 'discord.js';
 import { DiceCommandSchema } from '../domain/commandSchema/diceCommandSchema';
+import { Command } from '../domain/interfaces/Command';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
-import { CheckDevRole } from './utils/checkDevRole';
-import { CoolDown } from './utils/coolDown';
 import { MessageCreator } from './utils/messageCreator';
 
-export class DiceCommand {
+export class DiceCommand extends Command {
     private diceSchema: CommandSchema = DiceCommandSchema;
-    private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
     public isDiceCommandActive = false;
 
     // activa o desactuva los dados
@@ -21,18 +18,7 @@ export class DiceCommand {
     }
 
     public async call(event: Message): Promise<Message> {
-        //role check
-        if (this.diceSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        //comprobar coolDown
-        const interrupt = this.coolDown.call(this.diceSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
+        if (this.roleAndCooldownValidation(event, this.diceSchema)) {
             return;
         }
 

@@ -7,15 +7,11 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { ButtonRowList, ButtonsStyle } from '../../../domain/interfaces/createEmbedOptions';
 import { DisplayMessage } from '../../../domain/interfaces/displayMessage';
 import { PlayListHandler } from '../../playListHandler';
-import { CheckDevRole } from '../../utils/checkDevRole';
-import { CoolDown } from '../../utils/coolDown';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
 
 export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
-    private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
     private isDisplayActive = false;
     private showingReadme = false;
@@ -27,19 +23,7 @@ export class DisplayPlayListCommand extends Command {
     }
 
     public async call(event: Message) {
-        //role check
-        if (this.displaySchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
-
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        //comprobar coolDown
-        const interrupt = this.coolDown.call(this.displaySchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
+        if (this.roleAndCooldownValidation(event, this.displaySchema)) {
             return;
         }
 
@@ -115,7 +99,7 @@ export class DisplayPlayListCommand extends Command {
             display.thread.delete().catch(() => console.log("Display' thread has been deleted."));
             display.message.delete().catch(() => console.log('Display has been deleted.'));
 
-            if(!display.channelEventWasThread){
+            if (!display.channelEventWasThread) {
                 await event.channel.send('Display ha cesado su funcionamiento.')
             }
             return;

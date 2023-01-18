@@ -4,13 +4,9 @@ import { TogglePauseOutputEnums } from '../../../domain/enums/togglePauseOutputE
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
-import { CheckDevRole } from '../../utils/checkDevRole';
-import { CoolDown } from '../../utils/coolDown';
 
 export class PauseCommand extends Command {
     private pauseSchema: CommandSchema = PauseCommandSchema;
-    private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
     private playListHandler: PlayListHandler;
 
     constructor(playListHandler: PlayListHandler) {
@@ -19,18 +15,7 @@ export class PauseCommand extends Command {
     }
 
     public async call(event: Message) {
-        //role check
-        if (this.pauseSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        //comprobar coolDown
-        const interrupt = this.coolDown.call(this.pauseSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
+        if (this.roleAndCooldownValidation(event, this.pauseSchema)) {
             return;
         }
 

@@ -4,15 +4,11 @@ import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
-import { CheckDevRole } from '../../utils/checkDevRole';
-import { CoolDown } from '../../utils/coolDown';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 
 export class RemoveSongsFromPlayListCommand extends Command {
     private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
-    private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
 
     constructor(
         private playListHandler: PlayListHandler,
@@ -22,18 +18,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
     }
 
     public async call(event: Message,) {
-        //role check
-        if (this.removeSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        //comprobar coolDown
-        const interrupt = this.coolDown.call(this.removeSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
+        if (this.roleAndCooldownValidation(event, this.removeSchema)) {
             return;
         }
 

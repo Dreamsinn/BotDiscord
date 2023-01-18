@@ -4,8 +4,6 @@ import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { NewSongData, RawSongData, SongData } from '../../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../../playListHandler';
-import { CheckDevRole } from '../../../utils/checkDevRole';
-import { CoolDown } from '../../../utils/coolDown';
 import { PlayMusicByName } from './playMusicByName';
 import { PlayMusicByYouTubeMobileURL } from './playMusicByYouTubeMobileURL';
 import { PlayMusicByYouTubeURL } from './playMusicByYouTubeURL';
@@ -13,8 +11,6 @@ import { PlayPlayListByYoutubeURL } from './playPlayListByYoutubeURL';
 
 export class PlayCommandHandler extends Command {
     private playSchema: CommandSchema = PlayCommandSchema;
-    private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
 
     constructor(
         private playListHandler: PlayListHandler,
@@ -27,12 +23,8 @@ export class PlayCommandHandler extends Command {
     }
 
     public async call(event: Message) {
-        //role check
-        if (this.playSchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
-            if (!interrupt) {
-                return;
-            }
+        if (this.roleAndCooldownValidation(event, this.playSchema)) {
+            return;
         }
 
         // si no hay espacio vacio es que no hay argumento
@@ -44,13 +36,6 @@ export class PlayCommandHandler extends Command {
         // si no estas en un canal de voz
         if (!event.member?.voice.channel) {
             event.channel.send('Tienes que estar en un canal de voz!');
-            return;
-        }
-
-        //comprobar coolDown
-        const interrupt = this.coolDown.call(this.playSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
             return;
         }
 

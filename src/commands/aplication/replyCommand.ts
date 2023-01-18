@@ -1,14 +1,11 @@
 import { Message } from 'discord.js';
 import { ReplyCommandSchema } from '../domain/commandSchema/replyCommandSchema';
+import { Command } from '../domain/interfaces/Command';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
-import { CheckDevRole } from './utils/checkDevRole';
-import { CoolDown } from './utils/coolDown';
 import { MessageCreator } from './utils/messageCreator';
 
-export class ReplyCommand {
+export class ReplyCommand extends Command {
     private replySchema: CommandSchema = ReplyCommandSchema;
-    private coolDown = new CoolDown();
-    private checkDevRole = new CheckDevRole();
     public isReplyCommandActive = false;
 
     // activa o desactuva las respuestas
@@ -21,17 +18,7 @@ export class ReplyCommand {
     }
 
     public async call(event): Promise<Message> {
-        //role check
-        if (this.replySchema.devOnly) {
-            const interrupt = this.checkDevRole.call(event);
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        const interrupt = this.coolDown.call(this.replySchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
+        if (this.roleAndCooldownValidation(event, this.replySchema)) {
             return;
         }
 
