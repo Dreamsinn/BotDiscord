@@ -1,3 +1,4 @@
+import { Message } from 'discord.js';
 import { ClearPlayListCommandSchema } from '../../../domain/commandSchema/clearPlayListCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
@@ -12,12 +13,12 @@ export class ClearPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event) {
+    public call(event) {
         if (this.roleAndCooldownValidation(event, this.clearSchema)) {
             return;
         }
 
-        const deleteResponse = await this.playListHandler.deletePlayList();
+        const deleteResponse = this.playListHandler.deletePlayList();
 
         if (!deleteResponse) {
             return event.reply('There is no playList');
