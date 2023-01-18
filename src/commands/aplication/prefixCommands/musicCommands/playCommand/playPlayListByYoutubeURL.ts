@@ -151,15 +151,14 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
     }
 
     private mapPlayDLPlayListData(event: Message, rawPlayList: RawSongData[]) {
-        const playList: SongData[] = [];
-        rawPlayList.forEach((song: RawSongData) => {
+        const playList: SongData[] = rawPlayList.map((song: RawSongData) => {
             const newSong: SongData = {
                 songName: song.title,
                 songId: song.id,
                 duration: this.parseSongDuration(String(song.duration), true),
                 thumbnails: song.thumbnails,
             };
-            playList.push(newSong);
+            return newSong;
         });
         return playList;
     }

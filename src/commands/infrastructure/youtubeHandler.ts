@@ -15,12 +15,11 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 `https://www.googleapis.com/youtube/v3/search?key=${process.env.API_KEY_YOUTUBE}&order=${order}&part=${part}&maxResults=${maxResults}&type=${type}&q=${song}`,
             );
 
-            const response: RawSongData[] = [];
-            searched.data.items.forEach((songData: any) => {
-                response.push({
+            const response: RawSongData[] = searched.data.items.map((songData: any) => {
+                return {
                     id: songData.id.videoId,
                     title: songData.snippet.title,
-                });
+                };
             });
 
             return {
@@ -46,12 +45,11 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 `https://youtube.googleapis.com/youtube/v3/playlistItems?part=${part}&playlistId=${playlistId}&key=${process.env.API_KEY_YOUTUBE}&maxResults=${maxResults}`,
             );
 
-            const response: RawSongData[] = [];
-            searched.data.items.forEach((songData: any) => {
-                response.push({
+            const response: RawSongData[] = searched.data.items.map((songData: any) => {
+                return {
                     id: songData.snippet.resourceId.videoId,
                     title: songData.snippet.title,
-                });
+                };
             });
 
             return {

@@ -57,11 +57,7 @@ export class PaginatedMessage {
     }
 
     private createPaginationData() {
-        const playListString: string[] = [];
-
-        this.pagination.rawDataToPaginate.forEach((e: SongData, i: number) => {
-            playListString.push(this.mapPagesData(e, i));
-        });
+        const playListString: string[] = this.pagination.rawDataToPaginate?.map((e: SongData, i: number) => this.mapPagesData(e, i));
         return playListString;
     }
 
@@ -79,10 +75,7 @@ export class PaginatedMessage {
             paginatedData.push(this.pagination.dataToPaginate.splice(0, this.pagination.dataPerPage));
         }
 
-        const paginatedStringData: string[] = [];
-        paginatedData.forEach((songPage: string[]) => {
-            paginatedStringData.push(this.convertPageToString(songPage));
-        });
+        const paginatedStringData: string[] = paginatedData.map((songPage: string[]) => this.convertPageToString(songPage));
 
         return paginatedStringData;
     }

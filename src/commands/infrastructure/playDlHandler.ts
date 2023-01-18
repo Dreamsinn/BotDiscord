@@ -8,13 +8,12 @@ export class PlayDlHandler implements PlayDlAPI {
         try {
             const searched = await play.search(songString, { source: { youtube: 'video' }, limit: 9 });
 
-            const response: RawSongData[] = [];
-            searched.forEach((songData) => {
-                response.push({
+            const response: RawSongData[] = searched.map((songData) => {
+                return {
                     id: songData.id,
                     title: songData.title,
                     duration: songData.durationInSec,
-                });
+                };
             });
 
             return {
@@ -57,8 +56,7 @@ export class PlayDlHandler implements PlayDlAPI {
 
             const platlistData = await rawPlayList.all_videos();
 
-            const playList: RawSongData[] = [];
-            platlistData.forEach((songData: YouTubeVideo) => {
+            const playList: RawSongData[] = platlistData.map((songData: YouTubeVideo) => {
                 let thumbnails = songData.thumbnails[3].url;
                 if (!thumbnails) {
                     if (songData.thumbnails[2]) {
@@ -68,13 +66,12 @@ export class PlayDlHandler implements PlayDlAPI {
                     }
                 }
 
-                const newSong: RawSongData = {
+                return {
                     title: songData.title,
                     id: songData.id,
                     duration: songData.durationInSec,
                     thumbnails,
                 };
-                playList.push(newSong);
             });
 
             return {

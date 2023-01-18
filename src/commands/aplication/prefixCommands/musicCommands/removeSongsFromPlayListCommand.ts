@@ -106,14 +106,13 @@ export class RemoveSongsFromPlayListCommand extends Command {
         // pasa a playListHandler el indice(-1) de las canciones
         const stringNumbersArray = content.split(',');
 
-        const numberArray: number[] = [];
-
-        stringNumbersArray.forEach((str) => {
+        const numberArray = stringNumbersArray.map((str) => {
             const n = Number(str);
             if (n !== 0) {
-                numberArray.push(Number(str));
+                return Number(str);
             }
         });
+        console.log({ numberArray })
 
         // recive las canciones borradas y hace embed de las canciones borradas
         const removedMusic = this.playListHandler.removeSongsFromPlayList(numberArray);
