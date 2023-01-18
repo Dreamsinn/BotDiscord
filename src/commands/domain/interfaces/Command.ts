@@ -15,7 +15,7 @@ export abstract class Command {
         let interrupt = false;
 
         //role check
-        if (schema.devOnly) {
+        if (schema.adminOnly) {
             if (!this.checkDevRole.call(event)) {
                 interrupt = true;
             }

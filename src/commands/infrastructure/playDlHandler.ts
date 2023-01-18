@@ -59,12 +59,12 @@ export class PlayDlHandler implements PlayDlAPI {
 
             const playList: RawSongData[] = [];
             platlistData.forEach((songData: YouTubeVideo) => {
-                let thumbnails = songData.thumbnails[3];
+                let thumbnails = songData.thumbnails[3].url;
                 if (!thumbnails) {
                     if (songData.thumbnails[2]) {
-                        thumbnails = songData.thumbnails[2];
+                        thumbnails = songData.thumbnails[2].url;
                     } else {
-                        thumbnails = songData.thumbnails[1] ?? undefined;
+                        thumbnails = songData.thumbnails[1].url ?? undefined;
                     }
                 }
 

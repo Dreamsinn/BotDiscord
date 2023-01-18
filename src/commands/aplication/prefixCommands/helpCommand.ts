@@ -81,7 +81,7 @@ export class HelpCommand extends Command {
                 aliases: schema.aliases,
                 coolDown: schema.coolDown,
                 category: schema.category,
-                roleRequired: schema.devOnly,
+                roleRequired: schema.adminOnly,
             };
 
             if (schema.category === CommandsCategoryEnum.PREFIX) {

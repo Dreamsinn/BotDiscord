@@ -116,7 +116,7 @@ export class PaginatedMessage {
 
         const output = new MessageCreator({
             message: {
-                content: this.message ?? undefined,
+                content: this.message?.content ?? undefined,
             },
             embed: {
                 color: this.embed.color ?? undefined,
@@ -128,10 +128,10 @@ export class PaginatedMessage {
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                              value: `${this.paginatedStringData[this.page - 1]}`,
-                              inline: false,
-                          }
+                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                            value: `${this.paginatedStringData[this.page - 1]}`,
+                            inline: false,
+                        }
                         : undefined,
                 imageUrl: this.embed.imageUrl ?? undefined,
                 timeStamp: this.embed.timeStamp ?? undefined,

@@ -22,7 +22,7 @@ export class DisplayPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<void> {
+    public async call(event: Message): Promise<Message | void> {
         if (this.roleAndCooldownValidation(event, this.displaySchema)) {
             return;
         }
@@ -47,9 +47,9 @@ export class DisplayPlayListCommand extends Command {
             return;
         }
         this.isDisplayActive = true;
-        console.log('hemos  llegado');
+
         // pasa estado activo playListHandler y le devuelve el mensaje
-        const display: DisplayMessage = await this.playListHandler.activateDispaly(event);
+        const display = await this.playListHandler.activateDispaly(event);
 
         if (display.message) {
             return this.reactionListener(event, display);
@@ -70,7 +70,7 @@ export class DisplayPlayListCommand extends Command {
             // anular mensage de Interacción fallida
             collected.deferUpdate();
 
-            if (this.displaySchema.devOnly) {
+            if (this.displaySchema.adminOnly) {
                 const interrupt = this.checkDevRole.call(event);
 
                 if (!interrupt) {

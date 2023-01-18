@@ -14,7 +14,7 @@ export class DisplayEmbedBuilder {
         playListStatus: PlayListStatus,
         event: Message,
         newEmbed: boolean,
-    ): Promise<DisplayMessage | void> {
+    ): Promise<DisplayMessage> {
         // si newEmbed crea un mensaje con toda la informacion, sino edita el mensaje ya creado
         this.playListStatus = playListStatus;
 
@@ -42,7 +42,7 @@ export class DisplayEmbedBuilder {
         return;
     }
 
-    private async selectChannel(event: Message): Promise<ThreadChannel> {
+    private async selectChannel(event): Promise<ThreadChannel> {
         // si el chat es un hilo lo devolvemos
         if (event.channel.isThread()) {
             return event.channel;

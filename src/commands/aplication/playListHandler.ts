@@ -451,7 +451,7 @@ export class PlayListHandler {
         return;
     }
 
-    public activateDispaly(event: Message): Promise<DisplayMessage | void> {
+    public activateDispaly(event: Message): Promise<DisplayMessage> {
         this.isDisplay.active = true;
         this.isDisplay.event = event;
 
