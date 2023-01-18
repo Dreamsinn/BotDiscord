@@ -22,7 +22,7 @@ export class DisplayPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message) {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.displaySchema)) {
             return;
         }

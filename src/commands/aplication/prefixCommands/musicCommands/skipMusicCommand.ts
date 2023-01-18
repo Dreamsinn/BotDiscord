@@ -2,7 +2,6 @@ import { Message } from 'discord.js';
 import { SkipMusicCommandSchema } from '../../../domain/commandSchema/skipMusicCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { SongData } from '../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../playListHandler';
 import { MessageCreator } from '../../utils/messageCreator';
 
@@ -15,12 +14,12 @@ export class SkipMusicCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message | undefined> {
+    public async call(event: Message): Promise<Message | void> {
         if (this.roleAndCooldownValidation(event, this.skipSchema)) {
             return;
         }
 
-        const skipedMusic: SongData = await this.playListHandler.skipMusic();
+        const skipedMusic = await this.playListHandler.skipMusic();
 
         if (!skipedMusic) {
             return event.reply('There is no playList');

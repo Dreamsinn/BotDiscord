@@ -3,14 +3,13 @@ import { DiceCommand } from '../../aplication/diceCommand';
 import { ReplyCommand } from '../../aplication/replyCommand';
 import { CheckDevRole } from '../../aplication/utils/checkDevRole';
 import { CoolDown } from '../../aplication/utils/coolDown';
-import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
 import { CommandSchema } from './commandSchema';
 
 export abstract class Command {
     private coolDown = new CoolDown();
     protected checkDevRole = new CheckDevRole();
 
-    abstract call(event: Message, props?: UsersUsingACommand | DiceCommand | ReplyCommand);
+    abstract call(event: Message, props?: DiceCommand | ReplyCommand);
 
     protected roleAndCooldownValidation(event: Message, schema: CommandSchema): boolean {
         let interrupt = false;

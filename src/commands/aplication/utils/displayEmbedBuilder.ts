@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from 'discord.js';
+import { EmbedFieldData, Message, ThreadChannel } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { DisplayMessage } from '../../domain/interfaces/displayMessage';
@@ -10,7 +10,11 @@ export class DisplayEmbedBuilder {
     private playListStatus: PlayListStatus;
     private displayMessage: Message;
 
-    public async call(playListStatus: PlayListStatus, event: Message, newEmbed: boolean) {
+    public async call(
+        playListStatus: PlayListStatus,
+        event: Message,
+        newEmbed: boolean,
+    ): Promise<DisplayMessage | void> {
         // si newEmbed crea un mensaje con toda la informacion, sino edita el mensaje ya creado
         this.playListStatus = playListStatus;
 
@@ -21,7 +25,7 @@ export class DisplayEmbedBuilder {
         const thread = await this.selectChannel(event);
 
         if (newEmbed) {
-            const display: DisplayMessage ={
+            const display: DisplayMessage = {
                 thread: await this.selectChannel(event),
                 channelEventWasThread: event.channel.isThread() ? true : false,
                 message: (this.displayMessage = await thread.send(output)),
@@ -38,15 +42,15 @@ export class DisplayEmbedBuilder {
         return;
     }
 
-    private async selectChannel(event) {
+    private async selectChannel(event: Message): Promise<ThreadChannel> {
         // si el chat es un hilo lo devolvemos
         if (event.channel.isThread()) {
             return event.channel;
         }
 
         // buscamos si el chat tiene un hilo con el nombre de displayer, y si existe se fevuelve
-        let threadChannel;
-        event.channel.threads.cache.find((thread) => {
+        let threadChannel: ThreadChannel;
+        event.channel.threads.cache.find((thread: ThreadChannel) => {
             if (thread.name === 'Displayer') {
                 threadChannel = thread;
             }

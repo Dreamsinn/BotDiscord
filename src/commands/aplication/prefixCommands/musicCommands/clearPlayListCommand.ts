@@ -13,7 +13,7 @@ export class ClearPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public call(event) {
+    public call(event: Message): Promise<Message> | void {
         if (this.roleAndCooldownValidation(event, this.clearSchema)) {
             return;
         }

@@ -8,21 +8,12 @@ import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
 import { Routes } from './routes';
 
 export class CommandHandler {
-    private diceCommand: DiceCommand;
-    private replyCommand: ReplyCommand;
-    private routes: Routes;
-    private usersUsingACommand: UsersUsingACommand;
     constructor(
-        diceCommand: DiceCommand,
-        replyCommand: ReplyCommand,
-        routes: Routes,
-        usersUsingACommand: UsersUsingACommand,
-    ) {
-        this.diceCommand = diceCommand;
-        this.replyCommand = replyCommand;
-        this.routes = routes;
-        this.usersUsingACommand = usersUsingACommand;
-    }
+        private diceCommand: DiceCommand,
+        private replyCommand: ReplyCommand,
+        private routes: Routes,
+        private usersUsingACommand: UsersUsingACommand,
+    ) {}
 
     public async isCommand(event: Message) {
         // si un comando esta a la espera de una respuesta por parte de un usario,

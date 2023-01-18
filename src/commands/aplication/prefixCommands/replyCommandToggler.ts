@@ -7,7 +7,7 @@ import { ReplyCommand } from '../replyCommand';
 export class ReplyCommandToggler extends Command {
     private toggleDiceSchema: CommandSchema = ReplyCommandTogglerSchema;
 
-    public async call(event: Message, replyCommand: ReplyCommand) {
+    public async call(event: Message, replyCommand: ReplyCommand): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.toggleDiceSchema)) {
             return;
         }

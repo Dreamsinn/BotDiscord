@@ -6,6 +6,7 @@ import {
 } from '@discordjs/voice';
 import { GuildMember, Message } from 'discord.js';
 import { TogglePauseOutputEnums } from '../domain/enums/togglePauseOutputEnums';
+import { DisplayMessage } from '../domain/interfaces/displayMessage';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { NewSongData, SongData, SongDuration } from '../domain/interfaces/songData';
@@ -30,7 +31,7 @@ export class PlayListHandler {
         this.displayEmbedBuilder = displayEmbedBuilder;
     }
 
-    public async update({ member, channel, songList, newSong }: NewSongData) {
+    public async update({ member, channel, songList, newSong }: NewSongData): Promise<void> {
         // si no estas en un canal de voz
         if (songList) {
             this.playList.push(...songList);
@@ -71,7 +72,7 @@ export class PlayListHandler {
         member: GuildMember,
         songList: SongData[],
         channel: Message['channel'],
-    ) {
+    ): Promise<Message> {
         // TODO: descripcion con lista de todas las canciones, mas adelante, con paginacion de 20s y sin mensaje de Time Out
         const songListDuration = this.calculateListDuration(songList);
 
@@ -117,7 +118,11 @@ export class PlayListHandler {
         }).call();
     }
 
-    private newSongToPlayListEmbed(member: GuildMember, newSong: SongData, channel: Message['channel']) {
+    private newSongToPlayListEmbed(
+        member: GuildMember,
+        newSong: SongData,
+        channel: Message['channel'],
+    ): Promise<Message> {
         const output = new MessageCreator({
             embed: {
                 color: '#0099ff',
@@ -150,7 +155,7 @@ export class PlayListHandler {
         return channel.send(output);
     }
 
-    private calculateListDuration(songList: SongData[]) {
+    private calculateListDuration(songList: SongData[]): SongDuration {
         const listDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0 };
         if (!songList[0]) {
             return listDuration;
@@ -173,7 +178,7 @@ export class PlayListHandler {
         return listDuration;
     }
 
-    private getQeueDuration(listDuration: SongDuration) {
+    private getQeueDuration(listDuration: SongDuration): string {
         const hours = listDuration.hours;
         const minutes = listDuration.minutes;
         const seconds = listDuration.seconds;
@@ -189,7 +194,7 @@ export class PlayListHandler {
         return `${seconds}s`;
     }
 
-    private joinToChannel(member: GuildMember, channel: any) {
+    private joinToChannel(member: GuildMember, channel: any): void {
         // une al bot al canal de discord y da la capacidad de reproducir musica
 
         this.botConnection = joinVoiceChannel({
@@ -208,7 +213,7 @@ export class PlayListHandler {
         }
     }
 
-    private async playMusic() {
+    private async playMusic(): Promise<void> {
         try {
             // descarga cancion
             const song = await this.playDlHandler.getSongStream(this.playList[0].songId);
@@ -240,7 +245,7 @@ export class PlayListHandler {
         return;
     }
 
-    private musicEventListener() {
+    private musicEventListener(): void {
         this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
             if (this.isDisplay.active) {
                 this.sendPlayListDataToDisplay(false);
@@ -260,7 +265,7 @@ export class PlayListHandler {
         });
     }
 
-    public readPlayListStatus() {
+    public readPlayListStatus(): PlayListStatus {
         const playListData: PlayListStatus = {
             playList: this.playList,
             playListDuration: this.getQeueDuration(this.calculateListDuration(this.playList)),
@@ -272,7 +277,7 @@ export class PlayListHandler {
         return playListData;
     }
 
-    public botDisconnect() {
+    public botDisconnect(): void {
         if (this.botConnection) {
             this.botConnection.destroy();
             if (this.isDisplay.active) {
@@ -283,11 +288,11 @@ export class PlayListHandler {
         return;
     }
 
-    public async skipMusic() {
+    public async skipMusic(): Promise<SongData | void> {
         let musicToSkip: SongData;
 
         if (!this.player) {
-            return null;
+            return;
         }
 
         if (this.player._state.status === 'paused') {
@@ -332,7 +337,7 @@ export class PlayListHandler {
         return TogglePauseOutputEnums.PAUSE;
     }
 
-    public changeBotVoiceChanel(event: Message) {
+    public changeBotVoiceChanel(event: Message): void {
         this.joinToChannel(event.member, event.channel);
         if (this.playList[0]) {
             this.playMusic();
@@ -346,10 +351,6 @@ export class PlayListHandler {
     }
 
     public deletePlayList() {
-        if (!this.playList[0]) {
-            return false;
-        }
-
         if (this.player) {
             this.playList = [];
             this.player.stop();
@@ -361,9 +362,10 @@ export class PlayListHandler {
             }
             return true;
         }
+        return false;
     }
 
-    public removeSongsFromPlayList(songsIndex: number[]) {
+    public removeSongsFromPlayList(songsIndex: number[]): SongData[] {
         // si esta sonando y se quiere eliminar la primera cancion
         if (
             songsIndex.find((n) => n === 1) &&
@@ -445,13 +447,13 @@ export class PlayListHandler {
         return this.loopMode;
     }
 
-    public deactivateDisplay() {
+    public deactivateDisplay(): void {
         this.isDisplay.active = false;
         this.isDisplay.event = undefined;
         return;
     }
 
-    public activateDispaly(event: Message) {
+    public activateDispaly(event: Message): Promise<DisplayMessage | void> {
         this.isDisplay.active = true;
         this.isDisplay.event = event;
 
@@ -464,7 +466,7 @@ export class PlayListHandler {
         return this.displayEmbedBuilder.call(playListData, this.isDisplay.event, newEmbed);
     }
 
-    public logPlaylistStatus() {
+    public logPlaylistStatus(): void {
         console.log('PLAYER: ', this.player ? this.player : null);
         console.log('BOTCONNECTION: ', this.botConnection ? this.botConnection : null);
         console.log('PLAYLIST: ', this.playList);

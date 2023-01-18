@@ -21,7 +21,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, url: string): Promise<RawSongData | SongData[] | undefined | Message> {
+    async call(event: Message, url: string): Promise<RawSongData | SongData[] | void | Message> {
         if (!url.includes('&list=')) {
             // sino se esta rerpoduciendo un video
             return this.notStartedPlayListUrl(event, url);

@@ -17,7 +17,7 @@ export class DiceCommand extends Command {
         return true;
     }
 
-    public async call(event: Message): Promise<Message> {
+    public async call(event: Message): Promise<Message | void> {
         if (this.roleAndCooldownValidation(event, this.diceSchema)) {
             return;
         }
@@ -101,7 +101,7 @@ export class DiceCommand extends Command {
         return { symbol, symbolPosition, plusSymbol };
     }
 
-    private rollSuccesses(messageContent: string) {
+    private rollSuccesses(messageContent: string): MessageOptions {
         const symbolData = this.findSuccessSymbol(messageContent);
 
         const roll = messageContent.substring(0, symbolData.symbolPosition);
@@ -249,7 +249,7 @@ export class DiceCommand extends Command {
         return { diceNumber, diceFaces };
     }
 
-    private rollLimitation(diceNumberArray: number[], diceFacesArray: number[]): MessageOptions {
+    private rollLimitation(diceNumberArray: number[], diceFacesArray: number[]): MessageOptions | void {
         let numberOfDices = 0;
         for (const value of diceNumberArray) {
             numberOfDices += value;

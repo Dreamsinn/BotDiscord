@@ -19,7 +19,7 @@ export abstract class PlayCommand {
         event: Message,
         argument: string,
         usersUsingACommand?: UsersUsingACommand,
-    ): Promise<RawSongData | SongData[] | Message | undefined>;
+    ): Promise<RawSongData | SongData[] | Message | void>;
 
     protected findSongIdFromYoutubeURL(event: Message, url: string) {
         // encontramos la id del video

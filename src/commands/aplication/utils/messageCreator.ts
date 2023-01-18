@@ -18,7 +18,7 @@ export class MessageCreator {
         this.buttons = messageData.buttons;
     }
 
-    public call() {
+    public call(): MessageOptions {
         let embed;
         if (this.embed) {
             embed = new MessageEmbed();

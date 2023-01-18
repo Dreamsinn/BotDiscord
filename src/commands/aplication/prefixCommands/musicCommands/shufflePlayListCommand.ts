@@ -13,7 +13,7 @@ export class ShufflePlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message> {
+    public async call(event: Message): Promise<Message | void> {
         if (this.roleAndCooldownValidation(event, this.shuffleSchema)) {
             return;
         }

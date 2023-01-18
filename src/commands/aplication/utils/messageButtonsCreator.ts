@@ -8,8 +8,8 @@ export class MessageButtonsCreator {
         this.buttons = buttons;
     }
 
-    public call() {
-        const buttonRows = [];
+    public call(): MessageActionRow[] {
+        const buttonRows: MessageActionRow[] = [];
 
         this.buttons.map((row: ButtonRow) => {
             buttonRows.push(this.buttonCreator(row));

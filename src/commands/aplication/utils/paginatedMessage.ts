@@ -26,7 +26,7 @@ export class PaginatedMessage {
         this.pagination = messageData.pagination;
     }
 
-    public async call() {
+    public async call(): Promise<Message> {
         // si la informacion es una lista de canciones, la convierte en un [] de estings
         if (this.pagination.rawDataToPaginate) {
             this.pagination.dataToPaginate = this.createPaginationData();

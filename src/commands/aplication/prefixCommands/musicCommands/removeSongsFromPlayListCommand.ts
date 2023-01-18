@@ -17,7 +17,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         super();
     }
 
-    public async call(event: Message) {
+    public async call(event: Message): Promise<Message | void> {
         if (this.roleAndCooldownValidation(event, this.removeSchema)) {
             return;
         }

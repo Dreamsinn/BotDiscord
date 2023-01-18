@@ -22,7 +22,7 @@ export class PlayMusicByName extends PlayCommand {
         this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, argument: string): Promise<RawSongData | undefined> {
+    async call(event: Message, argument: string): Promise<RawSongData | void> {
         let musicData: RawSongData[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
 

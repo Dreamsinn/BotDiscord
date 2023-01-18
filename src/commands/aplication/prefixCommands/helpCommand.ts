@@ -33,7 +33,7 @@ export class HelpCommand extends Command {
         super();
     }
 
-    public async call(event: Message) {
+    public async call(event: Message): Promise<Message | void> {
         if (this.roleAndCooldownValidation(event, this.helpSchema)) {
             return;
         }
@@ -134,7 +134,7 @@ export class HelpCommand extends Command {
         // usuario en la lista de no poder usar comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
-        const filter = (reaction: Message) => {
+        const filter = (reaction: Message): boolean => {
             const authorCondition = event.author.id === reaction.author.id;
 
             // el primer embed de todos no tiene 'b', porque no puede ir para atras
@@ -388,7 +388,7 @@ export class HelpCommand extends Command {
         return { output, category: selectedCommand.category };
     }
 
-    private findSelectedCommand(helpEmbed: Message, selected: number) {
+    private findSelectedCommand(helpEmbed: Message, selected: number): HelpCommandData {
         const fields = helpEmbed.embeds[0].fields;
         const typeOfComand = helpEmbed.embeds[0].title;
 

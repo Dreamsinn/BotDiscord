@@ -21,7 +21,7 @@ export class ServerRouting {
         return this.addSeverToServerList(event);
     }
 
-    private addSeverToServerList(event) {
+    private addSeverToServerList(event: Message) {
         const diceCommand = new DiceCommand();
         const replyCommand = new ReplyCommand();
         const usersUsingACommand = new UsersUsingACommand();

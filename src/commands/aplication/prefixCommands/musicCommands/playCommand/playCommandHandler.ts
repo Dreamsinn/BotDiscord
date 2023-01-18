@@ -22,7 +22,7 @@ export class PlayCommandHandler extends Command {
         super();
     }
 
-    public async call(event: Message) {
+    public async call(event: Message): Promise<Message | void> {
         if (this.roleAndCooldownValidation(event, this.playSchema)) {
             return;
         }
@@ -35,8 +35,7 @@ export class PlayCommandHandler extends Command {
 
         // si no estas en un canal de voz
         if (!event.member?.voice.channel) {
-            event.channel.send('Tienes que estar en un canal de voz!');
-            return;
+            return event.channel.send('Tienes que estar en un canal de voz!');
         }
 
         const argument = event.content.substring(emptySpacePosition);

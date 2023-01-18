@@ -1,3 +1,4 @@
+import { Message } from 'discord.js';
 import { DisconnectCommandSchema } from '../../../domain/commandSchema/disconnectCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
@@ -12,7 +13,7 @@ export class DisconnectCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event) {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.BotDisconnectSchema)) {
             return;
         }

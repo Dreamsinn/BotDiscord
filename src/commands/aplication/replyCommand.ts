@@ -17,7 +17,7 @@ export class ReplyCommand extends Command {
         return true;
     }
 
-    public async call(event): Promise<Message> {
+    public async call(event): Promise<Message | void> {
         if (this.roleAndCooldownValidation(event, this.replySchema)) {
             return;
         }
@@ -50,7 +50,7 @@ export class ReplyCommand extends Command {
         return;
     }
 
-    private mapAliases(alias: string) {
+    private mapAliases(alias: string): string {
         console.log(alias);
         if (alias.charAt(alias.length - 1) === ' ') {
             const aliasModified = alias.slice(0, -1);
