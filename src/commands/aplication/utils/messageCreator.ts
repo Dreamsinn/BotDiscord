@@ -19,7 +19,7 @@ export class MessageCreator {
     }
 
     public call(): MessageOptions {
-        let embed;
+        let embed: MessageEmbed;
         if (this.embed) {
             embed = new MessageEmbed();
             this.embed.color ? embed.setColor(this.embed.color) : null;
@@ -40,7 +40,7 @@ export class MessageCreator {
         const output: MessageOptions = {
             components: this.buttons ? new MessageButtonsCreator(this.buttons).call() : null,
             content: this.message ? this.message.content : null,
-            embeds: embed ? [embed] : null,
+            embeds: [embed] ?? null,
         };
 
         return output;

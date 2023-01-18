@@ -24,9 +24,9 @@ export class MessageButtonsCreator {
         rowData.forEach((buttonData: Button) => {
             const button = new MessageButton()
                 .setStyle(buttonData.style.valueOf())
-                .setCustomId(buttonData.custom_id ? buttonData.custom_id : null)
-                .setLabel(buttonData.label ? buttonData.label : null)
-                .setDisabled(buttonData.disabled ? buttonData.disabled : null);
+                .setCustomId(buttonData.custom_id ?? null)
+                .setLabel(buttonData.label ?? null)
+                .setDisabled(buttonData.disabled ?? null);
 
             if (buttonData.url) {
                 // urls no puede ser null

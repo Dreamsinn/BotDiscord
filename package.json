@@ -28,7 +28,7 @@
         "test:silent": "jest --silent --runInBand",
         "start": "ts-node-dev --respawn ./src/main.ts",
         "lint": "eslint . --ext .ts",
-        "pritier": "pretty-quick --pattern '**/*.*(js|ts|json|yaml)'",
+        "prettier": "pretty-quick --pattern '**/*.*(js|ts|json|yaml)'",
         "prepare": "husky install"
     },
     "devDependencies": {

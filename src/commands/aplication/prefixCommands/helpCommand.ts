@@ -25,7 +25,6 @@ import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class HelpCommand extends Command {
-    // TODO, poner schemas como dependencias?
     private helpSchema: CommandSchema = HelpCommandSchema;
     private commandList: HelpCommandList;
 

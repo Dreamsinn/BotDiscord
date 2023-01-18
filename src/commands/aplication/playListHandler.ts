@@ -126,9 +126,7 @@ export class PlayListHandler {
         const output = new MessageCreator({
             embed: {
                 color: '#0099ff',
-                title: newSong.songName
-                    ? `${newSong.songName}`
-                    : 'Ha habido un error a la hora de coger el nombre',
+                title: newSong.songName ?? 'Ha habido un error a la hora de coger el nombre',
                 author: {
                     name: `${member.user.username}`,
                     iconURL: `${member.user.displayAvatarURL()}`,
@@ -148,7 +146,7 @@ export class PlayListHandler {
                         inline: true,
                     },
                 ],
-                thumbnailUrl: newSong.thumbnails ? newSong.thumbnails : null,
+                thumbnailUrl: newSong.thumbnails ?? null,
             },
         }).call();
 
@@ -467,8 +465,8 @@ export class PlayListHandler {
     }
 
     public logPlaylistStatus(): void {
-        console.log('PLAYER: ', this.player ? this.player : null);
-        console.log('BOTCONNECTION: ', this.botConnection ? this.botConnection : null);
+        console.log('PLAYER: ', this.player ?? null);
+        console.log('BOTCONNECTION: ', this.botConnection ?? null);
         console.log('PLAYLIST: ', this.playList);
         return;
     }

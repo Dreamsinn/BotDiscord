@@ -105,25 +105,26 @@ export class PaginatedMessage {
     }
 
     private createPageEmbed() {
+        let description: string | undefined;
+        if (this.paginatedStringData.length === 1 && this.embed.description) {
+            description = this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`;
+        } else if (this.paginatedStringData.length === 1) {
+            description = this.paginatedStringData[this.page - 1];
+        } else {
+            description = this.embed.description ?? undefined;
+        }
+
         const output = new MessageCreator({
             message: {
-                content: this.message ? this.message.content : null,
+                content: this.message ?? undefined,
             },
             embed: {
-                color: this.embed.color ? this.embed.color : null,
-                title: this.embed.title ? this.embed.title : null,
-                URL: this.embed.URL ? this.embed.URL : null,
-                author: this.embed.author ? this.embed.author : null,
-                description:
-                    this.paginatedStringData.length === 1 && this.embed.description
-                        ? this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`
-                        : this.paginatedStringData.length === 1
-                        ? this.paginatedStringData[this.page - 1]
-                        : this.embed.description
-                        ? this.embed.description
-                        : null,
-                thumbnailUrl: this.embed.thumbnailUrl ? this.embed.thumbnailUrl : null,
-                fields: this.embed.fields ? this.embed.fields : null,
+                color: this.embed.color ?? undefined,
+                title: this.embed.title ?? undefined,
+                URL: this.embed.URL ?? undefined,
+                author: this.embed.author ?? undefined,
+                description,
+                fields: this.embed.fields ?? undefined,
                 field:
                     this.paginatedStringData.length > 1
                         ? {
@@ -131,10 +132,10 @@ export class PaginatedMessage {
                               value: `${this.paginatedStringData[this.page - 1]}`,
                               inline: false,
                           }
-                        : null,
-                imageUrl: this.embed.imageUrl ? this.embed.imageUrl : null,
-                timeStamp: this.embed.timeStamp ? this.embed.timeStamp : null,
-                footer: this.embed.footer ? this.embed.footer : null,
+                        : undefined,
+                imageUrl: this.embed.imageUrl ?? undefined,
+                timeStamp: this.embed.timeStamp ?? undefined,
+                footer: this.embed.footer ?? undefined,
             },
         }).call();
         return output;
