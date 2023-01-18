@@ -353,8 +353,8 @@ export class HelpCommand extends Command {
 
         let rol = 'No';
         if (selectedCommand.roleRequired) {
-            if (process.env.DEV_ROL) {
-                rol = process.env.DEV_ROL;
+            if (process.env.ADMIN_ROL) {
+                rol = process.env.ADMIN_ROL;
             } else {
                 rol = 'Requerido, pero no se ha definido el nombre del rol.';
             }

@@ -4,7 +4,7 @@ import { CommandSchema } from '../interfaces/commandSchema';
 const PlayCommandSchema: CommandSchema = {
     aliases: ['p', 'play'],
     coolDown: 0,
-    devOnly: false,
+    adminOnly: false,
     description:
         'Este comando debe ir seguido de la canción que se quiere escuchar, hay que tener en cuenta que de momento solo coge la música de YouTube.\n\u200b\n' +
         'Se le puede pasar como argumento:\n' +

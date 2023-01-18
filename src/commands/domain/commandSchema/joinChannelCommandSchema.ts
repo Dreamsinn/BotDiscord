@@ -4,7 +4,7 @@ import { CommandSchema } from '../interfaces/commandSchema';
 const JoinChannelCommandSchema: CommandSchema = {
     aliases: ['j', 'join'],
     coolDown: 0,
-    devOnly: false,
+    adminOnly: false,
     description: 'Conecta el bot al canal de voz del usuario, requiere estar en un canal de voz',
     category: CommandsCategoryEnum.MUSIC,
     name: 'Conectar bot al canal de voz',
