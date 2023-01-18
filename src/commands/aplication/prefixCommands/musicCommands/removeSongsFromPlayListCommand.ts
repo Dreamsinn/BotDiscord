@@ -112,7 +112,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 return Number(str);
             }
         });
-        console.log({ numberArray })
 
         // recive las canciones borradas y hace embed de las canciones borradas
         const removedMusic = this.playListHandler.removeSongsFromPlayList(numberArray);

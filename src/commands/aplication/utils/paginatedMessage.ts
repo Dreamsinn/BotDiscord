@@ -57,7 +57,9 @@ export class PaginatedMessage {
     }
 
     private createPaginationData() {
-        const playListString: string[] = this.pagination.rawDataToPaginate?.map((e: SongData, i: number) => this.mapPagesData(e, i));
+        const playListString: string[] = this.pagination.rawDataToPaginate?.map(
+            (e: SongData, i: number) => this.mapPagesData(e, i),
+        );
         return playListString;
     }
 
@@ -75,7 +77,9 @@ export class PaginatedMessage {
             paginatedData.push(this.pagination.dataToPaginate.splice(0, this.pagination.dataPerPage));
         }
 
-        const paginatedStringData: string[] = paginatedData.map((songPage: string[]) => this.convertPageToString(songPage));
+        const paginatedStringData: string[] = paginatedData.map((songPage: string[]) =>
+            this.convertPageToString(songPage),
+        );
 
         return paginatedStringData;
     }
@@ -121,10 +125,10 @@ export class PaginatedMessage {
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                            value: `${this.paginatedStringData[this.page - 1]}`,
-                            inline: false,
-                        }
+                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                              value: `${this.paginatedStringData[this.page - 1]}`,
+                              inline: false,
+                          }
                         : undefined,
                 imageUrl: this.embed.imageUrl ?? undefined,
                 timeStamp: this.embed.timeStamp ?? undefined,

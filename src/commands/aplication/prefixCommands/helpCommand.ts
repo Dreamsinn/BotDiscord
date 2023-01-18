@@ -267,49 +267,48 @@ export class HelpCommand extends Command {
             helpEmbed,
             Number(collectedMessage.content),
         );
+
         const commandMessage = await helpEmbed.edit(output);
         return this.messageResponseListener(commandMessage, event, category);
     }
 
     private createSubTypeCommandsEmbed(commandCategory: string) {
-        let index = 0;
+        const commandCategoryDictionary: { [key in CommandsCategoryEnum]: { title: HelpEmbedsTitlesEnum, commandArray: HelpCommandData[] } } = {
+            [CommandsCategoryEnum.PREFIX]: {
+                title: HelpEmbedsTitlesEnum.PREFIX,
+                commandArray: this.commandList.prefix
+            },
+            [CommandsCategoryEnum.MUSIC]: {
+                title: HelpEmbedsTitlesEnum.MUSIC,
+                commandArray: this.commandList.music
+            },
+            [CommandsCategoryEnum.NONPREFIX]: {
+                title: HelpEmbedsTitlesEnum.NONPREFIX,
+                commandArray: this.commandList.nonPrefix
+            },
+        }
+
         const embedFileds: EmbedFieldData[] = [];
-        let title: string;
+        let index = 0
 
         if (commandCategory === CommandsCategoryEnum.PREFIX) {
-            title = HelpEmbedsTitlesEnum.PREFIX;
-            index += 1;
+            index = + 1
             embedFileds.push({
                 name: '\u200b',
                 value: `**${index} - ${HelpEmbedsTitlesEnum.MUSIC}**`,
                 inline: false,
             });
-            this.commandList.prefix.forEach((commandData: HelpCommandData) => {
-                index += 1;
-                embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
-            });
         }
 
-        if (commandCategory === CommandsCategoryEnum.MUSIC) {
-            title = HelpEmbedsTitlesEnum.MUSIC;
-            this.commandList.music.forEach((commandData: HelpCommandData) => {
-                index += 1;
-                embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
-            });
-        }
-
-        if (commandCategory === CommandsCategoryEnum.NONPREFIX) {
-            title = HelpEmbedsTitlesEnum.NONPREFIX;
-            this.commandList.nonPrefix.forEach((commandData: HelpCommandData) => {
-                index += 1;
-                embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
-            });
-        }
+        commandCategoryDictionary[commandCategory].commandArray.forEach((commandData: HelpCommandData) => {
+            index += 1;
+            embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
+        })
 
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',
-                title,
+                title: commandCategoryDictionary[commandCategory].title,
                 fields: embedFileds,
                 field: {
                     name: '\u200b',
