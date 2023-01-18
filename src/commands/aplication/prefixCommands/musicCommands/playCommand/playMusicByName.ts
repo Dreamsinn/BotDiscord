@@ -1,25 +1,25 @@
-import { Message } from "discord.js";
-import { discordEmojis } from "../../../../domain/discordEmojis";
-import { APIResponse } from "../../../../domain/interfaces/APIResponse";
-import { PlayCommand } from "../../../../domain/interfaces/playCommand";
-import { RawSongData } from "../../../../domain/interfaces/songData";
-import { PlayDlHandler } from "../../../../infrastructure/playDlHandler";
-import { YoutubeAPIHandler } from "../../../../infrastructure/youtubeHandler";
-import { MessageCreator } from "../../../utils/messageCreator";
-import { UsersUsingACommand } from "../../../utils/usersUsingACommand";
+import { Message } from 'discord.js';
+import { discordEmojis } from '../../../../domain/discordEmojis';
+import { APIResponse } from '../../../../domain/interfaces/APIResponse';
+import { PlayCommand } from '../../../../domain/interfaces/playCommand';
+import { RawSongData } from '../../../../domain/interfaces/songData';
+import { PlayDlHandler } from '../../../../infrastructure/playDlHandler';
+import { YoutubeAPIHandler } from '../../../../infrastructure/youtubeHandler';
+import { MessageCreator } from '../../../utils/messageCreator';
+import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
 export class PlayMusicByName extends PlayCommand {
     private usersUsingACommand: UsersUsingACommand;
 
     constructor(
         musicAPIs: {
-            youtubeAPI: YoutubeAPIHandler,
-            playDlAPI: PlayDlHandler
+            youtubeAPI: YoutubeAPIHandler;
+            playDlAPI: PlayDlHandler;
         },
-        usersUsingACommand: UsersUsingACommand
+        usersUsingACommand: UsersUsingACommand,
     ) {
         super(musicAPIs);
-        this.usersUsingACommand = usersUsingACommand
+        this.usersUsingACommand = usersUsingACommand;
     }
 
     async call(event: Message, argument: string): Promise<RawSongData | undefined> {
@@ -69,9 +69,13 @@ export class PlayMusicByName extends PlayCommand {
             return authorCondition && (letterCondition || numberCondition);
         };
 
-
         try {
-            const collected = await message.channel.awaitMessages({ filter, time: 20000, max: 1, errors: ['time'] })
+            const collected = await message.channel.awaitMessages({
+                filter,
+                time: 20000,
+                max: 1,
+                errors: ['time'],
+            });
 
             this.usersUsingACommand.removeUserList(event.author.id);
             let collectedMessage: Message;
@@ -96,7 +100,6 @@ export class PlayMusicByName extends PlayCommand {
             collectedMessage.delete();
 
             return this.mapSongData(event, song);
-
         } catch (err) {
             if (err instanceof TypeError) {
                 console.log('Select music colector error: ', err);

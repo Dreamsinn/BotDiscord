@@ -17,7 +17,7 @@ export class PlayCommandHandler extends Command {
         private playMusicByName: PlayMusicByName,
         private playMusicByYouTubeMobileURL: PlayMusicByYouTubeMobileURL,
         private playPlayListByYoutubeURL: PlayPlayListByYoutubeURL,
-        private playMusicByYouTubeURL: PlayMusicByYouTubeURL
+        private playMusicByYouTubeURL: PlayMusicByYouTubeURL,
     ) {
         super();
     }
@@ -49,22 +49,22 @@ export class PlayCommandHandler extends Command {
             youtubePlayListURl: {
                 condition: Boolean(
                     argument.includes('youtube.com/playlist?list=') ||
-                    (argument.includes('youtube.com') &&
-                        argument.includes('&list='))
+                        (argument.includes('youtube.com') && argument.includes('&list=')),
                 ),
-                route: this.playPlayListByYoutubeURL
+                route: this.playPlayListByYoutubeURL,
             },
             youtubeSongURL: {
                 condition: argument.includes('youtube.com/watch?v='),
-                route: this.playMusicByYouTubeURL
+                route: this.playMusicByYouTubeURL,
             },
-            songName: { //default
+            songName: {
+                //default
                 condition: true,
                 route: this.playMusicByName,
-            }
-        }
+            },
+        };
 
-        const argumentType = Object.values(argumentTypeDictionary).find((value) => value.condition)
+        const argumentType = Object.values(argumentTypeDictionary).find((value) => value.condition);
         const song = await argumentType?.route.call(event, argument);
 
         if (!song) {
@@ -78,10 +78,10 @@ export class PlayCommandHandler extends Command {
         // unificar tipos de respuesta no pot se que una sigui SongData y laltre RawSongData
 
         if (Array.isArray(song)) {
-            return this.updatePlayListWithAPlayList(event, song)
+            return this.updatePlayListWithAPlayList(event, song);
         }
 
-        return this.updateToPlayList(event, song)
+        return this.updateToPlayList(event, song);
     }
 
     private async updateToPlayList(event: Message, songData: RawSongData) {

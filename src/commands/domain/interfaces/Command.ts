@@ -4,7 +4,7 @@ import { ReplyCommand } from '../../aplication/replyCommand';
 import { CheckDevRole } from '../../aplication/utils/checkDevRole';
 import { CoolDown } from '../../aplication/utils/coolDown';
 import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
-import { CommandSchema } from './commandSchema'
+import { CommandSchema } from './commandSchema';
 
 export abstract class Command {
     private coolDown = new CoolDown();
@@ -18,13 +18,13 @@ export abstract class Command {
         //role check
         if (schema.devOnly) {
             if (!this.checkDevRole.call(event)) {
-                interrupt = true
+                interrupt = true;
             }
         }
 
         //comprobar coolDown
         if (this.coolDown.call(schema.coolDown)) {
-            interrupt = true
+            interrupt = true;
         }
 
         return interrupt;

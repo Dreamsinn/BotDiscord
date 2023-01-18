@@ -12,12 +12,12 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
     constructor(
         private playListHandler: PlayListHandler,
-        private usersUsingACommand: UsersUsingACommand
+        private usersUsingACommand: UsersUsingACommand,
     ) {
         super();
     }
 
-    public async call(event: Message,) {
+    public async call(event: Message) {
         if (this.roleAndCooldownValidation(event, this.removeSchema)) {
             return;
         }

@@ -1,10 +1,10 @@
-import { Message } from "discord.js";
-import { YouTubeVideo } from "play-dl";
-import { UsersUsingACommand } from "../../aplication/utils/usersUsingACommand";
-import { PlayDlHandler } from "../../infrastructure/playDlHandler";
-import { YoutubeAPIHandler } from "../../infrastructure/youtubeHandler";
-import { APIResponse } from "./APIResponse";
-import { RawSongData, SongData } from "./songData";
+import { Message } from 'discord.js';
+import { YouTubeVideo } from 'play-dl';
+import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
+import { PlayDlHandler } from '../../infrastructure/playDlHandler';
+import { YoutubeAPIHandler } from '../../infrastructure/youtubeHandler';
+import { APIResponse } from './APIResponse';
+import { RawSongData, SongData } from './songData';
 
 export abstract class PlayCommand {
     protected youtubeAPIHandler: YoutubeAPIHandler;
@@ -15,7 +15,11 @@ export abstract class PlayCommand {
         this.playDlHandler = playDlAPI;
     }
 
-    abstract call(event: Message, argument: string, usersUsingACommand?: UsersUsingACommand): Promise<RawSongData | SongData[] | Message | undefined>;
+    abstract call(
+        event: Message,
+        argument: string,
+        usersUsingACommand?: UsersUsingACommand,
+    ): Promise<RawSongData | SongData[] | Message | undefined>;
 
     protected findSongIdFromYoutubeURL(event: Message, url: string) {
         // encontramos la id del video

@@ -1,31 +1,30 @@
-import { Message } from "discord.js";
-import { PlayCommand } from "../../../../domain/interfaces/playCommand";
-import { RawSongData, SongData } from "../../../../domain/interfaces/songData";
-import { APIResponse } from "../../../../domain/interfaces/APIResponse";
-import { YoutubeAPIHandler } from "../../../../infrastructure/youtubeHandler";
-import { PlayDlHandler } from "../../../../infrastructure/playDlHandler";
-import { UsersUsingACommand } from "../../../utils/usersUsingACommand";
-import { MessageCreator } from "../../../utils/messageCreator";
+import { Message } from 'discord.js';
+import { APIResponse } from '../../../../domain/interfaces/APIResponse';
+import { PlayCommand } from '../../../../domain/interfaces/playCommand';
+import { RawSongData, SongData } from '../../../../domain/interfaces/songData';
+import { PlayDlHandler } from '../../../../infrastructure/playDlHandler';
+import { YoutubeAPIHandler } from '../../../../infrastructure/youtubeHandler';
+import { MessageCreator } from '../../../utils/messageCreator';
+import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
 export class PlayPlayListByYoutubeURL extends PlayCommand {
     private usersUsingACommand: UsersUsingACommand;
 
     constructor(
         musicAPIs: {
-            youtubeAPI: YoutubeAPIHandler,
-            playDlAPI: PlayDlHandler
+            youtubeAPI: YoutubeAPIHandler;
+            playDlAPI: PlayDlHandler;
         },
-        usersUsingACommand: UsersUsingACommand
+        usersUsingACommand: UsersUsingACommand,
     ) {
         super(musicAPIs);
-        this.usersUsingACommand = usersUsingACommand
+        this.usersUsingACommand = usersUsingACommand;
     }
 
     async call(event: Message, url: string): Promise<RawSongData | SongData[] | undefined | Message> {
-
         if (!url.includes('&list=')) {
             // sino se esta rerpoduciendo un video
-            return this.notStartedPlayListUrl(event, url)
+            return this.notStartedPlayListUrl(event, url);
         }
 
         // si esta reproduciendo un video
@@ -96,7 +95,12 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         };
 
         try {
-            const collected = await message.channel.awaitMessages({ filter, time: 20000, max: 1, errors: ['time'] })
+            const collected = await message.channel.awaitMessages({
+                filter,
+                time: 20000,
+                max: 1,
+                errors: ['time'],
+            });
             this.usersUsingACommand.removeUserList(event.author.id);
             let collectedMessage: Message;
             collected.map((e: Message) => (collectedMessage = e));

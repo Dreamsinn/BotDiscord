@@ -46,18 +46,19 @@ interface Route {
 export class Routes {
     private musicAPIs = {
         youtubeAPI: new YoutubeAPIHandler(),
-        playDlAPI: new PlayDlHandler()
-    }
+        playDlAPI: new PlayDlHandler(),
+    };
     private displayEmbedBuilder = new DisplayEmbedBuilder();
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
     private playMusicByName = new PlayMusicByName(this.musicAPIs, this.usersUsingACommand);
-    private playMusicByYouTubeMobileURL = new PlayMusicByYouTubeMobileURL(this.musicAPIs)
-    private playPlayListByYoutubeURL = new PlayPlayListByYoutubeURL(this.musicAPIs, this.usersUsingACommand)
-    private playMusicByYouTubeURL = new PlayMusicByYouTubeURL(this.musicAPIs)
+    private playMusicByYouTubeMobileURL = new PlayMusicByYouTubeMobileURL(this.musicAPIs);
+    private playPlayListByYoutubeURL = new PlayPlayListByYoutubeURL(
+        this.musicAPIs,
+        this.usersUsingACommand,
+    );
+    private playMusicByYouTubeURL = new PlayMusicByYouTubeURL(this.musicAPIs);
 
-    constructor(
-        private usersUsingACommand: UsersUsingACommand
-    ) { }
+    constructor(private usersUsingACommand: UsersUsingACommand) {}
 
     public routeList: Route[] = [
         {
@@ -67,7 +68,7 @@ export class Routes {
                 this.playMusicByName,
                 this.playMusicByYouTubeMobileURL,
                 this.playPlayListByYoutubeURL,
-                this.playMusicByYouTubeURL
+                this.playMusicByYouTubeURL,
             ),
         },
         {
@@ -100,7 +101,7 @@ export class Routes {
         },
         {
             alias: RemoveSongsFromPlayListCommandSchema.aliases,
-            command: new RemoveSongsFromPlayListCommand(this.playListHandler, this.usersUsingACommand,),
+            command: new RemoveSongsFromPlayListCommand(this.playListHandler, this.usersUsingACommand),
         },
         {
             alias: ShufflePlayListCommandSchema.aliases,

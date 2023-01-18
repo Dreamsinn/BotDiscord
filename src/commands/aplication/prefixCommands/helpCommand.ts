@@ -29,9 +29,7 @@ export class HelpCommand extends Command {
     private helpSchema: CommandSchema = HelpCommandSchema;
     private commandList: HelpCommandList;
 
-    constructor(
-        private usersUsingACommand: UsersUsingACommand
-    ) {
+    constructor(private usersUsingACommand: UsersUsingACommand) {
         super();
     }
 
@@ -47,21 +45,35 @@ export class HelpCommand extends Command {
 
         // sino esta hecho, crea las listas de comandos, con su informacion
         if (!this.commandList) {
-            this.mapCommandListData()
+            this.mapCommandListData();
         }
 
         return this.messageResponseListener(typeCommandMessage, event, HelpEmbedsTitlesEnum.TYPES);
     }
 
     private mapCommandListData() {
-        const commandsSchemas = [DiceCommandSchema, ReplyCommandSchema, HelpCommandSchema, DiceCommandTogglerSchema,
-            ReplyCommandTogglerSchema, PlayCommandSchema, PlayListCommandSchema, PauseCommandSchema, SkipMusicCommandSchema,
-            RemoveSongsFromPlayListCommandSchema, ClearPlayListCommandSchema, DisplayPlayListCommandSchema,
-            LoopPlayListModeCommandSchema, ShufflePlayListCommandSchema, JoinChannelCommandSchema, DisconnectCommandSchema];
+        const commandsSchemas = [
+            DiceCommandSchema,
+            ReplyCommandSchema,
+            HelpCommandSchema,
+            DiceCommandTogglerSchema,
+            ReplyCommandTogglerSchema,
+            PlayCommandSchema,
+            PlayListCommandSchema,
+            PauseCommandSchema,
+            SkipMusicCommandSchema,
+            RemoveSongsFromPlayListCommandSchema,
+            ClearPlayListCommandSchema,
+            DisplayPlayListCommandSchema,
+            LoopPlayListModeCommandSchema,
+            ShufflePlayListCommandSchema,
+            JoinChannelCommandSchema,
+            DisconnectCommandSchema,
+        ];
 
-        const prefixCommandList = []
-        const nonCommandList = []
-        const musicCommandList = []
+        const prefixCommandList = [];
+        const nonCommandList = [];
+        const musicCommandList = [];
 
         commandsSchemas.forEach((schema: CommandSchema) => {
             const schemaData: HelpCommandData = {
@@ -71,25 +83,25 @@ export class HelpCommand extends Command {
                 coolDown: schema.coolDown,
                 category: schema.category,
                 roleRequired: schema.devOnly,
-            }
+            };
 
             if (schema.category === CommandsCategoryEnum.PREFIX) {
-                prefixCommandList.push(schemaData)
+                prefixCommandList.push(schemaData);
             }
 
             if (schema.category === CommandsCategoryEnum.NONPREFIX) {
-                nonCommandList.push(schemaData)
+                nonCommandList.push(schemaData);
             }
 
             if (schema.category === CommandsCategoryEnum.MUSIC) {
-                musicCommandList.push(schemaData)
+                musicCommandList.push(schemaData);
             }
-        })
-        return this.commandList = {
+        });
+        return (this.commandList = {
             prefix: prefixCommandList,
             nonPrefix: nonCommandList,
             music: musicCommandList,
-        }
+        });
     }
 
     private createTypeOfCommandsEmbed() {
@@ -339,12 +351,12 @@ export class HelpCommand extends Command {
             }
         });
 
-        let rol = 'No'
+        let rol = 'No';
         if (selectedCommand.roleRequired) {
             if (process.env.DEV_ROL) {
-                rol = process.env.DEV_ROL
+                rol = process.env.DEV_ROL;
             } else {
-                rol = 'Requerido, pero no se ha definido el nombre del rol.'
+                rol = 'Requerido, pero no se ha definido el nombre del rol.';
             }
         }
 
