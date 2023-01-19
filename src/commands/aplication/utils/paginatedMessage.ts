@@ -1,4 +1,4 @@
-import { Message, MessagePayload, ReplyMessageOptions } from 'discord.js';
+import { Message } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
 import {
@@ -30,22 +30,21 @@ export class PaginatedMessage {
 
         const output = this.createPageEmbed();
 
-
-        let message: (options: string | MessagePayload | ReplyMessageOptions) => Promise<Message<boolean>>;
+        let message: Promise<Message<boolean>>;
         if (this.pagination.reply === true) {
-            message = this.pagination.event.reply;
+            message = this.pagination.event.reply(output);
         } else {
-            message = this.pagination.channel.send;
+            message = this.pagination.channel.send(output);
         }
 
         // for type isses, if message was sending the message then if(!(maxPage > 1)) would return void
         // if only 1 page send without buttons
         const maxPage = this.paginatedStringData.length;
         if (!(maxPage > 1)) {
-            return await message(output);
+            return await message;
         }
 
-        const paginatedMessage = await message(output)
+        const paginatedMessage = await message;
 
         this.addButtonsReactions(paginatedMessage);
 
@@ -110,10 +109,10 @@ export class PaginatedMessage {
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                            value: `${this.paginatedStringData[this.page - 1]}`,
-                            inline: false,
-                        }
+                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                              value: `${this.paginatedStringData[this.page - 1]}`,
+                              inline: false,
+                          }
                         : undefined,
                 imageUrl: this.embed.imageUrl ?? undefined,
                 timeStamp: this.embed.timeStamp ?? undefined,
@@ -170,7 +169,7 @@ export class PaginatedMessage {
                     content: discordEmojis.x,
                 },
             }).call();
-            await message.edit(output).catch((err) => {
+            await message.edit({ content: output.content, components: [] }).catch((err) => {
                 console.log({ err });
             });
             console.log(`Pagination collector time Out`);
@@ -196,7 +195,7 @@ export class PaginatedMessage {
         // si se ha cambiado la pagina edita el embed con la info de la pagina actual
         if (pageChanged) {
             const output = this.createPageEmbed();
-            return message.edit(output);
+            return message.edit({ embeds: output.embeds });
         }
         return;
     }

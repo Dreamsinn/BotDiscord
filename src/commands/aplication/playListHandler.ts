@@ -70,7 +70,7 @@ export class PlayListHandler {
 
         const songListDuration = this.calculateListDuration(songList);
 
-        const paginationData = this.songArrayToPaginationData(songList)
+        const paginationData = this.songArrayToPaginationData(songList);
 
         return await new PaginatedMessage({
             embed: {
@@ -115,8 +115,8 @@ export class PlayListHandler {
     }
 
     private songArrayToPaginationData(songList: Song[]): string[] {
-        const playListString: string[] = songList.map(
-            (song: Song, i: number) => this.mapPagesData(song, i),
+        const playListString: string[] = songList.map((song: Song, i: number) =>
+            this.mapPagesData(song, i),
         );
         return playListString;
     }
@@ -183,7 +183,7 @@ export class PlayListHandler {
                 listDuration.hours += 1;
             }
         });
-        listDuration.string = this.getQeueDuration(listDuration)
+        listDuration.string = this.getQeueDuration(listDuration);
         return listDuration;
     }
 

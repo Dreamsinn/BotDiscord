@@ -9,12 +9,11 @@ export class MessageButtonsCreator {
     }
 
     public call(): MessageActionRow[] {
-        const buttonRows: MessageActionRow[] = []
+        const buttonRows: MessageActionRow[] = [];
         this.buttons.forEach((row: ButtonRow | undefined) => {
             if (row) {
                 buttonRows.push(this.buttonCreator(row));
             }
-
         });
 
         return buttonRows;
@@ -29,7 +28,7 @@ export class MessageButtonsCreator {
                     .setStyle(buttonData.style.valueOf())
                     .setCustomId(buttonData.custom_id)
                     .setLabel(buttonData.label)
-                    .setDisabled(buttonData.disabled);
+                    .setDisabled(buttonData.disabled === undefined ? false : buttonData.disabled);
 
                 if (buttonData.url) {
                     // urls no puede ser null
