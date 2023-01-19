@@ -60,8 +60,9 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         }
 
         // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
-        const playDlResponse: APIResponse<RawSong[]> =
-            await this.playDlHandler.getSognsInfoFromPlayList(url);
+        const playDlResponse: APIResponse<RawSong[]> = await this.playDlHandler.getSognsInfoFromPlayList(
+            url,
+        );
 
         if (!playDlResponse.isError) {
             return this.mapPlayDLPlayListData(event, playDlResponse.data);
@@ -163,7 +164,11 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         return playList;
     }
 
-    private async fetchYoutubePlayListData(event: Message, playListId: string, url: string): Promise<Song | Song[] | void> {
+    private async fetchYoutubePlayListData(
+        event: Message,
+        playListId: string,
+        url: string,
+    ): Promise<Song | Song[] | void> {
         // llama a la API de youtube, si esta tambien falla y esta sonando un video reproduce el video
         const youtubeResponse: APIResponse<RawSong[]> = await this.youtubeAPIHandler.searchPlaylist(
             playListId,
@@ -185,11 +190,11 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
     private async mapSongListData(event: Message, rawPlayList: RawSong[]): Promise<Song[]> {
         const playList: Song[] = [];
         for (const rawSong of rawPlayList) {
-            const songData = await this.mapSongData(event, rawSong.songId)
+            const songData = await this.mapSongData(event, rawSong.songId);
             if (this.isSongData(songData)) {
                 playList.push(songData);
             }
         }
-        return playList
+        return playList;
     }
 }
