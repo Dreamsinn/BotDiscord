@@ -9,10 +9,12 @@ export class MessageButtonsCreator {
     }
 
     public call(): MessageActionRow[] {
-        const buttonRows: MessageActionRow[] = [];
+        const buttonRows: MessageActionRow[] = []
+        this.buttons.forEach((row: ButtonRow | undefined) => {
+            if (row) {
+                buttonRows.push(this.buttonCreator(row));
+            }
 
-        this.buttons.map((row: ButtonRow) => {
-            buttonRows.push(this.buttonCreator(row));
         });
 
         return buttonRows;
@@ -21,19 +23,21 @@ export class MessageButtonsCreator {
     private buttonCreator(rowData: ButtonRow) {
         const buttonsRow = new MessageActionRow();
 
-        rowData.forEach((buttonData: Button) => {
-            const button = new MessageButton()
-                .setStyle(buttonData.style.valueOf())
-                .setCustomId(buttonData.custom_id ?? null)
-                .setLabel(buttonData.label ?? null)
-                .setDisabled(buttonData.disabled ?? null);
+        rowData.forEach((buttonData: Button | undefined) => {
+            if (buttonData) {
+                const button = new MessageButton()
+                    .setStyle(buttonData.style.valueOf())
+                    .setCustomId(buttonData.custom_id)
+                    .setLabel(buttonData.label)
+                    .setDisabled(buttonData.disabled);
 
-            if (buttonData.url) {
-                // urls no puede ser null
-                button.setURL(buttonData.url);
+                if (buttonData.url) {
+                    // urls no puede ser null
+                    button.setURL(buttonData.url);
+                }
+
+                buttonsRow.addComponents(button);
             }
-
-            buttonsRow.addComponents(button);
         });
         return buttonsRow;
     }

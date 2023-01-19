@@ -45,8 +45,8 @@ export type ButtonRow = [Button?, Button?, Button?, Button?, Button?];
 
 export interface Button {
     style: ButtonsStyle;
-    label?: string;
-    custom_id?: string;
+    label: string;
+    custom_id: string;
     url?: string;
     disabled?: boolean;
 }
