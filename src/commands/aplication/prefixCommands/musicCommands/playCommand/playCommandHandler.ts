@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { PlayCommandSchema } from '../../../../domain/commandSchema/playCommandSchema';
 import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
-import { NewSongData, SongData } from '../../../../domain/interfaces/songData';
+import { NewSong, Song } from '../../../../domain/interfaces/song';
 import { PlayListHandler } from '../../../playListHandler';
 import { PlayMusicByName } from './playMusicByName';
 import { PlayMusicByYouTubeMobileURL } from './playMusicByYouTubeMobileURL';
@@ -82,9 +82,9 @@ export class PlayCommandHandler extends Command {
         return await argumentType?.route.call(event, argument);
     }
 
-    private async updatePlayList(event: Message, songsData: SongData | SongData[]): Promise<void> {
+    private async updatePlayList(event: Message, songsData: Song | Song[]): Promise<void> {
         if (songsData instanceof Array) {
-            const newSongList: NewSongData = {
+            const newSongList: NewSong = {
                 newSongs: songsData,
                 channel: event.channel,
                 member: event.member,
@@ -93,7 +93,7 @@ export class PlayCommandHandler extends Command {
             return this.playListHandler.update(newSongList);
         }
 
-        const newSongList: NewSongData = {
+        const newSongList: NewSong = {
             newSongs: songsData,
             channel: event.channel,
             member: event.member,

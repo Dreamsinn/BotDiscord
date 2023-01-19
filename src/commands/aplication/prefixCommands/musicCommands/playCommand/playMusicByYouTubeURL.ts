@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { SongData } from '../../../../domain/interfaces/songData';
+import { Song } from '../../../../domain/interfaces/song';
 
 export class PlayMusicByYouTubeURL extends PlayCommand {
-    async call(event: Message, url: string): Promise<SongData | void> {
+    async call(event: Message, url: string): Promise<Song | void> {
         return this.findSongIdFromYoutubeURL(event, url);
     }
 }

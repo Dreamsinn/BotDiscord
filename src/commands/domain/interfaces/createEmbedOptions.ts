@@ -7,7 +7,7 @@ import {
     User,
 } from 'discord.js';
 import { MessageButtonStyles } from 'discord.js/typings/enums';
-import { SongData } from './songData';
+import { Song } from './song';
 
 // hay mas opciones disponibles en MessageOptions
 export interface CreateMessageOptions {
@@ -62,7 +62,7 @@ export enum ButtonsStyle {
 export interface PaginationOptions {
     event?: Message;
     channel?: Message['channel'];
-    rawDataToPaginate?: SongData[];
+    rawDataToPaginate?: Song[];
     dataToPaginate?: string[];
     dataPerPage: number;
     timeOut: number;

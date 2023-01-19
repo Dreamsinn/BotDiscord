@@ -1,15 +1,15 @@
 import play, { InfoData, SoundCloudStream, YouTubePlayList, YouTubeStream, YouTubeVideo } from 'play-dl';
 import { APIResponse } from '../domain/interfaces/APIResponse';
 import { PlayDlAPI } from '../domain/interfaces/playDlAPI';
-import { RawSongData } from '../domain/interfaces/songData';
+import { RawSong } from '../domain/interfaces/song';
 
 export class PlayDlHandler implements PlayDlAPI {
-    public async searchSongByName(songString: string): Promise<APIResponse<RawSongData[]>> {
+    public async searchSongByName(songString: string): Promise<APIResponse<RawSong[]>> {
         try {
             const searched = await play.search(songString, { source: { youtube: 'video' }, limit: 9 });
 
-            const response: RawSongData[] = searched.map((songData) => {
-                const newSong: RawSongData = {
+            const response: RawSong[] = searched.map((songData) => {
+                const newSong: RawSong = {
                     songId: songData.id,
                     songName: songData.title,
                     duration: String(songData.durationInSec),
@@ -52,13 +52,13 @@ export class PlayDlHandler implements PlayDlAPI {
         }
     }
 
-    public async getSognsInfoFromPlayList(url: string): Promise<APIResponse<RawSongData[]>> {
+    public async getSognsInfoFromPlayList(url: string): Promise<APIResponse<RawSong[]>> {
         try {
             const rawPlayList: YouTubePlayList = await play.playlist_info(url, { incomplete: true });
 
             const platlistData = await rawPlayList.all_videos();
 
-            const playList: RawSongData[] = platlistData.map((songData: YouTubeVideo) => {
+            const playList: RawSong[] = platlistData.map((songData: YouTubeVideo) => {
                 let thumbnails = songData.thumbnails[3].url;
                 if (!thumbnails) {
                     if (songData.thumbnails[2]) {
@@ -68,7 +68,7 @@ export class PlayDlHandler implements PlayDlAPI {
                     }
                 }
 
-                const newSong: RawSongData = {
+                const newSong: RawSong = {
                     songName: songData.title,
                     songId: songData.id,
                     duration: String(songData.durationInSec),

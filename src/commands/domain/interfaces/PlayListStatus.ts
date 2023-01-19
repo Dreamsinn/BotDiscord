@@ -1,7 +1,7 @@
-import { SongData } from './songData';
+import { Song } from './songData';
 
 export interface PlayListStatus {
-    playList: SongData[];
+    playList: Song[];
     playListDuration: string;
     loop: boolean;
     playerStatus: string;

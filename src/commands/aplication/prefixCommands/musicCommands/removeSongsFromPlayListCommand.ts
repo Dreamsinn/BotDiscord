@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { RemoveSongsFromPlayListCommandSchema } from '../../../domain/commandSchema/removeSongsFromPlayListCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { SongData } from '../../../domain/interfaces/songData';
+import { Song } from '../../../domain/interfaces/song';
 import { PlayListHandler } from '../../playListHandler';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
@@ -22,7 +22,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
             return;
         }
 
-        const playList: SongData[] = this.playListHandler.readPlayList();
+        const playList: Song[] = this.playListHandler.readPlayList();
 
         if (!playList[0]) {
             return event.reply('There is no playList');
@@ -53,7 +53,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         return this.messageCollector(event, playList);
     }
 
-    private messageCollector(event: Message, playList: SongData[]) {
+    private messageCollector(event: Message, playList: Song[]) {
         // usuario no pueda ejecutar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
@@ -118,7 +118,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         return this.removedMusicEmbed(removedMusic, event);
     }
 
-    private async removedMusicEmbed(removedMusic: SongData[], event: Message) {
+    private async removedMusicEmbed(removedMusic: Song[], event: Message) {
         return await new PaginatedMessage({
             embed: {
                 color: 'ORANGE',

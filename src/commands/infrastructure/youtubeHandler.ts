@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { APIResponse } from '../domain/interfaces/APIResponse';
-import { RawSongData } from '../domain/interfaces/songData';
+import { RawSong } from '../domain/interfaces/song';
 import { YoutubeAPI } from '../domain/interfaces/youtubeAPI';
 
 export class YoutubeAPIHandler implements YoutubeAPI {
-    public async searchSongByName(song: string): Promise<APIResponse<RawSongData[]>> {
+    public async searchSongByName(song: string): Promise<APIResponse<RawSong[]>> {
         const order = 'relevance';
         const part = 'snippet';
         const maxResults = '9';
@@ -15,8 +15,8 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 `https://www.googleapis.com/youtube/v3/search?key=${process.env.API_KEY_YOUTUBE}&order=${order}&part=${part}&maxResults=${maxResults}&type=${type}&q=${song}`,
             );
 
-            const response: RawSongData[] = searched.data.items.map((songData: any) => {
-                const newSong: RawSongData = {
+            const response: RawSong[] = searched.data.items.map((songData: any) => {
+                const newSong: RawSong = {
                     songId: songData.id.videoId,
                     songName: songData.snippet.title,
                 };
@@ -37,7 +37,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
         }
     }
 
-    public async searchPlaylist(playListId: string): Promise<APIResponse<RawSongData[]>> {
+    public async searchPlaylist(playListId: string): Promise<APIResponse<RawSong[]>> {
         const part = 'snippet';
         const playlistId = playListId;
         const maxResults = '30';
@@ -47,8 +47,8 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 `https://youtube.googleapis.com/youtube/v3/playlistItems?part=${part}&playlistId=${playlistId}&key=${process.env.API_KEY_YOUTUBE}&maxResults=${maxResults}`,
             );
 
-            const response: RawSongData[] = searched.data.items.map((songData: any) => {
-                const newSong: RawSongData = {
+            const response: RawSong[] = searched.data.items.map((songData: any) => {
+                const newSong: RawSong = {
                     songId: songData.snippet.resourceId.videoId,
                     songName: songData.snippet.title,
                 };
@@ -69,7 +69,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
         }
     }
 
-    public async searchSongById(songId: string): Promise<APIResponse<RawSongData>> {
+    public async searchSongById(songId: string): Promise<APIResponse<RawSong>> {
         const part = 'snippet,contentDetails';
         const maxResults = '1';
         const id = songId;
@@ -79,7 +79,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 `https://www.googleapis.com/youtube/v3/videos?key=${process.env.API_KEY_YOUTUBE}&part=${part}&maxResults=${maxResults}&id=${id}`,
             );
 
-            const newSong: RawSongData = {
+            const newSong: RawSong = {
                 songId,
                 songName: searched.data.items[0].snippet.title,
                 duration: searched.data.items[0].contentDetails.duration,

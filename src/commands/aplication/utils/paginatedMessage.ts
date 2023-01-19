@@ -9,7 +9,7 @@ import {
     MessageContent,
     PaginationOptions,
 } from '../../domain/interfaces/createEmbedOptions';
-import { SongData } from '../../domain/interfaces/songData';
+import { Song } from '../../domain/interfaces/song';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 import { MessageCreator } from './messageCreator';
 
@@ -58,12 +58,12 @@ export class PaginatedMessage {
 
     private createPaginationData() {
         const playListString: string[] = this.pagination.rawDataToPaginate?.map(
-            (e: SongData, i: number) => this.mapPagesData(e, i),
+            (e: Song, i: number) => this.mapPagesData(e, i),
         );
         return playListString;
     }
 
-    private mapPagesData(songData: SongData, index: number) {
+    private mapPagesData(songData: Song, index: number) {
         const songsString = `${index + 1} - ${songData.songName} '${songData.duration.string}'\n`;
 
         return songsString;
@@ -125,10 +125,10 @@ export class PaginatedMessage {
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                              value: `${this.paginatedStringData[this.page - 1]}`,
-                              inline: false,
-                          }
+                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                            value: `${this.paginatedStringData[this.page - 1]}`,
+                            inline: false,
+                        }
                         : undefined,
                 imageUrl: this.embed.imageUrl ?? undefined,
                 timeStamp: this.embed.timeStamp ?? undefined,

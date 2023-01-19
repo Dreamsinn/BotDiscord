@@ -4,7 +4,7 @@ import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
 import { PlayDlHandler } from '../../infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from '../../infrastructure/youtubeHandler';
 import { APIResponse } from './APIResponse';
-import { RawSongData, SongData } from './songData';
+import { RawSong, Song } from './song';
 
 export abstract class PlayCommand {
     protected youtubeAPIHandler: YoutubeAPIHandler;
@@ -19,9 +19,9 @@ export abstract class PlayCommand {
         event: Message,
         argument: string,
         usersUsingACommand?: UsersUsingACommand,
-    ): Promise<SongData | SongData[] | Message | void>;
+    ): Promise<Song | Song[] | Message | void>;
 
-    protected async findSongIdFromYoutubeURL(event: Message, url: string): Promise<SongData | void> {
+    protected async findSongIdFromYoutubeURL(event: Message, url: string): Promise<Song | void> {
         // encontramos la id del video
         const rawSongId = url
             .replace('https://', '')
@@ -49,16 +49,16 @@ export abstract class PlayCommand {
         return;
     }
 
-    protected isSongData(argument: SongData | void): argument is SongData {
-        return (argument as SongData).duration.string !== undefined
+    protected isSongData(argument: Song | void): argument is Song {
+        return (argument as Song).duration.string !== undefined
     }
 
-    protected async mapSongData(event: Message, songId: string): Promise<SongData | void> {
+    protected async mapSongData(event: Message, songId: string): Promise<Song | void> {
         // optenemos duracion y nombre
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
         const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlHandler.getSongInfo(songId);
         if (!playDlResponse.isError) {
-            const song: SongData = {
+            const song: Song = {
                 songId,
                 songName: playDlResponse.data.title,
                 duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
@@ -69,11 +69,11 @@ export abstract class PlayCommand {
         console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
 
         // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
-        const youtubeResponse: APIResponse<RawSongData> = await this.youtubeAPIHandler.searchSongById(
+        const youtubeResponse: APIResponse<RawSong> = await this.youtubeAPIHandler.searchSongById(
             songId,
         );
         if (!youtubeResponse.isError) {
-            const song: SongData = {
+            const song: Song = {
                 songId,
                 songName: youtubeResponse.data.songName,
                 duration: this.parseSongDuration(youtubeResponse.data.duration, false),

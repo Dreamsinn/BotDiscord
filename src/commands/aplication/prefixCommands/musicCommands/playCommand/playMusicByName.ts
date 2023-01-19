@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { discordEmojis } from '../../../../domain/discordEmojis';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { RawSongData, SongData } from '../../../../domain/interfaces/songData';
+import { RawSong, Song } from '../../../../domain/interfaces/song';
 import { PlayDlHandler } from '../../../../infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from '../../../../infrastructure/youtubeHandler';
 import { MessageCreator } from '../../../utils/messageCreator';
@@ -22,11 +22,11 @@ export class PlayMusicByName extends PlayCommand {
         this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, argument: string): Promise<SongData | void> {
-        let unchosenMusic: RawSongData[];
+    async call(event: Message, argument: string): Promise<Song | void> {
+        let unchosenMusic: RawSong[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
 
-        const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.searchSongByName(
+        const playDlResponse: APIResponse<RawSong[]> = await this.playDlHandler.searchSongByName(
             argument,
         );
 
@@ -54,7 +54,7 @@ export class PlayMusicByName extends PlayCommand {
         return await this.listenUserChoices(event, unchosenMusic)
     }
 
-    private async listenUserChoices(event: Message, unchosenMusic: RawSongData[]) {
+    private async listenUserChoices(event: Message, unchosenMusic: RawSong[]) {
         const { output, numberChoices } = this.createSelectChoicesEmbed(unchosenMusic);
 
         // subimos al usuario a la lista para que no pueda usar otros comandos
@@ -123,7 +123,7 @@ export class PlayMusicByName extends PlayCommand {
         }
     }
 
-    private createSelectChoicesEmbed(unchosenMusic: RawSongData[]) {
+    private createSelectChoicesEmbed(unchosenMusic: RawSong[]) {
         // pasa un embed al discord para que elija exactamente cual quiere
         let embedContent = '```js\n';
 
