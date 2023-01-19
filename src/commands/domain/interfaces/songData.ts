@@ -8,8 +8,7 @@ export interface SongData {
 }
 
 export interface NewSongData {
-    newSong?: SongData;
-    songList?: SongData[];
+    newSongs: SongData | SongData[];
     channel: Message['channel'];
     member: GuildMember;
 }
@@ -18,14 +17,12 @@ export interface SongDuration {
     hours: number;
     minutes: number;
     seconds: number;
-    string?: string;
+    string: string;
 }
 
 export interface RawSongData {
-    id?: string;
-    title?: string;
-    duration?: number;
-    durationString?: string;
-    durationData?: SongDuration;
+    songId: string;
+    songName?: string;
+    duration?: string;
     thumbnails?: string;
 }

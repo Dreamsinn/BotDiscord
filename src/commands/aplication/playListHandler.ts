@@ -17,7 +17,7 @@ import { PaginatedMessage } from './utils/paginatedMessage';
 
 export class PlayListHandler {
     private playList: SongData[] = [];
-    private playListDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0 };
+    private playListDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0, string: '' };
     private botConnection: any;
     private player: any;
     private playDlHandler: PlayDlHandler;
@@ -31,21 +31,14 @@ export class PlayListHandler {
         this.displayEmbedBuilder = displayEmbedBuilder;
     }
 
-    public async update({ member, channel, songList, newSong }: NewSongData): Promise<void> {
+    public async update({ member, channel, newSongs }: NewSongData): Promise<void> {
         // si no estas en un canal de voz
-        if (songList) {
-            this.playList.push(...songList);
+        if (newSongs instanceof Array) {
+            this.playList.push(...newSongs);
+            await this.newListToPlayListEmbed(member, newSongs, channel);
         } else {
-            this.playList.push(newSong);
-        }
-
-        // calcula el tiempo total de la cola, lo hace despues del embed porque el tiempo del acancion no entra en el tiempo de espera
-        this.playListDuration = this.calculateListDuration(this.playList);
-
-        if (songList) {
-            await this.newListToPlayListEmbed(member, songList, channel);
-        } else {
-            this.newSongToPlayListEmbed(member, newSong, channel);
+            this.playList.push(newSongs);
+            this.newSongToPlayListEmbed(member, newSongs, channel);
         }
 
         // si display está activo le pasa información al constructor del embed
@@ -73,7 +66,8 @@ export class PlayListHandler {
         songList: SongData[],
         channel: Message['channel'],
     ): Promise<Message> {
-        // TODO: descripcion con lista de todas las canciones, mas adelante, con paginacion de 20s y sin mensaje de Time Out
+        this.playListDuration = this.calculateListDuration(this.playList);
+
         const songListDuration = this.calculateListDuration(songList);
 
         return await new PaginatedMessage({
@@ -97,7 +91,7 @@ export class PlayListHandler {
                     },
                     {
                         name: 'Espera',
-                        value: this.getQeueDuration(this.playListDuration),
+                        value: this.playListDuration.string,
                         inline: true,
                     },
                     {
@@ -123,6 +117,7 @@ export class PlayListHandler {
         newSong: SongData,
         channel: Message['channel'],
     ): Promise<Message> {
+        this.playListDuration = this.calculateListDuration(this.playList);
         const output = new MessageCreator({
             embed: {
                 color: '#0099ff',
@@ -137,7 +132,7 @@ export class PlayListHandler {
                     { name: 'Posicion', value: `${this.playList.length}`, inline: true },
                     {
                         name: 'Espera',
-                        value: this.getQeueDuration(this.playListDuration),
+                        value: this.playListDuration.string,
                         inline: true,
                     },
                     {
@@ -154,7 +149,7 @@ export class PlayListHandler {
     }
 
     private calculateListDuration(songList: SongData[]): SongDuration {
-        const listDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0 };
+        const listDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0, string: '' };
         if (!songList[0]) {
             return listDuration;
         }
@@ -173,6 +168,7 @@ export class PlayListHandler {
                 listDuration.hours += 1;
             }
         });
+        listDuration.string = this.getQeueDuration(listDuration)
         return listDuration;
     }
 

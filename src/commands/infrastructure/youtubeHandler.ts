@@ -16,10 +16,12 @@ export class YoutubeAPIHandler implements YoutubeAPI {
             );
 
             const response: RawSongData[] = searched.data.items.map((songData: any) => {
-                return {
-                    id: songData.id.videoId,
-                    title: songData.snippet.title,
+                const newSong: RawSongData = {
+                    songId: songData.id.videoId,
+                    songName: songData.snippet.title,
                 };
+
+                return newSong;
             });
 
             return {
@@ -46,10 +48,12 @@ export class YoutubeAPIHandler implements YoutubeAPI {
             );
 
             const response: RawSongData[] = searched.data.items.map((songData: any) => {
-                return {
-                    id: songData.snippet.resourceId.videoId,
-                    title: songData.snippet.title,
+                const newSong: RawSongData = {
+                    songId: songData.snippet.resourceId.videoId,
+                    songName: songData.snippet.title,
                 };
+
+                return newSong;
             });
 
             return {
@@ -75,15 +79,16 @@ export class YoutubeAPIHandler implements YoutubeAPI {
                 `https://www.googleapis.com/youtube/v3/videos?key=${process.env.API_KEY_YOUTUBE}&part=${part}&maxResults=${maxResults}&id=${id}`,
             );
 
-            const response: RawSongData = {
-                title: searched.data.items[0].snippet.title,
-                durationString: searched.data.items[0].contentDetails.duration,
+            const newSong: RawSongData = {
+                songId,
+                songName: searched.data.items[0].snippet.title,
+                duration: searched.data.items[0].contentDetails.duration,
                 thumbnails: searched.data.items[0].snippet.thumbnails.medium.url,
             };
 
             return {
                 isError: false,
-                data: response,
+                data: newSong,
             };
         } catch (err) {
             return {

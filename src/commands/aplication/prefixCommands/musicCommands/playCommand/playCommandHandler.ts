@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { PlayCommandSchema } from '../../../../domain/commandSchema/playCommandSchema';
 import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
-import { NewSongData, RawSongData, SongData } from '../../../../domain/interfaces/songData';
+import { NewSongData, SongData } from '../../../../domain/interfaces/songData';
 import { PlayListHandler } from '../../../playListHandler';
 import { PlayMusicByName } from './playMusicByName';
 import { PlayMusicByYouTubeMobileURL } from './playMusicByYouTubeMobileURL';
@@ -40,6 +40,20 @@ export class PlayCommandHandler extends Command {
 
         const argument = event.content.substring(emptySpacePosition);
 
+        const songs = await this.findSongByArgumentType(argument, event)
+
+        if (!songs || (Array.isArray(songs) && !songs.length)) {
+            return;
+        }
+
+        if (songs instanceof Message) {
+            return songs;
+        }
+
+        return this.updatePlayList(event, songs);
+    }
+
+    private async findSongByArgumentType(argument: string, event: Message) {
         const argumentTypeDictionary = {
             mobil: {
                 condition: argument.includes('youtu.be/'),
@@ -48,7 +62,7 @@ export class PlayCommandHandler extends Command {
             youtubePlayListURl: {
                 condition: Boolean(
                     argument.includes('youtube.com/playlist?list=') ||
-                        (argument.includes('youtube.com') && argument.includes('&list=')),
+                    (argument.includes('youtube.com') && argument.includes('&list=')),
                 ),
                 route: this.playPlayListByYoutubeURL,
             },
@@ -64,47 +78,24 @@ export class PlayCommandHandler extends Command {
         };
 
         const argumentType = Object.values(argumentTypeDictionary).find((value) => value.condition);
-        const song = await argumentType?.route.call(event, argument);
 
-        if (!song) {
-            return;
-        }
-
-        if (song instanceof Message) {
-            return song;
-        }
-
-        // unificar tipos de respuesta no pot se que una sigui SongData y laltre RawSongData
-
-        if (Array.isArray(song)) {
-            return this.updatePlayListWithAPlayList(event, song);
-        }
-
-        return this.updateToPlayList(event, song);
+        return await argumentType?.route.call(event, argument);
     }
 
-    private async updateToPlayList(event: Message, songData: RawSongData) {
-        // const songData: RawSongData = await this.mapSongData(event, song);
-        if (songData.title && songData.durationData) {
-            const newSong: NewSongData = {
-                newSong: {
-                    songName: songData.title,
-                    songId: songData.id,
-                    duration: songData.durationData,
-                    thumbnails: songData.thumbnails,
-                },
+    private async updatePlayList(event: Message, songsData: SongData | SongData[]): Promise<void> {
+        console.log({ songsData })
+        if (songsData instanceof Array) {
+            const newSongList: NewSongData = {
+                newSongs: songsData,
                 channel: event.channel,
                 member: event.member,
             };
 
-            return this.playListHandler.update(newSong);
+            return this.playListHandler.update(newSongList);
         }
-        return;
-    }
 
-    private async updatePlayListWithAPlayList(event: Message, playList: SongData[]) {
         const newSongList: NewSongData = {
-            songList: playList,
+            newSongs: songsData,
             channel: event.channel,
             member: event.member,
         };

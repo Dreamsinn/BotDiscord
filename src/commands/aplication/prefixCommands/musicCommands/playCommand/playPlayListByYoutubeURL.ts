@@ -21,7 +21,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, url: string): Promise<RawSongData | SongData[] | void | Message> {
+    async call(event: Message, url: string): Promise<SongData | SongData[] | Message<boolean> | void> {
         if (!url.includes('&list=')) {
             // sino se esta rerpoduciendo un video
             return this.notStartedPlayListUrl(event, url);
@@ -45,7 +45,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
             return this.findSongIdFromYoutubeURL(event, url);
         }
 
-        return this.isPlayListDesired(event, playListId, url);
+        return await this.isPlayListDesired(event, playListId, url);
     }
 
     private async notStartedPlayListUrl(event: Message, url: string) {
@@ -153,8 +153,8 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
     private mapPlayDLPlayListData(event: Message, rawPlayList: RawSongData[]) {
         const playList: SongData[] = rawPlayList.map((song: RawSongData) => {
             const newSong: SongData = {
-                songName: song.title,
-                songId: song.id,
+                songName: song.songName,
+                songId: song.songId,
                 duration: this.parseSongDuration(String(song.duration), true),
                 thumbnails: song.thumbnails,
             };
@@ -163,12 +163,11 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         return playList;
     }
 
-    private async fetchYoutubePlayListData(event: Message, playListId: string, url: string) {
+    private async fetchYoutubePlayListData(event: Message, playListId: string, url: string): Promise<SongData | SongData[] | void> {
         // llama a la API de youtube, si esta tambien falla y esta sonando un video reproduce el video
         const youtubeResponse: APIResponse<RawSongData[]> = await this.youtubeAPIHandler.searchPlaylist(
             playListId,
         );
-
         if (youtubeResponse.isError) {
             console.log(`YoutubeAPI searchPlaylist Error: ${youtubeResponse.errorData}`);
             event.channel.send(`It has not been possible to get playList`);
@@ -180,25 +179,17 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         }
 
         // por cada video llama a la api para obtener la informacion
-        const playlist: SongData[] = await this.mapSongListData(event, youtubeResponse.data);
-
-        return playlist;
+        return this.mapSongListData(event, youtubeResponse.data);
     }
 
     private async mapSongListData(event: Message, rawPlayList: RawSongData[]): Promise<SongData[]> {
-        const playlist: SongData[] = [];
-        for (let i = 0; rawPlayList.length > i; i++) {
-            const songData = await this.mapSongData(event, rawPlayList[i]);
-            if (songData.title && songData.thumbnails) {
-                const newSong: SongData = {
-                    songName: songData.title,
-                    songId: songData.id,
-                    duration: songData.durationData,
-                    thumbnails: songData.thumbnails,
-                };
-                playlist.push(newSong);
+        const playList: SongData[] = [];
+        for (const rawSong of rawPlayList) {
+            const songData = await this.mapSongData(event, rawSong.songId)
+            if (this.isSongData(songData)) {
+                playList.push(songData);
             }
         }
-        return playlist;
+        return playList
     }
 }

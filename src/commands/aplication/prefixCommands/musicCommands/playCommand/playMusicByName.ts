@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { discordEmojis } from '../../../../domain/discordEmojis';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { RawSongData } from '../../../../domain/interfaces/songData';
+import { RawSongData, SongData } from '../../../../domain/interfaces/songData';
 import { PlayDlHandler } from '../../../../infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from '../../../../infrastructure/youtubeHandler';
 import { MessageCreator } from '../../../utils/messageCreator';
@@ -22,8 +22,8 @@ export class PlayMusicByName extends PlayCommand {
         this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, argument: string): Promise<RawSongData | void> {
-        let musicData: RawSongData[];
+    async call(event: Message, argument: string): Promise<SongData | void> {
+        let unchosenMusic: RawSongData[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
 
         const playDlResponse: APIResponse<RawSongData[]> = await this.playDlHandler.searchSongByName(
@@ -41,17 +41,21 @@ export class PlayMusicByName extends PlayCommand {
                 return;
             }
 
-            musicData = youtubeResponse.data;
+            unchosenMusic = youtubeResponse.data;
         } else {
-            musicData = playDlResponse.data;
+            unchosenMusic = playDlResponse.data;
         }
 
-        if (!musicData[0]) {
+        if (!unchosenMusic[0]) {
             event.channel.send('No hay coincidencias');
             return;
         }
 
-        const { output, numberChoices } = this.createSelectChoicesEmbed(musicData);
+        return await this.listenUserChoices(event, unchosenMusic)
+    }
+
+    private async listenUserChoices(event: Message, unchosenMusic: RawSongData[]) {
+        const { output, numberChoices } = this.createSelectChoicesEmbed(unchosenMusic);
 
         // subimos al usuario a la lista para que no pueda usar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id);
@@ -92,14 +96,17 @@ export class PlayMusicByName extends PlayCommand {
 
             const numberSelected = Number(collectedMessage.content) - 1;
 
-            const song: RawSongData = musicData[numberSelected];
-
             // eleminamos opciones
             message.delete();
             // eliminamos la respuesta a la opciones
             collectedMessage.delete();
 
-            return this.mapSongData(event, song);
+            const songId = unchosenMusic[numberSelected].songId;
+
+            if (songId) {
+                return this.mapSongData(event, songId);
+            }
+            return;
         } catch (err) {
             if (err instanceof TypeError) {
                 console.log('Select music colector error: ', err);
@@ -116,12 +123,12 @@ export class PlayMusicByName extends PlayCommand {
         }
     }
 
-    private createSelectChoicesEmbed(songList: RawSongData[]) {
+    private createSelectChoicesEmbed(unchosenMusic: RawSongData[]) {
         // pasa un embed al discord para que elija exactamente cual quiere
         let embedContent = '```js\n';
 
-        songList.forEach((song, i) => {
-            embedContent += `${i + 1} - ${song.title}\n`;
+        unchosenMusic.forEach((song, i) => {
+            embedContent += `${i + 1} - ${song.songName}\n`;
         });
 
         embedContent += `${discordEmojis.x} - Cancel\n` + '```';
@@ -138,6 +145,6 @@ export class PlayMusicByName extends PlayCommand {
         }).call();
 
         // devuelve el embed y el numero de eleciones
-        return { output, numberChoices: songList.length };
+        return { output, numberChoices: unchosenMusic.length };
     }
 }

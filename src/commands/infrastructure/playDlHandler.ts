@@ -9,11 +9,13 @@ export class PlayDlHandler implements PlayDlAPI {
             const searched = await play.search(songString, { source: { youtube: 'video' }, limit: 9 });
 
             const response: RawSongData[] = searched.map((songData) => {
-                return {
-                    id: songData.id,
-                    title: songData.title,
-                    duration: songData.durationInSec,
+                const newSong: RawSongData = {
+                    songId: songData.id,
+                    songName: songData.title,
+                    duration: String(songData.durationInSec),
                 };
+
+                return newSong;
             });
 
             return {
@@ -66,12 +68,14 @@ export class PlayDlHandler implements PlayDlAPI {
                     }
                 }
 
-                return {
-                    title: songData.title,
-                    id: songData.id,
-                    duration: songData.durationInSec,
+                const newSong: RawSongData = {
+                    songName: songData.title,
+                    songId: songData.id,
+                    duration: String(songData.durationInSec),
                     thumbnails,
                 };
+
+                return newSong;
             });
 
             return {
