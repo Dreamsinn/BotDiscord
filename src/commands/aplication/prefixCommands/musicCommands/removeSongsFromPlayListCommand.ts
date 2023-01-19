@@ -22,7 +22,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
             return;
         }
 
-        const playList: Song[] = this.playListHandler.readPlayList();
+        const playList: string[] = this.playListHandler.readPlayList();
 
         if (!playList[0]) {
             return event.reply('There is no playList');
@@ -40,8 +40,8 @@ export class RemoveSongsFromPlayListCommand extends Command {
                     'Write the numbers of the songs you wish to remove split by " , " \nWrite " X " to cancel operation',
             },
             pagination: {
-                event: event,
-                rawDataToPaginate: playList,
+                channel: event.channel,
+                dataToPaginate: playList,
                 dataPerPage: 10,
                 timeOut: 60000,
                 jsFormat: true,
@@ -53,7 +53,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         return this.messageCollector(event, playList);
     }
 
-    private messageCollector(event: Message, playList: Song[]) {
+    private messageCollector(event: Message, playList: string[]) {
         // usuario no pueda ejecutar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
@@ -118,19 +118,19 @@ export class RemoveSongsFromPlayListCommand extends Command {
         return this.removedMusicEmbed(removedMusic, event);
     }
 
-    private async removedMusicEmbed(removedMusic: Song[], event: Message) {
+    private async removedMusicEmbed(removedMusic: string[], event: Message) {
         return await new PaginatedMessage({
             embed: {
                 color: 'ORANGE',
                 title: `${removedMusic.length} songs removeds from Playlist`,
                 author: {
-                    name: `${event.member.user.username}`,
-                    iconURL: `${event.member.user.displayAvatarURL()}`,
+                    name: `${event.member?.user.username}`,
+                    iconURL: `${event.member?.user.displayAvatarURL()}`,
                 },
             },
             pagination: {
-                event: event,
-                rawDataToPaginate: removedMusic,
+                channel: event.channel,
+                dataToPaginate: removedMusic,
                 dataPerPage: 10,
                 timeOut: 30000,
                 reply: false,

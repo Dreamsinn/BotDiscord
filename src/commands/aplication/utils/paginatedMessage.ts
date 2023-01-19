@@ -1,72 +1,57 @@
-import { Message } from 'discord.js';
+import { Message, MessagePayload, ReplyMessageOptions } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
 import {
     ButtonRowList,
     ButtonsStyle,
-    CreateMessageOptions,
+    CreatePaginatedMessage,
     EmbedOptions,
     MessageContent,
     PaginationOptions,
 } from '../../domain/interfaces/createEmbedOptions';
-import { Song } from '../../domain/interfaces/song';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 import { MessageCreator } from './messageCreator';
 
 export class PaginatedMessage {
-    private message: MessageContent;
+    private message: MessageContent | undefined;
     private embed: EmbedOptions;
     private pagination: PaginationOptions;
     private page = 1;
     private paginatedStringData: string[];
 
-    constructor(messageData: CreateMessageOptions) {
+    constructor(messageData: CreatePaginatedMessage) {
         this.message = messageData.message;
         this.embed = messageData.embed;
         this.pagination = messageData.pagination;
     }
 
     public async call(): Promise<Message> {
-        // si la informacion es una lista de canciones, la convierte en un [] de estings
-        if (this.pagination.rawDataToPaginate) {
-            this.pagination.dataToPaginate = this.createPaginationData();
-        }
-
         this.paginatedStringData = this.paginateData();
 
         const output = this.createPageEmbed();
 
-        let paginatedMessage: Message;
-        if (this.pagination.reply) {
-            paginatedMessage = await this.pagination.event.reply(output);
-        } else
-            paginatedMessage = this.pagination.event
-                ? await this.pagination.event.channel.send(output)
-                : await this.pagination.channel.send(output);
 
+        let message: (options: string | MessagePayload | ReplyMessageOptions) => Promise<Message<boolean>>;
+        if (this.pagination.reply === true) {
+            message = this.pagination.event.reply;
+        } else {
+            message = this.pagination.channel.send;
+        }
+
+        // for type isses, if message was sending the message then if(!(maxPage > 1)) would return void
+        // if only 1 page send without buttons
         const maxPage = this.paginatedStringData.length;
         if (!(maxPage > 1)) {
-            return;
+            return await message(output);
         }
+
+        const paginatedMessage = await message(output)
 
         this.addButtonsReactions(paginatedMessage);
 
         this.reactionListener(paginatedMessage, maxPage);
 
         return paginatedMessage;
-    }
-
-    private createPaginationData() {
-        const playListString: string[] = this.pagination.rawDataToPaginate?.map(
-            (e: Song, i: number) => this.mapPagesData(e, i),
-        );
-        return playListString;
-    }
-
-    private mapPagesData(songData: Song, index: number) {
-        const songsString = `${index + 1} - ${songData.songName} '${songData.duration.string}'\n`;
-
-        return songsString;
     }
 
     private paginateData() {
@@ -113,7 +98,7 @@ export class PaginatedMessage {
 
         const output = new MessageCreator({
             message: {
-                content: this.message?.content ?? undefined,
+                content: this.message?.content ?? ' ',
             },
             embed: {
                 color: this.embed.color ?? undefined,
@@ -194,7 +179,7 @@ export class PaginatedMessage {
     }
 
     private reactionHandler(message: Message, collected, maxPage: number) {
-        let pageChanged: boolean;
+        let pageChanged = false;
 
         const collectedId = collected.customId;
         // si se ha tirado hacia atras, y la pagina es superior a 0: disminuimos pagina
@@ -211,7 +196,6 @@ export class PaginatedMessage {
         // si se ha cambiado la pagina edita el embed con la info de la pagina actual
         if (pageChanged) {
             const output = this.createPageEmbed();
-
             return message.edit(output);
         }
         return;

@@ -7,14 +7,18 @@ import {
     User,
 } from 'discord.js';
 import { MessageButtonStyles } from 'discord.js/typings/enums';
-import { Song } from './song';
 
 // hay mas opciones disponibles en MessageOptions
 export interface CreateMessageOptions {
     message?: MessageContent;
     embed?: EmbedOptions;
     buttons?: ButtonRowList;
-    pagination?: PaginationOptions;
+
+}
+
+export interface CreatePaginatedMessage extends CreateMessageOptions {
+    embed: EmbedOptions;
+    pagination: PaginationOptions;
 }
 
 export interface MessageContent {
@@ -59,14 +63,20 @@ export enum ButtonsStyle {
     LINK = MessageButtonStyles.LINK,
 }
 
-export interface PaginationOptions {
-    event?: Message;
-    channel?: Message['channel'];
-    rawDataToPaginate?: Song[];
-    dataToPaginate?: string[];
+export type PaginationOptions = {
+    reply: true;
+    event: Message;
+    dataToPaginate: string[];
     dataPerPage: number;
     timeOut: number;
     jsFormat: boolean;
-    reply: boolean;
     author?: User;
-}
+} | {
+    reply: false;
+    channel: Message['channel'];
+    dataToPaginate: string[];
+    dataPerPage: number;
+    timeOut: number;
+    jsFormat: boolean;
+    author?: User;
+} 

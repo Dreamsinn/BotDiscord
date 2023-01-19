@@ -70,6 +70,8 @@ export class PlayListHandler {
 
         const songListDuration = this.calculateListDuration(songList);
 
+        const paginationData = this.songArrayToPaginationData(songList)
+
         return await new PaginatedMessage({
             embed: {
                 color: '#0099ff',
@@ -103,13 +105,26 @@ export class PlayListHandler {
             },
             pagination: {
                 channel: channel,
-                rawDataToPaginate: songList,
+                dataToPaginate: paginationData,
                 dataPerPage: 10,
                 timeOut: 60000,
                 jsFormat: true,
                 reply: false,
             },
         }).call();
+    }
+
+    private songArrayToPaginationData(songList: Song[]): string[] {
+        const playListString: string[] = songList.map(
+            (song: Song, i: number) => this.mapPagesData(song, i),
+        );
+        return playListString;
+    }
+
+    private mapPagesData(songData: Song, index: number) {
+        const songsString = `${index + 1} - ${songData.songName} '${songData.duration.string}'\n`;
+
+        return songsString;
     }
 
     private newSongToPlayListEmbed(
@@ -339,8 +354,8 @@ export class PlayListHandler {
         return;
     }
 
-    public readPlayList() {
-        const playList = [...this.playList];
+    public readPlayList(): string[] {
+        const playList = this.songArrayToPaginationData([...this.playList]);
         return playList;
     }
 
@@ -359,7 +374,7 @@ export class PlayListHandler {
         return false;
     }
 
-    public removeSongsFromPlayList(songsIndex: number[]): Song[] {
+    public removeSongsFromPlayList(songsIndex: number[]): string[] {
         // si esta sonando y se quiere eliminar la primera cancion
         if (
             songsIndex.find((n) => n === 1) &&
@@ -378,7 +393,8 @@ export class PlayListHandler {
             // eliminamos la cancion que esta sonando via Skip
             this.skipMusic();
 
-            return removedMusic;
+            const removedMusicString = this.songArrayToPaginationData(removedMusic);
+            return removedMusicString;
         }
 
         // hace una array con las canciones selecionas
@@ -390,7 +406,8 @@ export class PlayListHandler {
         if (this.isDisplay.active) {
             this.sendPlayListDataToDisplay(false);
         }
-        return removedMusic;
+        const removedMusicString = this.songArrayToPaginationData(removedMusic);
+        return removedMusicString;
     }
 
     public shufflePlayList(): boolean {
