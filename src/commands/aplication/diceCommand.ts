@@ -2,6 +2,7 @@ import { Message, MessageOptions } from 'discord.js';
 import { DiceCommandSchema } from '../domain/commandSchema/diceCommandSchema';
 import { Command } from '../domain/interfaces/Command';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
+import { rollSymbol, SuccessesSymbol } from '../domain/interfaces/successesSymbol';
 import { MessageCreator } from './utils/messageCreator';
 
 export class DiceCommand extends Command {
@@ -60,7 +61,7 @@ export class DiceCommand extends Command {
         }
 
         if (roll.includes('<') || roll.includes('>')) {
-            const symbol = this.findSuccessSymbol(roll);
+            const symbol: SuccessesSymbol = this.findSuccessSymbol(roll);
             // antes y despues del simbolo sea u numero
             if (Number(roll.substring(D_position + 1, symbol.symbolPosition))) {
                 // si tiene =, despues de <= sea un nuemero
@@ -83,26 +84,41 @@ export class DiceCommand extends Command {
         return true;
     }
 
-    private findSuccessSymbol(messageContent: string) {
-        let symbol: string;
-        let symbolPosition: number;
-        let plusSymbol = false;
-        if (messageContent.includes('<')) {
-            symbol = '<';
-            symbolPosition = messageContent.search('<');
-        } else {
-            symbol = '>';
-            symbolPosition = messageContent.search('>');
-        }
-        if (messageContent.includes('=')) {
-            plusSymbol = true;
-        }
+    private findSuccessSymbol(messageContent: string): SuccessesSymbol {
+        const successSymbolDictionary: { symbol: rollSymbol, condition: boolean, plusSymbol: boolean }[] = [
+            {
+                symbol: '<=',
+                condition: messageContent.includes('<') && messageContent.includes('='),
+                plusSymbol: true
+            },
+            {
+                symbol: '<',
+                condition: messageContent.includes('<'),
+                plusSymbol: false
+            },
+            {
+                symbol: '>=',
+                condition: messageContent.includes('>') && messageContent.includes('='),
+                plusSymbol: true
+            },
+            {
+                symbol: '>',
+                condition: messageContent.includes('>'),
+                plusSymbol: false
+            }
+        ]
 
-        return { symbol, symbolPosition, plusSymbol };
+        const usedSymbol = successSymbolDictionary.find((successSymbol) => successSymbol.condition)
+
+        return {
+            symbol: usedSymbol!.symbol,
+            symbolPosition: messageContent.search(usedSymbol!.symbol),
+            plusSymbol: usedSymbol!.plusSymbol
+        }
     }
 
     private rollSuccesses(messageContent: string): MessageOptions {
-        const symbolData = this.findSuccessSymbol(messageContent);
+        const symbolData: SuccessesSymbol = this.findSuccessSymbol(messageContent);
 
         const roll = messageContent.substring(0, symbolData.symbolPosition);
         const { diceNumber, diceFaces } = this.numberOfDicesAndDicesFaces(roll);
@@ -137,7 +153,7 @@ export class DiceCommand extends Command {
         diceNumber: number,
         diceFaces: number,
         successesCondition: number,
-        symbolData: { symbol: string; symbolPosition: number; plusSymbol: boolean },
+        symbolData: SuccessesSymbol,
     ) {
         let diceString = '';
         if (diceNumber !== 1) {
@@ -147,9 +163,6 @@ export class DiceCommand extends Command {
 
         diceString += '{' + diceResult.rollString + '}';
         diceString += ' ' + symbolData.symbol;
-        if (symbolData.plusSymbol) {
-            diceString += '=';
-        }
         diceString += ` ${successesCondition}`;
 
         const numberSuccesses = this.findNumberOfSuccesses(
@@ -169,49 +182,21 @@ export class DiceCommand extends Command {
     }
 
     private findNumberOfSuccesses(
-        symbolData: { symbol: string; symbolPosition: number; plusSymbol: boolean },
+        symbolData: SuccessesSymbol,
         rollString: string,
         successesCondition: number,
-    ) {
+    ): number {
         const diceResultNumbers = rollString.split('+');
-
-        const successes = [];
-
-        if (symbolData.symbol === '>' && symbolData.plusSymbol) {
-            diceResultNumbers.forEach((result: string) => {
-                if (Number(result) >= successesCondition) {
-                    successes.push(true);
-                }
-                return;
-            });
+        const successesDictionary: { [key in rollSymbol]: (n: string) => boolean } = {
+            '>=': (result: string): boolean => (Number(result) >= successesCondition),
+            '>': (result: string): boolean => (Number(result) > successesCondition),
+            '<=': (result: string): boolean => (Number(result) <= successesCondition),
+            '<': (result: string): boolean => (Number(result) < successesCondition)
         }
 
-        if (symbolData.symbol === '>' && !symbolData.plusSymbol) {
-            diceResultNumbers.forEach((result: string) => {
-                if (Number(result) > successesCondition) {
-                    successes.push(true);
-                }
-                return;
-            });
-        }
-
-        if (symbolData.symbol === '<' && symbolData.plusSymbol) {
-            diceResultNumbers.forEach((result: string) => {
-                if (Number(result) <= successesCondition) {
-                    successes.push(true);
-                }
-                return;
-            });
-        }
-
-        if (symbolData.symbol === '<' && !symbolData.plusSymbol) {
-            diceResultNumbers.forEach((result: string) => {
-                if (Number(result) < successesCondition) {
-                    successes.push(true);
-                }
-                return;
-            });
-        }
+        const successes: string[] = diceResultNumbers.filter((result: string) => {
+            return successesDictionary[symbolData.symbol](result)
+        });
 
         return successes.length;
     }

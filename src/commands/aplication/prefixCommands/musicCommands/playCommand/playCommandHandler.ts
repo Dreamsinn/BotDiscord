@@ -83,7 +83,6 @@ export class PlayCommandHandler extends Command {
     }
 
     private async updatePlayList(event: Message, songsData: SongData | SongData[]): Promise<void> {
-        console.log({ songsData })
         if (songsData instanceof Array) {
             const newSongList: NewSongData = {
                 newSongs: songsData,
