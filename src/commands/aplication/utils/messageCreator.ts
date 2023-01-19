@@ -8,9 +8,9 @@ import {
 import { MessageButtonsCreator } from './messageButtonsCreator';
 
 export class MessageCreator {
-    private message: MessageContent;
-    private embed: EmbedOptions;
-    private buttons: ButtonRowList;
+    private message: MessageContent | undefined;
+    private embed: EmbedOptions | undefined;
+    private buttons: ButtonRowList | undefined;
 
     constructor(messageData: CreateMessageOptions) {
         this.message = messageData.message;
@@ -38,7 +38,7 @@ export class MessageCreator {
         }
 
         const output: MessageOptions = {
-            components: this.buttons ? new MessageButtonsCreator(this.buttons).call() : null,
+            components: this.buttons ? new MessageButtonsCreator(this.buttons).call() : [],
             content: this.message ? this.message.content : null,
             embeds: [embed] ?? null,
         };
