@@ -1,17 +1,3 @@
-- Un cliente distinto por servidor (intancia / base de datos?)
-
-    en handler
-    private playListIntanceServers = [];
-
-
-    if (route.category === 'music') {
-                    if (!this.playListIntanceServers.find((data: any) => data.id === event.guildId)) {
-                        this.playListIntanceServers.push({id: event.guildId, playList: new PlayListHandler(bot)})
-                    }
-                    const data = this.playListIntanceServers.find((data: any) => data.id === event.guildId)
-                    return route.command.call(event);
-                }
-
 - delet emojis:  private async deleteUserReaction(displayMessage: Message, user: User) {
                         const userReactions = displayMessage.reactions.cache.filter((reaction) =>
                             reaction.users.cache.has(user.id),

@@ -51,7 +51,7 @@ export class PlayMusicByName extends PlayCommand {
             return;
         }
 
-        return await this.listenUserChoices(event, unchosenMusic)
+        return await this.listenUserChoices(event, unchosenMusic);
     }
 
     private async listenUserChoices(event: Message, unchosenMusic: RawSong[]) {
@@ -136,8 +136,9 @@ export class PlayMusicByName extends PlayCommand {
         const output = new MessageCreator({
             embed: {
                 color: '#40b3ff',
+                description: 'Escriba el **número de la canción** que quiera seleccionar',
                 field: {
-                    name: 'Escriba el número de la canción que quiera seleccionar',
+                    name: ' ',
                     value: embedContent,
                     inline: false,
                 },

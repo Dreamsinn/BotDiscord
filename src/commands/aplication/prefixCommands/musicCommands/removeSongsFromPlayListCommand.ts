@@ -2,7 +2,6 @@ import { Message } from 'discord.js';
 import { RemoveSongsFromPlayListCommandSchema } from '../../../domain/commandSchema/removeSongsFromPlayListCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { Song } from '../../../domain/interfaces/song';
 import { PlayListHandler } from '../../playListHandler';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
@@ -36,8 +35,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
                     name: `${event.member.user.username}`,
                     iconURL: `${event.member.user.displayAvatarURL()}`,
                 },
-                description:
-                    'Write the numbers of the songs you wish to remove split by " , " \nWrite " X " to cancel operation',
+                description: `Write the **numbers** of the songs you wish to remove split by " , " \nWrite **X** to cancel operation`,
             },
             pagination: {
                 channel: event.channel,

@@ -119,8 +119,9 @@ export class HelpCommand extends Command {
                 field: {
                     name: '\u200b',
                     value:
-                        'Escriba: \n- El número del tipo de comando que desee consultar.\n' +
-                        '- X para cancelar el comando. __Mientras help este activo no podra usar otro comando.__',
+                        'Escriba:\n' +
+                        '- El **número** del tipo de comando que desee consultar.\n' +
+                        `- **X** para cancelar el comando.\n __Mientras help este activo no podra usar otro comando.__`,
                     inline: false,
                 },
             },
@@ -273,26 +274,31 @@ export class HelpCommand extends Command {
     }
 
     private createSubTypeCommandsEmbed(commandCategory: string) {
-        const commandCategoryDictionary: { [key in CommandsCategoryEnum]: { title: HelpEmbedsTitlesEnum, commandArray: HelpCommandData[] } } = {
+        const commandCategoryDictionary: {
+            [key in CommandsCategoryEnum]: {
+                title: HelpEmbedsTitlesEnum;
+                commandArray: HelpCommandData[];
+            };
+        } = {
             [CommandsCategoryEnum.PREFIX]: {
                 title: HelpEmbedsTitlesEnum.PREFIX,
-                commandArray: this.commandList.prefix
+                commandArray: this.commandList.prefix,
             },
             [CommandsCategoryEnum.MUSIC]: {
                 title: HelpEmbedsTitlesEnum.MUSIC,
-                commandArray: this.commandList.music
+                commandArray: this.commandList.music,
             },
             [CommandsCategoryEnum.NONPREFIX]: {
                 title: HelpEmbedsTitlesEnum.NONPREFIX,
-                commandArray: this.commandList.nonPrefix
+                commandArray: this.commandList.nonPrefix,
             },
-        }
+        };
 
         const embedFileds: EmbedFieldData[] = [];
-        let index = 0
+        let index = 0;
 
         if (commandCategory === CommandsCategoryEnum.PREFIX) {
-            index = + 1
+            index = +1;
             embedFileds.push({
                 name: '\u200b',
                 value: `**${index} - ${HelpEmbedsTitlesEnum.MUSIC}**`,
@@ -300,10 +306,12 @@ export class HelpCommand extends Command {
             });
         }
 
-        commandCategoryDictionary[commandCategory].commandArray.forEach((commandData: HelpCommandData) => {
-            index += 1;
-            embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
-        })
+        commandCategoryDictionary[commandCategory].commandArray.forEach(
+            (commandData: HelpCommandData) => {
+                index += 1;
+                embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
+            },
+        );
 
         const output = new MessageCreator({
             embed: {
@@ -314,9 +322,9 @@ export class HelpCommand extends Command {
                     name: '\u200b',
                     value:
                         'Escriba:\n' +
-                        '- El número del tipo de comando que desee consultar.\n' +
-                        '- b o back para ir hacia atras.\n' +
-                        '- X para cancelar el comando. __Mientras help este activo no podra usar otro comando.__',
+                        '- El **número** del tipo de comando que desee consultar.\n' +
+                        '- **b** o **back** para ir hacia atras.\n' +
+                        `- **X** para cancelar el comando.\n __Mientras help este activo no podra usar otro comando.__`,
                     inline: false,
                 },
             },
@@ -372,9 +380,9 @@ export class HelpCommand extends Command {
                 name: '\u200b',
                 value:
                     'Escriba:\n' +
-                    '- El número del tipo de comando que desee consultar.\n' +
-                    '- b o back para ir hacia atras.\n' +
-                    '- X para cancelar el comando. __Mientras help este activo no podra usar otro comando.__',
+                    '- El **número** del tipo de comando que desee consultar.\n' +
+                    '- **b** o **back** para ir hacia atras.\n' +
+                    `- **X** para cancelar el comando.\n __Mientras help este activo no podra usar otro comando.__`,
                 inline: false,
             },
         };

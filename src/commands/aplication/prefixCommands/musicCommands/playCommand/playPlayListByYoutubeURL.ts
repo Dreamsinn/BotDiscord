@@ -80,7 +80,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
             embed: {
                 color: '#40b3ff',
                 title: 'Is playlist desired?',
-                description: 'Y - Play playlisy \nN - Play song \nX - Cancel',
+                description: 'Write: \n**Y** - Play playlisy \n**N** - Play song \n**X** - Cancel',
             },
         }).call();
 
