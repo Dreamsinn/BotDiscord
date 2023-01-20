@@ -12,9 +12,9 @@ export class DisplayEmbedBuilder {
 
     public async call(
         playListStatus: PlayListStatus,
-        event: Message,
+        event: Message | undefined,
         newEmbed: boolean,
-    ): Promise<DisplayMessage> {
+    ): Promise<DisplayMessage | void> {
         // si newEmbed crea un mensaje con toda la informacion, sino edita el mensaje ya creado
         this.playListStatus = playListStatus;
 
@@ -27,19 +27,19 @@ export class DisplayEmbedBuilder {
         if (newEmbed) {
             const display: DisplayMessage = {
                 thread: await this.selectChannel(event),
-                channelEventWasThread: event.channel.isThread() ? true : false,
+                channelEventWasThread: event?.channel.isThread() ? true : false,
                 message: (this.displayMessage = await thread.send(output)),
             };
             return display;
         }
 
         if (this.displayMessage) {
-            await this.displayMessage.edit(output).catch(() => {
-                console.log('Error editing display');
-            });
+            await this.displayMessage
+                .edit({ embeds: output.embeds, components: this.displayMessage.components })
+                .catch(() => {
+                    console.log('Error editing display');
+                });
         }
-
-        return;
     }
 
     private async selectChannel(event): Promise<ThreadChannel> {
@@ -49,12 +49,13 @@ export class DisplayEmbedBuilder {
         }
 
         // buscamos si el chat tiene un hilo con el nombre de displayer, y si existe se fevuelve
-        let threadChannel: ThreadChannel;
-        event.channel.threads.cache.find((thread: ThreadChannel) => {
-            if (thread.name === 'Displayer') {
-                threadChannel = thread;
-            }
-        });
+        const threadChannel: ThreadChannel = event.channel.threads.cache.find(
+            (thread: ThreadChannel) => {
+                if (thread.name === 'Displayer') {
+                    return thread;
+                }
+            },
+        );
         if (threadChannel) {
             return threadChannel;
         }
@@ -93,37 +94,50 @@ export class DisplayEmbedBuilder {
         return embed;
     }
 
-    private mapTitleAndURlData(playinSong: Song, playerStatus: string, conectionStatus: string) {
-        let title: string;
-        let URL: string | null;
-        if (!playerStatus || !conectionStatus) {
-            title = `${discordEmojis.problem} La función de música aún no está activada, añada alguna cancion`;
-            URL = null;
-            return { title, URL };
-        }
-        if (conectionStatus === 'destroyed') {
-            title =
-                `${discordEmojis.problem} Es necesario reconectar el bot, usa los comandos:` +
-                ` ${process.env.PREFIX}p o ${process.env.PREFIX}join`;
-            URL = null;
-            return { title, URL };
-        }
-        if (playerStatus === 'idle') {
-            title = '**Ready to play!**';
-            URL = null;
-            return { title, URL };
-        }
-        if (playerStatus === 'paused') {
-            title = `${discordEmojis.musicEmojis.pause} Pausado\n` + `${playinSong.songName}`;
-            URL = `https://www.youtube.com/watch?v=${playinSong.songId}`;
-            return { title, URL };
-        }
+    private mapTitleAndURlData(
+        playinSong: Song,
+        playerStatus: string,
+        conectionStatus: string,
+    ): { title: string; URL: string | undefined } {
+        const titleAndURLOptions: { condition: boolean; title: string; URL: string | undefined }[] = [
+            {
+                condition: !playerStatus || !conectionStatus,
+                title: `${discordEmojis.problem} La función de música aún no está activada, añada alguna cancion`,
+                URL: undefined,
+            },
+            {
+                condition: conectionStatus === 'destroyed',
+                title:
+                    `${discordEmojis.problem} Es necesario reconectar el bot, usa los comandos:` +
+                    ` ${process.env.PREFIX}p o ${process.env.PREFIX}join`,
+                URL: undefined,
+            },
+            {
+                condition: playerStatus === 'idle',
+                title: '**Ready to play!**',
+                URL: undefined,
+            },
+            {
+                condition: playerStatus === 'paused',
+                title: `${discordEmojis.musicEmojis.pause} Pausado\n` + `${playinSong?.songName}`,
+                URL: `https://www.youtube.com/watch?v=${playinSong?.songId}`,
+            },
+            {
+                condition: true,
+                title:
+                    `${discordEmojis.musicEmojis.playing} Playing ${discordEmojis.musicEmojis.playing}\n` +
+                    `${playinSong?.songName}`,
+                URL: `https://www.youtube.com/watch?v=${playinSong?.songId}`,
+            },
+        ];
+        const titleAndUrl = titleAndURLOptions.find(
+            (option: { condition: boolean; title: string; URL: string | undefined }) => option.condition,
+        );
 
-        title =
-            `${discordEmojis.musicEmojis.playing} Playing ${discordEmojis.musicEmojis.playing}\n` +
-            `${playinSong.songName}`;
-        URL = `https://www.youtube.com/watch?v=${playinSong.songId}`;
-        return { title, URL };
+        return {
+            title: titleAndUrl!.title,
+            URL: titleAndUrl.URL,
+        };
     }
 
     private mapFieldData(playListStatus: PlayListStatus): EmbedFieldData[] {
@@ -199,12 +213,11 @@ export class DisplayEmbedBuilder {
             !playerStatus ||
             !conectionStatus ||
             conectionStatus === 'destroyed' ||
-            !playinSong ||
             playerStatus === 'idle'
         ) {
             return;
         }
-        if (playinSong.thumbnails) {
+        if (playinSong?.thumbnails) {
             return playinSong.thumbnails;
         }
         return;

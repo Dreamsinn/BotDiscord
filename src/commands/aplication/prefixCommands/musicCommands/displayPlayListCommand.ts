@@ -51,7 +51,7 @@ export class DisplayPlayListCommand extends Command {
         // pasa estado activo playListHandler y le devuelve el mensaje
         const display = await this.playListHandler.activateDispaly(event);
 
-        if (display.message) {
+        if (display) {
             return this.reactionListener(event, display);
         }
         return;
