@@ -1,7 +1,7 @@
 import { MessageEmbed, MessageOptions } from 'discord.js';
 import {
     ButtonRowList,
-    CreateMessageOptions,
+    CreateMessage,
     EmbedOptions,
     MessageContent,
 } from '../../domain/interfaces/createEmbedOptions';
@@ -12,7 +12,7 @@ export class MessageCreator {
     private embed: EmbedOptions | undefined;
     private buttons: ButtonRowList | undefined;
 
-    constructor(messageData: CreateMessageOptions) {
+    constructor(messageData: CreateMessage) {
         this.message = messageData.message;
         this.embed = messageData.embed;
         this.buttons = messageData.buttons;

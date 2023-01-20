@@ -9,14 +9,13 @@ import {
 import { MessageButtonStyles } from 'discord.js/typings/enums';
 
 // hay mas opciones disponibles en MessageOptions
-export interface CreateMessageOptions {
+export interface CreateMessage {
     message?: MessageContent;
     embed?: EmbedOptions;
     buttons?: ButtonRowList;
-
 }
 
-export interface CreatePaginatedMessage extends CreateMessageOptions {
+export interface CreatePaginatedMessage extends CreateMessage {
     embed: EmbedOptions;
     pagination: PaginationOptions;
 }
@@ -63,20 +62,22 @@ export enum ButtonsStyle {
     LINK = MessageButtonStyles.LINK,
 }
 
-export type PaginationOptions = {
-    reply: true;
-    event: Message;
-    dataToPaginate: string[];
-    dataPerPage: number;
-    timeOut: number;
-    jsFormat: boolean;
-    author?: User;
-} | {
-    reply: false;
-    channel: Message['channel'];
-    dataToPaginate: string[];
-    dataPerPage: number;
-    timeOut: number;
-    jsFormat: boolean;
-    author?: User;
-} 
+export type PaginationOptions =
+    | {
+          reply: true;
+          event: Message;
+          dataToPaginate: string[];
+          dataPerPage: number;
+          timeOut: number;
+          jsFormat: boolean;
+          author?: User;
+      }
+    | {
+          reply: false;
+          channel: Message['channel'];
+          dataToPaginate: string[];
+          dataPerPage: number;
+          timeOut: number;
+          jsFormat: boolean;
+          author?: User;
+      };
