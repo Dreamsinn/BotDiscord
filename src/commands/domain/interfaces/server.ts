@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 
-export interface ServerList {
+export interface Server {
     serverId: string;
     instance: CommandsHandler;
 }
