@@ -29,6 +29,7 @@ export class DisplayPlayListCommand extends Command {
         }
 
         if (event.content.includes('kill')) {
+            console.log({ argument: 'kill' });
             return this.collector.stop();
         }
 
@@ -43,7 +44,7 @@ export class DisplayPlayListCommand extends Command {
                     }, 10000);
                 })
                 .catch((err) => {
-                    console.log(err);
+                    console.log('Is Display Active message error: ', err);
                 });
             return;
         }
@@ -72,9 +73,7 @@ export class DisplayPlayListCommand extends Command {
             collected.deferUpdate();
 
             if (this.displaySchema.adminOnly) {
-                const interrupt = this.checkDevRole.call(event);
-
-                if (!interrupt) {
+                if (!this.checkDevRole.call(event)) {
                     return;
                 }
             }
@@ -150,7 +149,9 @@ export class DisplayPlayListCommand extends Command {
             ],
         ];
 
-        displayMessage.edit({ components: new MessageButtonsCreator(buttons).call() });
+        displayMessage.edit({ components: new MessageButtonsCreator(buttons).call() }).catch((err) => {
+            console.log('Error adding buttons to display: ', err);
+        });
 
         return;
     }
@@ -205,7 +206,7 @@ export class DisplayPlayListCommand extends Command {
                 setTimeout(() => {
                     if (msg) {
                         msg.delete().catch((err) => {
-                            console.log("Display's README error:", err);
+                            console.log("Delete display's README error:", err);
                         });
                     }
                     this.showingReadme = false;
@@ -213,7 +214,7 @@ export class DisplayPlayListCommand extends Command {
             })
             .catch((err) => {
                 this.showingReadme = false;
-                console.log(err);
+                console.log("Display's README error:", err);
             });
         return;
     }

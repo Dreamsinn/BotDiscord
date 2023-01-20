@@ -50,7 +50,7 @@ export abstract class PlayCommand {
     }
 
     protected isSongData(argument: Song | void): argument is Song {
-        return (argument as Song).duration.string !== undefined
+        return (argument as Song).duration.string !== undefined;
     }
 
     protected async mapSongData(event: Message, songId: string): Promise<Song | void> {
@@ -62,8 +62,8 @@ export abstract class PlayCommand {
                 songId,
                 songName: playDlResponse.data.title,
                 duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
-                thumbnails: playDlResponse.data.thumbnails[3].url
-            }
+                thumbnails: playDlResponse.data.thumbnails[3].url,
+            };
             return song;
         }
         console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
@@ -77,10 +77,9 @@ export abstract class PlayCommand {
                 songId,
                 songName: youtubeResponse.data.songName,
                 duration: this.parseSongDuration(youtubeResponse.data.duration, false),
-                thumbnails: youtubeResponse.data.thumbnails
-            }
+                thumbnails: youtubeResponse.data.thumbnails,
+            };
             return song;
-
         }
 
         event.channel.send(`It has not been possible to get song's information`);

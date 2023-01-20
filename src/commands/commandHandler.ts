@@ -18,12 +18,10 @@ export class CommandHandler {
     public async isCommand(event: Message) {
         // si un comando esta a la espera de una respuesta por parte de un usario,
         // ese usuario no podra interactuar con el bot
-        if (this.usersUsingACommand.searchIdInUserList(event.author.id)) return;
-        console.log(event.guild.name);
+        if (this.usersUsingACommand.searchIdInUserList(event.author.id, event)) return;
 
         // si el comando tiene prefijo, para comandos con prefijo
         if (event.content.startsWith(`${process.env.PREFIX}`)) {
-            console.log('prefix founded');
             return this.isPrefixCommand(event);
         }
 
@@ -31,7 +29,8 @@ export class CommandHandler {
         if (event.content.includes(`${DiceCommandSchema.aliases[0]}`)) {
             // si los dados estan activos
             if (this.diceCommand.isDiceCommandActive) {
-                console.log('contains D');
+                console.log('Guild: ', event.guild?.name);
+                console.log('Command: Dice command');
                 return await this.diceCommand.call(event);
             }
             return;
@@ -43,13 +42,13 @@ export class CommandHandler {
             for (const key of Object.keys(replyCommandOptions)) {
                 console.log(event.content.includes(`${key}`), key);
                 if (event.content.includes(`${key}`)) {
+                    console.log('Guild: ', event.guild?.name);
+                    console.log('Command: Reply command');
                     return await this.replyCommand.call(event);
                 }
             }
             return;
         }
-
-        console.log('it is not a command');
         return;
     }
 
@@ -63,9 +62,12 @@ export class CommandHandler {
             // si no tiene espacio, todo es el command
             command = event.content.substring(1);
         }
-        console.log(command);
+
         for (const route of this.routes.routeList) {
             if (route.alias.find((alias) => alias === command.toLowerCase())) {
+                console.log('Guild: ', event.guild?.name);
+                console.log('Command: ', route.name);
+
                 if (route.command instanceof DiceCommandToggler) {
                     return route.command.call(event, this.diceCommand);
                 }
@@ -78,6 +80,5 @@ export class CommandHandler {
                 return route.command.call(event);
             }
         }
-        console.log('its not a command');
     }
 }

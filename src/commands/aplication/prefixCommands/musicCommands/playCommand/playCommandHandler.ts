@@ -39,8 +39,9 @@ export class PlayCommandHandler extends Command {
         }
 
         const argument = event.content.substring(emptySpacePosition);
+        console.log({ argument });
 
-        const songs = await this.findSongByArgumentType(argument, event)
+        const songs = await this.findSongByArgumentType(argument, event);
 
         if (!songs || (Array.isArray(songs) && !songs.length)) {
             return;
@@ -62,7 +63,7 @@ export class PlayCommandHandler extends Command {
             youtubePlayListURl: {
                 condition: Boolean(
                     argument.includes('youtube.com/playlist?list=') ||
-                    (argument.includes('youtube.com') && argument.includes('&list=')),
+                        (argument.includes('youtube.com') && argument.includes('&list=')),
                 ),
                 route: this.playPlayListByYoutubeURL,
             },

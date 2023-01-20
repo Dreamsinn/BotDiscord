@@ -22,7 +22,7 @@ export abstract class Command {
         }
 
         //comprobar coolDown
-        if (this.coolDown.call(schema.coolDown)) {
+        if (this.coolDown.call(schema.coolDown, event)) {
             interrupt = true;
         }
 

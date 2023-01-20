@@ -235,7 +235,7 @@ export class PlayListHandler {
             // pasa recurso al player
             this.player.play(resources);
         } catch (err) {
-            console.log('Play ERROR', err);
+            console.log('Play ERROR: ', err);
             this.playList.shift();
             if (this.playList[0]) {
                 return this.playMusic();

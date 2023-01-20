@@ -69,8 +69,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         }
 
         // si Play-dl falla
-        event.channel.send('Play-dl failed to fectch PlayList, it will be tried with Youtube API');
-        console.log('PlayDl getSognsInfoFromPlayList Error:', playDlResponse.errorData);
+        console.log('PlayDl getSognsInfoFromPlayList Error');
         return this.fetchYoutubePlayListData(event, playListId, url);
     }
 
@@ -108,7 +107,6 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
 
             // Si se responde una X se borra el mensaje
             if (['x', 'X'].includes(collectedMessage.content)) {
-                console.log('Search cancelled');
                 event.reply('Search cancelled');
 
                 message.delete();
@@ -130,19 +128,15 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
                     return this.mapPlayDLPlayListData(event, playDlResponse.data);
                 }
 
-                console.log('playDl getSognsInfoFromPlayList Error: ', playDlResponse.errorData);
-                event.channel.send(
-                    'Play-dl failed to fectch PlayList, it will be tried with Youtube API',
-                );
+                console.log('playDl getSognsInfoFromPlayList Error');
                 return this.fetchYoutubePlayListData(event, playListId, url);
             }
         } catch (err) {
             if (err instanceof TypeError) {
-                console.log(err);
-                event.channel.send(`Error: ${err.message}`);
+                console.log('Is Playlist Desired colector error: ', err);
+                event.channel.send(`Ha habido un error, por favor vuelvelo a intentar`);
             } else {
                 // sino contesta
-                console.log(`No answer`);
                 event.reply('Time out');
             }
             this.usersUsingACommand.removeUserList(event.author.id);

@@ -36,8 +36,8 @@ export class DisplayEmbedBuilder {
         if (this.displayMessage) {
             await this.displayMessage
                 .edit({ embeds: output.embeds, components: this.displayMessage.components })
-                .catch(() => {
-                    console.log('Error editing display');
+                .catch((err) => {
+                    console.log('Error editing display', err);
                 });
         }
     }

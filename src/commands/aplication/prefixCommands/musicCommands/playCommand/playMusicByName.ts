@@ -31,7 +31,7 @@ export class PlayMusicByName extends PlayCommand {
         );
 
         if (playDlResponse.isError) {
-            console.log(`Play-dl Search by name Error: ${playDlResponse.errorData}`);
+            console.log('Play-dl Search by name Error: ', playDlResponse.errorData);
 
             const youtubeResponse = await this.youtubeAPIHandler.searchSongByName(argument);
 
@@ -87,7 +87,6 @@ export class PlayMusicByName extends PlayCommand {
 
             // Si se responde una X se borra el mensaje
             if (collectedMessage.content === 'x') {
-                console.log('Search cancelled');
                 event.reply('Search cancelled');
                 message.delete();
                 collectedMessage.delete();
@@ -109,11 +108,10 @@ export class PlayMusicByName extends PlayCommand {
             return;
         } catch (err) {
             if (err instanceof TypeError) {
-                console.log('Select music colector error: ', err);
-                event.channel.send(`Error: ${err.message}`);
+                console.log('Select music by name colector error: ', err);
+                event.channel.send('Ha habido un error, por favor vuelvelo a intentar');
             } else {
                 // sino contesta
-                console.log(`No answer`);
                 event.reply('Time out');
             }
 

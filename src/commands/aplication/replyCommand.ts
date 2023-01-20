@@ -29,8 +29,6 @@ export class ReplyCommand extends Command {
             if (event.content.startsWith(alias) || event.content.includes(` ${alias} `)) {
                 // mirar si cumple la condicion de coolDown
 
-                console.log('alias founded');
-
                 const output = new MessageCreator({
                     message: {
                         content: `${event.author.username} a dicho: ${event.content}!`,
@@ -41,9 +39,6 @@ export class ReplyCommand extends Command {
                         description: `${this.mapAliases(alias)}`,
                     },
                 }).call();
-                console.log('ReplyCommand executed');
-                console.log(event.guild.name);
-                console.log(event.channel.name);
                 return event.reply(output);
             }
         });
@@ -51,7 +46,6 @@ export class ReplyCommand extends Command {
     }
 
     private mapAliases(alias: string): string {
-        console.log(alias);
         if (alias.charAt(alias.length - 1) === ' ') {
             const aliasModified = alias.slice(0, -1);
             return replyCommandOptions[aliasModified];

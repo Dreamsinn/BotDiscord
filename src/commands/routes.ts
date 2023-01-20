@@ -39,6 +39,7 @@ import { Command } from './domain/interfaces/Command';
 import { PlayDlHandler } from './infrastructure/playDlHandler';
 import { YoutubeAPIHandler } from './infrastructure/youtubeHandler';
 interface Route {
+    name: string;
     alias: string[];
     command: Command;
 }
@@ -62,6 +63,7 @@ export class Routes {
 
     public routeList: Route[] = [
         {
+            name: 'Play Command',
             alias: PlayCommandSchema.aliases,
             command: new PlayCommandHandler(
                 this.playListHandler,
@@ -72,58 +74,72 @@ export class Routes {
             ),
         },
         {
+            name: 'PlayList Command',
             alias: PlayListCommandSchema.aliases,
             command: new PlayListCommand(this.playListHandler),
         },
         {
+            name: 'Help Command',
             alias: HelpCommandSchema.aliases,
             command: new HelpCommand(this.usersUsingACommand),
         },
         {
+            name: 'Pause Command',
             alias: PauseCommandSchema.aliases,
             command: new PauseCommand(this.playListHandler),
         },
         {
+            name: 'Skip Music Command',
             alias: SkipMusicCommandSchema.aliases,
             command: new SkipMusicCommand(this.playListHandler),
         },
         {
+            name: 'Disconnect Command',
             alias: DisconnectCommandSchema.aliases,
             command: new DisconnectCommand(this.playListHandler),
         },
         {
+            name: 'Join Channel Command',
             alias: JoinChannelCommandSchema.aliases,
             command: new JoinChannelCommand(this.playListHandler),
         },
         {
+            name: 'Clear PlayList Command',
             alias: ClearPlayListCommandSchema.aliases,
             command: new ClearPlayListCommand(this.playListHandler),
         },
         {
+            name: 'Remove Songs From Playlist Command',
             alias: RemoveSongsFromPlayListCommandSchema.aliases,
             command: new RemoveSongsFromPlayListCommand(this.playListHandler, this.usersUsingACommand),
         },
         {
+            name: 'Shuffle Playlist Command',
             alias: ShufflePlayListCommandSchema.aliases,
             command: new ShufflePlayListCommand(this.playListHandler),
         },
         {
+            name: 'Loop Playlist Mode Command',
             alias: LoopPlayListModeCommandSchema.aliases,
             command: new LoopPlayListModeCommand(this.playListHandler),
         },
         {
+            name: 'Display Playlist Command',
             alias: DisplayPlayListCommandSchema.aliases,
             command: new DisplayPlayListCommand(this.playListHandler),
         },
         {
+            name: 'Dice Command Toggler',
             alias: DiceCommandTogglerSchema.aliases,
             command: new DiceCommandToggler(),
         },
         {
+            name: 'Reply Command Toggler',
             alias: ReplyCommandTogglerSchema.aliases,
             command: new ReplyCommandToggler(),
         },
         {
+            name: 'Log Playlist Status Command',
             alias: LogPlaylistStatusSchema.aliases,
             command: new LogPlaylistStatusCommand(this.playListHandler),
         },

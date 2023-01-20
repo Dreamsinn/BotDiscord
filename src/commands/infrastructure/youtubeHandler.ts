@@ -32,7 +32,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
             return {
                 isError: true,
                 data: null,
-                errorData: err,
+                errorData: err?.response?.data ?? err,
             };
         }
     }
@@ -64,7 +64,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
             return {
                 isError: true,
                 data: null,
-                errorData: err,
+                errorData: err?.response?.data ?? err,
             };
         }
     }
@@ -94,7 +94,7 @@ export class YoutubeAPIHandler implements YoutubeAPI {
             return {
                 isError: true,
                 data: null,
-                errorData: err,
+                errorData: err?.response?.data ?? err,
             };
         }
     }

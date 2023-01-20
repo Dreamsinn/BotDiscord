@@ -172,7 +172,6 @@ export class HelpCommand extends Command {
 
                 // Si se responde una X se borra el mensaje
                 if (['x', 'X'].includes(collectedMessage.content)) {
-                    console.log('Help Command cancelled');
                     event.reply('Help Command ha expirado');
 
                     return;
@@ -186,11 +185,10 @@ export class HelpCommand extends Command {
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
-                    console.log(err);
-                    event.channel.send(`Error: ${err.message}`);
+                    console.log('Help colector error: ', err);
+                    event.channel.send('Ha habido un error, por favor vuelvelo a intentar');
                 } else {
                     // sino contesta
-                    console.log(`Help Command time out`);
                     event.reply('Time out');
                 }
                 // quitamos usuario de la lista de no poder usar comandos
@@ -207,31 +205,41 @@ export class HelpCommand extends Command {
             typeOfEmbed === HelpEmbedsTitlesEnum.NONPREFIX
         ) {
             const output = this.createTypeOfCommandsEmbed();
-            const message = await helpEmbed.edit(output);
+            const message = await helpEmbed.edit(output).catch((err) => {
+                console.log('Error editing findPreviousEmbed :', err);
+            });
             return this.messageResponseListener(message, event, HelpEmbedsTitlesEnum.TYPES);
         }
 
         if (typeOfEmbed === HelpEmbedsTitlesEnum.MUSIC) {
             const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
-            const prefixMessage = await helpEmbed.edit(prefixOutput);
+            const prefixMessage = await helpEmbed.edit(prefixOutput).catch((err) => {
+                console.log('Error editing findPreviousEmbed :', err);
+            });
             return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
         }
 
         if (typeOfEmbed === CommandsCategoryEnum.PREFIX) {
             const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
-            const prefixMessage = await helpEmbed.edit(prefixOutput);
+            const prefixMessage = await helpEmbed.edit(prefixOutput).catch((err) => {
+                console.log('Error editing findPreviousEmbed :', err);
+            });
             return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
         }
 
         if (typeOfEmbed === CommandsCategoryEnum.NONPREFIX) {
             const nonPrefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.NONPREFIX);
-            const nonPrefixMessage = await helpEmbed.edit(nonPrefixOutput);
+            const nonPrefixMessage = await helpEmbed.edit(nonPrefixOutput).catch((err) => {
+                console.log('Error editing findPreviousEmbed :', err);
+            });
             return this.messageResponseListener(nonPrefixMessage, event, HelpEmbedsTitlesEnum.NONPREFIX);
         }
 
         if (typeOfEmbed === CommandsCategoryEnum.MUSIC) {
             const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.MUSIC);
-            const prefixMessage = await helpEmbed.edit(prefixOutput);
+            const prefixMessage = await helpEmbed.edit(prefixOutput).catch((err) => {
+                console.log('Error editing findPreviousEmbed :', err);
+            });
             return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.MUSIC);
         }
     }
@@ -241,13 +249,17 @@ export class HelpCommand extends Command {
         if (helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.TYPES) {
             if (collectedMessage.content === '1') {
                 const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
-                const prefixMessage = await helpEmbed.edit(prefixOutput);
+                const prefixMessage = await helpEmbed.edit(prefixOutput).catch((err) => {
+                    console.log('Error editing findNextEmbedToCreate :', err);
+                });
                 return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
             }
 
             if (collectedMessage.content === '2') {
                 const nonPrefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.NONPREFIX);
-                const nonPrefixMessage = await helpEmbed.edit(nonPrefixOutput);
+                const nonPrefixMessage = await helpEmbed.edit(nonPrefixOutput).catch((err) => {
+                    console.log('Error editing findNextEmbedToCreate :', err);
+                });
                 return this.messageResponseListener(
                     nonPrefixMessage,
                     event,
@@ -259,7 +271,9 @@ export class HelpCommand extends Command {
         if (helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.PREFIX) {
             if (collectedMessage.content === '1') {
                 const musicOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.MUSIC);
-                const musicMessage = await helpEmbed.edit(musicOutput);
+                const musicMessage = await helpEmbed.edit(musicOutput).catch((err) => {
+                    console.log('Error editing findNextEmbedToCreate :', err);
+                });
                 return this.messageResponseListener(musicMessage, event, HelpEmbedsTitlesEnum.MUSIC);
             }
         }

@@ -80,7 +80,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
                 if (collectedMessage.content === 'x' || collectedMessage.content === 'X') {
                     // cancela el comando
-                    console.log('Remove command cancelled');
                     event.channel.send('Remove command cancelled');
                     return;
                 }
@@ -89,8 +88,8 @@ export class RemoveSongsFromPlayListCommand extends Command {
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
-                    console.log(err);
-                    event.channel.send(`Error: ${err.message}`);
+                    console.log('Remove Song colector error: ', err);
+                    event.channel.send('Ha habido un error, por favor vuelvelo a intentar');
                 } else {
                     event.reply('Time out');
                 }

@@ -141,7 +141,9 @@ export class PaginatedMessage {
                 },
             ],
         ];
-        paginatedMessage.edit({ components: new MessageButtonsCreator(buttons).call() });
+        paginatedMessage.edit({ components: new MessageButtonsCreator(buttons).call() }).catch((err) => {
+            console.log('Error adding buttons to paginated embed: ', err);
+        });
 
         return;
     }
@@ -169,9 +171,8 @@ export class PaginatedMessage {
                 },
             }).call();
             await message.edit({ content: output.content, components: [] }).catch((err) => {
-                console.log({ err });
+                console.log('Pagination editing error: ', err);
             });
-            console.log(`Pagination collector time Out`);
             return;
         });
     }
@@ -194,7 +195,9 @@ export class PaginatedMessage {
         // si se ha cambiado la pagina edita el embed con la info de la pagina actual
         if (pageChanged) {
             const output = this.createPageEmbed();
-            return message.edit({ embeds: output.embeds });
+            return message.edit({ embeds: output.embeds }).catch((err) => {
+                console.log('Error changing page: ', err);
+            });
         }
         return;
     }
