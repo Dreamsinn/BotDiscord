@@ -1,10 +1,6 @@
 import { MessageEmbed, MessageOptions } from 'discord.js';
-import {
-    ButtonRowList,
-    CreateMessage,
-    EmbedOptions,
-    MessageContent,
-} from '../../domain/interfaces/createEmbedOptions';
+import { ButtonRowList } from '../../domain/interfaces/button';
+import { CreateMessage, EmbedOptions, MessageContent } from '../../domain/interfaces/createEmbedOptions';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 
 export class MessageCreator {

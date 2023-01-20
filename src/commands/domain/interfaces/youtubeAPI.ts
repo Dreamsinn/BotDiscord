@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { APIResponse } from './APIResponse';
-import { RawSong } from './songData';
+import { RawSong } from './song';
 
 export abstract class YoutubeAPI {
     abstract searchSongByName(song: string, event: Message): Promise<APIResponse<RawSong[]>>;

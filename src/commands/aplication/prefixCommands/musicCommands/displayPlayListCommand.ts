@@ -1,10 +1,11 @@
 import { Message } from 'discord.js';
 import { DisplayPlayListCommandSchema } from '../../../domain/commandSchema/displayPlayListCommandSchema';
 import { discordEmojis } from '../../../domain/discordEmojis';
+import { ButtonsStyleEnum } from '../../../domain/enums/buttonStyleEnum';
 import { DisplayButtonsIdEnum } from '../../../domain/enums/displayButtonsIdEnum';
+import { ButtonRowList } from '../../../domain/interfaces/button';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { ButtonRowList, ButtonsStyle } from '../../../domain/interfaces/createEmbedOptions';
 import { DisplayMessage } from '../../../domain/interfaces/displayMessage';
 import { PlayListHandler } from '../../playListHandler';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
@@ -110,39 +111,39 @@ export class DisplayPlayListCommand extends Command {
         const buttons: ButtonRowList = [
             [
                 {
-                    style: ButtonsStyle.BLUE,
+                    style: ButtonsStyleEnum.BLUE,
                     label: `${discordEmojis.musicEmojis.playOrPause} Play/Pause`,
                     custom_id: DisplayButtonsIdEnum.PLAY_PAUSE,
                 },
                 {
-                    style: ButtonsStyle.BLUE,
+                    style: ButtonsStyleEnum.BLUE,
                     label: `${discordEmojis.musicEmojis.nextSong} Next song`,
                     custom_id: DisplayButtonsIdEnum.NEXT,
                 },
                 {
-                    style: ButtonsStyle.BLUE,
+                    style: ButtonsStyleEnum.BLUE,
                     label: `${discordEmojis.musicEmojis.loop} Loop mode`,
                     custom_id: DisplayButtonsIdEnum.LOOP,
                 },
                 {
-                    style: ButtonsStyle.BLUE,
+                    style: ButtonsStyleEnum.BLUE,
                     label: `${discordEmojis.musicEmojis.shuffle} Shuffle`,
                     custom_id: DisplayButtonsIdEnum.SHUFFLE,
                 },
             ],
             [
                 {
-                    style: ButtonsStyle.GRENN,
+                    style: ButtonsStyleEnum.GRENN,
                     label: `${discordEmojis.musicEmojis.clear} Clear Platlist`,
                     custom_id: DisplayButtonsIdEnum.CLEAR,
                 },
                 {
-                    style: ButtonsStyle.GREY,
+                    style: ButtonsStyleEnum.GREY,
                     label: `${discordEmojis.readme} Readme`,
                     custom_id: DisplayButtonsIdEnum.README,
                 },
                 {
-                    style: ButtonsStyle.RED,
+                    style: ButtonsStyleEnum.RED,
                     label: `${discordEmojis.x} Close`,
                     custom_id: DisplayButtonsIdEnum.CLOSE,
                 },

@@ -1,5 +1,5 @@
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { Button, ButtonRow, ButtonRowList } from '../../domain/interfaces/createEmbedOptions';
+import { Button, ButtonRow, ButtonRowList } from '../../domain/interfaces/button';
 
 export class MessageButtonsCreator {
     private buttons: ButtonRowList;

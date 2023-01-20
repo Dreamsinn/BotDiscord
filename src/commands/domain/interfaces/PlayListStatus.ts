@@ -1,4 +1,4 @@
-import { Song } from './songData';
+import { Song } from './song';
 
 export interface PlayListStatus {
     playList: Song[];

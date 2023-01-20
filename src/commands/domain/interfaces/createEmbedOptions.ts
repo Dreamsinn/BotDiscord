@@ -6,7 +6,7 @@ import {
     Message,
     User,
 } from 'discord.js';
-import { MessageButtonStyles } from 'discord.js/typings/enums';
+import { ButtonRowList } from './button';
 
 // hay mas opciones disponibles en MessageOptions
 export interface CreateMessage {
@@ -40,26 +40,6 @@ export interface EmbedOptions {
     imageUrl?: string;
     timeStamp?: Date | number | null;
     footer?: EmbedFooterData;
-}
-
-export type ButtonRowList = [ButtonRow?, ButtonRow?, ButtonRow?, ButtonRow?, ButtonRow?];
-
-export type ButtonRow = [Button?, Button?, Button?, Button?, Button?];
-
-export interface Button {
-    style: ButtonsStyle;
-    label: string;
-    custom_id: string;
-    url?: string;
-    disabled?: boolean;
-}
-
-export enum ButtonsStyle {
-    BLUE = MessageButtonStyles.PRIMARY,
-    GREY = MessageButtonStyles.SECONDARY,
-    GRENN = MessageButtonStyles.SUCCESS,
-    RED = MessageButtonStyles.DANGER,
-    LINK = MessageButtonStyles.LINK,
 }
 
 export type PaginationOptions =

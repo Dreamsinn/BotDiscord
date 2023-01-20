@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
+import { ButtonsStyleEnum } from '../../domain/enums/buttonStyleEnum';
 import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
+import { ButtonRowList } from '../../domain/interfaces/button';
 import {
-    ButtonRowList,
-    ButtonsStyle,
     CreatePaginatedMessage,
     EmbedOptions,
     MessageContent,
@@ -11,7 +11,6 @@ import {
 } from '../../domain/interfaces/createEmbedOptions';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 import { MessageCreator } from './messageCreator';
-
 export class PaginatedMessage {
     private message: MessageContent | undefined;
     private embed: EmbedOptions;
@@ -126,17 +125,17 @@ export class PaginatedMessage {
         const buttons: ButtonRowList = [
             [
                 {
-                    style: ButtonsStyle.BLUE,
+                    style: ButtonsStyleEnum.BLUE,
                     label: discordEmojis['<-'],
                     custom_id: PaginationButtonsIdEnum.PREV,
                 },
                 {
-                    style: ButtonsStyle.BLUE,
+                    style: ButtonsStyleEnum.BLUE,
                     label: discordEmojis['->'],
                     custom_id: PaginationButtonsIdEnum.NEXT,
                 },
                 {
-                    style: ButtonsStyle.RED,
+                    style: ButtonsStyleEnum.RED,
                     label: discordEmojis.x,
                     custom_id: PaginationButtonsIdEnum.X,
                 },
