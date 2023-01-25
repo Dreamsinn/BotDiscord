@@ -18,7 +18,7 @@ export class CommandHandler {
     public async isCommand(event: Message) {
         // si un comando esta a la espera de una respuesta por parte de un usario,
         // ese usuario no podra interactuar con el bot
-        if (this.usersUsingACommand.searchIdInUserList(event.author.id, event)) return;
+        if (this.usersUsingACommand.searchIdInUserList(event.author.id)) return;
 
         // si el comando tiene prefijo, para comandos con prefijo
         if (event.content.startsWith(`${process.env.PREFIX}`)) {
