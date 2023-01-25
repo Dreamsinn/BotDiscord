@@ -1,4 +1,4 @@
-import { EmbedFieldData, Message } from 'discord.js';
+import { EmbedFieldData, Message, MessageOptions } from 'discord.js';
 import { ClearPlayListCommandSchema } from '../../domain/commandSchema/clearPlayListCommandSchema';
 import { DiceCommandSchema } from '../../domain/commandSchema/diceCommandSchema';
 import { DiceCommandTogglerSchema } from '../../domain/commandSchema/diceCommandTogglerSchema';
@@ -20,7 +20,11 @@ import { HelpEmbedsTitlesEnum } from '../../domain/enums/helpEmbedsTitlesEnum';
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
-import { HelpCommandData, HelpCommandList } from '../../domain/interfaces/helpCommandData';
+import {
+    HelpCommandData,
+    HelpCommandList,
+    SubTypeCommandData,
+} from '../../domain/interfaces/helpCommandData';
 import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
@@ -36,7 +40,6 @@ export class HelpCommand extends Command {
         if (this.roleAndCooldownValidation(event, this.helpSchema)) {
             return;
         }
-
         // creamos embed para elejir entre comandos de prfijo o no prefijo, y lo enviamos
         const output = this.createTypeOfCommandsEmbed();
 
@@ -70,9 +73,9 @@ export class HelpCommand extends Command {
             DisconnectCommandSchema,
         ];
 
-        const prefixCommandList = [];
-        const nonCommandList = [];
-        const musicCommandList = [];
+        const prefixCommandList: HelpCommandData[] = [];
+        const nonCommandList: HelpCommandData[] = [];
+        const musicCommandList: HelpCommandData[] = [];
 
         commandsSchemas.forEach((schema: CommandSchema) => {
             const schemaData: HelpCommandData = {
@@ -83,7 +86,6 @@ export class HelpCommand extends Command {
                 category: schema.category,
                 roleRequired: schema.adminOnly,
             };
-
             if (schema.category === CommandsCategoryEnum.PREFIX) {
                 prefixCommandList.push(schemaData);
             }
@@ -130,7 +132,11 @@ export class HelpCommand extends Command {
         return output;
     }
 
-    private messageResponseListener(helpEmbed: Message, event: Message, typeOfEmbed: string) {
+    private messageResponseListener(
+        helpEmbed: Message,
+        event: Message,
+        typeOfEmbed: HelpEmbedsTitlesEnum | CommandsCategoryEnum,
+    ) {
         // usuario en la lista de no poder usar comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
@@ -144,13 +150,12 @@ export class HelpCommand extends Command {
             }
             // los embeds con la descripcion de comandos no tienen condicion numerica, porque no tienen que elegir nada llegado el punto
             if (
-                typeOfEmbed === HelpEmbedsTitlesEnum.TYPES ||
-                typeOfEmbed === HelpEmbedsTitlesEnum.PREFIX ||
-                typeOfEmbed === HelpEmbedsTitlesEnum.MUSIC ||
-                typeOfEmbed === HelpEmbedsTitlesEnum.NONPREFIX
+                Object.values(HelpEmbedsTitlesEnum).some((enumsTitle: string) =>
+                    typeOfEmbed.includes(enumsTitle),
+                )
             ) {
                 const numberCondition =
-                    Number(reaction.content) <= helpEmbed.embeds[0].fields.length &&
+                    Number(reaction.content) <= helpEmbed.embeds[0].fields.length - 1 &&
                     Number(reaction.content) > 0;
                 return authorCondition && (letterCondition || numberCondition);
             }
@@ -163,25 +168,24 @@ export class HelpCommand extends Command {
             .then(async (collected) => {
                 // eliminamos a la persona de la lista de no poder usar comandos
                 this.usersUsingACommand.removeUserList(event.author.id);
-                let collectedMessage: Message;
-                collected.map((e: Message) => (collectedMessage = e));
+                const collectedMessage = collected.map((e: Message) => e);
 
-                collectedMessage.delete();
+                collectedMessage[0].delete();
                 // quitamos usuario de la lista de no poder usar comandos
                 this.usersUsingACommand.removeUserList(event.author.id);
 
                 // Si se responde una X se borra el mensaje
-                if (['x', 'X'].includes(collectedMessage.content)) {
+                if (['x', 'X'].includes(collectedMessage[0].content)) {
                     event.reply('Help Command ha expirado');
 
                     return;
                 }
                 // ir al embed anterior
-                if (['b', 'B', 'back', 'BACK'].includes(collectedMessage.content)) {
+                if (['b', 'B', 'back', 'BACK'].includes(collectedMessage[0].content)) {
                     return this.findPreviousEmbed(helpEmbed, event, typeOfEmbed);
                 }
                 // ir al siguiente embed
-                return this.findNextEmbedToCreate(collectedMessage, helpEmbed, event);
+                return this.findNextEmbedToCreate(collectedMessage[0], helpEmbed, event);
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
@@ -198,120 +202,155 @@ export class HelpCommand extends Command {
             });
     }
 
-    private async findPreviousEmbed(helpEmbed: Message, event: Message, typeOfEmbed: string) {
+    private async findPreviousEmbed(
+        helpEmbed: Message,
+        event: Message,
+        typeOfEmbed: HelpEmbedsTitlesEnum | CommandsCategoryEnum,
+    ): Promise<void> {
         // creamos el embed anterior, lo enviamos y le escuchamos la respuesta
-        if (
-            typeOfEmbed === HelpEmbedsTitlesEnum.PREFIX ||
-            typeOfEmbed === HelpEmbedsTitlesEnum.NONPREFIX
-        ) {
-            const output = this.createTypeOfCommandsEmbed();
-            const message = await helpEmbed.edit(output).catch((err) => {
-                console.log('Error editing findPreviousEmbed :', err);
-            });
-            return this.messageResponseListener(message, event, HelpEmbedsTitlesEnum.TYPES);
-        }
+        const previousEmbedDictionary: {
+            condition: boolean;
+            methodData: SubTypeCommandData | undefined;
+            prevType: HelpEmbedsTitlesEnum;
+        }[] = [
+            {
+                condition:
+                    typeOfEmbed === HelpEmbedsTitlesEnum.PREFIX ||
+                    typeOfEmbed === HelpEmbedsTitlesEnum.NONPREFIX,
+                methodData: undefined,
+                prevType: HelpEmbedsTitlesEnum.TYPES,
+            },
+            {
+                condition: typeOfEmbed === HelpEmbedsTitlesEnum.MUSIC,
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.PREFIX,
+                    commandArray: this.commandList.prefix,
+                },
+                prevType: HelpEmbedsTitlesEnum.PREFIX,
+            },
+            {
+                condition: typeOfEmbed === CommandsCategoryEnum.PREFIX,
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.PREFIX,
+                    commandArray: this.commandList.prefix,
+                },
+                prevType: HelpEmbedsTitlesEnum.PREFIX,
+            },
+            {
+                condition: typeOfEmbed === CommandsCategoryEnum.NONPREFIX,
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.NONPREFIX,
+                    commandArray: this.commandList.nonPrefix,
+                },
+                prevType: HelpEmbedsTitlesEnum.NONPREFIX,
+            },
+            {
+                condition: typeOfEmbed === CommandsCategoryEnum.MUSIC,
+                methodData: { title: HelpEmbedsTitlesEnum.MUSIC, commandArray: this.commandList.music },
+                prevType: HelpEmbedsTitlesEnum.MUSIC,
+            },
+        ];
 
-        if (typeOfEmbed === HelpEmbedsTitlesEnum.MUSIC) {
-            const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
-            const prefixMessage = await helpEmbed.edit(prefixOutput).catch((err) => {
-                console.log('Error editing findPreviousEmbed :', err);
-            });
-            return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
-        }
+        const previousEmbed = previousEmbedDictionary.find((embed) => embed.condition);
 
-        if (typeOfEmbed === CommandsCategoryEnum.PREFIX) {
-            const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
-            const prefixMessage = await helpEmbed.edit(prefixOutput).catch((err) => {
-                console.log('Error editing findPreviousEmbed :', err);
-            });
-            return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
-        }
-
-        if (typeOfEmbed === CommandsCategoryEnum.NONPREFIX) {
-            const nonPrefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.NONPREFIX);
-            const nonPrefixMessage = await helpEmbed.edit(nonPrefixOutput).catch((err) => {
-                console.log('Error editing findPreviousEmbed :', err);
-            });
-            return this.messageResponseListener(nonPrefixMessage, event, HelpEmbedsTitlesEnum.NONPREFIX);
-        }
-
-        if (typeOfEmbed === CommandsCategoryEnum.MUSIC) {
-            const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.MUSIC);
-            const prefixMessage = await helpEmbed.edit(prefixOutput).catch((err) => {
-                console.log('Error editing findPreviousEmbed :', err);
-            });
-            return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.MUSIC);
+        if (previousEmbed) {
+            let response: { output: MessageOptions; type: HelpEmbedsTitlesEnum | CommandsCategoryEnum };
+            if (previousEmbed.methodData) {
+                response = {
+                    output: this.createSubTypeCommandsEmbed(previousEmbed.methodData),
+                    type: previousEmbed.prevType,
+                };
+            } else {
+                response = {
+                    output: this.createTypeOfCommandsEmbed(),
+                    type: previousEmbed.prevType,
+                };
+            }
+            return await helpEmbed
+                .edit(response.output)
+                .then((previousEmbedMessage) =>
+                    this.messageResponseListener(previousEmbedMessage, event, response.type),
+                )
+                .catch((err) => {
+                    console.log('Error editing findNextEmbedToCreate :', err);
+                });
         }
     }
 
     private async findNextEmbedToCreate(collectedMessage: Message, helpEmbed: Message, event: Message) {
         // creamos el embed selecionado, lo enviamos y le escuchamos la respuesta
-        if (helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.TYPES) {
-            if (collectedMessage.content === '1') {
-                const prefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.PREFIX);
-                const prefixMessage = await helpEmbed.edit(prefixOutput).catch((err) => {
-                    console.log('Error editing findNextEmbedToCreate :', err);
-                });
-                return this.messageResponseListener(prefixMessage, event, HelpEmbedsTitlesEnum.PREFIX);
-            }
+        const nextEmbedDictionary: {
+            condition: boolean;
+            methodData: SubTypeCommandData;
+            nextType: HelpEmbedsTitlesEnum;
+        }[] = [
+            {
+                condition:
+                    helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.TYPES &&
+                    collectedMessage.content === '1',
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.PREFIX,
+                    commandArray: [...this.commandList.prefix],
+                },
+                nextType: HelpEmbedsTitlesEnum.PREFIX,
+            },
+            {
+                condition:
+                    helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.TYPES &&
+                    collectedMessage.content === '2',
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.NONPREFIX,
+                    commandArray: [...this.commandList.nonPrefix],
+                },
+                nextType: HelpEmbedsTitlesEnum.NONPREFIX,
+            },
+            {
+                condition:
+                    helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.PREFIX &&
+                    collectedMessage.content === '1',
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.MUSIC,
+                    commandArray: [...this.commandList.music],
+                },
+                nextType: HelpEmbedsTitlesEnum.MUSIC,
+            },
+        ];
 
-            if (collectedMessage.content === '2') {
-                const nonPrefixOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.NONPREFIX);
-                const nonPrefixMessage = await helpEmbed.edit(nonPrefixOutput).catch((err) => {
-                    console.log('Error editing findNextEmbedToCreate :', err);
-                });
-                return this.messageResponseListener(
-                    nonPrefixMessage,
-                    event,
-                    HelpEmbedsTitlesEnum.NONPREFIX,
-                );
+        const nextEmbed = nextEmbedDictionary.find((option) => option.condition);
+
+        let response: { output: MessageOptions; type: HelpEmbedsTitlesEnum | CommandsCategoryEnum };
+
+        if (nextEmbed) {
+            response = {
+                output: this.createSubTypeCommandsEmbed(nextEmbed.methodData),
+                type: nextEmbed.nextType,
+            };
+        } else {
+            // default - commandEmbed
+            const commandEmbed = this.createCommandEmbed(helpEmbed, Number(collectedMessage.content));
+            if (!commandEmbed) {
+                return;
             }
+            response = {
+                output: commandEmbed.output,
+                type: commandEmbed.category,
+            };
         }
 
-        if (helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.PREFIX) {
-            if (collectedMessage.content === '1') {
-                const musicOutput = this.createSubTypeCommandsEmbed(CommandsCategoryEnum.MUSIC);
-                const musicMessage = await helpEmbed.edit(musicOutput).catch((err) => {
-                    console.log('Error editing findNextEmbedToCreate :', err);
-                });
-                return this.messageResponseListener(musicMessage, event, HelpEmbedsTitlesEnum.MUSIC);
-            }
-        }
-
-        const { output, category } = this.createCommandEmbed(
-            helpEmbed,
-            Number(collectedMessage.content),
-        );
-
-        const commandMessage = await helpEmbed.edit(output);
-        return this.messageResponseListener(commandMessage, event, category);
+        return await helpEmbed
+            .edit(response.output)
+            .then((nextEmbedMessage) =>
+                this.messageResponseListener(nextEmbedMessage, event, response.type),
+            )
+            .catch((err) => {
+                console.log('Error editing findNextEmbedToCreate :', err);
+            });
     }
 
-    private createSubTypeCommandsEmbed(commandCategory: string) {
-        const commandCategoryDictionary: {
-            [key in CommandsCategoryEnum]: {
-                title: HelpEmbedsTitlesEnum;
-                commandArray: HelpCommandData[];
-            };
-        } = {
-            [CommandsCategoryEnum.PREFIX]: {
-                title: HelpEmbedsTitlesEnum.PREFIX,
-                commandArray: this.commandList.prefix,
-            },
-            [CommandsCategoryEnum.MUSIC]: {
-                title: HelpEmbedsTitlesEnum.MUSIC,
-                commandArray: this.commandList.music,
-            },
-            [CommandsCategoryEnum.NONPREFIX]: {
-                title: HelpEmbedsTitlesEnum.NONPREFIX,
-                commandArray: this.commandList.nonPrefix,
-            },
-        };
-
+    private createSubTypeCommandsEmbed(commandCategory: SubTypeCommandData) {
         const embedFileds: EmbedFieldData[] = [];
         let index = 0;
-
-        if (commandCategory === CommandsCategoryEnum.PREFIX) {
+        if (commandCategory.title === HelpEmbedsTitlesEnum.PREFIX) {
             index = +1;
             embedFileds.push({
                 name: '\u200b',
@@ -319,18 +358,15 @@ export class HelpCommand extends Command {
                 inline: false,
             });
         }
-
-        commandCategoryDictionary[commandCategory].commandArray.forEach(
-            (commandData: HelpCommandData) => {
-                index += 1;
-                embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
-            },
-        );
+        commandCategory.commandArray.forEach((commandData: HelpCommandData) => {
+            index += 1;
+            embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
+        });
 
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',
-                title: commandCategoryDictionary[commandCategory].title,
+                title: commandCategory.title,
                 fields: embedFileds,
                 field: {
                     name: '\u200b',
@@ -353,6 +389,9 @@ export class HelpCommand extends Command {
 
     private createCommandEmbed(helpEmbed: Message, selected: number) {
         const selectedCommand = this.findSelectedCommand(helpEmbed, selected);
+        if (!selectedCommand) {
+            return;
+        }
 
         let description = '';
         if (selectedCommand.category !== CommandsCategoryEnum.NONPREFIX) {
@@ -408,38 +447,25 @@ export class HelpCommand extends Command {
         return { output, category: selectedCommand.category };
     }
 
-    private findSelectedCommand(helpEmbed: Message, selected: number): HelpCommandData {
+    private findSelectedCommand(helpEmbed: Message, selected: number): HelpCommandData | void {
         const fields = helpEmbed.embeds[0].fields;
         const typeOfComand = helpEmbed.embeds[0].title;
+        const commandTitile = fields[selected - 1].value;
 
-        const rawCommandTitile = fields[selected - 1].value;
+        const typeCommandDictionary = {
+            [HelpEmbedsTitlesEnum.PREFIX]: this.commandList.prefix,
+            [HelpEmbedsTitlesEnum.NONPREFIX]: this.commandList.nonPrefix,
+            [HelpEmbedsTitlesEnum.MUSIC]: this.commandList.music,
+        };
 
-        let commandSelected: HelpCommandData;
+        const typeCommandSelected = Object.values(HelpEmbedsTitlesEnum).find((enumsTitle: string) =>
+            enumsTitle.includes(String(typeOfComand)),
+        );
 
-        if (typeOfComand === HelpEmbedsTitlesEnum.PREFIX) {
-            this.commandList.prefix.forEach((commandData: HelpCommandData) => {
-                if (rawCommandTitile.includes(commandData.name)) {
-                    commandSelected = commandData;
-                }
-            });
+        if (typeCommandSelected && typeCommandSelected !== HelpEmbedsTitlesEnum.TYPES) {
+            return typeCommandDictionary[typeCommandSelected].find((commandData: HelpCommandData) =>
+                commandTitile.includes(commandData.name),
+            );
         }
-
-        if (typeOfComand === HelpEmbedsTitlesEnum.NONPREFIX) {
-            this.commandList.nonPrefix.forEach((commandData: HelpCommandData) => {
-                if (rawCommandTitile.includes(commandData.name)) {
-                    commandSelected = commandData;
-                }
-            });
-        }
-
-        if (typeOfComand === HelpEmbedsTitlesEnum.MUSIC) {
-            this.commandList.music.forEach((commandData: HelpCommandData) => {
-                if (rawCommandTitile.includes(commandData.name)) {
-                    commandSelected = commandData;
-                }
-            });
-        }
-
-        return commandSelected;
     }
 }
