@@ -1,14 +1,14 @@
 import { Message } from 'discord.js';
 import { YouTubeVideo } from 'play-dl';
 import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
-import { PlayDlHandler } from '../../infrastructure/playDlHandler';
-import { YoutubeAPIHandler } from '../../infrastructure/youtubeHandler';
+import { PlayDlService } from '../../infrastructure/playDlService';
+import { YouTubeAPIService } from '../../infrastructure/youTubeAPIService';
 import { APIResponse } from './APIResponse';
 import { RawSong, Song } from './song';
 
 export abstract class PlayCommand {
-    protected youtubeAPIHandler: YoutubeAPIHandler;
-    protected playDlHandler: PlayDlHandler;
+    protected youtubeAPIHandler: YouTubeAPIService;
+    protected playDlHandler: PlayDlService;
 
     constructor({ youtubeAPI, playDlAPI }) {
         this.youtubeAPIHandler = youtubeAPI;

@@ -3,7 +3,7 @@ import { APIResponse } from '../domain/interfaces/APIResponse';
 import { RawSong } from '../domain/interfaces/song';
 import { YoutubeAPI } from '../domain/interfaces/youtubeAPI';
 
-export class YoutubeAPIHandler implements YoutubeAPI {
+export class YouTubeAPIService implements YoutubeAPI {
     public async searchSongByName(song: string): Promise<APIResponse<RawSong[]>> {
         const order = 'relevance';
         const part = 'snippet';

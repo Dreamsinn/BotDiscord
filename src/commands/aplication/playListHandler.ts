@@ -10,7 +10,7 @@ import { DisplayMessage } from '../domain/interfaces/displayMessage';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { NewSong, Song, SongDuration } from '../domain/interfaces/song';
-import { PlayDlHandler } from '../infrastructure/playDlHandler';
+import { PlayDlService } from '../infrastructure/playDlService';
 import { DisplayEmbedBuilder } from './utils/displayEmbedBuilder';
 import { MessageCreator } from './utils/messageCreator';
 import { PaginatedMessage } from './utils/paginatedMessage';
@@ -20,13 +20,13 @@ export class PlayListHandler {
     private playListDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0, string: '' };
     private botConnection: any;
     private player: any;
-    private playDlHandler: PlayDlHandler;
+    private playDlHandler: PlayDlService;
     private displayEmbedBuilder: DisplayEmbedBuilder;
     private isMusicListenerActive = false;
     private loopMode = false;
     private isDisplay: IsDisplayActive = { active: false, event: undefined };
 
-    constructor(playDlHandler: PlayDlHandler, displayEmbedBuilder: DisplayEmbedBuilder) {
+    constructor(playDlHandler: PlayDlService, displayEmbedBuilder: DisplayEmbedBuilder) {
         this.playDlHandler = playDlHandler;
         this.displayEmbedBuilder = displayEmbedBuilder;
     }

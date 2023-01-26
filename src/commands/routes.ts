@@ -36,8 +36,8 @@ import { ReplyCommandTogglerSchema } from './domain/commandSchema/replyCommandTo
 import { ShufflePlayListCommandSchema } from './domain/commandSchema/shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from './domain/commandSchema/skipMusicCommandSchema';
 import { Command } from './domain/interfaces/Command';
-import { PlayDlHandler } from './infrastructure/playDlHandler';
-import { YoutubeAPIHandler } from './infrastructure/youtubeHandler';
+import { PlayDlService } from './infrastructure/playDlService';
+import { YouTubeAPIService } from './infrastructure/youTubeAPIService';
 interface Route {
     name: string;
     alias: string[];
@@ -46,8 +46,8 @@ interface Route {
 
 export class Routes {
     private musicAPIs = {
-        youtubeAPI: new YoutubeAPIHandler(),
-        playDlAPI: new PlayDlHandler(),
+        youtubeAPI: new YouTubeAPIService(),
+        playDlAPI: new PlayDlService(),
     };
     private displayEmbedBuilder = new DisplayEmbedBuilder();
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);

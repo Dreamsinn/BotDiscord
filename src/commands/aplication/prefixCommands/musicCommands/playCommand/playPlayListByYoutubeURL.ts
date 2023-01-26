@@ -2,8 +2,8 @@ import { Message } from 'discord.js';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
 import { RawSong, Song } from '../../../../domain/interfaces/song';
-import { PlayDlHandler } from '../../../../infrastructure/playDlHandler';
-import { YoutubeAPIHandler } from '../../../../infrastructure/youtubeHandler';
+import { PlayDlService } from '../../../../infrastructure/playDlService';
+import { YouTubeAPIService } from '../../../../infrastructure/youTubeAPIService';
 import { MessageCreator } from '../../../utils/messageCreator';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
@@ -12,8 +12,8 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
 
     constructor(
         musicAPIs: {
-            youtubeAPI: YoutubeAPIHandler;
-            playDlAPI: PlayDlHandler;
+            youtubeAPI: YouTubeAPIService;
+            playDlAPI: PlayDlService;
         },
         usersUsingACommand: UsersUsingACommand,
     ) {
