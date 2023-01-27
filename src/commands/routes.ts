@@ -10,6 +10,7 @@ import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicComman
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
 import { PlayCommandHandler } from './aplication/prefixCommands/musicCommands/playCommand/playCommandHandler';
 import { PlayMusicByName } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByName';
+import { PlayMusicBySpotifyPlaylistURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicBySpotifyPlaylistURL';
 import { PlayMusicBySpotifySongURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicBySpotifySongURL';
 import { PlayMusicByYouTubeMobileURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByYouTubeMobileURL';
 import { PlayMusicByYouTubeURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByYouTubeURL';
@@ -64,6 +65,7 @@ export class Routes {
     );
     private playMusicByYouTubeURL = new PlayMusicByYouTubeURL(this.musicAPIs);
     private playMusicBySpotifySongURL = new PlayMusicBySpotifySongURL(this.musicAPIs);
+    private playMusicBySpotifyPlaylistURL = new PlayMusicBySpotifyPlaylistURL(this.musicAPIs);
 
     constructor(private usersUsingACommand: UsersUsingACommand) {}
 
@@ -78,6 +80,7 @@ export class Routes {
                 this.playPlayListByYoutubeURL,
                 this.playMusicByYouTubeURL,
                 this.playMusicBySpotifySongURL,
+                this.playMusicBySpotifyPlaylistURL,
             ),
         },
         {

@@ -21,13 +21,13 @@ export class PlayMusicBySpotifySongURL extends PlayCommand {
         return;
     }
 
-    private async mapSongDataFromSpotify(event: Message, songsId: string): Promise<Song | void> {
+    private async mapSongDataFromSpotify(event: Message, songId: string): Promise<Song | void> {
         const spotifyResponse: APIResponse<RawSong[]> =
-            await this.spotifyService.getSongDataFromSpotifyId(songsId);
+            await this.spotifyService.getSongDataFromSpotifyId(songId);
         console.log(spotifyResponse);
         if (!spotifyResponse.isError) {
             const song: Song = {
-                songId: songsId,
+                songId,
                 songName: spotifyResponse.data[0].songName,
                 duration: this.parseSongDuration(String(spotifyResponse.data[0].duration), true),
                 thumbnails: spotifyResponse.data[0].thumbnails,
@@ -37,7 +37,7 @@ export class PlayMusicBySpotifySongURL extends PlayCommand {
         }
 
         event.channel.send(`It has not been possible to get song's information`);
-        console.log(`Spotify getSongInfo Error: ${spotifyResponse.errorData}`);
+        console.log(`Spotify get song info Error: ${spotifyResponse.errorData}`);
         return;
     }
 }
