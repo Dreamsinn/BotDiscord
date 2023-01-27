@@ -20,14 +20,14 @@ export class PlayListHandler {
     private playListDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0, string: '' };
     private botConnection: any;
     private player: any;
-    private playDlHandler: PlayDlService;
+    private playDlService: PlayDlService;
     private displayEmbedBuilder: DisplayEmbedBuilder;
     private isMusicListenerActive = false;
     private loopMode = false;
     private isDisplay: IsDisplayActive = { active: false, event: undefined };
 
-    constructor(playDlHandler: PlayDlService, displayEmbedBuilder: DisplayEmbedBuilder) {
-        this.playDlHandler = playDlHandler;
+    constructor(playDlService: PlayDlService, displayEmbedBuilder: DisplayEmbedBuilder) {
+        this.playDlService = playDlService;
         this.displayEmbedBuilder = displayEmbedBuilder;
     }
 
@@ -225,7 +225,7 @@ export class PlayListHandler {
     private async playMusic(): Promise<void> {
         try {
             // descarga cancion
-            const song = await this.playDlHandler.getSongStream(this.playList[0].songId);
+            const song = await this.playDlService.getSongStream(this.playList[0].songId);
 
             // craa recurso
             const resources = createAudioResource(song.stream, {

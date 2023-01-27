@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
+import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
 import { RawSong, Song } from '../../../../domain/interfaces/song';
 import { PlayDlService } from '../../../../infrastructure/playDlService';
@@ -11,10 +12,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
     private usersUsingACommand: UsersUsingACommand;
 
     constructor(
-        musicAPIs: {
-            youtubeAPI: YouTubeAPIService;
-            playDlAPI: PlayDlService;
-        },
+        musicAPIs: MusicAPIs,
         usersUsingACommand: UsersUsingACommand,
     ) {
         super(musicAPIs);
@@ -60,7 +58,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         }
 
         // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
-        const playDlResponse: APIResponse<RawSong[]> = await this.playDlHandler.getSognsInfoFromPlayList(
+        const playDlResponse: APIResponse<RawSong[]> = await this.playDlService.getSognsInfoFromPlayList(
             url,
         );
 
@@ -123,7 +121,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
             if (['y', 'Y'].includes(collectedMessage.content)) {
                 message.delete();
                 const playDlResponse: APIResponse<RawSong[]> =
-                    await this.playDlHandler.getSognsInfoFromPlayList(url);
+                    await this.playDlService.getSognsInfoFromPlayList(url);
                 if (!playDlResponse.isError) {
                     return this.mapPlayDLPlayListData(event, playDlResponse.data);
                 }
@@ -152,6 +150,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
                 songId: song.songId,
                 duration: this.parseSongDuration(String(song.duration), true),
                 thumbnails: song.thumbnails,
+                origin: 'Youtube'
             };
             return newSong;
         });
@@ -164,7 +163,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         url: string,
     ): Promise<Song | Song[] | void> {
         // llama a la API de youtube, si esta tambien falla y esta sonando un video reproduce el video
-        const youtubeResponse: APIResponse<RawSong[]> = await this.youtubeAPIHandler.searchPlaylist(
+        const youtubeResponse: APIResponse<RawSong[]> = await this.youtubeAPIService.searchPlaylist(
             playListId,
         );
         if (youtubeResponse.isError) {

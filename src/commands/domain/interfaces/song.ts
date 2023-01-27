@@ -5,6 +5,7 @@ export interface Song {
     songId: string;
     duration: SongDuration;
     thumbnails: string;
+    origin: 'Spotify' | 'Youtube'
 }
 
 export interface NewSong {

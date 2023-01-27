@@ -7,12 +7,14 @@ import { APIResponse } from './APIResponse';
 import { RawSong, Song } from './song';
 
 export abstract class PlayCommand {
-    protected youtubeAPIHandler: YouTubeAPIService;
-    protected playDlHandler: PlayDlService;
+    protected youtubeAPIService: YouTubeAPIService;
+    protected playDlService: PlayDlService;
+    protected spotifyService: PlayDlService;
 
-    constructor({ youtubeAPI, playDlAPI }) {
-        this.youtubeAPIHandler = youtubeAPI;
-        this.playDlHandler = playDlAPI;
+    constructor({ youtubeAPI, playDlAPI, spotifyAPI }) {
+        this.youtubeAPIService = youtubeAPI;
+        this.playDlService = playDlAPI;
+        this.spotifyService = spotifyAPI;
     }
 
     abstract call(
@@ -60,13 +62,14 @@ export abstract class PlayCommand {
     ): Promise<Song | void> {
         // optenemos duracion y nombre
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
-        const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlHandler.getSongInfo(songId);
+        const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlService.getSongInfo(songId);
         if (!playDlResponse.isError) {
             const song: Song = {
                 songId,
                 songName: playDlResponse.data.title,
                 duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
                 thumbnails: playDlResponse.data.thumbnails[3].url,
+                origin: 'Youtube'
             };
             return song;
         }
@@ -76,7 +79,7 @@ export abstract class PlayCommand {
         }
 
         // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
-        const youtubeResponse: APIResponse<RawSong> = await this.youtubeAPIHandler.searchSongById(
+        const youtubeResponse: APIResponse<RawSong> = await this.youtubeAPIService.searchSongById(
             songId,
         );
         if (!youtubeResponse.isError) {
@@ -85,6 +88,7 @@ export abstract class PlayCommand {
                 songName: youtubeResponse.data.songName,
                 duration: this.parseSongDuration(youtubeResponse.data.duration, false),
                 thumbnails: youtubeResponse.data.thumbnails,
+                origin: 'Youtube'
             };
             return song;
         }

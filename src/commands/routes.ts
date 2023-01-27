@@ -36,7 +36,9 @@ import { ReplyCommandTogglerSchema } from './domain/commandSchema/replyCommandTo
 import { ShufflePlayListCommandSchema } from './domain/commandSchema/shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from './domain/commandSchema/skipMusicCommandSchema';
 import { Command } from './domain/interfaces/Command';
+import { MusicAPIs } from './domain/interfaces/musicAPIs';
 import { PlayDlService } from './infrastructure/playDlService';
+import { SpotifyAPIService } from './infrastructure/spotifyAPIService';
 import { YouTubeAPIService } from './infrastructure/youTubeAPIService';
 
 interface Route {
@@ -46,9 +48,10 @@ interface Route {
 }
 
 export class Routes {
-    private musicAPIs = {
+    private musicAPIs: MusicAPIs = {
         youtubeAPI: new YouTubeAPIService(),
         playDlAPI: new PlayDlService(),
+        spotifyAPI: new SpotifyAPIService()
     };
     private displayEmbedBuilder = new DisplayEmbedBuilder();
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);

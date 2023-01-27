@@ -1,21 +1,17 @@
 import { Message } from 'discord.js';
 import { discordEmojis } from '../../../../domain/discordEmojis';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
+import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
 import { RawSong, Song } from '../../../../domain/interfaces/song';
-import { PlayDlService } from '../../../../infrastructure/playDlService';
-import { YouTubeAPIService } from '../../../../infrastructure/youTubeAPIService';
 import { MessageCreator } from '../../../utils/messageCreator';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
-export class PlayMusicByName extends PlayCommand {
+export class PlayMusicByName extends PlayCommand {p
     private usersUsingACommand: UsersUsingACommand;
 
     constructor(
-        musicAPIs: {
-            youtubeAPI: YouTubeAPIService;
-            playDlAPI: PlayDlService;
-        },
+        musicAPIs: MusicAPIs,
         usersUsingACommand: UsersUsingACommand,
     ) {
         super(musicAPIs);
@@ -26,14 +22,14 @@ export class PlayMusicByName extends PlayCommand {
         let unchosenMusic: RawSong[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
 
-        const playDlResponse: APIResponse<RawSong[]> = await this.playDlHandler.searchSongByName(
+        const playDlResponse: APIResponse<RawSong[]> = await this.playDlService.searchSongByName(
             argument,
         );
 
         if (playDlResponse.isError) {
             console.log('Play-dl Search by name Error: ', playDlResponse.errorData);
 
-            const youtubeResponse = await this.youtubeAPIHandler.searchSongByName(argument);
+            const youtubeResponse = await this.youtubeAPIService.searchSongByName(argument);
 
             if (youtubeResponse.isError) {
                 console.log('Youtube Search by name Error:', youtubeResponse.errorData);
