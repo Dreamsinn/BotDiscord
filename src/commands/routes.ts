@@ -1,10 +1,10 @@
 import { PlayListHandler } from './aplication/playListHandler';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
-import { ClearPlayListCommand } from './aplication/prefixCommands/musicCommands/ClearPlayListCommand';
+import { ClearPlayListCommand } from './aplication/prefixCommands/musicCommands/clearPlayListCommand';
 import { DisconnectCommand } from './aplication/prefixCommands/musicCommands/disconnectCommand';
 import { DisplayPlayListCommand } from './aplication/prefixCommands/musicCommands/displayPlayListCommand';
-import { JoinChannelCommand } from './aplication/prefixCommands/musicCommands/JoinChannelCommand';
+import { JoinChannelCommand } from './aplication/prefixCommands/musicCommands/joinChannelCommand';
 import { LogPlaylistStatusCommand } from './aplication/prefixCommands/musicCommands/logPlaylistStatusCommand';
 import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicCommands/loopPlayListModeCommand';
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
@@ -16,7 +16,7 @@ import { PlayPlayListByYoutubeURL } from './aplication/prefixCommands/musicComma
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
 import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommands/shufflePlayListCommand';
-import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/SkipMusicCommand';
+import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/skipMusicCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { DisplayEmbedBuilder } from './aplication/utils/displayEmbedBuilder';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
@@ -38,6 +38,7 @@ import { SkipMusicCommandSchema } from './domain/commandSchema/skipMusicCommandS
 import { Command } from './domain/interfaces/Command';
 import { PlayDlService } from './infrastructure/playDlService';
 import { YouTubeAPIService } from './infrastructure/youTubeAPIService';
+
 interface Route {
     name: string;
     alias: string[];
