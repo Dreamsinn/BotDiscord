@@ -2,6 +2,7 @@ import { Message } from 'discord.js';
 import { YouTubeVideo } from 'play-dl';
 import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
 import { PlayDlService } from '../../infrastructure/playDlService';
+import { SpotifyAPIService } from '../../infrastructure/spotifyAPIService';
 import { YouTubeAPIService } from '../../infrastructure/youTubeAPIService';
 import { APIResponse } from './APIResponse';
 import { RawSong, Song } from './song';
@@ -9,7 +10,7 @@ import { RawSong, Song } from './song';
 export abstract class PlayCommand {
     protected youtubeAPIService: YouTubeAPIService;
     protected playDlService: PlayDlService;
-    protected spotifyService: PlayDlService;
+    protected spotifyService: SpotifyAPIService;
 
     constructor({ youtubeAPI, playDlAPI, spotifyAPI }) {
         this.youtubeAPIService = youtubeAPI;

@@ -5,6 +5,7 @@ import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { NewSong, Song } from '../../../../domain/interfaces/song';
 import { PlayListHandler } from '../../../playListHandler';
 import { PlayMusicByName } from './playMusicByName';
+import { PlayMusicBySpotifySongURL } from './playMusicBySpotifySongURL';
 import { PlayMusicByYouTubeMobileURL } from './playMusicByYouTubeMobileURL';
 import { PlayMusicByYouTubeURL } from './playMusicByYouTubeURL';
 import { PlayPlayListByYoutubeURL } from './playPlayListByYoutubeURL';
@@ -18,6 +19,7 @@ export class PlayCommandHandler extends Command {
         private playMusicByYouTubeMobileURL: PlayMusicByYouTubeMobileURL,
         private playPlayListByYoutubeURL: PlayPlayListByYoutubeURL,
         private playMusicByYouTubeURL: PlayMusicByYouTubeURL,
+        private playMusicBySpotifySongURL: PlayMusicBySpotifySongURL
     ) {
         super();
     }
@@ -71,6 +73,14 @@ export class PlayCommandHandler extends Command {
                 condition: argument.includes('youtube.com/watch?v='),
                 route: this.playMusicByYouTubeURL,
             },
+            spotifySong: {
+                condition: argument.includes('spotify') && argument.includes("track"),
+                route: this.playMusicBySpotifySongURL
+            },
+            // spotifyPlaylist: {
+            //     condition: argument.includes('spotify') && argument.includes("playlist"),
+            //     rotue: ''
+            // },
             songName: {
                 //default
                 condition: true,

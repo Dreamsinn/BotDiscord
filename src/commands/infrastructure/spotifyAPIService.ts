@@ -1,11 +1,12 @@
 import axios from 'axios';
 import * as qs from 'qs';
+import { APIResponse } from '../domain/interfaces/APIResponse';
 import { RawSong } from '../domain/interfaces/song';
 
 export class SpotifyAPIService {
     private token: string | undefined;
 
-    private async getToken() {
+    private async getToken(): Promise<void> {
         const headers = {
             headers: {
                 Accept: 'application/json',
@@ -29,7 +30,7 @@ export class SpotifyAPIService {
         }
     }
 
-    public async getSongsDataFromSpotifyPlaylistId(playListId: string) {
+    public async getSongsDataFromSpotifyPlaylistId(playListId: string): Promise<APIResponse<RawSong[]>> {
         try {
             if (!this.token) {
                 await this.getToken();
@@ -60,7 +61,7 @@ export class SpotifyAPIService {
         }
     }
 
-    public async getSongDataFromSpotifyId(songId: string) {
+    public async getSongDataFromSpotifyId(songId: string): Promise<APIResponse<RawSong[]>> {
         try {
             if (!this.token) {
                 await this.getToken();
@@ -81,10 +82,11 @@ export class SpotifyAPIService {
             }
 
             const songsData: RawSong[] = response.data.tracks.map((song: SpotifyApi.TrackObjectFull) => {
+                const durationInSeconds = (song.duration_ms/1000).toFixed(0)
                 const newSong: RawSong = {
                     songName: song.name,
                     songId: song.id,
-                    duration: String(song.duration_ms),
+                    duration: String(durationInSeconds),
                     thumbnails: song.album.images[0].url,
                 };
 
