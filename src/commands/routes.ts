@@ -52,7 +52,7 @@ export class Routes {
     private musicAPIs: MusicAPIs = {
         youtubeAPI: new YouTubeAPIService(),
         playDlAPI: new PlayDlService(),
-        spotifyAPI: new SpotifyAPIService()
+        spotifyAPI: new SpotifyAPIService(),
     };
     private displayEmbedBuilder = new DisplayEmbedBuilder();
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
@@ -63,7 +63,7 @@ export class Routes {
         this.usersUsingACommand,
     );
     private playMusicByYouTubeURL = new PlayMusicByYouTubeURL(this.musicAPIs);
-    private playMusicBySpotifySongURL = new PlayMusicBySpotifySongURL(this.musicAPIs)
+    private playMusicBySpotifySongURL = new PlayMusicBySpotifySongURL(this.musicAPIs);
 
     constructor(private usersUsingACommand: UsersUsingACommand) {}
 

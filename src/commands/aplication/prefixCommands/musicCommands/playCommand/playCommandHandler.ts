@@ -19,7 +19,7 @@ export class PlayCommandHandler extends Command {
         private playMusicByYouTubeMobileURL: PlayMusicByYouTubeMobileURL,
         private playPlayListByYoutubeURL: PlayPlayListByYoutubeURL,
         private playMusicByYouTubeURL: PlayMusicByYouTubeURL,
-        private playMusicBySpotifySongURL: PlayMusicBySpotifySongURL
+        private playMusicBySpotifySongURL: PlayMusicBySpotifySongURL,
     ) {
         super();
     }
@@ -74,8 +74,8 @@ export class PlayCommandHandler extends Command {
                 route: this.playMusicByYouTubeURL,
             },
             spotifySong: {
-                condition: argument.includes('spotify') && argument.includes("track"),
-                route: this.playMusicBySpotifySongURL
+                condition: argument.includes('spotify') && argument.includes('track'),
+                route: this.playMusicBySpotifySongURL,
             },
             // spotifyPlaylist: {
             //     condition: argument.includes('spotify') && argument.includes("playlist"),

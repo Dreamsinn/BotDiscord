@@ -3,18 +3,13 @@ import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
 import { RawSong, Song } from '../../../../domain/interfaces/song';
-import { PlayDlService } from '../../../../infrastructure/playDlService';
-import { YouTubeAPIService } from '../../../../infrastructure/youTubeAPIService';
 import { MessageCreator } from '../../../utils/messageCreator';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
 export class PlayPlayListByYoutubeURL extends PlayCommand {
     private usersUsingACommand: UsersUsingACommand;
 
-    constructor(
-        musicAPIs: MusicAPIs,
-        usersUsingACommand: UsersUsingACommand,
-    ) {
+    constructor(musicAPIs: MusicAPIs, usersUsingACommand: UsersUsingACommand) {
         super(musicAPIs);
         this.usersUsingACommand = usersUsingACommand;
     }
@@ -150,7 +145,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
                 songId: song.songId,
                 duration: this.parseSongDuration(String(song.duration), true),
                 thumbnails: song.thumbnails,
-                origin: 'Youtube'
+                origin: 'Youtube',
             };
             return newSong;
         });

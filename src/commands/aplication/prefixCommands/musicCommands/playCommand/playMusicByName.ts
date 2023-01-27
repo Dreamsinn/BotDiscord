@@ -7,13 +7,10 @@ import { RawSong, Song } from '../../../../domain/interfaces/song';
 import { MessageCreator } from '../../../utils/messageCreator';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
-export class PlayMusicByName extends PlayCommand {p
+export class PlayMusicByName extends PlayCommand {
     private usersUsingACommand: UsersUsingACommand;
 
-    constructor(
-        musicAPIs: MusicAPIs,
-        usersUsingACommand: UsersUsingACommand,
-    ) {
+    constructor(musicAPIs: MusicAPIs, usersUsingACommand: UsersUsingACommand) {
         super(musicAPIs);
         this.usersUsingACommand = usersUsingACommand;
     }

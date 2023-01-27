@@ -70,7 +70,7 @@ export abstract class PlayCommand {
                 songName: playDlResponse.data.title,
                 duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
                 thumbnails: playDlResponse.data.thumbnails[3].url,
-                origin: 'Youtube'
+                origin: 'Youtube',
             };
             return song;
         }
@@ -89,7 +89,7 @@ export abstract class PlayCommand {
                 songName: youtubeResponse.data.songName,
                 duration: this.parseSongDuration(youtubeResponse.data.duration, false),
                 thumbnails: youtubeResponse.data.thumbnails,
-                origin: 'Youtube'
+                origin: 'Youtube',
             };
             return song;
         }

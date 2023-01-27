@@ -82,7 +82,7 @@ export class SpotifyAPIService {
             }
 
             const songsData: RawSong[] = response.data.tracks.map((song: SpotifyApi.TrackObjectFull) => {
-                const durationInSeconds = (song.duration_ms/1000).toFixed(0)
+                const durationInSeconds = (song.duration_ms / 1000).toFixed(0);
                 const newSong: RawSong = {
                     songName: song.name,
                     songId: song.id,
