@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es2020",
+        "module": "commonjs",
+        "lib": ["es2020"],
+        // "noImplicitAny": true,
+        "importHelpers": true,
+        // "strictNullChecks": true,
+        "types": ["node", "spotify-api", "jest"],
+        // "noUnusedLocals": true,
+        "esModuleInterop": true
+    },
+    "include": ["src/**/*", "src/__test__"],
+    "exclude": ["node_modules"]
+}
