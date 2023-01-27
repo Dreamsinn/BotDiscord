@@ -69,7 +69,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         }
 
         // si Play-dl falla
-        console.log('PlayDl getSognsInfoFromPlayList Error');
+        console.log(`PlayDl getSognsInfoFromPlayList Error: ${playDlResponse.errorData}`);
         return this.fetchYoutubePlayListData(event, playListId, url);
     }
 
@@ -128,7 +128,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
                     return this.mapPlayDLPlayListData(event, playDlResponse.data);
                 }
 
-                console.log('playDl getSognsInfoFromPlayList Error');
+                console.log(`playDl getSognsInfoFromPlayList Error: ${playDlResponse.errorData}`);
                 return this.fetchYoutubePlayListData(event, playListId, url);
             }
         } catch (err) {
@@ -184,7 +184,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
     private async mapSongListData(event: Message, rawPlayList: RawSong[]): Promise<Song[]> {
         const playList: Song[] = [];
         for (const rawSong of rawPlayList) {
-            const songData = await this.mapSongData(event, rawSong.songId);
+            const songData = await this.mapSongData(event, rawSong.songId, true);
             if (this.isSongData(songData)) {
                 playList.push(songData);
             }

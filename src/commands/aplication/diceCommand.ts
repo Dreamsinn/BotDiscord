@@ -85,36 +85,40 @@ export class DiceCommand extends Command {
     }
 
     private findSuccessSymbol(messageContent: string): SuccessesSymbol {
-        const successSymbolDictionary: { symbol: rollSymbol, condition: boolean, plusSymbol: boolean }[] = [
+        const successSymbolDictionary: {
+            symbol: rollSymbol;
+            condition: boolean;
+            plusSymbol: boolean;
+        }[] = [
             {
                 symbol: '<=',
                 condition: messageContent.includes('<') && messageContent.includes('='),
-                plusSymbol: true
+                plusSymbol: true,
             },
             {
                 symbol: '<',
                 condition: messageContent.includes('<'),
-                plusSymbol: false
+                plusSymbol: false,
             },
             {
                 symbol: '>=',
                 condition: messageContent.includes('>') && messageContent.includes('='),
-                plusSymbol: true
+                plusSymbol: true,
             },
             {
                 symbol: '>',
                 condition: messageContent.includes('>'),
-                plusSymbol: false
-            }
-        ]
+                plusSymbol: false,
+            },
+        ];
 
-        const usedSymbol = successSymbolDictionary.find((successSymbol) => successSymbol.condition)
+        const usedSymbol = successSymbolDictionary.find((successSymbol) => successSymbol.condition);
 
         return {
             symbol: usedSymbol!.symbol,
             symbolPosition: messageContent.search(usedSymbol!.symbol),
-            plusSymbol: usedSymbol!.plusSymbol
-        }
+            plusSymbol: usedSymbol!.plusSymbol,
+        };
     }
 
     private rollSuccesses(messageContent: string): MessageOptions {
@@ -188,14 +192,14 @@ export class DiceCommand extends Command {
     ): number {
         const diceResultNumbers = rollString.split('+');
         const successesDictionary: { [key in rollSymbol]: (n: string) => boolean } = {
-            '>=': (result: string): boolean => (Number(result) >= successesCondition),
-            '>': (result: string): boolean => (Number(result) > successesCondition),
-            '<=': (result: string): boolean => (Number(result) <= successesCondition),
-            '<': (result: string): boolean => (Number(result) < successesCondition)
-        }
+            '>=': (result: string): boolean => Number(result) >= successesCondition,
+            '>': (result: string): boolean => Number(result) > successesCondition,
+            '<=': (result: string): boolean => Number(result) <= successesCondition,
+            '<': (result: string): boolean => Number(result) < successesCondition,
+        };
 
         const successes: string[] = diceResultNumbers.filter((result: string) => {
-            return successesDictionary[symbolData.symbol](result)
+            return successesDictionary[symbolData.symbol](result);
         });
 
         return successes.length;

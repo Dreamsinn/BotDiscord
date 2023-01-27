@@ -53,7 +53,11 @@ export abstract class PlayCommand {
         return (argument as Song).duration.string !== undefined;
     }
 
-    protected async mapSongData(event: Message, songId: string): Promise<Song | void> {
+    protected async mapSongData(
+        event: Message,
+        songId: string,
+        arrayElement = false,
+    ): Promise<Song | void> {
         // optenemos duracion y nombre
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
         const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlHandler.getSongInfo(songId);
@@ -66,7 +70,10 @@ export abstract class PlayCommand {
             };
             return song;
         }
-        console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
+        // sin este if, si falla Play-dl en conseguir la playlist nos saltara un error por musica de la playlist quando la consigamos con youtube i la pasemos por aqui
+        if (!arrayElement) {
+            console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
+        }
 
         // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
         const youtubeResponse: APIResponse<RawSong> = await this.youtubeAPIHandler.searchSongById(
