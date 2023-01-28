@@ -5,7 +5,7 @@ import { PlayDlService } from '../../infrastructure/playDlService';
 import { SpotifyAPIService } from '../../infrastructure/spotifyAPIService';
 import { YouTubeAPIService } from '../../infrastructure/youTubeAPIService';
 import { APIResponse } from './APIResponse';
-import { RawSong, Song } from './song';
+import { RawSong, Song, SpotifyRawSong } from './song';
 
 export abstract class PlayCommand {
     protected youtubeAPIService: YouTubeAPIService;
@@ -70,7 +70,6 @@ export abstract class PlayCommand {
                 songName: playDlResponse.data.title,
                 duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
                 thumbnails: playDlResponse.data.thumbnails[3].url,
-                origin: 'Youtube',
             };
             return song;
         }
@@ -89,13 +88,42 @@ export abstract class PlayCommand {
                 songName: youtubeResponse.data.songName,
                 duration: this.parseSongDuration(youtubeResponse.data.duration, false),
                 thumbnails: youtubeResponse.data.thumbnails,
-                origin: 'Youtube',
             };
             return song;
         }
 
         event.channel.send(`It has not been possible to get song's information`);
         console.log(`YoutubeAPI getSongInfo Error: ${youtubeResponse.errorData}`);
+        return;
+    }
+
+    protected async mapSpotifySongData(rawSong: SpotifyRawSong): Promise<Song> {
+        const songId = await this.getYoutubeIdFromSpotyId(rawSong);
+        if (songId) {
+            const song: Song = {
+                songId,
+                songName: rawSong.songName,
+                duration: this.parseSongDuration(String(rawSong.duration), true),
+                thumbnails: rawSong.thumbnails,
+            };
+            return song;
+        }
+    }
+
+    private async getYoutubeIdFromSpotyId(rawSong: SpotifyRawSong): Promise<string | void> {
+        const search = rawSong.songAuthor + ' ' + rawSong.songName;
+
+        const playDlResponse = await this.playDlService.searchSongByName(search, 1);
+        if (!playDlResponse.isError) {
+            return playDlResponse.data[0].songId;
+        }
+        console.log(`PlayDl get songId by name and artist  Error: ${playDlResponse.errorData}`);
+
+        const youtubeResponse = await this.youtubeAPIService.searchSongByName(search, 1);
+        if (!youtubeResponse.isError) {
+            return youtubeResponse.data[0].songId;
+        }
+        console.log(`PlayDl get songId by name and artist  Error: ${playDlResponse.errorData}`);
         return;
     }
 

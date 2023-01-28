@@ -4,9 +4,12 @@ import { PlayDlAPI } from '../domain/interfaces/playDlAPI';
 import { RawSong } from '../domain/interfaces/song';
 
 export class PlayDlService implements PlayDlAPI {
-    public async searchSongByName(songString: string): Promise<APIResponse<RawSong[]>> {
+    public async searchSongByName(songString: string, maxResults = 9): Promise<APIResponse<RawSong[]>> {
         try {
-            const searched = await play.search(songString, { source: { youtube: 'video' }, limit: 9 });
+            const searched = await play.search(songString, {
+                source: { youtube: 'video' },
+                limit: maxResults,
+            });
 
             const response: RawSong[] = searched.map((songData) => {
                 const newSong: RawSong = {

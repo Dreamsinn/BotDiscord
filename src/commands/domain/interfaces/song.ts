@@ -5,7 +5,6 @@ export interface Song {
     songId: string;
     duration: SongDuration;
     thumbnails: string;
-    origin: 'Spotify' | 'Youtube';
 }
 
 export interface NewSong {
@@ -26,4 +25,12 @@ export interface RawSong {
     songName?: string;
     duration?: string;
     thumbnails?: string;
+}
+
+export interface SpotifyRawSong {
+    spotifySongId: string;
+    songName: string;
+    songAuthor: string;
+    duration: string;
+    thumbnails: string;
 }

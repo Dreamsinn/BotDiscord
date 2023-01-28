@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { RawSong, Song } from '../../../../domain/interfaces/song';
+import { Song, SpotifyRawSong } from '../../../../domain/interfaces/song';
 
 export class PlayMusicBySpotifySongURL extends PlayCommand {
     public async call(event: Message, url: string) {
@@ -22,18 +22,11 @@ export class PlayMusicBySpotifySongURL extends PlayCommand {
     }
 
     private async mapSongDataFromSpotify(event: Message, songId: string): Promise<Song | void> {
-        const spotifyResponse: APIResponse<RawSong[]> =
+        const spotifyResponse: APIResponse<SpotifyRawSong[]> =
             await this.spotifyService.getSongDataFromSpotifyId(songId);
-        console.log(spotifyResponse);
+
         if (!spotifyResponse.isError) {
-            const song: Song = {
-                songId,
-                songName: spotifyResponse.data[0].songName,
-                duration: this.parseSongDuration(String(spotifyResponse.data[0].duration), true),
-                thumbnails: spotifyResponse.data[0].thumbnails,
-                origin: 'Spotify',
-            };
-            return song;
+            return await this.mapSpotifySongData(spotifyResponse.data[0]);
         }
 
         event.channel.send(`It has not been possible to get song's information`);

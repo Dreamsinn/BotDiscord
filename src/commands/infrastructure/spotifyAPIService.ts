@@ -1,12 +1,13 @@
 import axios from 'axios';
 import * as qs from 'qs';
 import { APIResponse } from '../domain/interfaces/APIResponse';
-import { RawSong } from '../domain/interfaces/song';
+import { SpotifyRawSong } from '../domain/interfaces/song';
+import { SpotifyAPI } from '../domain/interfaces/SpotifyAPI';
 
-export class SpotifyAPIService {
-    private token: string | undefined;
+export class SpotifyAPIService extends SpotifyAPI {
+    protected token: string | undefined;
 
-    private async getToken(): Promise<void> {
+    protected async getToken(): Promise<void> {
         const headers = {
             headers: {
                 Accept: 'application/json',
@@ -30,7 +31,9 @@ export class SpotifyAPIService {
         }
     }
 
-    public async getSongsDataFromSpotifyPlaylistId(playListId: string): Promise<APIResponse<RawSong[]>> {
+    public async getSongsDataFromSpotifyPlaylistId(
+        playListId: string,
+    ): Promise<APIResponse<SpotifyRawSong[]>> {
         try {
             if (!this.token) {
                 await this.getToken();
@@ -61,7 +64,7 @@ export class SpotifyAPIService {
         }
     }
 
-    public async getSongDataFromSpotifyId(songId: string): Promise<APIResponse<RawSong[]>> {
+    public async getSongDataFromSpotifyId(songId: string): Promise<APIResponse<SpotifyRawSong[]>> {
         try {
             if (!this.token) {
                 await this.getToken();
@@ -81,17 +84,20 @@ export class SpotifyAPIService {
                 throw new Error('Not found');
             }
 
-            const songsData: RawSong[] = response.data.tracks.map((song: SpotifyApi.TrackObjectFull) => {
-                const durationInSeconds = (song.duration_ms / 1000).toFixed(0);
-                const newSong: RawSong = {
-                    songName: song.name,
-                    songId: song.id,
-                    duration: String(durationInSeconds),
-                    thumbnails: song.album.images[0].url,
-                };
+            const songsData: SpotifyRawSong[] = response.data.tracks.map(
+                (song: SpotifyApi.TrackObjectFull) => {
+                    const durationInSeconds = (song.duration_ms / 1000).toFixed(0);
+                    const newSong: SpotifyRawSong = {
+                        songName: song.name,
+                        spotifySongId: song.id,
+                        songAuthor: song.artists[0].name,
+                        duration: String(durationInSeconds),
+                        thumbnails: song.album.images[0].url,
+                    };
 
-                return newSong;
-            });
+                    return newSong;
+                },
+            );
 
             return {
                 isError: false,

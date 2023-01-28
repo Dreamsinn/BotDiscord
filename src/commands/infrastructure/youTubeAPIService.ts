@@ -4,10 +4,9 @@ import { RawSong } from '../domain/interfaces/song';
 import { YoutubeAPI } from '../domain/interfaces/youtubeAPI';
 
 export class YouTubeAPIService implements YoutubeAPI {
-    public async searchSongByName(song: string): Promise<APIResponse<RawSong[]>> {
+    public async searchSongByName(song: string, maxResults = 9): Promise<APIResponse<RawSong[]>> {
         const order = 'relevance';
         const part = 'snippet';
-        const maxResults = '9';
         const type = 'video,playlist';
 
         try {

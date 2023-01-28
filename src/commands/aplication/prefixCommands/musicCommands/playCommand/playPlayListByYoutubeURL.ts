@@ -145,7 +145,6 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
                 songId: song.songId,
                 duration: this.parseSongDuration(String(song.duration), true),
                 thumbnails: song.thumbnails,
-                origin: 'Youtube',
             };
             return newSong;
         });
