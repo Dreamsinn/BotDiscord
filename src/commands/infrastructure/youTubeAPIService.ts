@@ -7,7 +7,7 @@ export class YouTubeAPIService implements YoutubeAPI {
     public async searchSongByName(song: string, maxResults = 9): Promise<APIResponse<RawSong[]>> {
         const order = 'relevance';
         const part = 'snippet';
-        const type = 'video,playlist';
+        const type = 'video';
 
         try {
             const searched = await axios.get(
@@ -36,28 +36,23 @@ export class YouTubeAPIService implements YoutubeAPI {
         }
     }
 
-    public async searchPlaylist(playListId: string): Promise<APIResponse<RawSong[]>> {
+    public async searchPlaylist(playListId: string): Promise<APIResponse<string>> {
         const part = 'snippet';
         const playlistId = playListId;
-        const maxResults = '30';
+        const maxResults = '50';
 
         try {
             const searched: any = await axios.get(
                 `https://youtube.googleapis.com/youtube/v3/playlistItems?part=${part}&playlistId=${playlistId}&key=${process.env.API_KEY_YOUTUBE}&maxResults=${maxResults}`,
             );
 
-            const response: RawSong[] = searched.data.items.map((songData: any) => {
-                const newSong: RawSong = {
-                    songId: songData.snippet.resourceId.videoId,
-                    songName: songData.snippet.title,
-                };
-
-                return newSong;
+            const songsId: string[] = searched.data.items.map((songData: any) => {
+                return songData.snippet.resourceId.videoId;
             });
 
             return {
                 isError: false,
-                data: response,
+                data: String(songsId),
             };
         } catch (err) {
             return {
@@ -68,26 +63,31 @@ export class YouTubeAPIService implements YoutubeAPI {
         }
     }
 
-    public async searchSongById(songId: string): Promise<APIResponse<RawSong>> {
+    public async searchSongById(songsId: string): Promise<APIResponse<RawSong[]>> {
         const part = 'snippet,contentDetails';
         const maxResults = '1';
-        const id = songId;
+        // id can be an id or ids splited by ' , '
+        const id = songsId;
 
         try {
             const searched = await axios.get(
                 `https://www.googleapis.com/youtube/v3/videos?key=${process.env.API_KEY_YOUTUBE}&part=${part}&maxResults=${maxResults}&id=${id}`,
             );
 
-            const newSong: RawSong = {
-                songId,
-                songName: searched.data.items[0].snippet.title,
-                duration: searched.data.items[0].contentDetails.duration,
-                thumbnails: searched.data.items[0].snippet.thumbnails.medium.url,
-            };
+            const response: RawSong[] = searched.data.items.map((song: any) => {
+                const newSong: RawSong = {
+                    songId: song.id,
+                    songName: song.snippet.title,
+                    duration: song.contentDetails.duration,
+                    thumbnails: song.snippet.thumbnails.medium.url,
+                };
+
+                return newSong;
+            });
 
             return {
                 isError: false,
-                data: newSong,
+                data: response,
             };
         } catch (err) {
             return {

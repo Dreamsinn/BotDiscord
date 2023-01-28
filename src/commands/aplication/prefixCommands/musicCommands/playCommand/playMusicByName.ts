@@ -94,9 +94,11 @@ export class PlayMusicByName extends PlayCommand {
             collectedMessage.delete();
 
             const songId = unchosenMusic[numberSelected].songId;
-
             if (songId) {
-                return this.mapSongData(event, songId);
+                const songData = await this.mapSongData(event, songId);
+                if (this.isSongData(songData[0])) {
+                    return songData[0];
+                }
             }
             return;
         } catch (err) {

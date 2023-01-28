@@ -37,8 +37,8 @@ export abstract class PlayCommand {
         if (URLParametersPosition === -1) {
             const songId: string = rawSongId;
             const songData = await this.mapSongData(event, songId);
-            if (this.isSongData(songData)) {
-                return songData;
+            if (this.isSongData(songData[0])) {
+                return songData[0];
             }
             return;
         }
@@ -46,8 +46,8 @@ export abstract class PlayCommand {
         const songId: string = rawSongId.substring(0, URLParametersPosition);
 
         const songData = await this.mapSongData(event, songId);
-        if (this.isSongData(songData)) {
-            return songData;
+        if (this.isSongData(songData[0])) {
+            return songData[0];
         }
         return;
     }
@@ -56,40 +56,38 @@ export abstract class PlayCommand {
         return (argument as Song).duration.string !== undefined;
     }
 
-    protected async mapSongData(
-        event: Message,
-        songId: string,
-        arrayElement = false,
-    ): Promise<Song | void> {
+    protected async mapSongData(event: Message, songsId: string): Promise<Song[] | void> {
         // optenemos duracion y nombre
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
-        const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlService.getSongInfo(songId);
+        const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlService.getSongInfo(songsId);
         if (!playDlResponse.isError) {
             const song: Song = {
-                songId,
+                songId: songsId,
                 songName: playDlResponse.data.title,
                 duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
                 thumbnails: playDlResponse.data.thumbnails[3].url,
             };
-            return song;
-        }
-        // sin este if, si falla Play-dl en conseguir la playlist nos saltara un error por musica de la playlist quando la consigamos con youtube i la pasemos por aqui
-        if (!arrayElement) {
-            console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
+            return [song];
         }
 
+        console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
+
         // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
-        const youtubeResponse: APIResponse<RawSong> = await this.youtubeAPIService.searchSongById(
-            songId,
+        const youtubeResponse: APIResponse<RawSong[]> = await this.youtubeAPIService.searchSongById(
+            songsId,
         );
+
         if (!youtubeResponse.isError) {
-            const song: Song = {
-                songId,
-                songName: youtubeResponse.data.songName,
-                duration: this.parseSongDuration(youtubeResponse.data.duration, false),
-                thumbnails: youtubeResponse.data.thumbnails,
-            };
-            return song;
+            const songsData: Song[] = youtubeResponse.data.map((rawSong: RawSong) => {
+                const song: Song = {
+                    songId: rawSong.songId,
+                    songName: rawSong.songName,
+                    duration: this.parseSongDuration(rawSong.duration, false),
+                    thumbnails: rawSong.thumbnails,
+                };
+                return song;
+            });
+            return songsData;
         }
 
         event.channel.send(`It has not been possible to get song's information`);

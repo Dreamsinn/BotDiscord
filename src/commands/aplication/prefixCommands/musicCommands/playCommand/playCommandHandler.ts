@@ -96,22 +96,12 @@ export class PlayCommandHandler extends Command {
     }
 
     private async updatePlayList(event: Message, songsData: Song | Song[]): Promise<void> {
-        if (songsData instanceof Array) {
-            const newSongList: NewSong = {
-                newSongs: songsData,
-                channel: event.channel,
-                member: event.member,
-            };
-
-            return this.playListHandler.update(newSongList);
-        }
-
         const newSongList: NewSong = {
             newSongs: songsData,
             channel: event.channel,
             member: event.member,
         };
 
-        return this.playListHandler.update(newSongList);
+        this.playListHandler.update(newSongList);
     }
 }
