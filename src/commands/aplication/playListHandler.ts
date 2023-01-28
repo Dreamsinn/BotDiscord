@@ -17,7 +17,7 @@ import { PaginatedMessage } from './utils/paginatedMessage';
 
 export class PlayListHandler {
     private playList: Song[] = [];
-    private playListDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0, string: '' };
+    private playListDuration: SongDuration;
     private botConnection: any;
     private player: any;
     private playDlService: PlayDlService;
@@ -32,6 +32,8 @@ export class PlayListHandler {
     }
 
     public async update({ member, channel, newSongs }: NewSong): Promise<void> {
+        this.playListDuration = this.calculateListDuration(this.playList);
+
         // si no estas en un canal de voz
         if (newSongs instanceof Array) {
             this.playList.push(...newSongs);
@@ -66,8 +68,6 @@ export class PlayListHandler {
         songList: Song[],
         channel: Message['channel'],
     ): Promise<Message> {
-        this.playListDuration = this.calculateListDuration(this.playList);
-
         const songListDuration = this.calculateListDuration(songList);
 
         const paginationData = this.songArrayToPaginationData(songList);
@@ -132,7 +132,6 @@ export class PlayListHandler {
         newSong: Song,
         channel: Message['channel'],
     ): Promise<Message> {
-        this.playListDuration = this.calculateListDuration(this.playList);
         const output = new MessageCreator({
             embed: {
                 color: '#0099ff',
@@ -164,7 +163,7 @@ export class PlayListHandler {
     }
 
     private calculateListDuration(songList: Song[]): SongDuration {
-        const listDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0, string: '' };
+        const listDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0, string: '0s' };
         if (!songList[0]) {
             return listDuration;
         }
@@ -197,7 +196,7 @@ export class PlayListHandler {
         }
 
         if (hours == 0 && minutes !== 0) {
-            return `${minutes}m${seconds}s`;
+            return `${minutes}m ${seconds}s`;
         }
 
         return `${seconds}s`;
