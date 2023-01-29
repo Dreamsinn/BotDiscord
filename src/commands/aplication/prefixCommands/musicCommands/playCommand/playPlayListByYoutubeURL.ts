@@ -101,11 +101,10 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
                 errors: ['time'],
             });
             this.usersUsingACommand.removeUserList(event.author.id);
-            let collectedMessage: Message;
-            collected.map((e: Message) => (collectedMessage = e));
+            const collectedMessage: Message<boolean>[] = collected.map((e: Message) => e);
 
             // Si se responde una X se borra el mensaje
-            if (['x', 'X'].includes(collectedMessage.content)) {
+            if (['x', 'X'].includes(collectedMessage[0].content)) {
                 event.reply('Search cancelled');
 
                 message.delete();
@@ -113,13 +112,13 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
             }
 
             // N que toque la cancion del enlace
-            if (['n', 'N'].includes(collectedMessage.content)) {
+            if (['n', 'N'].includes(collectedMessage[0].content)) {
                 message.delete();
                 return this.findSongIdFromYoutubeURL(event, url);
             }
 
             // play playList
-            if (['y', 'Y'].includes(collectedMessage.content)) {
+            if (['y', 'Y'].includes(collectedMessage[0].content)) {
                 message.delete();
                 const playDlResponse: APIResponse<RawSong[]> =
                     await this.playDlService.getSognsInfoFromPlayList(url);
@@ -147,10 +146,10 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
     private mapPlayDLPlayListData(rawPlayList: RawSong[]): Song[] {
         const playList: Song[] = rawPlayList.map((song: RawSong) => {
             const newSong: Song = {
-                songName: song.songName,
+                songName: song.songName ?? "It has not been possible to get song's title",
                 songId: song.songId,
                 duration: this.parseSongDuration(String(song.duration), true),
-                thumbnails: song.thumbnails,
+                thumbnails: song.thumbnails ?? '',
             };
             return newSong;
         });

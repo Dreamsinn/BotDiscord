@@ -64,7 +64,7 @@ export abstract class PlayCommand {
         if (!playDlResponse.isError) {
             const song: Song = {
                 songId: songsId,
-                songName: playDlResponse.data.title,
+                songName: playDlResponse.data.title ?? "It has not been possible to get song's title",
                 duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
                 thumbnails: playDlResponse.data.thumbnails[3].url,
             };
@@ -82,9 +82,9 @@ export abstract class PlayCommand {
             const songsData: Song[] = youtubeResponse.data.map((rawSong: RawSong) => {
                 const song: Song = {
                     songId: rawSong.songId,
-                    songName: rawSong.songName,
+                    songName: rawSong.songName ?? "It has not been possible to get song's title",
                     duration: this.parseSongDuration(rawSong.duration, false),
-                    thumbnails: rawSong.thumbnails,
+                    thumbnails: rawSong.thumbnails ?? '',
                 };
                 return song;
             });
@@ -96,7 +96,7 @@ export abstract class PlayCommand {
         return;
     }
 
-    protected async mapSpotifySongData(rawSong: SpotifyRawSong): Promise<Song> {
+    protected async mapSpotifySongData(rawSong: SpotifyRawSong): Promise<Song | void> {
         const songId = await this.getYoutubeIdFromSpotyId(rawSong);
         if (songId) {
             const song: Song = {

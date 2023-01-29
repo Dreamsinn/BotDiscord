@@ -123,7 +123,7 @@ export class DisplayEmbedBuilder {
                 URL: `https://www.youtube.com/watch?v=${playinSong?.songId}`,
             },
             {
-                condition: true,
+                condition: true, //default
                 title:
                     `${discordEmojis.musicEmojis.playing} Playing ${discordEmojis.musicEmojis.playing}\n` +
                     `${playinSong?.songName}`,
@@ -136,7 +136,7 @@ export class DisplayEmbedBuilder {
 
         return {
             title: titleAndUrl!.title,
-            URL: titleAndUrl.URL,
+            URL: titleAndUrl!.URL,
         };
     }
 

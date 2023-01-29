@@ -33,8 +33,8 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 color: 'ORANGE',
                 title: 'Remove songs from playlist:',
                 author: {
-                    name: `${event.member.user.username}`,
-                    iconURL: `${event.member.user.displayAvatarURL()}`,
+                    name: `${event.member!.user.username}`,
+                    iconURL: `${event.member!.user.displayAvatarURL()}`,
                 },
                 description: `Write the **numbers** of the songs you wish to remove split by " , " \nWrite **X** to cancel operation`,
             },
@@ -76,16 +76,15 @@ export class RemoveSongsFromPlayListCommand extends Command {
             .then((collected) => {
                 // usuario ya puede usar otros comandos
                 this.usersUsingACommand.removeUserList(event.author.id);
-                let collectedMessage: Message;
-                collected.map((e: Message) => (collectedMessage = e));
+                const collectedMessage: Message<boolean>[] = collected.map((e: Message) => e);
 
-                if (collectedMessage.content === 'x' || collectedMessage.content === 'X') {
+                if (collectedMessage[0].content === 'x' || collectedMessage[0].content === 'X') {
                     // cancela el comando
                     event.channel.send('Remove command cancelled');
                     return;
                 }
 
-                return this.removeSongFromPlayList(collectedMessage.content, event);
+                return this.removeSongFromPlayList(collectedMessage[0].content, event);
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
@@ -102,14 +101,9 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
     private removeSongFromPlayList(content: string, event: Message): void {
         // pasa a playListHandler el indice(-1) de las canciones
-        const stringNumbersArray = content.split(',');
+        const stringOfNumbersArray = content.split(',');
 
-        const numberArray = stringNumbersArray.map((str) => {
-            const n = Number(str);
-            if (n !== 0) {
-                return Number(str);
-            }
-        });
+        const numberArray = stringOfNumbersArray.map((str) => Number(str));
 
         // recive las canciones borradas y hace embed de las canciones borradas
         const removedMusic = this.playListHandler.removeSongsFromPlayList(numberArray);

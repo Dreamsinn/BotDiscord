@@ -32,7 +32,10 @@ export class PlayMusicBySpotifyPlaylistURL extends PlayCommand {
             const playlist: Song[] = [];
 
             for (const rawSong of spotifyResponse.data) {
-                playlist.push(await this.mapSpotifySongData(rawSong));
+                const song = await this.mapSpotifySongData(rawSong);
+                if (song) {
+                    playlist.push(song);
+                }
             }
 
             return playlist;

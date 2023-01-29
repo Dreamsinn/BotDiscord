@@ -11,14 +11,16 @@ export class PlayDlService implements PlayDlAPI {
                 limit: maxResults,
             });
 
-            const response: RawSong[] = searched.map((songData) => {
-                const newSong: RawSong = {
-                    songId: songData.id,
-                    songName: songData.title,
-                    duration: String(songData.durationInSec),
-                };
-
-                return newSong;
+            const response: RawSong[] = [];
+            searched.forEach((songData) => {
+                if (songData.id) {
+                    const newSong: RawSong = {
+                        songId: songData.id,
+                        songName: songData.title,
+                        duration: String(songData.durationInSec),
+                    };
+                    response.push(newSong);
+                }
             });
 
             return {
@@ -61,24 +63,26 @@ export class PlayDlService implements PlayDlAPI {
 
             const platlistData = await rawPlayList.all_videos();
 
-            const playList: RawSong[] = platlistData.map((songData: YouTubeVideo) => {
-                let thumbnails = songData.thumbnails[3].url;
-                if (!thumbnails) {
-                    if (songData.thumbnails[2]) {
-                        thumbnails = songData.thumbnails[2].url;
-                    } else {
-                        thumbnails = songData.thumbnails[1].url ?? undefined;
+            const playList: RawSong[] = [];
+            platlistData.forEach((songData: YouTubeVideo) => {
+                if (songData.id) {
+                    let thumbnails = songData.thumbnails[3].url;
+                    if (!thumbnails) {
+                        if (songData.thumbnails[2]) {
+                            thumbnails = songData.thumbnails[2].url;
+                        } else {
+                            thumbnails = songData.thumbnails[1].url ?? undefined;
+                        }
                     }
+
+                    const newSong: RawSong = {
+                        songName: songData.title,
+                        songId: songData.id,
+                        duration: String(songData.durationInSec),
+                        thumbnails,
+                    };
+                    playList.push(newSong);
                 }
-
-                const newSong: RawSong = {
-                    songName: songData.title,
-                    songId: songData.id,
-                    duration: String(songData.durationInSec),
-                    thumbnails,
-                };
-
-                return newSong;
             });
 
             return {

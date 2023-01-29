@@ -154,7 +154,7 @@ export class PlayListHandler {
                         inline: true,
                     },
                 ],
-                thumbnailUrl: newSong.thumbnails ?? null,
+                thumbnailUrl: newSong.thumbnails ?? '',
             },
         }).call();
 
@@ -203,9 +203,8 @@ export class PlayListHandler {
 
     private joinToChannel(member: GuildMember, channel: any): void {
         // une al bot al canal de discord y da la capacidad de reproducir musica
-
         this.botConnection = joinVoiceChannel({
-            channelId: member.voice.channel.id,
+            channelId: member.voice.channel!.id,
             guildId: channel.guild.id,
             adapterCreator: channel.guild.voiceAdapterCreator,
             selfDeaf: true,
@@ -296,7 +295,7 @@ export class PlayListHandler {
     }
 
     public async skipMusic(): Promise<Song | void> {
-        let musicToSkip: Song;
+        let musicToSkip: Song | undefined = undefined;
 
         if (!this.player) {
             return;
@@ -345,9 +344,11 @@ export class PlayListHandler {
     }
 
     public changeBotVoiceChanel(event: Message): void {
-        this.joinToChannel(event.member, event.channel);
-        if (this.playList[0]) {
-            this.playMusic();
+        if (event.member?.voice.channel) {
+            this.joinToChannel(event.member, event.channel);
+            if (this.playList[0]) {
+                this.playMusic();
+            }
         }
         return;
     }

@@ -263,7 +263,7 @@ export class DiceCommand extends Command {
 
     private mapRollString(diceNumberArray: number[], diceFacesArray: number[]): MessageOptions {
         let total = 0;
-        let rollStringSum: string;
+        let rollStringSum = '';
 
         // mapear a string todos dados
         for (let i = 0; i <= diceNumberArray.length - 1; i++) {

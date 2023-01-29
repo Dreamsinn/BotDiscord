@@ -15,9 +15,8 @@ export class MessageCreator {
     }
 
     public call(): MessageOptions {
-        let embed: MessageEmbed;
+        const embed = new MessageEmbed();
         if (this.embed) {
-            embed = new MessageEmbed();
             this.embed.color ? embed.setColor(this.embed.color) : null;
             this.embed.title ? embed.setTitle(this.embed.title) : null;
             this.embed.URL ? embed.setURL(this.embed.URL) : null;

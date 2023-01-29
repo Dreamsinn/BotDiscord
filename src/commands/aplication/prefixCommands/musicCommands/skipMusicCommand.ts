@@ -30,8 +30,8 @@ export class SkipMusicCommand extends Command {
             embed: {
                 color: 'ORANGE',
                 author: {
-                    name: `${event.member.user.username}`,
-                    iconURL: `${event.member.user.displayAvatarURL()}`,
+                    name: `${event.member!.user.username}`,
+                    iconURL: `${event.member!.user.displayAvatarURL()}`,
                 },
                 URL: `https://www.youtube.com/watch?v=${skipedMusic.songId}`,
                 title: 'Skipped music:',

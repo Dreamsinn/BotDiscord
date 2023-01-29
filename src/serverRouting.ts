@@ -18,15 +18,19 @@ export class ServerRouting {
         }
 
         // instancia el servidor y vuleve a llamar esta funcion
-        return this.addSeverToServerList(event);
+        this.addSeverToServerList(event);
     }
 
-    private addSeverToServerList(event: Message): Promise<void> {
+    private addSeverToServerList(event: Message): Promise<void> | void {
         const diceCommand = new DiceCommand();
         const replyCommand = new ReplyCommand();
         const usersUsingACommand = new UsersUsingACommand();
         const routes = new Routes(usersUsingACommand);
         const commandHandler = new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand);
+
+        if (!event.guildId) {
+            return;
+        }
 
         const newServer: Server = {
             serverId: event.guildId,

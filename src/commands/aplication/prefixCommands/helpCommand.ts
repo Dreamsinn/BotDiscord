@@ -398,7 +398,7 @@ export class HelpCommand extends Command {
     private createCommandEmbed(
         helpEmbed: Message,
         selected: number,
-    ): { output: MessageOptions; category: CommandsCategoryEnum } {
+    ): { output: MessageOptions; category: CommandsCategoryEnum } | void {
         const selectedCommand = this.findSelectedCommand(helpEmbed, selected);
         if (!selectedCommand) {
             return;

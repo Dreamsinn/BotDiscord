@@ -63,7 +63,7 @@ export class PlayMusicByName extends PlayCommand {
                 Number(reaction.content) > 0 &&
                 Number(reaction.content) < numberChoices;
             // si el autor es el mismo, y el mensaje contiene X, 0 o un numero entre 0 y las numero de opciones
-            return authorCondition && (letterCondition || numberCondition);
+            return Boolean((authorCondition && letterCondition) || numberCondition);
         };
 
         try {
@@ -75,23 +75,22 @@ export class PlayMusicByName extends PlayCommand {
             });
 
             this.usersUsingACommand.removeUserList(event.author.id);
-            let collectedMessage: Message;
-            collected.map((e: Message) => (collectedMessage = e));
+            const collectedMessage: Message<boolean>[] = collected.map((e: Message) => e);
 
             // Si se responde una X se borra el mensaje
-            if (collectedMessage.content === 'x') {
+            if (collectedMessage[0].content === 'x') {
                 event.reply('Search cancelled');
                 message.delete();
-                collectedMessage.delete();
+                collectedMessage[0].delete();
                 return;
             }
 
-            const numberSelected = Number(collectedMessage.content) - 1;
+            const numberSelected = Number(collectedMessage[0].content) - 1;
 
             // eleminamos opciones
             message.delete();
             // eliminamos la respuesta a la opciones
-            collectedMessage.delete();
+            collectedMessage[0].delete();
 
             const songId = unchosenMusic[numberSelected].songId;
             if (songId) {

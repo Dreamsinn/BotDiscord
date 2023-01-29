@@ -49,11 +49,14 @@ export class SpotifyAPIService extends SpotifyAPI {
                 },
             );
 
+            const songsId: string[] = [];
             // eslint-disable-next-line no-undef
-            const songsId: string[] = response.data.items.map((song: SpotifyApi.PlaylistTrackObject) =>
-                // example of href: https://api.spotify.com/v1/tracks/15JINEqzVMv3SvJTAXAKED
-                song.track.href.substring(34),
-            );
+            response.data.items.forEach((song: SpotifyApi.PlaylistTrackObject) => {
+                if (song.track) {
+                    // example of href: https://api.spotify.com/v1/tracks/15JINEqzVMv3SvJTAXAKED
+                    songsId.push(song.track.href.substring(34));
+                }
+            });
 
             return this.getSongDataFromSpotifyId(String(songsId));
         } catch (err) {

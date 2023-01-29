@@ -26,11 +26,13 @@ export class PlayMusicBySpotifySongURL extends PlayCommand {
             await this.spotifyService.getSongDataFromSpotifyId(songId);
 
         if (!spotifyResponse.isError) {
-            return await this.mapSpotifySongData(spotifyResponse.data[0]);
+            if (spotifyResponse.data[0]) {
+                return await this.mapSpotifySongData(spotifyResponse.data[0]);
+            }
+        } else {
+            event.channel.send(`It has not been possible to get song's information`);
+            console.log(`Spotify get song info Error: ${spotifyResponse.errorData}`);
+            return;
         }
-
-        event.channel.send(`It has not been possible to get song's information`);
-        console.log(`Spotify get song info Error: ${spotifyResponse.errorData}`);
-        return;
     }
 }
