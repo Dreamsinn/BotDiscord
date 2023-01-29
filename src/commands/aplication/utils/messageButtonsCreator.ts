@@ -19,7 +19,7 @@ export class MessageButtonsCreator {
         return buttonRows;
     }
 
-    private buttonCreator(rowData: ButtonRow) {
+    private buttonCreator(rowData: ButtonRow): MessageActionRow {
         const buttonsRow = new MessageActionRow();
 
         rowData.forEach((buttonData: Button | undefined) => {

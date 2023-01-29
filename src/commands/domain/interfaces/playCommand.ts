@@ -5,6 +5,7 @@ import { PlayDlService } from '../../infrastructure/playDlService';
 import { SpotifyAPIService } from '../../infrastructure/spotifyAPIService';
 import { YouTubeAPIService } from '../../infrastructure/youTubeAPIService';
 import { APIResponse } from './APIResponse';
+import { MusicAPIs } from './musicAPIs';
 import { RawSong, Song, SpotifyRawSong } from './song';
 
 export abstract class PlayCommand {
@@ -12,7 +13,7 @@ export abstract class PlayCommand {
     protected playDlService: PlayDlService;
     protected spotifyService: SpotifyAPIService;
 
-    constructor({ youtubeAPI, playDlAPI, spotifyAPI }) {
+    constructor({ youtubeAPI, playDlAPI, spotifyAPI }: MusicAPIs) {
         this.youtubeAPIService = youtubeAPI;
         this.playDlService = playDlAPI;
         this.spotifyService = spotifyAPI;
@@ -22,7 +23,7 @@ export abstract class PlayCommand {
         event: Message,
         argument: string,
         usersUsingACommand?: UsersUsingACommand,
-    ): Promise<Song | Song[] | Message | void>;
+    ): Promise<Song | Song[] | void>;
 
     protected async findSongIdFromYoutubeURL(event: Message, url: string): Promise<Song | void> {
         // encontramos la id del video
@@ -37,23 +38,23 @@ export abstract class PlayCommand {
         if (URLParametersPosition === -1) {
             const songId: string = rawSongId;
             const songData = await this.mapSongData(event, songId);
-            if (this.isSongData(songData[0])) {
-                return songData[0];
+            if (!songData) {
+                return;
             }
-            return;
+            return songData[0];
         }
 
         const songId: string = rawSongId.substring(0, URLParametersPosition);
 
         const songData = await this.mapSongData(event, songId);
-        if (this.isSongData(songData[0])) {
-            return songData[0];
+        if (!songData) {
+            return;
         }
-        return;
+        return songData[0];
     }
 
     protected isSongData(argument: Song | void): argument is Song {
-        return (argument as Song).duration.string !== undefined;
+        return (argument as Song).duration?.string !== undefined;
     }
 
     protected async mapSongData(event: Message, songsId: string): Promise<Song[] | void> {
@@ -125,7 +126,7 @@ export abstract class PlayCommand {
         return;
     }
 
-    protected parseSongDuration(durationString = '', onlySeconds: boolean) {
+    protected parseSongDuration(durationString = '', onlySeconds: boolean): Song['duration'] {
         if (onlySeconds) {
             // si cojemos la de play-dl, lo pasamos al formato de la respuesta de youtube
             const duration = Number(durationString);

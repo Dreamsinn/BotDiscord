@@ -13,16 +13,17 @@ export class LoopPlayListModeCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.loopSchema)) {
             return;
         }
 
         const hasBeenActived = this.playListHandler.toggleLoopMode();
         if (hasBeenActived) {
-            return event.channel.send('Loop mode active');
+            event.channel.send('Loop mode active');
+            return;
         }
 
-        return event.channel.send('Loop mode deactive');
+        event.channel.send('Loop mode deactive');
     }
 }

@@ -13,7 +13,7 @@ export class JoinChannelCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public call(event: Message): void {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.joinSchema)) {
             return;
         }

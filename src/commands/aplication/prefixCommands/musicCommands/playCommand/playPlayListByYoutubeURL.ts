@@ -14,10 +14,11 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, url: string): Promise<Song | Song[] | Message<boolean> | void> {
+    async call(event: Message, url: string): Promise<Song | Song[] | void> {
         if (!url.includes('&list=')) {
             // sino se esta rerpoduciendo un video
-            return this.notStartedPlayListUrl(event, url);
+            this.notStartedPlayListUrl(event, url);
+            return;
         }
 
         // si esta reproduciendo un video
@@ -41,7 +42,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         return await this.isPlayListDesired(event, playListId, url);
     }
 
-    private async notStartedPlayListUrl(event: Message, url: string) {
+    private async notStartedPlayListUrl(event: Message, url: string): Promise<Song[] | Song | void> {
         const playListId = url
             .replace('https://', '')
             .replace('www.', '')
@@ -49,7 +50,8 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
             .replace(/^./, '');
 
         if (playListId.length < 3) {
-            return event.reply('Palylist bad request');
+            event.reply('Palylist bad request');
+            return;
         }
 
         // llamamos primero a Play-dl porue ya da la informacion del video y no hara falta hacer una busqueda por cada video de la playlist
@@ -66,7 +68,11 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         return this.fetchYoutubePlayListData(event, playListId, url);
     }
 
-    private async isPlayListDesired(event: Message, playListId: string, url: string) {
+    private async isPlayListDesired(
+        event: Message,
+        playListId: string,
+        url: string,
+    ): Promise<Song[] | Song | void> {
         // preguntamos al usuario si quiere reproducir la cancion el la playlist
         const output = new MessageCreator({
             embed: {
@@ -138,7 +144,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         }
     }
 
-    private mapPlayDLPlayListData(rawPlayList: RawSong[]) {
+    private mapPlayDLPlayListData(rawPlayList: RawSong[]): Song[] {
         const playList: Song[] = rawPlayList.map((song: RawSong) => {
             const newSong: Song = {
                 songName: song.songName,

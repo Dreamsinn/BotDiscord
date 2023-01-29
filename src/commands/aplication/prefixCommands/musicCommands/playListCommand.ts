@@ -14,14 +14,14 @@ export class PlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.playListSchema)) {
             return;
         }
 
         const playList: string[] = this.playListHandler.readPlayList();
 
-        return await new PaginatedMessage({
+        await new PaginatedMessage({
             embed: {
                 color: '#FFE4C4',
                 title: `Playlist: ${playList.length} songs`,
@@ -35,5 +35,6 @@ export class PlayListCommand extends Command {
                 reply: false,
             },
         }).call();
+        return;
     }
 }

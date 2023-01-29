@@ -7,9 +7,9 @@ export class PlayMusicByYouTubeMobileURL extends PlayCommand {
         const songId = url.replace('https://youtu.be/', '').replace(/^./, '');
 
         const songData = await this.mapSongData(event, songId);
-        if (this.isSongData(songData[0])) {
-            return songData[0];
+        if (!songData) {
+            return;
         }
-        return;
+        return songData[0];
     }
 }

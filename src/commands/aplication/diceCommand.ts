@@ -18,7 +18,7 @@ export class DiceCommand extends Command {
         return true;
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.diceSchema)) {
             return;
         }
@@ -33,7 +33,8 @@ export class DiceCommand extends Command {
                 return;
             }
             const output = this.rollSuccesses(event.content);
-            return event.reply(output);
+            event.reply(output);
+            return;
         }
 
         // las demas tiradas
@@ -50,7 +51,8 @@ export class DiceCommand extends Command {
         }
 
         const output = this.rolDices(rollsList);
-        return event.reply(output);
+        event.reply(output);
+        return;
     }
 
     private checkValidRoll(roll: string): boolean {
@@ -158,7 +160,7 @@ export class DiceCommand extends Command {
         diceFaces: number,
         successesCondition: number,
         symbolData: SuccessesSymbol,
-    ) {
+    ): { diceString: string; results: string } {
         let diceString = '';
         if (diceNumber !== 1) {
             diceString += `${diceNumber} `;
@@ -205,7 +207,7 @@ export class DiceCommand extends Command {
         return successes.length;
     }
 
-    private rolDices(rollsList: string[]) {
+    private rolDices(rollsList: string[]): MessageOptions {
         const diceNumberArray: number[] = [];
         const diceFacesArray: number[] = [];
 
@@ -224,7 +226,7 @@ export class DiceCommand extends Command {
         return this.mapRollString(diceNumberArray, diceFacesArray);
     }
 
-    private numberOfDicesAndDicesFaces(roll: string) {
+    private numberOfDicesAndDicesFaces(roll: string): { diceNumber: number; diceFaces: number } {
         const D_position = roll.search(this.diceSchema.aliases[0]);
         let diceNumber = 1;
         //mirar si antes de la D es un numero
@@ -291,7 +293,11 @@ export class DiceCommand extends Command {
         return this.embedConstructor(`${total}`, rollStringSum);
     }
 
-    private mapRandomNumberString(diceNumber: number, diceFaces: number, rollString = '') {
+    private mapRandomNumberString(
+        diceNumber: number,
+        diceFaces: number,
+        rollString = '',
+    ): { rollString: string; diceTotal: number } {
         let diceTotal = 0;
         for (let i = 0; i <= diceNumber - 1; i++) {
             const roll = Math.floor(Math.random() * diceFaces) + 1;

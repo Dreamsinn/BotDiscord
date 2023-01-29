@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { ButtonInteraction, CacheType, Message, MessageOptions } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../domain/enums/buttonStyleEnum';
 import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
@@ -52,7 +52,7 @@ export class PaginatedMessage {
         return paginatedMessage;
     }
 
-    private paginateData() {
+    private paginateData(): string[] {
         const paginatedData: string[][] = [];
 
         // convierte un arr
@@ -67,7 +67,7 @@ export class PaginatedMessage {
         return paginatedStringData;
     }
 
-    private convertPageToString(songPage: string[]) {
+    private convertPageToString(songPage: string[]): string {
         let pageStringData: string;
         if (this.pagination.jsFormat) {
             pageStringData = '```js\n';
@@ -84,7 +84,7 @@ export class PaginatedMessage {
         return pageStringData;
     }
 
-    private createPageEmbed() {
+    private createPageEmbed(): MessageOptions {
         let description: string | undefined;
         if (this.paginatedStringData.length === 1 && this.embed.description) {
             description = this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`;
@@ -121,7 +121,7 @@ export class PaginatedMessage {
         return output;
     }
 
-    private addButtonsReactions(paginatedMessage: Message) {
+    private addButtonsReactions(paginatedMessage: Message): void {
         const buttons: ButtonRowList = [
             [
                 {
@@ -144,11 +144,9 @@ export class PaginatedMessage {
         paginatedMessage.edit({ components: new MessageButtonsCreator(buttons).call() }).catch((err) => {
             console.log('Error adding buttons to paginated embed: ', err);
         });
-
-        return;
     }
 
-    private reactionListener(message: Message, maxPage: number) {
+    private reactionListener(message: Message, maxPage: number): void {
         const collector = message.createMessageComponentCollector({
             componentType: 'BUTTON',
             time: this.pagination.timeOut,
@@ -177,7 +175,11 @@ export class PaginatedMessage {
         });
     }
 
-    private reactionHandler(message: Message, collected, maxPage: number) {
+    private reactionHandler(
+        message: Message,
+        collected: ButtonInteraction<CacheType>,
+        maxPage: number,
+    ): void {
         let pageChanged = false;
 
         const collectedId = collected.customId;
@@ -195,7 +197,7 @@ export class PaginatedMessage {
         // si se ha cambiado la pagina edita el embed con la info de la pagina actual
         if (pageChanged) {
             const output = this.createPageEmbed();
-            return message.edit({ embeds: output.embeds }).catch((err) => {
+            message.edit({ embeds: output.embeds }).catch((err) => {
                 console.log('Error changing page: ', err);
             });
         }

@@ -13,16 +13,16 @@ export class ClearPlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public call(event: Message): Promise<Message> | void {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.clearSchema)) {
             return;
         }
 
         const deleteResponse = this.playListHandler.deletePlayList();
-
         if (!deleteResponse) {
-            return event.reply('There is no playList');
+            event.reply('There is no playList');
+            return;
         }
-        return event.reply('Playlist has been cleared');
+        event.reply('Playlist has been cleared');
     }
 }

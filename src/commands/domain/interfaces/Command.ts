@@ -9,7 +9,7 @@ export abstract class Command {
     private coolDown = new CoolDown();
     protected checkDevRole = new CheckDevRole();
 
-    abstract call(event: Message, props?: DiceCommand | ReplyCommand);
+    abstract call(event: Message, props?: DiceCommand | ReplyCommand): Promise<void>;
 
     protected roleAndCooldownValidation(event: Message, schema: CommandSchema): boolean {
         let interrupt = false;

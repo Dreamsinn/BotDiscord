@@ -16,7 +16,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
         super();
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.removeSchema)) {
             return;
         }
@@ -24,7 +24,8 @@ export class RemoveSongsFromPlayListCommand extends Command {
         const playList: string[] = this.playListHandler.readPlayList();
 
         if (!playList[0]) {
-            return event.reply('There is no playList');
+            event.reply('There is no playList');
+            return;
         }
 
         await new PaginatedMessage({
@@ -48,10 +49,10 @@ export class RemoveSongsFromPlayListCommand extends Command {
             },
         }).call();
 
-        return this.messageCollector(event, playList);
+        this.messageCollector(event, playList);
     }
 
-    private messageCollector(event: Message, playList: string[]) {
+    private messageCollector(event: Message, playList: string[]): void {
         // usuario no pueda ejecutar otros comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
@@ -99,7 +100,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
             });
     }
 
-    private removeSongFromPlayList(content: string, event: Message) {
+    private removeSongFromPlayList(content: string, event: Message): void {
         // pasa a playListHandler el indice(-1) de las canciones
         const stringNumbersArray = content.split(',');
 
@@ -112,11 +113,11 @@ export class RemoveSongsFromPlayListCommand extends Command {
 
         // recive las canciones borradas y hace embed de las canciones borradas
         const removedMusic = this.playListHandler.removeSongsFromPlayList(numberArray);
-        return this.removedMusicEmbed(removedMusic, event);
+        this.removedMusicEmbed(removedMusic, event);
     }
 
-    private async removedMusicEmbed(removedMusic: string[], event: Message) {
-        return await new PaginatedMessage({
+    private async removedMusicEmbed(removedMusic: string[], event: Message): Promise<void> {
+        await new PaginatedMessage({
             embed: {
                 color: 'ORANGE',
                 title: `${removedMusic.length} songs removeds from Playlist`,
@@ -134,5 +135,6 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 jsFormat: true,
             },
         }).call();
+        return;
     }
 }

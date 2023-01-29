@@ -49,6 +49,7 @@ export class SpotifyAPIService extends SpotifyAPI {
                 },
             );
 
+            // eslint-disable-next-line no-undef
             const songsId: string[] = response.data.items.map((song: SpotifyApi.PlaylistTrackObject) =>
                 // example of href: https://api.spotify.com/v1/tracks/15JINEqzVMv3SvJTAXAKED
                 song.track.href.substring(34),
@@ -85,6 +86,7 @@ export class SpotifyAPIService extends SpotifyAPI {
             }
 
             const songsData: SpotifyRawSong[] = response.data.tracks.map(
+                // eslint-disable-next-line no-undef
                 (song: SpotifyApi.TrackObjectFull) => {
                     const durationInSeconds = (song.duration_ms / 1000).toFixed(0);
                     const newSong: SpotifyRawSong = {

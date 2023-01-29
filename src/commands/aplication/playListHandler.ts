@@ -34,7 +34,6 @@ export class PlayListHandler {
     public async update({ member, channel, newSongs }: NewSong): Promise<void> {
         this.playListDuration = this.calculateListDuration(this.playList);
 
-        // si no estas en un canal de voz
         if (newSongs instanceof Array) {
             this.playList.push(...newSongs);
             await this.newListToPlayListEmbed(member, newSongs, channel);
@@ -121,7 +120,7 @@ export class PlayListHandler {
         return playListString;
     }
 
-    private mapPagesData(songData: Song, index: number) {
+    private mapPagesData(songData: Song, index: number): string {
         const songsString = `${index + 1} - ${songData.songName} '${songData.duration.string}'\n`;
 
         return songsString;
@@ -470,7 +469,7 @@ export class PlayListHandler {
         return this.sendPlayListDataToDisplay(true);
     }
 
-    private sendPlayListDataToDisplay(newEmbed = false) {
+    private sendPlayListDataToDisplay(newEmbed = false): Promise<void | DisplayMessage> {
         const playListData = this.readPlayListStatus();
 
         return this.displayEmbedBuilder.call(playListData, this.isDisplay.event, newEmbed);

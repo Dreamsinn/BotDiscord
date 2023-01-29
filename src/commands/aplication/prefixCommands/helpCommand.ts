@@ -36,7 +36,7 @@ export class HelpCommand extends Command {
         super();
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.helpSchema)) {
             return;
         }
@@ -50,7 +50,8 @@ export class HelpCommand extends Command {
             this.mapCommandListData();
         }
 
-        return this.messageResponseListener(typeCommandMessage, event, HelpEmbedsTitlesEnum.TYPES);
+        this.messageResponseListener(typeCommandMessage, event, HelpEmbedsTitlesEnum.TYPES);
+        return;
     }
 
     private mapCommandListData() {
@@ -105,7 +106,7 @@ export class HelpCommand extends Command {
         });
     }
 
-    private createTypeOfCommandsEmbed() {
+    private createTypeOfCommandsEmbed(): MessageOptions {
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',
@@ -136,7 +137,7 @@ export class HelpCommand extends Command {
         helpEmbed: Message,
         event: Message,
         typeOfEmbed: HelpEmbedsTitlesEnum | CommandsCategoryEnum,
-    ) {
+    ): void {
         // usuario en la lista de no poder usar comandos
         this.usersUsingACommand.updateUserList(event.author.id);
 
@@ -182,10 +183,12 @@ export class HelpCommand extends Command {
                 }
                 // ir al embed anterior
                 if (['b', 'B', 'back', 'BACK'].includes(collectedMessage[0].content)) {
-                    return this.findPreviousEmbed(helpEmbed, event, typeOfEmbed);
+                    this.findPreviousEmbed(helpEmbed, event, typeOfEmbed);
+                    return;
                 }
                 // ir al siguiente embed
-                return this.findNextEmbedToCreate(collectedMessage[0], helpEmbed, event);
+                this.findNextEmbedToCreate(collectedMessage[0], helpEmbed, event);
+                return;
             })
             .catch((err) => {
                 if (err instanceof TypeError) {
@@ -277,7 +280,11 @@ export class HelpCommand extends Command {
         }
     }
 
-    private async findNextEmbedToCreate(collectedMessage: Message, helpEmbed: Message, event: Message) {
+    private async findNextEmbedToCreate(
+        collectedMessage: Message,
+        helpEmbed: Message,
+        event: Message,
+    ): Promise<void> {
         // creamos el embed selecionado, lo enviamos y le escuchamos la respuesta
         const nextEmbedDictionary: {
             condition: boolean;
@@ -337,7 +344,7 @@ export class HelpCommand extends Command {
             };
         }
 
-        return await helpEmbed
+        await helpEmbed
             .edit(response.output)
             .then((nextEmbedMessage) =>
                 this.messageResponseListener(nextEmbedMessage, event, response.type),
@@ -345,9 +352,10 @@ export class HelpCommand extends Command {
             .catch((err) => {
                 console.log('Error editing findNextEmbedToCreate :', err);
             });
+        return;
     }
 
-    private createSubTypeCommandsEmbed(commandCategory: SubTypeCommandData) {
+    private createSubTypeCommandsEmbed(commandCategory: SubTypeCommandData): MessageOptions {
         const embedFileds: EmbedFieldData[] = [];
         let index = 0;
         if (commandCategory.title === HelpEmbedsTitlesEnum.PREFIX) {
@@ -383,11 +391,14 @@ export class HelpCommand extends Command {
         return output;
     }
 
-    private mapTypeCommandsFieldsData(commandData: HelpCommandData, index: number) {
+    private mapTypeCommandsFieldsData(commandData: HelpCommandData, index: number): EmbedFieldData {
         return { name: '\u200b', value: `**${index} - ${commandData.name}**`, inline: false };
     }
 
-    private createCommandEmbed(helpEmbed: Message, selected: number) {
+    private createCommandEmbed(
+        helpEmbed: Message,
+        selected: number,
+    ): { output: MessageOptions; category: CommandsCategoryEnum } {
         const selectedCommand = this.findSelectedCommand(helpEmbed, selected);
         if (!selectedCommand) {
             return;

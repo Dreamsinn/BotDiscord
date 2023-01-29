@@ -17,14 +17,14 @@ export class ReplyCommand extends Command {
         return true;
     }
 
-    public async call(event): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.replySchema)) {
             return;
         }
 
         // TODO: no fer recorsivitat de if, es podria fer un filter
         // concatenar if fa que sigui lios
-        this.replySchema.aliases.forEach((alias) => {
+        this.replySchema.aliases.forEach((alias: string) => {
             // mirar si se encuntra el alias al principio, o ente ' '
             if (event.content.startsWith(alias) || event.content.includes(` ${alias} `)) {
                 // mirar si cumple la condicion de coolDown
@@ -39,7 +39,8 @@ export class ReplyCommand extends Command {
                         description: `${this.mapAliases(alias)}`,
                     },
                 }).call();
-                return event.reply(output);
+                event.reply(output);
+                return;
             }
         });
         return;
@@ -57,7 +58,7 @@ export class ReplyCommand extends Command {
 
 //TODO hamburgessa no responde
 
-export const replyCommandOptions = {
+export const replyCommandOptions: any = {
     cinco: 'POR EL CULO TE LA HINCO',
     5: 'POR EL CULO TE LA HINCO',
     trece: 'AGARRAMELA QUE ME CRECE',

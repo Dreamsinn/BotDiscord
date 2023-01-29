@@ -26,7 +26,7 @@ export class PlayCommandHandler extends Command {
         super();
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.playSchema)) {
             return;
         }
@@ -39,7 +39,8 @@ export class PlayCommandHandler extends Command {
 
         // si no estas en un canal de voz
         if (!event.member?.voice.channel) {
-            return event.channel.send('Tienes que estar en un canal de voz!');
+            event.channel.send('Tienes que estar en un canal de voz!');
+            return;
         }
 
         const argument = event.content.substring(emptySpacePosition);
@@ -51,14 +52,13 @@ export class PlayCommandHandler extends Command {
             return;
         }
 
-        if (songs instanceof Message) {
-            return songs;
-        }
-
         return this.updatePlayList(event, songs);
     }
 
-    private async findSongByArgumentType(argument: string, event: Message) {
+    private async findSongByArgumentType(
+        argument: string,
+        event: Message,
+    ): Promise<void | Song | Song[]> {
         const argumentTypeDictionary = {
             mobil: {
                 condition: argument.includes('youtu.be/'),

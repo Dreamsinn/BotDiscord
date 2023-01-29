@@ -4,7 +4,7 @@ import { PlayCommand } from '../../../../domain/interfaces/playCommand';
 import { Song, SpotifyRawSong } from '../../../../domain/interfaces/song';
 
 export class PlayMusicBySpotifySongURL extends PlayCommand {
-    public async call(event: Message, url: string) {
+    public async call(event: Message, url: string): Promise<Song | void> {
         const songIdPosition = url.indexOf('track/');
         const pathParameterPosition = url.indexOf('?si');
 

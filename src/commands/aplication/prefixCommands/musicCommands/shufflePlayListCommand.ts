@@ -13,15 +13,17 @@ export class ShufflePlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.shuffleSchema)) {
             return;
         }
 
         if (this.playListHandler.shufflePlayList()) {
-            return event.channel.send('PlayList have been randomized');
+            event.channel.send('PlayList have been randomized');
+            return;
         }
 
-        return event.reply('There is no playList');
+        event.reply('There is no playList');
+        return;
     }
 }

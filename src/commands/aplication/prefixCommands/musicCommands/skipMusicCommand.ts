@@ -14,7 +14,7 @@ export class SkipMusicCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.skipSchema)) {
             return;
         }
@@ -22,7 +22,8 @@ export class SkipMusicCommand extends Command {
         const skipedMusic = await this.playListHandler.skipMusic();
 
         if (!skipedMusic) {
-            return event.reply('There is no playList');
+            event.reply('There is no playList');
+            return;
         }
 
         const output = new MessageCreator({
@@ -38,6 +39,7 @@ export class SkipMusicCommand extends Command {
             },
         }).call();
 
-        return event.channel.send(output);
+        event.channel.send(output);
+        return;
     }
 }

@@ -9,7 +9,7 @@ import { Routes } from './commands/routes';
 export class ServerRouting {
     private serverList: Server[] = [];
 
-    public async call(event: Message) {
+    public async call(event: Message): Promise<void> {
         // mira si el servidor ya ha sido instanciado, si es asi llama a la instancia
         for (const server of this.serverList) {
             if (server.serverId === event.guildId) {
@@ -21,7 +21,7 @@ export class ServerRouting {
         return this.addSeverToServerList(event);
     }
 
-    private addSeverToServerList(event: Message) {
+    private addSeverToServerList(event: Message): Promise<void> {
         const diceCommand = new DiceCommand();
         const replyCommand = new ReplyCommand();
         const usersUsingACommand = new UsersUsingACommand();

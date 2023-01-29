@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { ButtonInteraction, CacheType, InteractionCollector, Message } from 'discord.js';
 import { DisplayPlayListCommandSchema } from '../../../domain/commandSchema/displayPlayListCommandSchema';
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../domain/enums/buttonStyleEnum';
@@ -16,14 +16,14 @@ export class DisplayPlayListCommand extends Command {
     private playListHandler: PlayListHandler;
     private isDisplayActive = false;
     private showingReadme = false;
-    private collector;
+    private collector: InteractionCollector<ButtonInteraction<CacheType>>;
 
     constructor(playListHandler: PlayListHandler) {
         super();
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.displaySchema)) {
             return;
         }
@@ -54,12 +54,12 @@ export class DisplayPlayListCommand extends Command {
         const display = await this.playListHandler.activateDispaly(event);
 
         if (display) {
-            return this.reactionListener(event, display);
+            this.reactionListener(event, display);
         }
         return;
     }
 
-    private reactionListener(event: Message, display: DisplayMessage) {
+    private reactionListener(event: Message, display: DisplayMessage): void {
         // Añade reacciones y escucha las reacciones recibidas, si se reacciona una de las añadidas: se borra relación y actúa dependiendo relación
         this.addButtonsReactions(display.message);
 
@@ -80,12 +80,14 @@ export class DisplayPlayListCommand extends Command {
 
             // si x borra el msenaje
             if (collected.customId === DisplayButtonsIdEnum.CLOSE) {
-                return this.collector.stop();
+                this.collector.stop();
+                return;
             }
 
             // si readme, y no esta el readme activo
             if (collected.customId === DisplayButtonsIdEnum.README && !this.showingReadme) {
-                return this.createReadmeEmbed(display);
+                this.createReadmeEmbed(display);
+                return;
             }
 
             await this.reactionHandler(collected);
@@ -106,7 +108,7 @@ export class DisplayPlayListCommand extends Command {
         });
     }
 
-    private addButtonsReactions(displayMessage: Message) {
+    private addButtonsReactions(displayMessage: Message): void {
         const buttons: ButtonRowList = [
             [
                 {
@@ -133,7 +135,7 @@ export class DisplayPlayListCommand extends Command {
             [
                 {
                     style: ButtonsStyleEnum.GRENN,
-                    label: `${discordEmojis.musicEmojis.clear} Clear Platlist`,
+                    label: `${discordEmojis.musicEmojis.clear} Clear Playlist`,
                     custom_id: DisplayButtonsIdEnum.CLEAR,
                 },
                 {
@@ -156,7 +158,7 @@ export class DisplayPlayListCommand extends Command {
         return;
     }
 
-    private createReadmeEmbed(display: DisplayMessage) {
+    private createReadmeEmbed(display: DisplayMessage): void {
         this.showingReadme = true;
         const output = new MessageCreator({
             embed: {
@@ -219,27 +221,32 @@ export class DisplayPlayListCommand extends Command {
         return;
     }
 
-    private async reactionHandler(collected) {
+    private async reactionHandler(collected: ButtonInteraction<CacheType>): Promise<void> {
         const buttonId = collected.customId;
 
         if (buttonId === DisplayButtonsIdEnum.PLAY_PAUSE) {
-            return this.playListHandler.togglePauseMusic();
+            this.playListHandler.togglePauseMusic();
+            return;
         }
 
         if (buttonId === DisplayButtonsIdEnum.NEXT) {
-            return await this.playListHandler.skipMusic();
+            await this.playListHandler.skipMusic();
+            return;
         }
 
         if (buttonId === DisplayButtonsIdEnum.LOOP) {
-            return this.playListHandler.toggleLoopMode();
+            this.playListHandler.toggleLoopMode();
+            return;
         }
 
         if (buttonId === DisplayButtonsIdEnum.SHUFFLE) {
-            return this.playListHandler.shufflePlayList();
+            this.playListHandler.shufflePlayList();
+            return;
         }
 
         if (buttonId === DisplayButtonsIdEnum.CLEAR) {
-            return this.playListHandler.deletePlayList();
+            this.playListHandler.deletePlayList();
+            return;
         }
     }
 }

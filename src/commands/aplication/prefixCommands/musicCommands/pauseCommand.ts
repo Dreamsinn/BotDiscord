@@ -14,7 +14,7 @@ export class PauseCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<Message | void> {
+    public async call(event: Message): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.pauseSchema)) {
             return;
         }
@@ -22,13 +22,16 @@ export class PauseCommand extends Command {
         const pausedResposne = this.playListHandler.togglePauseMusic();
 
         if (pausedResposne === TogglePauseOutputEnums.NO_PLAYLIST) {
-            return event.reply('There is no playList');
+            event.reply('There is no playList');
+            return;
         }
 
         if (pausedResposne === TogglePauseOutputEnums.PAUSE) {
-            return event.reply('PlayList has been paused');
+            event.reply('PlayList has been paused');
+            return;
         }
 
-        return event.reply('PlayList has been unpaused');
+        event.reply('PlayList has been unpaused');
+        return;
     }
 }

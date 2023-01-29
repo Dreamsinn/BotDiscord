@@ -42,7 +42,7 @@ export class DisplayEmbedBuilder {
         }
     }
 
-    private async selectChannel(event): Promise<ThreadChannel> {
+    private async selectChannel(event: any): Promise<ThreadChannel> {
         // si el chat es un hilo lo devolvemos
         if (event.channel.isThread()) {
             return event.channel;
@@ -184,7 +184,7 @@ export class DisplayEmbedBuilder {
         playerStatus,
         conectionStatus,
         ...playListStatus
-    }: PlayListStatus) {
+    }: PlayListStatus): { duration: string; queueData: string } {
         let duration: string;
         let queueData: string;
 
@@ -208,7 +208,11 @@ export class DisplayEmbedBuilder {
         return { duration, queueData };
     }
 
-    private mapSongThumbnailUrl(playinSong: Song, playerStatus: string, conectionStatus: string) {
+    private mapSongThumbnailUrl(
+        playinSong: Song,
+        playerStatus: string,
+        conectionStatus: string,
+    ): string | undefined {
         if (
             !playerStatus ||
             !conectionStatus ||
@@ -223,7 +227,7 @@ export class DisplayEmbedBuilder {
         return;
     }
 
-    private mapNextSongData(playList: Song[]) {
+    private mapNextSongData(playList: Song[]): EmbedFieldData | void {
         if (playList[1]) {
             return {
                 name: 'Siguiente cancion',

@@ -13,8 +13,8 @@ async function server() {
 
     const serverRouting = new ServerRouting();
 
-    bot.client.on('messageCreate', async (event: Message) => {
-        if (event.author.bot) return false;
+    bot.client.on('messageCreate', async (event: Message): Promise<void> => {
+        if (event.author.bot) return;
 
         // si el autor del mensaje no es el bot
         return await serverRouting.call(event);

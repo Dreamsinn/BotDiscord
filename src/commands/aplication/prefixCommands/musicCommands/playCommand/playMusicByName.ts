@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, MessageOptions } from 'discord.js';
 import { discordEmojis } from '../../../../domain/discordEmojis';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
@@ -47,7 +47,7 @@ export class PlayMusicByName extends PlayCommand {
         return await this.listenUserChoices(event, unchosenMusic);
     }
 
-    private async listenUserChoices(event: Message, unchosenMusic: RawSong[]) {
+    private async listenUserChoices(event: Message, unchosenMusic: RawSong[]): Promise<Song | void> {
         const { output, numberChoices } = this.createSelectChoicesEmbed(unchosenMusic);
 
         // subimos al usuario a la lista para que no pueda usar otros comandos
@@ -96,9 +96,10 @@ export class PlayMusicByName extends PlayCommand {
             const songId = unchosenMusic[numberSelected].songId;
             if (songId) {
                 const songData = await this.mapSongData(event, songId);
-                if (this.isSongData(songData[0])) {
-                    return songData[0];
+                if (!songData) {
+                    return;
                 }
+                return songData[0];
             }
             return;
         } catch (err) {
@@ -116,7 +117,10 @@ export class PlayMusicByName extends PlayCommand {
         }
     }
 
-    private createSelectChoicesEmbed(unchosenMusic: RawSong[]) {
+    private createSelectChoicesEmbed(unchosenMusic: RawSong[]): {
+        output: MessageOptions;
+        numberChoices: number;
+    } {
         // pasa un embed al discord para que elija exactamente cual quiere
         let embedContent = '```js\n';
 
