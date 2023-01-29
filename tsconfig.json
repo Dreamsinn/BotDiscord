@@ -7,7 +7,7 @@
         "importHelpers": true,
         "strictNullChecks": true,
         "types": ["node", "spotify-api", "jest"],
-        // "noUnusedLocals": true,
+        "noUnusedLocals": true,
         "esModuleInterop": true
     },
     "include": ["src/**/*", "src/__test__"],
