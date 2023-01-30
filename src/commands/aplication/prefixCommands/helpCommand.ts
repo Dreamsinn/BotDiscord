@@ -110,6 +110,7 @@ export class HelpCommand extends Command {
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',
+                description: '__Mientras help este activo no podra usar otro comando.__',
                 title: HelpEmbedsTitlesEnum.TYPES,
                 fields: [
                     { name: '\u200b', value: `**1 - ${HelpEmbedsTitlesEnum.PREFIX}**`, inline: false },
@@ -124,7 +125,7 @@ export class HelpCommand extends Command {
                     value:
                         'Escriba:\n' +
                         '- El **número** del tipo de comando que desee consultar.\n' +
-                        `- **X** para cancelar el comando.\n __Mientras help este activo no podra usar otro comando.__`,
+                        `- **X** para cancelar el comando.`,
                     inline: false,
                 },
             },
@@ -374,6 +375,7 @@ export class HelpCommand extends Command {
         const output = new MessageCreator({
             embed: {
                 color: '#BFFF00',
+                description: '__Mientras help este activo no podra usar otro comando.__',
                 title: commandCategory.title,
                 fields: embedFileds,
                 field: {
@@ -382,7 +384,7 @@ export class HelpCommand extends Command {
                         'Escriba:\n' +
                         '- El **número** del tipo de comando que desee consultar.\n' +
                         '- **b** o **back** para ir hacia atras.\n' +
-                        `- **X** para cancelar el comando.\n __Mientras help este activo no podra usar otro comando.__`,
+                        `- **X** para cancelar el comando.`,
                     inline: false,
                 },
             },
@@ -404,7 +406,7 @@ export class HelpCommand extends Command {
             return;
         }
 
-        let description = '';
+        let description = '__Mientras help este activo no podra usar otro comando.__\n\n';
         if (selectedCommand.category !== CommandsCategoryEnum.NONPREFIX) {
             description += `**Este comando requiere del prefijo: \`${process.env.PREFIX}\` delante del alias para ser llamado**.\n`;
         }
@@ -446,7 +448,7 @@ export class HelpCommand extends Command {
                     'Escriba:\n' +
                     '- El **número** del tipo de comando que desee consultar.\n' +
                     '- **b** o **back** para ir hacia atras.\n' +
-                    `- **X** para cancelar el comando.\n __Mientras help este activo no podra usar otro comando.__`,
+                    `- **X** para cancelar el comando.`,
                 inline: false,
             },
         };
