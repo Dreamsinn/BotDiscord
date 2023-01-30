@@ -60,6 +60,12 @@ export class SpotifyAPIService extends SpotifyAPI {
 
             return this.getSongDataFromSpotifyId(String(songsId));
         } catch (err) {
+            if (err.response?.data.error?.message === 'The access token expired') {
+                console.log('Spotify token refresh');
+                this.token = undefined;
+                return this.getSongsDataFromSpotifyPlaylistId(playListId);
+            }
+
             return {
                 isError: true,
                 data: null,
@@ -109,6 +115,12 @@ export class SpotifyAPIService extends SpotifyAPI {
                 data: songsData,
             };
         } catch (err) {
+            if (err.response?.data.error?.message === 'The access token expired') {
+                console.log('Spotify token refresh');
+                this.token = undefined;
+                return this.getSongDataFromSpotifyId(songId);
+            }
+
             return {
                 isError: true,
                 data: null,
