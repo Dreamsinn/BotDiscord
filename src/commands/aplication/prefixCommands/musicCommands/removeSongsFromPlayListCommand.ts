@@ -40,7 +40,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
             },
             pagination: {
                 channel: event.channel,
-                dataToPaginate: playList,
+                dataToPaginate: [...playList],
                 dataPerPage: 10,
                 timeOut: 60000,
                 jsFormat: true,
