@@ -331,7 +331,7 @@ export class PlayListHandler {
     }
 
     public togglePauseMusic(): string {
-        if (!this.player) {
+        if (!this.player || !this.playList[0]) {
             return TogglePauseOutputEnums.NO_PLAYLIST;
         }
         if (this.player._state.status === 'paused') {
@@ -359,7 +359,7 @@ export class PlayListHandler {
     }
 
     public deletePlayList() {
-        if (this.player) {
+        if (this.playList[0] && this.player) {
             this.playList = [];
             this.player.stop();
 
