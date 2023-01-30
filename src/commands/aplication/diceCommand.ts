@@ -66,12 +66,7 @@ export class DiceCommand extends Command {
             const symbol: SuccessesSymbol = this.findSuccessSymbol(roll);
             // antes y despues del simbolo sea u numero
             if (Number(roll.substring(D_position + 1, symbol.symbolPosition))) {
-                // si tiene =, despues de <= sea un nuemero
-                if (symbol.plusSymbol && Number(roll.substring(symbol.symbolPosition + 2))) {
-                    return true;
-                }
-                // sino tiene =, despues de < sea un numero
-                if (Number(roll.substring(symbol.symbolPosition + 1))) {
+                if (Number(roll.substring(symbol.symbolPosition + symbol.symbolLength))) {
                     return true;
                 }
             }
@@ -116,11 +111,38 @@ export class DiceCommand extends Command {
 
         const usedSymbol = successSymbolDictionary.find((successSymbol) => successSymbol.condition);
 
+        const { symbolPosition, symbolLength } = this.findSymbolPosition(
+            messageContent,
+            usedSymbol!.symbol,
+            usedSymbol!.plusSymbol,
+        );
+
         return {
             symbol: usedSymbol!.symbol,
-            symbolPosition: messageContent.search(usedSymbol!.symbol),
+            symbolPosition,
+            symbolLength,
             plusSymbol: usedSymbol!.plusSymbol,
         };
+    }
+
+    private findSymbolPosition(
+        messageContent: string,
+        symbol: rollSymbol,
+        plusSymbol: boolean,
+    ): { symbolPosition: number; symbolLength: number } {
+        if (!plusSymbol) {
+            return { symbolPosition: messageContent.search(symbol), symbolLength: 1 };
+        }
+        const plusPosition = messageContent.search('=');
+        const minusMayorPosition = messageContent.search(symbol.substring(0, 1));
+
+        if (plusPosition > minusMayorPosition) {
+            return {
+                symbolPosition: minusMayorPosition,
+                symbolLength: plusPosition - minusMayorPosition + 1,
+            };
+        }
+        return { symbolPosition: plusPosition, symbolLength: minusMayorPosition - plusPosition + 1 };
     }
 
     private rollSuccesses(messageContent: string): MessageOptions {
@@ -136,12 +158,9 @@ export class DiceCommand extends Command {
             return notAllowedRoll;
         }
 
-        let successesCondition: number;
-        if (symbolData.plusSymbol) {
-            successesCondition = Number(messageContent.substring(symbolData.symbolPosition + 2));
-        } else {
-            successesCondition = Number(messageContent.substring(symbolData.symbolPosition + 1));
-        }
+        const successesCondition = Number(
+            messageContent.substring(symbolData.symbolPosition + symbolData.symbolLength),
+        );
 
         const { diceString, results } = this.mapRollSuccessesString(
             diceResult,
