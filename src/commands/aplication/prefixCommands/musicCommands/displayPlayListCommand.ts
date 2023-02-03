@@ -10,12 +10,14 @@ import { DisplayMessage } from '../../../domain/interfaces/displayMessage';
 import { PlayListHandler } from '../../playListHandler';
 import { MessageButtonsCreator } from '../../utils/messageButtonsCreator';
 import { MessageCreator } from '../../utils/messageCreator';
+import { PaginatedMessage } from '../../utils/paginatedMessage';
 
 export class DisplayPlayListCommand extends Command {
     private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
     private playListHandler: PlayListHandler;
     private isDisplayActive = false;
     private showingReadme = false;
+    private playListEmbed: Message | undefined;
     private collector: InteractionCollector<ButtonInteraction<CacheType>>;
 
     constructor(playListHandler: PlayListHandler) {
@@ -90,6 +92,25 @@ export class DisplayPlayListCommand extends Command {
                 return;
             }
 
+            // si show playlist, y no esta el playlist embed activo
+            if (collected.customId === DisplayButtonsIdEnum.PLAYLIST) {
+                // check if has been created before check if already exist
+                if (this.playListEmbed) {
+                    let isAlreadyActive = true;
+
+                    // if this fail, means that was deleted
+                    await display.thread.messages
+                        .fetch(this.playListEmbed.id)
+                        .catch(() => (isAlreadyActive = false));
+
+                    if (isAlreadyActive) {
+                        return;
+                    }
+                }
+                await this.createPlaylistEmbed(display);
+                return;
+            }
+
             await this.reactionHandler(collected);
             return;
         });
@@ -130,6 +151,11 @@ export class DisplayPlayListCommand extends Command {
                     style: ButtonsStyleEnum.BLUE,
                     label: `${discordEmojis.musicEmojis.shuffle} Shuffle`,
                     custom_id: DisplayButtonsIdEnum.SHUFFLE,
+                },
+                {
+                    style: ButtonsStyleEnum.BLUE,
+                    label: `${discordEmojis.musicEmojis.playing} Show Playlist`,
+                    custom_id: DisplayButtonsIdEnum.PLAYLIST,
                 },
             ],
             [
@@ -189,6 +215,11 @@ export class DisplayPlayListCommand extends Command {
                         inline: false,
                     },
                     {
+                        name: discordEmojis.musicEmojis.playing,
+                        value: 'Mustra la playlist paginada',
+                        inline: false,
+                    },
+                    {
                         name: discordEmojis.musicEmojis.clear,
                         value: 'Elimina todas las canciones de la playlist, menos la que esté sonando',
                         inline: false,
@@ -218,6 +249,29 @@ export class DisplayPlayListCommand extends Command {
                 this.showingReadme = false;
                 console.log("Display's README error:", err);
             });
+        return;
+    }
+
+    private async createPlaylistEmbed(display: DisplayMessage): Promise<void> {
+        const playList: string[] = this.playListHandler.readPlayList();
+
+        const playListEmbed = await new PaginatedMessage({
+            embed: {
+                color: '#FFE4C4',
+                title: `Playlist: ${playList.length} songs`,
+            },
+            pagination: {
+                channel: display.thread,
+                dataToPaginate: playList,
+                dataPerPage: 10,
+                timeOut: 30000,
+                deleteWhenTimeOut: true,
+                jsFormat: true,
+                reply: false,
+            },
+        }).call();
+
+        this.playListEmbed = playListEmbed;
         return;
     }
 
