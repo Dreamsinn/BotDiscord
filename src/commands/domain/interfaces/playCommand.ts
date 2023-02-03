@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import { YouTubeVideo } from 'play-dl';
 import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
 import { PlayDlService } from '../../infrastructure/playDlService';
 import { SpotifyAPIService } from '../../infrastructure/spotifyAPIService';
@@ -53,21 +52,18 @@ export abstract class PlayCommand {
 
     protected async mapSongData(event: Message, songId: string): Promise<Song | void> {
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
-        const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlService.getSongInfo(songId);
+        const playDlResponse: APIResponse<RawSong> = await this.playDlService.getSongInfo(songId);
         if (!playDlResponse.isError) {
-            if (playDlResponse.data.id) {
-                const song: Song = {
-                    songId: playDlResponse.data.id,
-                    songName:
-                        playDlResponse.data.title ?? "It has not been possible to get song's title",
-                    duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
-                    thumbnails: playDlResponse.data.thumbnails[3].url,
-                };
-                return song;
-            }
-        } else {
-            console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
+            const song: Song = {
+                songId: playDlResponse.data.songId,
+                songName: playDlResponse.data.songName ?? "It has not been possible to get song's title",
+                duration: this.parseSongDuration(playDlResponse.data.duration, true),
+                thumbnails: playDlResponse.data.thumbnails ?? '',
+            };
+            return song;
         }
+
+        console.log(`Play-dl getSongInfo Error: ${playDlResponse.errorData}`);
 
         // si falla play-dl la llamamos a la api de google, para que sea mas dificil llegar al limite
         const youtubeResponse: APIResponse<RawSong[]> = await this.youtubeAPIService.searchSongById(

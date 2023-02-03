@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import { YouTubeVideo } from 'play-dl';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
@@ -207,22 +206,20 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         const playListData: Song[] = [];
 
         for (const songId of songIdArray) {
-            const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlService.getSongInfo(
-                songId,
-            );
-            if (!playDlResponse.isError && playDlResponse.data?.id) {
+            const playDlResponse: APIResponse<RawSong> = await this.playDlService.getSongInfo(songId);
+            if (!playDlResponse.isError) {
                 const song: Song = {
-                    songId: playDlResponse.data.id,
+                    songId: playDlResponse.data.songId,
                     songName:
-                        playDlResponse.data.title ?? "It has not been possible to get song's title",
-                    duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
-                    thumbnails: playDlResponse.data.thumbnails[3].url,
+                        playDlResponse.data.songName ?? "It has not been possible to get song's title",
+                    duration: this.parseSongDuration(playDlResponse.data.duration, true),
+                    thumbnails: playDlResponse.data.thumbnails ?? '',
                 };
                 playListData.push(song);
             }
         }
 
-        if (playListData) {
+        if (playListData.length) {
             return playListData;
         }
 

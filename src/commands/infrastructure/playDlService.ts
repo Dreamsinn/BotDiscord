@@ -36,17 +36,31 @@ export class PlayDlService implements PlayDlAPI {
         }
     }
 
-    public async getSongInfo(songId: string): Promise<APIResponse<YouTubeVideo>> {
+    public async getSongInfo(songId: string): Promise<APIResponse<RawSong>> {
         try {
-            const song: InfoData = await play.video_basic_info(
+            const response: InfoData = await play.video_basic_info(
                 `https://www.youtube.com/watch?v=${songId}`,
             );
 
-            const songData: YouTubeVideo = song.video_details;
+            let thumbnails = response.video_details.thumbnails[3].url;
+            if (!thumbnails) {
+                if (response.video_details.thumbnails[2]) {
+                    thumbnails = response.video_details.thumbnails[2].url;
+                } else {
+                    thumbnails = response.video_details.thumbnails[1].url ?? undefined;
+                }
+            }
+
+            const rawSong: RawSong = {
+                songId: response.video_details.id ?? songId,
+                songName: response.video_details.title,
+                duration: String(response.video_details.durationInSec),
+                thumbnails,
+            };
 
             return {
                 isError: false,
-                data: songData,
+                data: rawSong,
             };
         } catch (err) {
             return {
