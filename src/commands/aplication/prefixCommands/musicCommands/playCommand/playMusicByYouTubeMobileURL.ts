@@ -10,6 +10,6 @@ export class PlayMusicByYouTubeMobileURL extends PlayCommand {
         if (!songData) {
             return;
         }
-        return songData[0];
+        return songData;
     }
 }

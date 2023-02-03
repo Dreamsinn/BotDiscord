@@ -5,10 +5,10 @@ import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { NewSong, Song } from '../../../../domain/interfaces/song';
 import { PlayListHandler } from '../../../playListHandler';
 import { PlayMusicByName } from './playMusicByName';
-import { PlayMusicBySpotifyPlaylistURL } from './playMusicBySpotifyPlaylistURL';
 import { PlayMusicBySpotifySongURL } from './playMusicBySpotifySongURL';
 import { PlayMusicByYouTubeMobileURL } from './playMusicByYouTubeMobileURL';
 import { PlayMusicByYouTubeURL } from './playMusicByYouTubeURL';
+import { PlayPlaylistBySpotifyURL } from './playPlaylistBySpotifyURL';
 import { PlayPlayListByYoutubeURL } from './playPlayListByYoutubeURL';
 
 export class PlayCommandHandler extends Command {
@@ -21,7 +21,7 @@ export class PlayCommandHandler extends Command {
         private playPlayListByYoutubeURL: PlayPlayListByYoutubeURL,
         private playMusicByYouTubeURL: PlayMusicByYouTubeURL,
         private playMusicBySpotifySongURL: PlayMusicBySpotifySongURL,
-        private playMusicBySpotifyPlaylistURL: PlayMusicBySpotifyPlaylistURL,
+        private playMusicBySpotifyPlaylistURL: PlayPlaylistBySpotifyURL,
     ) {
         super();
     }

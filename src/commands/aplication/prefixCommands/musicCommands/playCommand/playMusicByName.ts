@@ -98,7 +98,7 @@ export class PlayMusicByName extends PlayCommand {
                 if (!songData) {
                     return;
                 }
-                return songData[0];
+                return songData;
             }
             return;
         } catch (err) {

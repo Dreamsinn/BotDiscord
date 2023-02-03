@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import { YouTubeVideo } from 'play-dl';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
@@ -106,7 +107,6 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
             // Si se responde una X se borra el mensaje
             if (['x', 'X'].includes(collectedMessage[0].content)) {
                 event.reply('Search cancelled');
-
                 message.delete();
                 return;
             }
@@ -127,7 +127,8 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
                 }
 
                 console.log(`playDl getSognsInfoFromPlayList Error: ${playDlResponse.errorData}`);
-                return this.fetchYoutubePlayListData(event, playListId, url);
+
+                return await this.fetchYoutubePlayListData(event, playListId, url);
             }
         } catch (err) {
             if (err instanceof TypeError) {
@@ -161,12 +162,13 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         playListId: string,
         url: string,
     ): Promise<Song | Song[] | void> {
-        // llama a la API de youtube, si esta tambien falla y esta sonando un video reproduce el video
+        // llama a la API de youtube
         const youtubeResponse: APIResponse<string> = await this.youtubeAPIService.searchPlaylist(
             playListId,
         );
 
         if (youtubeResponse.isError) {
+            // si esta tambien falla y esta sonando un video reproduce el video
             console.log(`YoutubeAPI searchPlaylist Error: ${youtubeResponse.errorData}`);
             event.channel.send(`It has not been possible to get playList`);
 
@@ -177,6 +179,55 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
             return;
         }
 
-        return this.mapSongData(event, youtubeResponse.data);
+        return this.mapPlayListData(event, youtubeResponse.data);
+    }
+
+    protected async mapPlayListData(event: Message, songIdList: string): Promise<Song[] | void> {
+        // youtube api tiene la capacided de buscar multiples ids a la vez
+        const youtubeResponse: APIResponse<RawSong[]> = await this.youtubeAPIService.searchSongById(
+            songIdList,
+        );
+
+        if (!youtubeResponse.isError) {
+            const playListData: Song[] = youtubeResponse.data.map((rawSong: RawSong) => {
+                const song: Song = {
+                    songId: rawSong.songId,
+                    songName: rawSong.songName ?? "It has not been possible to get song's title",
+                    duration: this.parseSongDuration(rawSong.duration, false),
+                    thumbnails: rawSong.thumbnails ?? '',
+                };
+                return song;
+            });
+            return playListData;
+        }
+        console.log(`YoutubeAPI getPlayListgInfo Error: ${youtubeResponse.errorData}`);
+
+        // si falla vamos una por una con playDL
+        const songIdArray: string[] = songIdList.split(',');
+        const playListData: Song[] = [];
+
+        for (const songId of songIdArray) {
+            const playDlResponse: APIResponse<YouTubeVideo> = await this.playDlService.getSongInfo(
+                songId,
+            );
+            if (!playDlResponse.isError && playDlResponse.data?.id) {
+                const song: Song = {
+                    songId: playDlResponse.data.id,
+                    songName:
+                        playDlResponse.data.title ?? "It has not been possible to get song's title",
+                    duration: this.parseSongDuration(String(playDlResponse.data.durationInSec), true),
+                    thumbnails: playDlResponse.data.thumbnails[3].url,
+                };
+                playListData.push(song);
+            }
+        }
+
+        if (playListData) {
+            return playListData;
+        }
+
+        console.log(`Play-dl getPlayListgInfo Error`);
+        event.channel.send(`It has not been possible to get playList information`);
+        return;
     }
 }
