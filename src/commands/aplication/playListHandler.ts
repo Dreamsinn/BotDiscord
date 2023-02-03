@@ -482,4 +482,16 @@ export class PlayListHandler {
         console.log('PLAYLIST: ', this.playList);
         return;
     }
+
+    public putSongInFirstPoistionOfPlaylist(songIndex: number): Song | void {
+        const chosenMusic = this.playList.find((n, i) => songIndex === i + 1);
+        if (chosenMusic) {
+            // remove chosen song
+            this.playList = this.playList.filter((n, i) => !(songIndex === i + 1));
+            // place it in first place
+            this.playList.unshift(chosenMusic);
+            this.playMusic();
+            return chosenMusic;
+        }
+    }
 }

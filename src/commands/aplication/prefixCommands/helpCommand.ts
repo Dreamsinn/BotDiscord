@@ -10,6 +10,7 @@ import { LoopPlayListModeCommandSchema } from '../../domain/commandSchema/loopPl
 import { PauseCommandSchema } from '../../domain/commandSchema/pauseCommandSchema';
 import { PlayCommandSchema } from '../../domain/commandSchema/playCommandSchema';
 import { PlayListCommandSchema } from '../../domain/commandSchema/playListCommandSchema';
+import { PlayNowCommandSchema } from '../../domain/commandSchema/playNowCommandSchema';
 import { RemoveSongsFromPlayListCommandSchema } from '../../domain/commandSchema/removeSongsFromPlayListCommandSchema';
 import { ReplyCommandSchema } from '../../domain/commandSchema/replyCommandSchema';
 import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyCommandTogglerSchema';
@@ -65,6 +66,7 @@ export class HelpCommand extends Command {
             PlayListCommandSchema,
             PauseCommandSchema,
             SkipMusicCommandSchema,
+            PlayNowCommandSchema,
             RemoveSongsFromPlayListCommandSchema,
             ClearPlayListCommandSchema,
             DisplayPlayListCommandSchema,

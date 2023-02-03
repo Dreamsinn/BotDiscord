@@ -16,6 +16,7 @@ import { PlayMusicByYouTubeURL } from './aplication/prefixCommands/musicCommands
 import { PlayPlaylistBySpotifyURL } from './aplication/prefixCommands/musicCommands/playCommand/playPlaylistBySpotifyURL';
 import { PlayPlayListByYoutubeURL } from './aplication/prefixCommands/musicCommands/playCommand/playPlayListByYoutubeURL';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
+import { PlayNowCommand } from './aplication/prefixCommands/musicCommands/playNowCommand';
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
 import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommands/shufflePlayListCommand';
 import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/skipMusicCommand';
@@ -33,6 +34,7 @@ import { LoopPlayListModeCommandSchema } from './domain/commandSchema/loopPlayLi
 import { PauseCommandSchema } from './domain/commandSchema/pauseCommandSchema';
 import { PlayCommandSchema } from './domain/commandSchema/playCommandSchema';
 import { PlayListCommandSchema } from './domain/commandSchema/playListCommandSchema';
+import { PlayNowCommandSchema } from './domain/commandSchema/playNowCommandSchema';
 import { RemoveSongsFromPlayListCommandSchema } from './domain/commandSchema/removeSongsFromPlayListCommandSchema';
 import { ReplyCommandTogglerSchema } from './domain/commandSchema/replyCommandTogglerSchema';
 import { ShufflePlayListCommandSchema } from './domain/commandSchema/shufflePlayListCommandSchema';
@@ -152,6 +154,11 @@ export class Routes {
             name: 'Log Playlist Status Command',
             alias: LogPlaylistStatusSchema.aliases,
             command: new LogPlaylistStatusCommand(this.playListHandler),
+        },
+        {
+            name: 'Play Now Command',
+            alias: PlayNowCommandSchema.aliases,
+            command: new PlayNowCommand(this.playListHandler, this.usersUsingACommand),
         },
     ];
 }
