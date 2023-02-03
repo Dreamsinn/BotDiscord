@@ -49,6 +49,7 @@ export type PaginationOptions =
           dataToPaginate: string[];
           dataPerPage: number;
           timeOut: number;
+          deleteWhenTimeOut: boolean;
           jsFormat: boolean;
           author?: User;
       }
@@ -58,6 +59,7 @@ export type PaginationOptions =
           dataToPaginate: string[];
           dataPerPage: number;
           timeOut: number;
+          deleteWhenTimeOut: boolean;
           jsFormat: boolean;
           author?: User;
       };

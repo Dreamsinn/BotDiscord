@@ -44,6 +44,7 @@ export class PlayNowCommand extends Command {
                 dataPerPage: 10,
                 timeOut: 60000,
                 jsFormat: true,
+                deleteWhenTimeOut: false,
                 reply: false,
                 author: event.author,
             },

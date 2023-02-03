@@ -31,6 +31,7 @@ export class PlayListCommand extends Command {
                 dataToPaginate: playList,
                 dataPerPage: 10,
                 timeOut: 60000,
+                deleteWhenTimeOut: false,
                 jsFormat: true,
                 reply: false,
             },

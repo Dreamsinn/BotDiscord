@@ -168,6 +168,16 @@ export class PaginatedMessage {
                     content: discordEmojis.x,
                 },
             }).call();
+
+            // if deleteWhenTimeOut, delete message
+            if (this.pagination.deleteWhenTimeOut) {
+                message.delete().catch((err) => {
+                    console.log('Pagination editing error: ', err);
+                });
+                return;
+            }
+
+            // else delete message's buttons
             await message.edit({ content: output.content, components: [] }).catch((err) => {
                 console.log('Pagination editing error: ', err);
             });

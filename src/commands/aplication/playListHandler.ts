@@ -107,6 +107,7 @@ export class PlayListHandler {
                 dataToPaginate: paginationData,
                 dataPerPage: 10,
                 timeOut: 60000,
+                deleteWhenTimeOut: false,
                 jsFormat: true,
                 reply: false,
             },
