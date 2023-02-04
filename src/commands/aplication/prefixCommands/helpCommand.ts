@@ -1,21 +1,6 @@
 import { EmbedFieldData, Message, MessageOptions } from 'discord.js';
-import { ClearPlayListCommandSchema } from '../../domain/commandSchema/clearPlayListCommandSchema';
-import { DiceCommandSchema } from '../../domain/commandSchema/diceCommandSchema';
-import { DiceCommandTogglerSchema } from '../../domain/commandSchema/diceCommandTogglerSchema';
-import { DisconnectCommandSchema } from '../../domain/commandSchema/disconnectCommandSchema';
-import { DisplayPlayListCommandSchema } from '../../domain/commandSchema/displayPlayListCommandSchema';
 import { HelpCommandSchema } from '../../domain/commandSchema/helpCommandSchema';
-import { JoinChannelCommandSchema } from '../../domain/commandSchema/joinChannelCommandSchema';
-import { LoopPlayListModeCommandSchema } from '../../domain/commandSchema/loopPlayListModeCommandSchema';
-import { PauseCommandSchema } from '../../domain/commandSchema/pauseCommandSchema';
-import { PlayCommandSchema } from '../../domain/commandSchema/playCommandSchema';
-import { PlayListCommandSchema } from '../../domain/commandSchema/playListCommandSchema';
-import { PlayNowCommandSchema } from '../../domain/commandSchema/playNowCommandSchema';
-import { RemoveSongsFromPlayListCommandSchema } from '../../domain/commandSchema/removeSongsFromPlayListCommandSchema';
-import { ReplyCommandSchema } from '../../domain/commandSchema/replyCommandSchema';
-import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyCommandTogglerSchema';
-import { ShufflePlayListCommandSchema } from '../../domain/commandSchema/shufflePlayListCommandSchema';
-import { SkipMusicCommandSchema } from '../../domain/commandSchema/skipMusicCommandSchema';
+import { commandsSchemasList } from '../../domain/commandSchema/schemasList';
 import { CommandsCategoryEnum } from '../../domain/enums/commandsCategoryEnum';
 import { HelpEmbedsTitlesEnum } from '../../domain/enums/helpEmbedsTitlesEnum';
 import { Command } from '../../domain/interfaces/Command';
@@ -56,31 +41,11 @@ export class HelpCommand extends Command {
     }
 
     private mapCommandListData() {
-        const commandsSchemas = [
-            DiceCommandSchema,
-            ReplyCommandSchema,
-            HelpCommandSchema,
-            DiceCommandTogglerSchema,
-            ReplyCommandTogglerSchema,
-            PlayCommandSchema,
-            PlayListCommandSchema,
-            PauseCommandSchema,
-            SkipMusicCommandSchema,
-            PlayNowCommandSchema,
-            RemoveSongsFromPlayListCommandSchema,
-            ClearPlayListCommandSchema,
-            DisplayPlayListCommandSchema,
-            LoopPlayListModeCommandSchema,
-            ShufflePlayListCommandSchema,
-            JoinChannelCommandSchema,
-            DisconnectCommandSchema,
-        ];
-
         const prefixCommandList: HelpCommandData[] = [];
         const nonCommandList: HelpCommandData[] = [];
         const musicCommandList: HelpCommandData[] = [];
 
-        commandsSchemas.forEach((schema: CommandSchema) => {
+        commandsSchemasList.forEach((schema: CommandSchema) => {
             const schemaData: HelpCommandData = {
                 name: schema.name,
                 description: schema.description,
