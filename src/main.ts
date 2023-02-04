@@ -1,15 +1,21 @@
 import { Message } from 'discord.js';
 import * as dotenv from 'dotenv';
 import { Bot } from './bot';
+import AppDataSource from './database/dataSource';
 import { ServerRouting } from './serverRouting';
 
 dotenv.config();
 
 async function server() {
     console.log('start');
+
+    // connection to discord
     const bot = new Bot();
     await bot.createClient();
     console.log('client created');
+
+    // database connection
+    await AppDataSource.CreateDataSource();
 
     const serverRouting = new ServerRouting();
 

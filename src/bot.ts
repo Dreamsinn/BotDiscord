@@ -18,7 +18,7 @@ export class Bot {
 
         // When the client is ready, run this code (only once)
         this.client.once('ready', () => {
-            console.log('Ready!');
+            console.log('Discord conection ready!');
         });
 
         // Login to Discord with your client's token
