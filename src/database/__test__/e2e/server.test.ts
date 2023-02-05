@@ -2,6 +2,7 @@
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { CreateServer } from '../../server/aplication/createServer';
+import { GetAllServers } from '../../server/aplication/getAllServers';
 import { DiscordServer } from '../../server/domain/discordServerEntity';
 import { ServerService } from '../../server/infrastructure/serverService';
 
@@ -18,6 +19,8 @@ describe('Sever Test', () => {
         migrations: [],
     });
 
+    const guildId = '12341234';
+    const guildName = 'Test Guild Name';
     let service: ServerService;
 
     beforeAll(async () => {
@@ -32,9 +35,6 @@ describe('Sever Test', () => {
     });
 
     it('CreateServer', async () => {
-        const guildId = '12341234';
-        const guildName = 'Test Guild Name';
-
         const response = await new CreateServer(service).call(guildId, guildName);
 
         expect(response instanceof DiscordServer).toBe(true);
@@ -47,5 +47,13 @@ describe('Sever Test', () => {
         expect(response.createdAt instanceof Date).toBe(true);
         expect(String(response.createdAt) === String(response.updatedAt)).toBe(true);
         expect(response.updatedBy).toBe(null);
+    });
+
+    it('GetAllServers', async () => {
+        const response = await new GetAllServers(service).call();
+
+        expect(response![0]).not.toBe(undefined);
+        expect(response![0] instanceof DiscordServer).toBe(true);
+        expect(response?.length).toBe(1);
     });
 });
