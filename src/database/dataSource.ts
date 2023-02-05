@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { Schema } from './commandsSchema/domain/schemaEntity';
+import { DiscordServer } from './server/domain/discordServerEntity';
 
 export class AppDataSource {
     private dataSource: DataSource;
@@ -10,7 +11,7 @@ export class AppDataSource {
             database: 'db.sqlite',
             synchronize: true,
             logging: true,
-            entities: [Schema],
+            entities: [Schema, DiscordServer],
             subscribers: [],
             migrations: [],
         });
