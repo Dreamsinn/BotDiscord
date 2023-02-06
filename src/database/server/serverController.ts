@@ -16,7 +16,7 @@ export class ServerController {
         return this.createServer.call(serverId, serverName);
     }
 
-    public getAll(): Promise<DiscordServer[] | null> {
+    public getAll(): Promise<DiscordServer[]> {
         return this.getAllServers.call();
     }
 }

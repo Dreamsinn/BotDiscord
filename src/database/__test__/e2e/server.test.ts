@@ -52,8 +52,8 @@ describe('Sever Test', () => {
     it('GetAllServers', async () => {
         const response = await new GetAllServers(service).call();
 
-        expect(response![0]).not.toBe(undefined);
-        expect(response![0] instanceof DiscordServer).toBe(true);
-        expect(response?.length).toBe(1);
+        expect(response[0]).not.toBe(undefined);
+        expect(response[0] instanceof DiscordServer).toBe(true);
+        expect(response.length).toBe(1);
     });
 });

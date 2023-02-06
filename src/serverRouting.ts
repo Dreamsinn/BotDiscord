@@ -22,7 +22,7 @@ export class ServerRouting {
     public async createServerList() {
         // take servers from db and put in memory
         const discordServerList = await this.databaseConnection.server.getAll();
-        if (discordServerList) {
+        if (discordServerList.length) {
             this.serverList = discordServerList.map((discordServer: DiscordServer) =>
                 this.mapServerData(discordServer),
             );

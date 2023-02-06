@@ -10,7 +10,7 @@ export class ServerService extends Service {
         return this.schemaRepository.save(server);
     }
 
-    public async getAll(): Promise<DiscordServer[] | null> {
+    public async getAll(): Promise<DiscordServer[]> {
         return this.schemaRepository.find();
     }
 }
