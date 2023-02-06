@@ -1,27 +1,41 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { CommandsNameEnum } from '../../../commands/domain/enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../../../commands/domain/enums/commandsCategoryEnum';
-// mirar tsconfig si falta algo
+
 @Entity()
 export class Schema extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
+    guildId: string;
+
+    @Column()
     name: string;
 
     @Column()
-    // convetir la array de alieses en string
     aliases: string;
-
-    @Column()
-    category: CommandsCategoryEnum;
-
-    @Column()
-    adminOnly: boolean;
 
     @Column()
     coolDown: number;
 
     @Column()
+    adminOnly: boolean;
+
+    @Column()
     description: string;
+
+    @Column()
+    command: CommandsNameEnum;
+
+    @Column()
+    category: CommandsCategoryEnum;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+
+    @Column({
+        nullable: true,
+    })
+    updatedBy: string;
 }

@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import * as dotenv from 'dotenv';
 import { Bot } from './bot';
-import Database from './database/databaseConnection';
+import Database from './database/connectionHandler';
 import { ServerRouting } from './serverRouting';
 
 dotenv.config();

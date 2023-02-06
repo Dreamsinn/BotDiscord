@@ -8,14 +8,14 @@ import { CommandSchema } from './commands/domain/interfaces/commandSchema';
 import { SchemaDictionary } from './commands/domain/interfaces/schemaDictionary';
 import { Server } from './commands/domain/interfaces/server';
 import { Routes } from './commands/routes';
-import { DatabaseConnection } from './database/databaseConnection';
+import { ConnectionHandler } from './database/connectionHandler';
 import { DiscordServer } from './database/server/domain/discordServerEntity';
 
 export class ServerRouting {
     private serverList: Server[] = [];
-    private databaseConnection: DatabaseConnection;
+    private databaseConnection: ConnectionHandler;
 
-    constructor(databaseConnection: DatabaseConnection) {
+    constructor(databaseConnection: ConnectionHandler) {
         this.databaseConnection = databaseConnection;
     }
 

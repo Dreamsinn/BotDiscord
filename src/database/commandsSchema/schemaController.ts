@@ -10,7 +10,10 @@ export class SchemaController {
         this.createUseCase = new CreateSchema(schemaService);
     }
 
-    public create(commandSchemaList: CommandSchema[]): Promise<Schema[]> {
-        return this.createUseCase.call(commandSchemaList);
+    public create(
+        commandSchemaList: CommandSchema | CommandSchema[],
+        guildId: string,
+    ): Promise<Schema[]> {
+        return this.createUseCase.call(commandSchemaList, guildId);
     }
 }

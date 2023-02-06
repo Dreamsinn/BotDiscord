@@ -1,11 +1,11 @@
 import { DataSource } from 'typeorm';
 import { Schema } from './commandsSchema/domain/schemaEntity';
 import { DiscordServer } from './server/domain/discordServerEntity';
+import { AppDataSource } from './shared/domain/interface/appDataSource';
 
-export class AppDataSource {
-    private dataSource: DataSource;
-
+export class DatabaseConnection extends AppDataSource {
     constructor() {
+        super();
         const dataSource = new DataSource({
             type: 'sqlite',
             database: 'db.sqlite',
@@ -26,9 +26,5 @@ export class AppDataSource {
             });
 
         this.dataSource = dataSource;
-    }
-
-    public getDataSource() {
-        return this.dataSource;
     }
 }

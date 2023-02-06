@@ -1,10 +1,11 @@
 import { SchemaService } from './commandsSchema/infrastructure/schemaService';
 import { SchemaController } from './commandsSchema/schemaController';
-import { AppDataSource } from './dataSource';
+import { DatabaseConnection } from './dataSource';
 import { ServerService } from './server/infrastructure/serverService';
 import { ServerController } from './server/serverController';
+import { AppDataSource } from './shared/domain/interface/appDataSource';
 
-export class DatabaseConnection {
+export class ConnectionHandler {
     public schema: SchemaController;
     public server: ServerController;
 
@@ -18,5 +19,5 @@ export class DatabaseConnection {
     }
 }
 
-const Database = new DatabaseConnection(new AppDataSource());
+const Database = new ConnectionHandler(new DatabaseConnection());
 export default Database;
