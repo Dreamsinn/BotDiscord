@@ -1,6 +1,6 @@
 import { CommandSchema } from '../../../commands/domain/interfaces/commandSchema';
+import { NewSchema } from '../domain/interfaces/newSchema';
 import { Schema } from '../domain/schemaEntity';
-import { NewSchema } from '../infrastructure/newSchema';
 import { SchemaService } from '../infrastructure/schemaService';
 
 export class CreateSchema {
@@ -12,11 +12,11 @@ export class CreateSchema {
     async call(commandSchema: CommandSchema | CommandSchema[], guildId: string): Promise<Schema[]> {
         if (commandSchema instanceof Array) {
             const schemaList = this.mapCommandSchemaArray(commandSchema, guildId);
-            return this.schemaService.Create(schemaList);
+            return this.schemaService.create(schemaList);
         }
 
         const schemaList = this.mapCommandSchemaArray([commandSchema], guildId);
-        return this.schemaService.Create(schemaList);
+        return this.schemaService.create(schemaList);
     }
 
     private mapCommandSchemaArray(commandSchemaList: CommandSchema[], guildId: string): NewSchema[] {

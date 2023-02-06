@@ -16,6 +16,6 @@ export class CreateServer {
             adminRole: process.env.ADMIN_ROL!,
         };
 
-        return this.serverService.Create(server);
+        return this.serverService.create(server);
     }
 }

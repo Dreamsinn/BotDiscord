@@ -1,5 +1,5 @@
-import { CommandsNameEnum } from '../../../commands/domain/enums/commandNamesEnum';
-import { CommandsCategoryEnum } from '../../../commands/domain/enums/commandsCategoryEnum';
+import { CommandsNameEnum } from '../../../../commands/domain/enums/commandNamesEnum';
+import { CommandsCategoryEnum } from '../../../../commands/domain/enums/commandsCategoryEnum';
 
 export interface NewSchema {
     guildId: string;

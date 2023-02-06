@@ -77,4 +77,21 @@ describe('Sever Test', () => {
         expect(response[0] instanceof Schema).toBe(true);
         expect(response.length).toBe(1);
     });
+
+    it('GetAllSchemasByGuildId, receiving an existing guild id', async () => {
+        const response = await databaseMock.schema.getAllByGuildId(guildId);
+
+        expect(response instanceof Array).toBe(true);
+        expect(response[0] instanceof Schema).toBe(true);
+        expect(response.length).toBe(3);
+        expect(response[0].guildId).toBe(guildId);
+        expect(response[0].aliases).toEqual('schema,list');
+        expect(response[0].category).toBe(CommandsCategoryEnum.MUSIC);
+    });
+
+    it('GetAllSchemasByGuildId, receiving non existing guild id', async () => {
+        const response = await databaseMock.schema.getAllByGuildId('1234');
+
+        expect(response).toEqual([]);
+    });
 });

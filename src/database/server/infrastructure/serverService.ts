@@ -5,12 +5,12 @@ import { NewServer } from '../domain/interfaces/newServer';
 export class ServerService extends Service {
     private schemaRepository = this.dataSource.getRepository(DiscordServer);
 
-    public async Create(discordServer: NewServer): Promise<DiscordServer> {
+    public async create(discordServer: NewServer): Promise<DiscordServer> {
         const server = this.schemaRepository.create(discordServer);
         return this.schemaRepository.save(server);
     }
 
-    public async GetAll(): Promise<DiscordServer[] | null> {
+    public async getAll(): Promise<DiscordServer[] | null> {
         return this.schemaRepository.find();
     }
 }

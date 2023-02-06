@@ -1,19 +1,26 @@
 import { CommandSchema } from '../../commands/domain/interfaces/commandSchema';
 import { CreateSchema } from './aplication/createSchema';
+import { GetAllSchemasByGuildId } from './aplication/getAllByGuildIdSchema';
 import { Schema } from './domain/schemaEntity';
 import { SchemaService } from './infrastructure/schemaService';
 
 export class SchemaController {
-    private createUseCase: CreateSchema;
+    private createSchema: CreateSchema;
+    private getAllSchemasByGuildId: GetAllSchemasByGuildId;
 
     constructor(schemaService: SchemaService) {
-        this.createUseCase = new CreateSchema(schemaService);
+        this.createSchema = new CreateSchema(schemaService);
+        this.getAllSchemasByGuildId = new GetAllSchemasByGuildId(schemaService);
     }
 
     public create(
         commandSchemaList: CommandSchema | CommandSchema[],
         guildId: string,
     ): Promise<Schema[]> {
-        return this.createUseCase.call(commandSchemaList, guildId);
+        return this.createSchema.call(commandSchemaList, guildId);
+    }
+
+    public getAllByGuildId(guildId: string) {
+        return this.getAllSchemasByGuildId.call(guildId);
     }
 }
