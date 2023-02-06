@@ -5,39 +5,75 @@ import { UsersUsingACommand } from './commands/aplication/utils/usersUsingAComma
 import { CommandHandler } from './commands/commandHandler';
 import { Server } from './commands/domain/interfaces/server';
 import { Routes } from './commands/routes';
+import { DatabaseConnection } from './database/databaseConnection';
+import { DiscordServer } from './database/server/domain/discordServerEntity';
 
 export class ServerRouting {
     private serverList: Server[] = [];
+    private databaseConnection: DatabaseConnection;
 
-    public async call(event: Message): Promise<void> {
-        // mira si el servidor ya ha sido instanciado, si es asi llama a la instancia
-        for (const server of this.serverList) {
-            if (server.serverId === event.guildId) {
-                return await server.instance.isCommand(event);
-            }
-        }
-
-        // instancia el servidor y vuleve a llamar esta funcion
-        this.addSeverToServerList(event);
+    constructor(databaseConnection: DatabaseConnection) {
+        this.databaseConnection = databaseConnection;
     }
 
-    private addSeverToServerList(event: Message): Promise<void> | void {
+    public async createServerList() {
+        // take servers from db and put in memory
+        const discordServerList = await this.databaseConnection.server.getAll();
+        if (discordServerList) {
+            this.serverList = discordServerList.map((discordServer: DiscordServer) =>
+                this.mapServerData(discordServer),
+            );
+        }
+    }
+
+    private mapServerData(discordServer: DiscordServer): Server {
+        let blackList: string[] = [];
+        if (discordServer.blackList) {
+            blackList = discordServer.blackList.split(',');
+        }
+
+        const server: Server = {
+            id: discordServer.id,
+            prefix: discordServer.prefix,
+            adminRole: discordServer.adminRole,
+            blackList,
+            instance: this.newCommandHandlerInstance(),
+        };
+
+        return server;
+    }
+
+    private newCommandHandlerInstance() {
         const diceCommand = new DiceCommand();
         const replyCommand = new ReplyCommand();
         const usersUsingACommand = new UsersUsingACommand();
         const routes = new Routes(usersUsingACommand);
-        const commandHandler = new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand);
 
-        if (!event.guildId) {
+        return new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand);
+    }
+
+    public async call(event: Message): Promise<void> {
+        if (!event.guild) {
             return;
         }
+        // look if the server is alredy instanced, if it is, call it
+        const eventServer = this.serverList.find((server) => server.id === event.guild!.id);
 
-        const newServer: Server = {
-            serverId: event.guildId,
-            instance: commandHandler,
-        };
+        if (eventServer) {
+            return eventServer.instance.isCommand(event);
+        }
 
-        this.serverList.push(newServer);
+        // else create post nedw server to db and put it in memory
+        await this.addSeverToServerList(event);
+    }
+
+    private async addSeverToServerList(event: Message): Promise<void> {
+        const newDiscordServer = await this.databaseConnection.server.create(
+            event.guild!.id,
+            event.guild!.name,
+        );
+        const server = this.mapServerData(newDiscordServer);
+        this.serverList.push(server);
 
         return this.call(event);
     }

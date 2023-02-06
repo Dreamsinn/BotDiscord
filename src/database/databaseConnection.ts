@@ -4,7 +4,7 @@ import { AppDataSource } from './dataSource';
 import { ServerService } from './server/infrastructure/serverService';
 import { ServerController } from './server/serverController';
 
-class DatabaseConnection {
+export class DatabaseConnection {
     public schema: SchemaController;
     public server: ServerController;
 
@@ -18,4 +18,5 @@ class DatabaseConnection {
     }
 }
 
-export default new DatabaseConnection(new AppDataSource());
+const Database = new DatabaseConnection(new AppDataSource());
+export default Database;

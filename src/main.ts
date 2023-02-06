@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import * as dotenv from 'dotenv';
 import { Bot } from './bot';
-import DatabaseConnection from './database/databaseConnection';
+import Database from './database/databaseConnection';
 import { ServerRouting } from './serverRouting';
 
 dotenv.config();
@@ -14,15 +14,13 @@ async function server() {
     await bot.createClient();
     console.log('client created');
 
-    // database connection
-    DatabaseConnection;
-
-    const serverRouting = new ServerRouting();
+    const serverRouting = new ServerRouting(Database);
+    serverRouting.createServerList();
 
     bot.client.on('messageCreate', async (event: Message): Promise<void> => {
         if (event.author.bot) return;
 
-        // si el autor del mensaje no es el bot
+        // if event is not created by a bot
         return await serverRouting.call(event);
     });
 }
