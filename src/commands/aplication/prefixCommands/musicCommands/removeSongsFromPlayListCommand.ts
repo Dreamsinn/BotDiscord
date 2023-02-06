@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import { RemoveSongsFromPlayListCommandSchema } from '../../../domain/commandSchema/removeSongsFromPlayListCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
@@ -7,9 +6,8 @@ import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 
 export class RemoveSongsFromPlayListCommand extends Command {
-    private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
-
     constructor(
+        private removeSchema: CommandSchema,
         private playListHandler: PlayListHandler,
         private usersUsingACommand: UsersUsingACommand,
     ) {

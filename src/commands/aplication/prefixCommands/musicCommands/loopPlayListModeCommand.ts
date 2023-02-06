@@ -1,15 +1,15 @@
 import { Message } from 'discord.js';
-import { LoopPlayListModeCommandSchema } from '../../../domain/commandSchema/loopPlayListModeCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class LoopPlayListModeCommand extends Command {
-    private loopSchema: CommandSchema = LoopPlayListModeCommandSchema;
+    private loopSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(loopSchema: CommandSchema, playListHandler: PlayListHandler) {
         super();
+        this.loopSchema = loopSchema;
         this.playListHandler = playListHandler;
     }
 

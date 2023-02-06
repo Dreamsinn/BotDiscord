@@ -1,7 +1,9 @@
+import { CommandsNameEnum } from '../enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const DiceCommandTogglerSchema: CommandSchema = {
+    name: 'Activador del comando de dados',
     aliases: ['dice', 'roll'],
     coolDown: 0,
     adminOnly: false,
@@ -9,8 +11,8 @@ const DiceCommandTogglerSchema: CommandSchema = {
         'Activa o desactiva el comando de dados.\n' +
         'Este comando debe ir seguido de `on` u `off`\n' +
         `Ejemplo: dice on`,
+    command: CommandsNameEnum.DiceCommandToggler,
     category: CommandsCategoryEnum.PREFIX,
-    name: 'Activador del comando de dados',
 };
 
 export { DiceCommandTogglerSchema };

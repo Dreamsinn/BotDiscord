@@ -1,13 +1,17 @@
 import { Message, MessageOptions } from 'discord.js';
-import { DiceCommandSchema } from '../domain/commandSchema/diceCommandSchema';
 import { Command } from '../domain/interfaces/Command';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
 import { rollSymbol, SuccessesSymbol } from '../domain/interfaces/successesSymbol';
 import { MessageCreator } from './utils/messageCreator';
 
 export class DiceCommand extends Command {
-    private diceSchema: CommandSchema = DiceCommandSchema;
+    private diceSchema: CommandSchema;
     public isDiceCommandActive = false;
+
+    constructor(diceSchema: CommandSchema) {
+        super();
+        this.diceSchema = diceSchema;
+    }
 
     // activa o desactuva los dados
     public toggleDiceCommand(active: boolean): boolean {

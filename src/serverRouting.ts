@@ -3,6 +3,9 @@ import { DiceCommand } from './commands/aplication/diceCommand';
 import { ReplyCommand } from './commands/aplication/replyCommand';
 import { UsersUsingACommand } from './commands/aplication/utils/usersUsingACommand';
 import { CommandHandler } from './commands/commandHandler';
+import { commandsSchemasList } from './commands/domain/commandSchema/schemasList';
+import { CommandSchema } from './commands/domain/interfaces/commandSchema';
+import { SchemaDictionary } from './commands/domain/interfaces/schemaDictionary';
 import { Server } from './commands/domain/interfaces/server';
 import { Routes } from './commands/routes';
 import { DatabaseConnection } from './database/databaseConnection';
@@ -44,12 +47,22 @@ export class ServerRouting {
     }
 
     private newCommandHandlerInstance() {
-        const diceCommand = new DiceCommand();
-        const replyCommand = new ReplyCommand();
+        const schemaDictionary = this.mapSchemaDictionary(commandsSchemasList);
+        const diceCommand = new DiceCommand(schemaDictionary['Dice Command']);
+        const replyCommand = new ReplyCommand(schemaDictionary['Reply Command']);
         const usersUsingACommand = new UsersUsingACommand();
-        const routes = new Routes(usersUsingACommand);
+        const routes = new Routes(usersUsingACommand, schemaDictionary);
 
         return new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand);
+    }
+
+    private mapSchemaDictionary(schemasList: CommandSchema[]): SchemaDictionary {
+        const schemaDictionary: any = {};
+        schemasList.map((commandSchema: CommandSchema) => {
+            schemaDictionary[commandSchema.command] = commandSchema;
+        });
+
+        return schemaDictionary;
     }
 
     public async call(event: Message): Promise<void> {

@@ -1,5 +1,4 @@
 import { ButtonInteraction, CacheType, InteractionCollector, Message } from 'discord.js';
-import { DisplayPlayListCommandSchema } from '../../../domain/commandSchema/displayPlayListCommandSchema';
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../domain/enums/buttonStyleEnum';
 import { DisplayButtonsIdEnum } from '../../../domain/enums/displayButtonsIdEnum';
@@ -13,16 +12,13 @@ import { MessageCreator } from '../../utils/messageCreator';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 
 export class DisplayPlayListCommand extends Command {
-    private displaySchema: CommandSchema = DisplayPlayListCommandSchema;
-    private playListHandler: PlayListHandler;
     private isDisplayActive = false;
     private showingReadme = false;
     private playListEmbed: Message | undefined;
     private collector: InteractionCollector<ButtonInteraction<CacheType>>;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(private displaySchema: CommandSchema, private playListHandler: PlayListHandler) {
         super();
-        this.playListHandler = playListHandler;
     }
 
     public async call(event: Message): Promise<void> {

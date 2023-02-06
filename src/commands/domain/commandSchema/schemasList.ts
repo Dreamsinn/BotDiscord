@@ -5,6 +5,7 @@ import { DisconnectCommandSchema } from './disconnectCommandSchema';
 import { DisplayPlayListCommandSchema } from './displayPlayListCommandSchema';
 import { HelpCommandSchema } from './helpCommandSchema';
 import { JoinChannelCommandSchema } from './joinChannelCommandSchema';
+import { LogPlaylistStatusSchema } from './logPlaylistStatusSchema';
 import { LoopPlayListModeCommandSchema } from './loopPlayListModeCommandSchema';
 import { PauseCommandSchema } from './pauseCommandSchema';
 import { PlayCommandSchema } from './playCommandSchema';
@@ -34,4 +35,5 @@ export const commandsSchemasList = [
     ShufflePlayListCommandSchema,
     JoinChannelCommandSchema,
     DisconnectCommandSchema,
+    LogPlaylistStatusSchema,
 ];

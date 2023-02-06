@@ -23,31 +23,16 @@ import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/skip
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { DisplayEmbedBuilder } from './aplication/utils/displayEmbedBuilder';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
-import { ClearPlayListCommandSchema } from './domain/commandSchema/clearPlayListCommandSchema';
-import { DiceCommandTogglerSchema } from './domain/commandSchema/diceCommandTogglerSchema';
-import { DisconnectCommandSchema } from './domain/commandSchema/disconnectCommandSchema';
-import { DisplayPlayListCommandSchema } from './domain/commandSchema/displayPlayListCommandSchema';
-import { HelpCommandSchema } from './domain/commandSchema/helpCommandSchema';
-import { JoinChannelCommandSchema } from './domain/commandSchema/joinChannelCommandSchema';
-import { LogPlaylistStatusSchema } from './domain/commandSchema/logPlaylistStatusSchema';
-import { LoopPlayListModeCommandSchema } from './domain/commandSchema/loopPlayListModeCommandSchema';
-import { PauseCommandSchema } from './domain/commandSchema/pauseCommandSchema';
-import { PlayCommandSchema } from './domain/commandSchema/playCommandSchema';
-import { PlayListCommandSchema } from './domain/commandSchema/playListCommandSchema';
-import { PlayNowCommandSchema } from './domain/commandSchema/playNowCommandSchema';
-import { RemoveSongsFromPlayListCommandSchema } from './domain/commandSchema/removeSongsFromPlayListCommandSchema';
-import { ReplyCommandTogglerSchema } from './domain/commandSchema/replyCommandTogglerSchema';
-import { ShufflePlayListCommandSchema } from './domain/commandSchema/shufflePlayListCommandSchema';
-import { SkipMusicCommandSchema } from './domain/commandSchema/skipMusicCommandSchema';
 import { Command } from './domain/interfaces/Command';
+import { CommandSchema } from './domain/interfaces/commandSchema';
 import { MusicAPIs } from './domain/interfaces/musicAPIs';
+import { SchemaDictionary } from './domain/interfaces/schemaDictionary';
 import { PlayDlService } from './infrastructure/playDlService';
 import { SpotifyAPIService } from './infrastructure/spotifyAPIService';
 import { YouTubeAPIService } from './infrastructure/youTubeAPIService';
 
 interface Route {
-    name: string;
-    alias: string[];
+    schema: CommandSchema;
     command: Command;
 }
 
@@ -69,13 +54,16 @@ export class Routes {
     private playMusicBySpotifySongURL = new PlayMusicBySpotifySongURL(this.musicAPIs);
     private playMusicBySpotifyPlaylistURL = new PlayPlaylistBySpotifyURL(this.musicAPIs);
 
-    constructor(private usersUsingACommand: UsersUsingACommand) {}
+    constructor(
+        private usersUsingACommand: UsersUsingACommand,
+        private schemaDictionary: SchemaDictionary,
+    ) {}
 
     public routeList: Route[] = [
         {
-            name: 'Play Command',
-            alias: PlayCommandSchema.aliases,
+            schema: this.schemaDictionary['Play Command'],
             command: new PlayCommandHandler(
+                this.schemaDictionary['Play Command'],
                 this.playListHandler,
                 this.playMusicByName,
                 this.playMusicByYouTubeMobileURL,
@@ -86,79 +74,99 @@ export class Routes {
             ),
         },
         {
-            name: 'PlayList Command',
-            alias: PlayListCommandSchema.aliases,
-            command: new PlayListCommand(this.playListHandler),
+            schema: this.schemaDictionary['Playlist Command'],
+            command: new PlayListCommand(
+                this.schemaDictionary['Playlist Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Help Command',
-            alias: HelpCommandSchema.aliases,
-            command: new HelpCommand(this.usersUsingACommand),
+            schema: this.schemaDictionary['Help Command'],
+            command: new HelpCommand(this.schemaDictionary['Help Command'], this.usersUsingACommand),
         },
         {
-            name: 'Pause Command',
-            alias: PauseCommandSchema.aliases,
-            command: new PauseCommand(this.playListHandler),
+            schema: this.schemaDictionary['Pause Command'],
+            command: new PauseCommand(this.schemaDictionary['Pause Command'], this.playListHandler),
         },
         {
-            name: 'Skip Music Command',
-            alias: SkipMusicCommandSchema.aliases,
-            command: new SkipMusicCommand(this.playListHandler),
+            schema: this.schemaDictionary['Skip Music Command'],
+            command: new SkipMusicCommand(
+                this.schemaDictionary['Skip Music Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Disconnect Command',
-            alias: DisconnectCommandSchema.aliases,
-            command: new DisconnectCommand(this.playListHandler),
+            schema: this.schemaDictionary['Disconnect Command'],
+            command: new DisconnectCommand(
+                this.schemaDictionary['Disconnect Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Join Channel Command',
-            alias: JoinChannelCommandSchema.aliases,
-            command: new JoinChannelCommand(this.playListHandler),
+            schema: this.schemaDictionary['Join Channel Command'],
+            command: new JoinChannelCommand(
+                this.schemaDictionary['Join Channel Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Clear PlayList Command',
-            alias: ClearPlayListCommandSchema.aliases,
-            command: new ClearPlayListCommand(this.playListHandler),
+            schema: this.schemaDictionary['Clear Playlist Command'],
+            command: new ClearPlayListCommand(
+                this.schemaDictionary['Clear Playlist Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Remove Songs From Playlist Command',
-            alias: RemoveSongsFromPlayListCommandSchema.aliases,
-            command: new RemoveSongsFromPlayListCommand(this.playListHandler, this.usersUsingACommand),
+            schema: this.schemaDictionary['Remove Songs From Playlist Command'],
+            command: new RemoveSongsFromPlayListCommand(
+                this.schemaDictionary['Remove Songs From Playlist Command'],
+                this.playListHandler,
+                this.usersUsingACommand,
+            ),
         },
         {
-            name: 'Shuffle Playlist Command',
-            alias: ShufflePlayListCommandSchema.aliases,
-            command: new ShufflePlayListCommand(this.playListHandler),
+            schema: this.schemaDictionary['Shuffle Playlist Command'],
+            command: new ShufflePlayListCommand(
+                this.schemaDictionary['Shuffle Playlist Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Loop Playlist Mode Command',
-            alias: LoopPlayListModeCommandSchema.aliases,
-            command: new LoopPlayListModeCommand(this.playListHandler),
+            schema: this.schemaDictionary['Loop Playlist Mode Command'],
+            command: new LoopPlayListModeCommand(
+                this.schemaDictionary['Loop Playlist Mode Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Display Playlist Command',
-            alias: DisplayPlayListCommandSchema.aliases,
-            command: new DisplayPlayListCommand(this.playListHandler),
+            schema: this.schemaDictionary['Display Playlist Command'],
+            command: new DisplayPlayListCommand(
+                this.schemaDictionary['Display Playlist Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Dice Command Toggler',
-            alias: DiceCommandTogglerSchema.aliases,
-            command: new DiceCommandToggler(),
+            schema: this.schemaDictionary['Dice Command Toggler'],
+            command: new DiceCommandToggler(this.schemaDictionary['Dice Command Toggler']),
         },
         {
-            name: 'Reply Command Toggler',
-            alias: ReplyCommandTogglerSchema.aliases,
-            command: new ReplyCommandToggler(),
+            schema: this.schemaDictionary['Reply Command Toggler'],
+            command: new ReplyCommandToggler(this.schemaDictionary['Reply Command Toggler']),
         },
         {
-            name: 'Log Playlist Status Command',
-            alias: LogPlaylistStatusSchema.aliases,
-            command: new LogPlaylistStatusCommand(this.playListHandler),
+            schema: this.schemaDictionary['Log Playlist Status Command'],
+            command: new LogPlaylistStatusCommand(
+                this.schemaDictionary['Log Playlist Status Command'],
+                this.playListHandler,
+            ),
         },
         {
-            name: 'Play Now Command',
-            alias: PlayNowCommandSchema.aliases,
-            command: new PlayNowCommand(this.playListHandler, this.usersUsingACommand),
+            schema: this.schemaDictionary['Play Now Command'],
+            command: new PlayNowCommand(
+                this.schemaDictionary['Play Now Command'],
+                this.playListHandler,
+                this.usersUsingACommand,
+            ),
         },
     ];
 }

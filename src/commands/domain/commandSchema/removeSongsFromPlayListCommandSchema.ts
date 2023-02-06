@@ -1,7 +1,9 @@
+import { CommandsNameEnum } from '../enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const RemoveSongsFromPlayListCommandSchema: CommandSchema = {
+    name: 'Eliminar canciones de la playlist',
     aliases: ['rm', 'remove'],
     coolDown: 0,
     adminOnly: false,
@@ -12,8 +14,8 @@ const RemoveSongsFromPlayListCommandSchema: CommandSchema = {
         'El bot solo leerá los mensajes bien escritos, es decir, mensajes con números más grandes de lo que toca, con letras, etc, serán ignorados.\n' +
         'Ejemplo: 1, 6, 23\n' +
         '__Durante este proceso no se podrán usar otros comandos.__',
+    command: CommandsNameEnum.RemoveSongsFromPlaylistCommand,
     category: CommandsCategoryEnum.MUSIC,
-    name: 'Eliminar canciones de la playlist',
 };
 
 export { RemoveSongsFromPlayListCommandSchema };

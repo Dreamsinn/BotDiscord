@@ -1,16 +1,16 @@
 import { Message } from 'discord.js';
-import { PlayListCommandSchema } from '../../../domain/commandSchema/playListCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 
 export class PlayListCommand extends Command {
-    private playListSchema: CommandSchema = PlayListCommandSchema;
+    private playListSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(playListSchema: CommandSchema, playListHandler: PlayListHandler) {
         super();
+        this.playListSchema = playListSchema;
         this.playListHandler = playListHandler;
     }
 

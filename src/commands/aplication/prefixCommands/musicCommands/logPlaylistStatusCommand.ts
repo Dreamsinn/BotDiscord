@@ -1,15 +1,15 @@
 import { Message } from 'discord.js';
-import { LogPlaylistStatusSchema } from '../../../domain/commandSchema/logPlaylistStatusSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class LogPlaylistStatusCommand extends Command {
-    private logSchema: CommandSchema = LogPlaylistStatusSchema;
+    private logSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(logSchema: CommandSchema, playListHandler: PlayListHandler) {
         super();
+        this.logSchema = logSchema;
         this.playListHandler = playListHandler;
     }
 

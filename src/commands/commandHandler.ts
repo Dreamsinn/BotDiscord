@@ -64,9 +64,9 @@ export class CommandHandler {
         }
 
         for (const route of this.routes.routeList) {
-            if (route.alias.find((alias) => alias === command.toLowerCase())) {
+            if (route.schema.aliases.find((alias) => alias === command.toLowerCase())) {
                 console.log('Guild: ', event.guild?.name);
-                console.log('Command: ', route.name);
+                console.log('Command: ', route.schema.command);
 
                 if (route.command instanceof DiceCommandToggler) {
                     return route.command.call(event, this.diceCommand);

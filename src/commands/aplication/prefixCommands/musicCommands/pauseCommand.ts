@@ -1,16 +1,16 @@
 import { Message } from 'discord.js';
-import { PauseCommandSchema } from '../../../domain/commandSchema/pauseCommandSchema';
 import { TogglePauseOutputEnums } from '../../../domain/enums/togglePauseOutputEnums';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class PauseCommand extends Command {
-    private pauseSchema: CommandSchema = PauseCommandSchema;
+    private pauseSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(pauseSchema: CommandSchema, playListHandler: PlayListHandler) {
         super();
+        this.pauseSchema = pauseSchema;
         this.playListHandler = playListHandler;
     }
 

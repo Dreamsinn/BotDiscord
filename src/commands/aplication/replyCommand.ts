@@ -1,12 +1,16 @@
 import { Message } from 'discord.js';
-import { ReplyCommandSchema } from '../domain/commandSchema/replyCommandSchema';
 import { Command } from '../domain/interfaces/Command';
 import { CommandSchema } from '../domain/interfaces/commandSchema';
 import { MessageCreator } from './utils/messageCreator';
 
 export class ReplyCommand extends Command {
-    private replySchema: CommandSchema = ReplyCommandSchema;
+    private replySchema: CommandSchema;
     public isReplyCommandActive = false;
+
+    constructor(replySchema: CommandSchema) {
+        super();
+        this.replySchema = replySchema;
+    }
 
     // activa o desactuva las respuestas
     public toggleReplyCommand(active: boolean): boolean {

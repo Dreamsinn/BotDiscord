@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import { PlayCommandSchema } from '../../../../domain/commandSchema/playCommandSchema';
 import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { NewSong, Song } from '../../../../domain/interfaces/song';
@@ -12,9 +11,8 @@ import { PlayPlaylistBySpotifyURL } from './playPlaylistBySpotifyURL';
 import { PlayPlayListByYoutubeURL } from './playPlayListByYoutubeURL';
 
 export class PlayCommandHandler extends Command {
-    private playSchema: CommandSchema = PlayCommandSchema;
-
     constructor(
+        private playSchema: CommandSchema,
         private playListHandler: PlayListHandler,
         private playMusicByName: PlayMusicByName,
         private playMusicByYouTubeMobileURL: PlayMusicByYouTubeMobileURL,

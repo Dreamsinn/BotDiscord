@@ -1,7 +1,9 @@
+import { CommandsNameEnum } from '../enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const PlayCommandSchema: CommandSchema = {
+    name: 'Play',
     aliases: ['p', 'play'],
     coolDown: 0,
     adminOnly: false,
@@ -16,8 +18,8 @@ const PlayCommandSchema: CommandSchema = {
         '>  >En el caso anterior, si se falla a conseguir la información de la playlist sonará la canción del enlace.\n' +
         ">  >Las 'mix' de YouTube pueden fallar, por temas propios de YouTube.\n" +
         '>  >Si la API principal falla, y se debe buscar por la propia de YouTube, tardará unos segundo, y como máximo cojera las 30 primeras canciones de la playlist.',
+    command: CommandsNameEnum.PlayCommand,
     category: CommandsCategoryEnum.MUSIC,
-    name: 'Play',
 };
 
 export { PlayCommandSchema };

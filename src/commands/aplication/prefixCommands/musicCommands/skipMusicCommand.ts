@@ -1,16 +1,16 @@
 import { Message } from 'discord.js';
-import { SkipMusicCommandSchema } from '../../../domain/commandSchema/skipMusicCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 import { MessageCreator } from '../../utils/messageCreator';
 
 export class SkipMusicCommand extends Command {
-    private skipSchema: CommandSchema = SkipMusicCommandSchema;
+    private skipSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(skipSchema: CommandSchema, playListHandler: PlayListHandler) {
         super();
+        this.skipSchema = skipSchema;
         this.playListHandler = playListHandler;
     }
 

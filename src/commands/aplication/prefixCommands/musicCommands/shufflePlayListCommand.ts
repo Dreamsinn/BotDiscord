@@ -1,15 +1,15 @@
 import { Message } from 'discord.js';
-import { ShufflePlayListCommandSchema } from '../../../domain/commandSchema/shufflePlayListCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class ShufflePlayListCommand extends Command {
-    private shuffleSchema: CommandSchema = ShufflePlayListCommandSchema;
+    private shuffleSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(shuffleSchema: CommandSchema, playListHandler: PlayListHandler) {
         super();
+        this.shuffleSchema = shuffleSchema;
         this.playListHandler = playListHandler;
     }
 

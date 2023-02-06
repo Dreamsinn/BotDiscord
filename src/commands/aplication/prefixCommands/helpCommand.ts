@@ -1,5 +1,4 @@
 import { EmbedFieldData, Message, MessageOptions } from 'discord.js';
-import { HelpCommandSchema } from '../../domain/commandSchema/helpCommandSchema';
 import { commandsSchemasList } from '../../domain/commandSchema/schemasList';
 import { CommandsCategoryEnum } from '../../domain/enums/commandsCategoryEnum';
 import { HelpEmbedsTitlesEnum } from '../../domain/enums/helpEmbedsTitlesEnum';
@@ -15,10 +14,9 @@ import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class HelpCommand extends Command {
-    private helpSchema: CommandSchema = HelpCommandSchema;
     private commandList: HelpCommandList;
 
-    constructor(private usersUsingACommand: UsersUsingACommand) {
+    constructor(private helpSchema: CommandSchema, private usersUsingACommand: UsersUsingACommand) {
         super();
     }
 

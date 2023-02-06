@@ -1,11 +1,15 @@
 import { Message } from 'discord.js';
-import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyCommandTogglerSchema';
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { ReplyCommand } from '../replyCommand';
 
 export class ReplyCommandToggler extends Command {
-    private toggleDiceSchema: CommandSchema = ReplyCommandTogglerSchema;
+    private toggleDiceSchema: CommandSchema;
+
+    constructor(toggleDiceSchema: CommandSchema) {
+        super();
+        this.toggleDiceSchema = toggleDiceSchema;
+    }
 
     public async call(event: Message, replyCommand: ReplyCommand): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.toggleDiceSchema)) {

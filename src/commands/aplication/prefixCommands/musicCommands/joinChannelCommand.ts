@@ -1,15 +1,15 @@
 import { Message } from 'discord.js';
-import { JoinChannelCommandSchema } from '../../../domain/commandSchema/joinChannelCommandSchema';
 import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class JoinChannelCommand extends Command {
-    private joinSchema: CommandSchema = JoinChannelCommandSchema;
+    private joinSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
+    constructor(joinSchema: CommandSchema, playListHandler: PlayListHandler) {
         super();
+        this.joinSchema = joinSchema;
         this.playListHandler = playListHandler;
     }
 
