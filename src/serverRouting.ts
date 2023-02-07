@@ -3,33 +3,36 @@ import { DiceCommand } from './commands/aplication/diceCommand';
 import { ReplyCommand } from './commands/aplication/replyCommand';
 import { UsersUsingACommand } from './commands/aplication/utils/usersUsingACommand';
 import { CommandHandler } from './commands/commandHandler';
-import { commandsSchemasList } from './commands/domain/commandSchema/schemasList';
 import { CommandSchema } from './commands/domain/interfaces/commandSchema';
 import { SchemaDictionary } from './commands/domain/interfaces/schemaDictionary';
 import { Server } from './commands/domain/interfaces/server';
 import { Routes } from './commands/routes';
+import { Schema } from './database/commandsSchema/domain/schemaEntity';
 import { ConnectionHandler } from './database/connectionHandler';
 import { DiscordServer } from './database/server/domain/discordServerEntity';
 
 export class ServerRouting {
     private serverList: Server[] = [];
     private databaseConnection: ConnectionHandler;
+    private commandSchemaList: CommandSchema[];
 
-    constructor(databaseConnection: ConnectionHandler) {
+    constructor(databaseConnection: ConnectionHandler, commandSchemaList: CommandSchema[]) {
         this.databaseConnection = databaseConnection;
+        this.commandSchemaList = commandSchemaList;
     }
 
     public async createServerList() {
         // take servers from db and put in memory
         const discordServerList = await this.databaseConnection.server.getAll();
         if (discordServerList.length) {
-            this.serverList = discordServerList.map((discordServer: DiscordServer) =>
-                this.mapServerData(discordServer),
-            );
+            for (const discordServer of discordServerList) {
+                const server = await this.mapServerData(discordServer);
+                this.serverList.push(server);
+            }
         }
     }
 
-    private mapServerData(discordServer: DiscordServer): Server {
+    private async mapServerData(discordServer: DiscordServer): Promise<Server> {
         let blackList: string[] = [];
         if (discordServer.blackList) {
             blackList = discordServer.blackList.split(',');
@@ -40,20 +43,45 @@ export class ServerRouting {
             prefix: discordServer.prefix,
             adminRole: discordServer.adminRole,
             blackList,
-            instance: this.newCommandHandlerInstance(),
+            instance: await this.newCommandHandlerInstance(discordServer.id),
         };
 
         return server;
     }
 
-    private newCommandHandlerInstance() {
-        const schemaDictionary = this.mapSchemaDictionary(commandsSchemasList);
+    private async newCommandHandlerInstance(serverId: string) {
+        const schemaDictionary = await this.getSchemas(this.commandSchemaList, serverId);
+
         const diceCommand = new DiceCommand(schemaDictionary['Dice Command']);
         const replyCommand = new ReplyCommand(schemaDictionary['Reply Command']);
         const usersUsingACommand = new UsersUsingACommand();
         const routes = new Routes(usersUsingACommand, schemaDictionary);
 
         return new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand);
+    }
+
+    private async getSchemas(
+        commandSchemaList: CommandSchema[],
+        serverId: string,
+    ): Promise<SchemaDictionary> {
+        // serach all schemas in db by serverId and return
+        const schemaList: Schema[] = await this.databaseConnection.schema.getAllByGuildId(serverId);
+
+        if (!schemaList.length) {
+            // if none create them and return SchemaDictionary object
+            await this.databaseConnection.schema.create(commandSchemaList, serverId);
+            return this.mapSchemaDictionary(commandSchemaList);
+        }
+
+        if (schemaList.length !== commandSchemaList.length) {
+            // if some lacking create them
+            const lackingSchemas = this.findLackingSchemas(schemaList, commandSchemaList);
+            const newSchemas = await this.databaseConnection.schema.create(lackingSchemas, serverId);
+            schemaList.push(...newSchemas);
+        }
+
+        // return SchemaDictionary object
+        return this.convertSchemaToCommandSchema(schemaList);
     }
 
     private mapSchemaDictionary(schemasList: CommandSchema[]): SchemaDictionary {
@@ -63,6 +91,35 @@ export class ServerRouting {
         });
 
         return schemaDictionary;
+    }
+
+    private findLackingSchemas(
+        schemaList: Schema[],
+        commandSchemaList: CommandSchema[],
+    ): CommandSchema[] {
+        const lackingSchema = commandSchemaList.filter((commandSchema: CommandSchema) => {
+            return !schemaList.some((schema: Schema) => {
+                return commandSchema.command === schema.command;
+            });
+        });
+
+        return lackingSchema;
+    }
+
+    private convertSchemaToCommandSchema(schemaList: Schema[]): SchemaDictionary {
+        const commandSchemaList: CommandSchema[] = schemaList.map((schema: Schema) => {
+            const commandSchema: CommandSchema = {
+                name: schema.name,
+                aliases: schema.aliases.split(','),
+                coolDown: schema.coolDown,
+                adminOnly: schema.adminOnly,
+                description: schema.description,
+                command: schema.command,
+                category: schema.category,
+            };
+            return commandSchema;
+        });
+        return this.mapSchemaDictionary(commandSchemaList);
     }
 
     public async call(event: Message): Promise<void> {
@@ -76,7 +133,7 @@ export class ServerRouting {
             return eventServer.instance.isCommand(event);
         }
 
-        // else create post nedw server to db and put it in memory
+        // else create new server in db and put it in memory
         await this.addSeverToServerList(event);
     }
 
@@ -85,7 +142,7 @@ export class ServerRouting {
             event.guild!.id,
             event.guild!.name,
         );
-        const server = this.mapServerData(newDiscordServer);
+        const server = await this.mapServerData(newDiscordServer);
         this.serverList.push(server);
 
         return this.call(event);

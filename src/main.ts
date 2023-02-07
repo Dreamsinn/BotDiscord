@@ -1,6 +1,7 @@
 import { Message } from 'discord.js';
 import * as dotenv from 'dotenv';
 import { Bot } from './bot';
+import { commandsSchemasList } from './commands/domain/commandSchema/schemasList';
 import Database from './database/connectionHandler';
 import { ServerRouting } from './serverRouting';
 
@@ -14,7 +15,7 @@ async function server() {
     await bot.createClient();
     console.log('client created');
 
-    const serverRouting = new ServerRouting(Database);
+    const serverRouting = new ServerRouting(Database, commandsSchemasList);
     serverRouting.createServerList();
 
     bot.client.on('messageCreate', async (event: Message): Promise<void> => {

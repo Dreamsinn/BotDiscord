@@ -1,3 +1,4 @@
+import { CommandSchema } from '../interfaces/commandSchema';
 import { ClearPlayListCommandSchema } from './clearPlayListCommandSchema';
 import { DiceCommandSchema } from './diceCommandSchema';
 import { DiceCommandTogglerSchema } from './diceCommandTogglerSchema';
@@ -17,7 +18,7 @@ import { ReplyCommandTogglerSchema } from './replyCommandTogglerSchema';
 import { ShufflePlayListCommandSchema } from './shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from './skipMusicCommandSchema';
 
-export const commandsSchemasList = [
+export const commandsSchemasList: CommandSchema[] = [
     DiceCommandSchema,
     ReplyCommandSchema,
     HelpCommandSchema,
