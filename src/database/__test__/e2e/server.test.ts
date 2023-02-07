@@ -1,7 +1,9 @@
 import * as dotenv from 'dotenv';
-import { DataSource } from 'typeorm';
+import { DataSource, UpdateResult } from 'typeorm';
 import { ConnectionHandler } from '../../connectionHandler';
 import { DiscordServer } from '../../server/domain/discordServerEntity';
+import { ServerConfig } from '../../server/domain/interfaces/serverConfig';
+import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
 import { DatabaseConnectionMock } from '../dataSourceMock';
 
 dotenv.config();
@@ -36,7 +38,7 @@ describe('Sever Test', () => {
     it('CreateServer', async () => {
         const response = await databaseMock.server.create(guildId, guildName);
 
-        expect(response instanceof DiscordServer).toBe(true);
+        expect(response).toBeInstanceOf(DiscordServer);
         expect(response.id).toEqual(guildId);
         expect(response.name).toEqual(guildName);
         expect(response.prefix).toEqual(process.env.PREFIX);
@@ -52,7 +54,61 @@ describe('Sever Test', () => {
         const response = await databaseMock.server.getAll();
 
         expect(response[0]).not.toBe(undefined);
-        expect(response[0] instanceof DiscordServer).toBe(true);
+        expect(response[0]).toBeInstanceOf(DiscordServer);
         expect(response.length).toBe(1);
+    });
+
+    it('GetServerById', async () => {
+        const response = await databaseMock.server.getById(guildId);
+
+        expect(response).toBeInstanceOf(DiscordServer);
+    });
+
+    it('GetServerById with no existing id', async () => {
+        const response = await databaseMock.server.getById('1234');
+
+        expect(response).toBe(null);
+    });
+
+    it('UpdateServerConfig', async () => {
+        const update: ServerConfig = {
+            adminRole: 'testAdminRole',
+            blackList: ['testUserID', 'testUserID2', 'testUserID3'],
+            prefix: '>>',
+        };
+        const userId = '123456';
+
+        const response = await databaseMock.server.updateConfig(guildId, userId, update);
+        const updatedServer = await databaseMock.server.getById(guildId);
+
+        expect(response).toBeInstanceOf(UpdateResult);
+        expect(updatedServer?.prefix).toEqual('>>');
+        expect(updatedServer?.blackList).toEqual('testUserID,testUserID2,testUserID3');
+        expect(updatedServer?.adminRole).toEqual('testAdminRole');
+        expect(updatedServer?.updatedBy).toEqual(userId);
+        expect(updatedServer?.createdAt.getTime() !== updatedServer?.updatedAt.getTime()).toBe(true);
+    });
+
+    it('UpdateServerConfig with voiden config boject', async () => {
+        const update: ServerConfig = {};
+        const userId = '123456';
+
+        const response = await databaseMock.server.updateConfig(guildId, userId, update);
+
+        expect(response === ErrorEnum.BadRequest).toBe(true);
+    });
+
+    it('UpdateServerConfig with unexisten id', async () => {
+        const update: ServerConfig = {
+            adminRole: 'testAdminRole',
+            blackList: ['testUserID', 'testUserID2', 'testUserID3'],
+            prefix: '>>',
+        };
+
+        const userId = '123456';
+
+        const response = await databaseMock.server.updateConfig('guildId', userId, update);
+
+        expect(response === ErrorEnum.NotFound).toBe(true);
     });
 });
