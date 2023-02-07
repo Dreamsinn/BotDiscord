@@ -1,10 +1,8 @@
-/* eslint-disable arrow-body-style */
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
-import { CreateServer } from '../../server/aplication/createServer';
-import { GetAllServers } from '../../server/aplication/getAllServers';
+import { ConnectionHandler } from '../../connectionHandler';
 import { DiscordServer } from '../../server/domain/discordServerEntity';
-import { ServerService } from '../../server/infrastructure/serverService';
+import { DatabaseConnectionMock } from '../dataSourceMock';
 
 dotenv.config();
 
@@ -19,23 +17,24 @@ describe('Sever Test', () => {
         migrations: [],
     });
 
+    let databaseMock: ConnectionHandler;
+
     const guildId = '12341234';
     const guildName = 'Test Guild Name';
-    let service: ServerService;
 
     beforeAll(async () => {
         await dataSource.initialize().catch((err) => {
             console.error('Error during testing Data Source initialization', err);
         });
 
-        service = new ServerService(dataSource);
+        databaseMock = new ConnectionHandler(new DatabaseConnectionMock(dataSource));
     });
     afterAll(async () => {
         await dataSource.destroy();
     });
 
     it('CreateServer', async () => {
-        const response = await new CreateServer(service).call(guildId, guildName);
+        const response = await databaseMock.server.create(guildId, guildName);
 
         expect(response instanceof DiscordServer).toBe(true);
         expect(response.id).toEqual(guildId);
@@ -50,7 +49,7 @@ describe('Sever Test', () => {
     });
 
     it('GetAllServers', async () => {
-        const response = await new GetAllServers(service).call();
+        const response = await databaseMock.server.getAll();
 
         expect(response[0]).not.toBe(undefined);
         expect(response[0] instanceof DiscordServer).toBe(true);
