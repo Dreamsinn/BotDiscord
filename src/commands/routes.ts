@@ -42,7 +42,7 @@ export class Routes {
         playDlAPI: new PlayDlService(),
         spotifyAPI: new SpotifyAPIService(),
     };
-    private displayEmbedBuilder = new DisplayEmbedBuilder();
+    private displayEmbedBuilder = new DisplayEmbedBuilder(this.prefix);
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
     private playMusicByName = new PlayMusicByName(this.musicAPIs, this.usersUsingACommand);
     private playMusicByYouTubeMobileURL = new PlayMusicByYouTubeMobileURL(this.musicAPIs);
@@ -57,6 +57,7 @@ export class Routes {
     constructor(
         private usersUsingACommand: UsersUsingACommand,
         private schemaDictionary: SchemaDictionary,
+        private prefix: string,
     ) {}
 
     public routeList: Route[] = [
@@ -82,7 +83,11 @@ export class Routes {
         },
         {
             schema: this.schemaDictionary['Help Command'],
-            command: new HelpCommand(this.schemaDictionary['Help Command'], this.usersUsingACommand),
+            command: new HelpCommand(
+                this.schemaDictionary['Help Command'],
+                this.usersUsingACommand,
+                this.prefix,
+            ),
         },
         {
             schema: this.schemaDictionary['Pause Command'],

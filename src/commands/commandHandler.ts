@@ -13,6 +13,7 @@ export class CommandHandler {
         private replyCommand: ReplyCommand,
         private routes: Routes,
         private usersUsingACommand: UsersUsingACommand,
+        private prefix: string,
     ) {}
 
     public async isCommand(event: Message) {
@@ -21,7 +22,7 @@ export class CommandHandler {
         if (this.usersUsingACommand.searchIdInUserList(event.author.id)) return;
 
         // si el comando tiene prefijo, para comandos con prefijo
-        if (event.content.startsWith(`${process.env.PREFIX}`)) {
+        if (event.content.startsWith(this.prefix)) {
             return this.isPrefixCommand(event);
         }
 

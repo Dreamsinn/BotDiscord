@@ -115,7 +115,7 @@ export class DisplayPlayListCommand extends Command {
             this.isDisplayActive = false;
             this.playListHandler.deactivateDisplay();
 
-            display.thread.delete().catch(() => console.log("Display' thread has been deleted."));
+            display.thread.delete().catch(() => console.log("Display's thread has been deleted."));
             display.message.delete().catch(() => console.log('Display has been deleted.'));
 
             if (!display.channelEventWasThread) {

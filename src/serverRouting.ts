@@ -43,21 +43,21 @@ export class ServerRouting {
             prefix: discordServer.prefix,
             adminRole: discordServer.adminRole,
             blackList,
-            instance: await this.newCommandHandlerInstance(discordServer.id),
+            instance: await this.newCommandHandlerInstance(discordServer.id, discordServer.prefix),
         };
 
         return server;
     }
 
-    private async newCommandHandlerInstance(serverId: string) {
+    private async newCommandHandlerInstance(serverId: string, prefix: string) {
         const schemaDictionary = await this.getSchemas(this.commandSchemaList, serverId);
 
         const diceCommand = new DiceCommand(schemaDictionary['Dice Command']);
         const replyCommand = new ReplyCommand(schemaDictionary['Reply Command']);
         const usersUsingACommand = new UsersUsingACommand();
-        const routes = new Routes(usersUsingACommand, schemaDictionary);
+        const routes = new Routes(usersUsingACommand, schemaDictionary, prefix);
 
-        return new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand);
+        return new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand, prefix);
     }
 
     private async getSchemas(

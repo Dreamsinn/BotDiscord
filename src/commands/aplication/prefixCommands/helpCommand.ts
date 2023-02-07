@@ -16,7 +16,11 @@ import { UsersUsingACommand } from '../utils/usersUsingACommand';
 export class HelpCommand extends Command {
     private commandList: HelpCommandList;
 
-    constructor(private helpSchema: CommandSchema, private usersUsingACommand: UsersUsingACommand) {
+    constructor(
+        private helpSchema: CommandSchema,
+        private usersUsingACommand: UsersUsingACommand,
+        private prefix: string,
+    ) {
         super();
     }
 
@@ -373,7 +377,7 @@ export class HelpCommand extends Command {
 
         let description = '__Mientras help este activo no podra usar otro comando.__\n\n';
         if (selectedCommand.category !== CommandsCategoryEnum.NONPREFIX) {
-            description += `**Este comando requiere del prefijo: \`${process.env.PREFIX}\` delante del alias para ser llamado**.\n`;
+            description += `**Este comando requiere del prefijo: \`${this.prefix}\` delante del alias para ser llamado**.\n`;
         }
         description +=
             'El alias es la parte necesaria para llamar a un comando, ' +
