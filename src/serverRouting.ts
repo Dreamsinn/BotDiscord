@@ -130,6 +130,12 @@ export class ServerRouting {
         const eventServer = this.serverList.find((server) => server.id === event.guild!.id);
 
         if (eventServer) {
+            if (
+                eventServer.blackList.length &&
+                eventServer.blackList.includes(String(event.author.id))
+            ) {
+                return;
+            }
             return eventServer.instance.isCommand(event);
         }
 
