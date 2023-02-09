@@ -44,17 +44,17 @@ export class ConfigServerCommand extends Command {
         const configOptionEmbed = new MessageCreator({
             embed: {
                 color: 'WHITE',
-                title: 'Configurar servidor',
+                title: 'Configuración del bot',
                 author: {
                     name: `${userName}`,
                     iconURL: `${event.member?.user.displayAvatarURL()}`,
                 },
                 description:
-                    '**Solo podra interectuar la persona que haya activado el comando.**\n' +
-                    'Cuando aprete el boton de cerrar se guardan todos los cambios realizados.',
+                    '**Solo podrá interactuar la persona que haya activado el comando.**\n' +
+                    'Cuando apreté el botón de cerrar se guardan todos los cambios realizados.',
                 fields: [
                     {
-                        name: 'Configuracion actual: ',
+                        name: 'Configuración actual: ',
                         value:
                             `> **Prefijo:** ${this.serverConfig.prefix}\n` +
                             `> **AdminRole:** ${this.serverConfig.adminRole}\n` +
@@ -102,7 +102,7 @@ export class ConfigServerCommand extends Command {
         let configOptionsMessage: Message<boolean> | void;
         if (changeConfigMessage) {
             configOptionsMessage = await changeConfigMessage.edit(configOptionEmbed).catch(async () => {
-                await event.channel.send('Ha habido un error, se guardaran los cambios efectuados');
+                await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
                 // poner metodo de guardado
             });
         } else configOptionsMessage = await event.channel.send(configOptionEmbed);
@@ -145,13 +145,6 @@ export class ConfigServerCommand extends Command {
                 return;
             }
         });
-
-        collector.on('end', async () => {
-            console.log('-----------------');
-
-            console.log(this.databaseConnection);
-            return;
-        });
     }
 
     private async changePrefix(event: Message, configOptionMessage: Message) {
@@ -173,21 +166,22 @@ export class ConfigServerCommand extends Command {
             .awaitMessages({ filter, time: 60000, max: 1, errors: ['time'] })
             .then(async (collected) => {
                 this.usersUsingACommand.removeUserList(event.author.id);
+
                 const collectedMessage = collected.map((e: Message) => e);
 
-                if (['x', 'X'].includes(collectedMessage[0].content)) {
-                    await this.createConfigOptionMessage(event, changePrefixMessage);
-                    return;
+                if (!['x', 'X'].includes(collectedMessage[0].content)) {
+                    this.configChanges.prefix = collectedMessage[0].content;
                 }
 
-                this.configChanges.prefix = collectedMessage[0].content;
                 await this.createConfigOptionMessage(event, changePrefixMessage);
                 return;
             })
             .catch(async (err) => {
                 if (err instanceof TypeError) {
                     await this.saveChanges(event);
-                    console.log(err);
+
+                    console.log('Error in changePrefix collector: ', err);
+
                     await event.channel.send(
                         `Ha habido un error, se han guardado los cambios efectuados hasta el momento`,
                     );
@@ -195,8 +189,8 @@ export class ConfigServerCommand extends Command {
                     // sino contesta
                     await this.createConfigOptionMessage(event, changePrefixMessage);
                 }
+
                 this.usersUsingACommand.removeUserList(event.author.id);
-                // message.delete();
                 return;
             });
     }
@@ -207,8 +201,9 @@ export class ConfigServerCommand extends Command {
                 color: 'WHITE',
                 title: 'Cambiar prefijo',
                 description:
-                    'Escriba el prefijo con el que quiera llamar al bot: \n' +
-                    'Escriba **x** para cancelar',
+                    'Escriba:\n' +
+                    '- El **prefijo** con el que quiera llamar al bot\n' +
+                    '- **x** para cancelar',
             },
             buttons: [],
         }).call();
@@ -231,10 +226,9 @@ export class ConfigServerCommand extends Command {
         const filter = (reaction: Message): boolean => {
             const userCondition = reaction.author.id === event.author.id;
             const numberCondition =
-                Number(reaction.content) <= Object.keys(roles).length - 1 &&
-                Number(reaction.content) > 0;
+                Number(reaction.content) <= Object.keys(roles).length && Number(reaction.content) > 0;
             const letterCondition = ['x', 'X'].includes(reaction.content);
-            console.log(reaction);
+
             return userCondition && (numberCondition || letterCondition);
         };
 
@@ -243,30 +237,34 @@ export class ConfigServerCommand extends Command {
             .then(async (collected) => {
                 const collectedMessage = collected.map((e: Message) => e);
 
-                await changeAdminRoleMessage.delete().catch(() => console.log('close'));
+                this.usersUsingACommand.removeUserList(event.author.id);
 
-                if (['x', 'X'].includes(collectedMessage[0].content)) {
-                    await this.createConfigOptionMessage(event, configOptionMessage);
-                    return;
+                await changeAdminRoleMessage
+                    .delete()
+                    .catch((err) => console.log('Error deleting changeAdminRoleMessage:', err));
+
+                if (!['x', 'X'].includes(collectedMessage[0].content)) {
+                    const selectedRoll = Object.keys(roles)[Number(collectedMessage[0].content) - 1];
+
+                    this.configChanges.adminRole = selectedRoll;
                 }
 
-                const selectedRoll = Object.keys(roles)[Number(collectedMessage[0].content)];
-
-                this.configChanges.adminRole = selectedRoll;
                 await this.createConfigOptionMessage(event, configOptionMessage);
                 return;
             })
             .catch(async (err) => {
                 if (err instanceof TypeError) {
-                    console.log(err);
-                    await event.channel.send(`Ha habido un error, por favor vuelvelo a intentar`);
-                    // guardar cambios
+                    await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
+                    await this.saveChanges(event);
                 } else {
                     // sino contesta
                     await this.createConfigOptionMessage(event, configOptionMessage);
                 }
+
                 this.usersUsingACommand.removeUserList(event.author.id);
-                await changeAdminRoleMessage.delete().catch(() => console.log('close'));
+                await changeAdminRoleMessage
+                    .delete()
+                    .catch((err) => console.log('Error deleting changeAdminRoleMessage:', err));
                 return;
             });
     }
@@ -329,7 +327,7 @@ export class ConfigServerCommand extends Command {
         );
         if (changes === ErrorEnum.NotFound) {
             await event.channel.send(
-                'Ha habido un problema determiando la id del servidor, porfavor vuelvalo a intentar',
+                'Ha habido un problema determinando la id del servidor, por favor vuélvalo a intentar',
             );
         }
     }
