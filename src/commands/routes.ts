@@ -1,4 +1,7 @@
+import { ConnectionHandler } from '../database/connectionHandler';
+import { ServerConfig } from '../database/server/domain/interfaces/serverConfig';
 import { PlayListHandler } from './aplication/playListHandler';
+import { ConfigServerCommand } from './aplication/prefixCommands/configServerCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
 import { ClearPlayListCommand } from './aplication/prefixCommands/musicCommands/clearPlayListCommand';
@@ -57,8 +60,11 @@ export class Routes {
     constructor(
         private usersUsingACommand: UsersUsingACommand,
         private schemaDictionary: SchemaDictionary,
-        private prefix: string,
-    ) {}
+        private serverConfig: ServerConfig,
+        private databaseConnection: ConnectionHandler,
+    ) {
+        // console.log({ schemaDictionary })
+    }
 
     public routeList: Route[] = [
         {
@@ -86,7 +92,7 @@ export class Routes {
             command: new HelpCommand(
                 this.schemaDictionary['Help Command'],
                 this.usersUsingACommand,
-                this.prefix,
+                this.serverConfig.prefix,
             ),
         },
         {
@@ -171,6 +177,15 @@ export class Routes {
                 this.schemaDictionary['Play Now Command'],
                 this.playListHandler,
                 this.usersUsingACommand,
+            ),
+        },
+        {
+            schema: this.schemaDictionary['Config Server Command'],
+            command: new ConfigServerCommand(
+                this.schemaDictionary['Config Server Command'],
+                this.databaseConnection,
+                this.usersUsingACommand,
+                this.serverConfig,
             ),
         },
     ];

@@ -17,4 +17,5 @@ export enum CommandsNameEnum {
     ReplyCommandToggler = 'Reply Command Toggler',
     LogPlaylistStatusCommand = 'Log Playlist Status Command',
     PlayNowCommand = 'Play Now Command',
+    ConfigServerCommand = 'Config Server Command',
 }

@@ -10,6 +10,7 @@ import { Routes } from './commands/routes';
 import { Schema } from './database/commandsSchema/domain/schemaEntity';
 import { ConnectionHandler } from './database/connectionHandler';
 import { DiscordServer } from './database/server/domain/discordServerEntity';
+import { ServerConfig } from './database/server/domain/interfaces/serverConfig';
 
 export class ServerRouting {
     private serverList: Server[] = [];
@@ -38,26 +39,43 @@ export class ServerRouting {
             blackList = discordServer.blackList.split(',');
         }
 
+        const serverConfig: ServerConfig = {
+            prefix: discordServer.prefix,
+            adminRole: discordServer.adminRole,
+            blackList,
+        };
+
         const server: Server = {
             id: discordServer.id,
             prefix: discordServer.prefix,
             adminRole: discordServer.adminRole,
             blackList,
-            instance: await this.newCommandHandlerInstance(discordServer.id, discordServer.prefix),
+            instance: await this.newCommandHandlerInstance(discordServer.id, serverConfig),
         };
 
         return server;
     }
 
-    private async newCommandHandlerInstance(serverId: string, prefix: string) {
+    private async newCommandHandlerInstance(serverId: string, serverConfig: ServerConfig) {
         const schemaDictionary = await this.getSchemas(this.commandSchemaList, serverId);
 
         const diceCommand = new DiceCommand(schemaDictionary['Dice Command']);
         const replyCommand = new ReplyCommand(schemaDictionary['Reply Command']);
         const usersUsingACommand = new UsersUsingACommand();
-        const routes = new Routes(usersUsingACommand, schemaDictionary, prefix);
+        const routes = new Routes(
+            usersUsingACommand,
+            schemaDictionary,
+            serverConfig,
+            this.databaseConnection,
+        );
 
-        return new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand, prefix);
+        return new CommandHandler(
+            diceCommand,
+            replyCommand,
+            routes,
+            usersUsingACommand,
+            serverConfig.prefix,
+        );
     }
 
     private async getSchemas(

@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import { DataSource, UpdateResult } from 'typeorm';
 import { ConnectionHandler } from '../../connectionHandler';
 import { DiscordServer } from '../../server/domain/discordServerEntity';
-import { ServerConfig } from '../../server/domain/interfaces/serverConfig';
+import { ServerConfigOptions } from '../../server/domain/interfaces/serverConfig';
 import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
 import { DatabaseConnectionMock } from '../dataSourceMock';
 
@@ -71,7 +71,7 @@ describe('Sever Test', () => {
     });
 
     it('UpdateServerConfig', async () => {
-        const update: ServerConfig = {
+        const update: ServerConfigOptions = {
             adminRole: 'testAdminRole',
             blackList: ['testUserID', 'testUserID2', 'testUserID3'],
             prefix: '>>',
@@ -90,7 +90,7 @@ describe('Sever Test', () => {
     });
 
     it('UpdateServerConfig with voiden config boject', async () => {
-        const update: ServerConfig = {};
+        const update: ServerConfigOptions = {};
         const userId = '123456';
 
         const response = await databaseMock.server.updateConfig(guildId, userId, update);
@@ -99,7 +99,7 @@ describe('Sever Test', () => {
     });
 
     it('UpdateServerConfig with unexisten id', async () => {
-        const update: ServerConfig = {
+        const update: ServerConfigOptions = {
             adminRole: 'testAdminRole',
             blackList: ['testUserID', 'testUserID2', 'testUserID3'],
             prefix: '>>',

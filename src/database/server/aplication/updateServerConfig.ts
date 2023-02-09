@@ -1,6 +1,6 @@
 import { UpdateResult } from 'typeorm';
 import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
-import { ServerConfig } from '../domain/interfaces/serverConfig';
+import { ServerConfigOptions } from '../domain/interfaces/serverConfig';
 import { UpdateServer } from '../domain/interfaces/updateServer';
 import { ServerService } from '../infrastructure/serverService';
 
@@ -13,7 +13,7 @@ export class UpdateServerConfig {
     public async call(
         serverId: string,
         userId: string,
-        config: ServerConfig,
+        config: ServerConfigOptions,
     ): Promise<UpdateResult | ErrorEnum> {
         if (!config.adminRole && !config.blackList && !config.prefix) {
             return ErrorEnum.BadRequest;

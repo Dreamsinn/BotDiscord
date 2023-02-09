@@ -5,7 +5,7 @@ import { GetAllServers } from './aplication/getAllServers';
 import { GetServerById } from './aplication/getServerById';
 import { UpdateServerConfig } from './aplication/updateServerConfig';
 import { DiscordServer } from './domain/discordServerEntity';
-import { ServerConfig } from './domain/interfaces/serverConfig';
+import { ServerConfigOptions } from './domain/interfaces/serverConfig';
 import { ServerService } from './infrastructure/serverService';
 
 export class ServerController {
@@ -36,7 +36,7 @@ export class ServerController {
     public updateConfig(
         serverId: string,
         userId: string,
-        config: ServerConfig,
+        config: ServerConfigOptions,
     ): Promise<UpdateResult | ErrorEnum> {
         return this.updateServerConfig.call(serverId, userId, config);
     }

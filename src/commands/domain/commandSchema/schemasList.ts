@@ -1,5 +1,6 @@
 import { CommandSchema } from '../interfaces/commandSchema';
 import { ClearPlayListCommandSchema } from './clearPlayListCommandSchema';
+import { ConfigServerCommand } from './configServerCommandSchema';
 import { DiceCommandSchema } from './diceCommandSchema';
 import { DiceCommandTogglerSchema } from './diceCommandTogglerSchema';
 import { DisconnectCommandSchema } from './disconnectCommandSchema';
@@ -37,4 +38,5 @@ export const commandsSchemasList: CommandSchema[] = [
     JoinChannelCommandSchema,
     DisconnectCommandSchema,
     LogPlaylistStatusSchema,
+    ConfigServerCommand,
 ];
