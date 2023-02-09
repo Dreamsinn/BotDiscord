@@ -36,6 +36,7 @@ export class ConfigServerCommand extends Command {
         const serverData = await this.databaseConnection.server.getById(event.guild!.id);
 
         if (serverData) {
+            // this is to reset this 2 const every use
             this.configChanges = {};
             this.serverConfig = {
                 prefix: serverData.prefix,
@@ -113,18 +114,22 @@ export class ConfigServerCommand extends Command {
 
         let configOptionsMessage: Message<boolean> | void;
         if (changeConfigMessage) {
+            // if is called with a message, edit it
             configOptionsMessage = await changeConfigMessage.edit(configOptionEmbed).catch(async () => {
                 await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
-                // poner metodo de guardado
+                await this.saveChanges(event);
             });
-        } else configOptionsMessage = await event.channel.send(configOptionEmbed);
+        } else {
+            // if first tame this method is called, create the message
+            configOptionsMessage = await event.channel.send(configOptionEmbed);
+        }
 
         if (configOptionsMessage) {
             this.buttonCollector(event, configOptionsMessage);
         }
     }
 
-    private buttonCollector(event: Message, configOptionMessage: Message) {
+    private buttonCollector(event: Message, configOptionMessage: Message): void {
         const collector = configOptionMessage.createMessageComponentCollector({
             componentType: 'BUTTON',
             time: 60000,
@@ -159,8 +164,10 @@ export class ConfigServerCommand extends Command {
         });
     }
 
-    private async changePrefix(event: Message, configOptionMessage: Message) {
+    private async changePrefix(event: Message, configOptionMessage: Message): Promise<void> {
         const changePrefixEmbed = this.createChangePrefixEmbed();
+
+        // edit the configOptionMessage with the new embed
         const changePrefixMessage = await configOptionMessage.edit(changePrefixEmbed).catch((err) => {
             console.log('Error editing changePrefixMessage: ', err);
         });
@@ -181,10 +188,14 @@ export class ConfigServerCommand extends Command {
 
                 const collectedMessage = collected.map((e: Message) => e);
 
+                // delete response message
+                await collectedMessage[0].delete();
+
                 if (!['x', 'X'].includes(collectedMessage[0].content)) {
                     this.configChanges.prefix = collectedMessage[0].content;
                 }
 
+                // edit changePrefixMessage, back to the fist message with the changes
                 await this.createConfigOptionMessage(event, changePrefixMessage);
                 return;
             })
@@ -198,7 +209,7 @@ export class ConfigServerCommand extends Command {
                         `Ha habido un error, se han guardado los cambios efectuados hasta el momento`,
                     );
                 } else {
-                    // sino contesta
+                    // if not answer, it is needed the remake the fisrt message to reactivate the button collector
                     await this.createConfigOptionMessage(event, changePrefixMessage);
                 }
 
@@ -222,7 +233,7 @@ export class ConfigServerCommand extends Command {
         return changePrefixEmbed;
     }
 
-    private async changeAdminRole(event: Message, configOptionMessage: Message) {
+    private async changeAdminRole(event: Message, configOptionMessage: Message): Promise<void> {
         const roles = await this.fetchAndMapRoles(event);
 
         if (!roles) {
@@ -237,6 +248,7 @@ export class ConfigServerCommand extends Command {
 
         const filter = (reaction: Message): boolean => {
             const userCondition = reaction.author.id === event.author.id;
+            // number condition = write a number equal to the index of the role wanted
             const numberCondition =
                 Number(reaction.content) <= Object.keys(roles).length && Number(reaction.content) > 0;
             const letterCondition = ['x', 'X'].includes(reaction.content);
@@ -250,6 +262,9 @@ export class ConfigServerCommand extends Command {
                 const collectedMessage = collected.map((e: Message) => e);
 
                 this.usersUsingACommand.removeUserList(event.author.id);
+
+                // delete response message
+                await collectedMessage[0].delete();
 
                 await changeAdminRoleMessage
                     .delete()
@@ -304,7 +319,7 @@ export class ConfigServerCommand extends Command {
         const indexedRoles = Object.keys(roles).map((key: string, i: number) => {
             return `${i + 1} - ${key}\n`;
         });
-        // segunda vez peta
+
         return await new PaginatedMessage({
             embed: {
                 color: 'WHITE',
@@ -331,13 +346,20 @@ export class ConfigServerCommand extends Command {
         }).call();
     }
 
-    private async saveChanges(event: Message) {
+    private async saveChanges(event: Message): Promise<void> {
+        // check if ther is any change
+        if (!this.isSaveNeeded()) {
+            await event.channel.send('No se ha efectuado ningún cambio.');
+            return;
+        }
+
         const changes = await this.databaseConnection.server.updateConfig(
             event.guildId!,
             event.author.id,
             this.configChanges,
         );
 
+        console.log(changes);
         if (changes === ErrorEnum.NotFound) {
             await event.channel.send(
                 'Ha habido un problema determinando la id del servidor, por favor vuélvalo a intentar',
@@ -345,7 +367,31 @@ export class ConfigServerCommand extends Command {
             return;
         }
 
+        // send a message that will be redded in main.ts to update the server instance
         const resetMessage = await event.channel.send(`Update: ${event.guildId}`);
         await resetMessage.delete().catch((err) => console.log('Error sending resetMessage: ', err));
+    }
+
+    private isSaveNeeded(): boolean {
+        if (!this.configChanges.adminRole) {
+            this.configChanges.adminRole = this.serverConfig.adminRole;
+        }
+
+        if (!this.configChanges.prefix) {
+            this.configChanges.prefix = this.serverConfig.prefix;
+        }
+
+        if (!this.configChanges.blackList) {
+            this.configChanges.blackList = this.serverConfig.blackList;
+        }
+
+        if (
+            this.configChanges.adminRole === this.serverConfig.adminRole &&
+            this.configChanges.prefix === this.serverConfig.prefix &&
+            this.configChanges.blackList === this.serverConfig.blackList
+        ) {
+            return false;
+        }
+        return true;
     }
 }
