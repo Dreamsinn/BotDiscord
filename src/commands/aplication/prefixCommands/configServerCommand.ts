@@ -315,6 +315,7 @@ export class ConfigServerCommand extends Command {
                 timeOut: 60000,
                 deleteWhenTimeOut: true,
                 jsFormat: true,
+                closeButton: false,
                 reply: false,
             },
         }).call();

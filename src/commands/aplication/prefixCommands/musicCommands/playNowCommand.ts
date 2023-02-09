@@ -44,6 +44,7 @@ export class PlayNowCommand extends Command {
                 jsFormat: true,
                 deleteWhenTimeOut: false,
                 reply: false,
+                closeButton: false,
                 author: event.author,
             },
         }).call();

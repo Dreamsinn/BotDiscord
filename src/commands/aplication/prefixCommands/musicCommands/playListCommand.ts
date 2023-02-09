@@ -33,6 +33,7 @@ export class PlayListCommand extends Command {
                 timeOut: 60000,
                 deleteWhenTimeOut: false,
                 jsFormat: true,
+                closeButton: true,
                 reply: false,
             },
         }).call();

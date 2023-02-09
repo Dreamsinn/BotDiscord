@@ -44,6 +44,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 jsFormat: true,
                 deleteWhenTimeOut: false,
                 reply: false,
+                closeButton: false,
                 author: event.author,
             },
         }).call();
@@ -126,6 +127,7 @@ export class RemoveSongsFromPlayListCommand extends Command {
                 timeOut: 30000,
                 deleteWhenTimeOut: false,
                 reply: false,
+                closeButton: true,
                 jsFormat: true,
             },
         }).call();

@@ -45,7 +45,7 @@ export class Routes {
         playDlAPI: new PlayDlService(),
         spotifyAPI: new SpotifyAPIService(),
     };
-    private displayEmbedBuilder = new DisplayEmbedBuilder(this.prefix);
+    private displayEmbedBuilder = new DisplayEmbedBuilder(this.serverConfig.prefix);
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
     private playMusicByName = new PlayMusicByName(this.musicAPIs, this.usersUsingACommand);
     private playMusicByYouTubeMobileURL = new PlayMusicByYouTubeMobileURL(this.musicAPIs);
@@ -62,9 +62,7 @@ export class Routes {
         private schemaDictionary: SchemaDictionary,
         private serverConfig: ServerConfig,
         private databaseConnection: ConnectionHandler,
-    ) {
-        // console.log({ schemaDictionary })
-    }
+    ) {}
 
     public routeList: Route[] = [
         {

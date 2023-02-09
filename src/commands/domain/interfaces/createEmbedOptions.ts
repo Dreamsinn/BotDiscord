@@ -51,6 +51,7 @@ export type PaginationOptions =
           timeOut: number;
           deleteWhenTimeOut: boolean;
           jsFormat: boolean;
+          closeButton: boolean;
           author?: User;
       }
     | {
@@ -61,5 +62,6 @@ export type PaginationOptions =
           timeOut: number;
           deleteWhenTimeOut: boolean;
           jsFormat: boolean;
+          closeButton: boolean;
           author?: User;
       };

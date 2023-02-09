@@ -2,7 +2,7 @@ import { ButtonInteraction, CacheType, Message, MessageOptions } from 'discord.j
 import { discordEmojis } from '../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../domain/enums/buttonStyleEnum';
 import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
-import { ButtonRowList } from '../../domain/interfaces/button';
+import { ButtonRow } from '../../domain/interfaces/button';
 import {
     CreatePaginatedMessage,
     EmbedOptions,
@@ -122,28 +122,32 @@ export class PaginatedMessage {
     }
 
     private addButtonsReactions(paginatedMessage: Message): void {
-        const buttons: ButtonRowList = [
-            [
-                {
-                    style: ButtonsStyleEnum.BLUE,
-                    label: discordEmojis['<-'],
-                    custom_id: PaginationButtonsIdEnum.PREV,
-                },
-                {
-                    style: ButtonsStyleEnum.BLUE,
-                    label: discordEmojis['->'],
-                    custom_id: PaginationButtonsIdEnum.NEXT,
-                },
-                {
-                    style: ButtonsStyleEnum.RED,
-                    label: discordEmojis.x,
-                    custom_id: PaginationButtonsIdEnum.X,
-                },
-            ],
+        const buttons: ButtonRow = [
+            {
+                style: ButtonsStyleEnum.BLUE,
+                label: discordEmojis['<-'],
+                custom_id: PaginationButtonsIdEnum.PREV,
+            },
+            {
+                style: ButtonsStyleEnum.BLUE,
+                label: discordEmojis['->'],
+                custom_id: PaginationButtonsIdEnum.NEXT,
+            },
         ];
-        paginatedMessage.edit({ components: new MessageButtonsCreator(buttons).call() }).catch((err) => {
-            console.log('Error adding buttons to paginated embed: ', err);
-        });
+
+        if (this.pagination.closeButton) {
+            buttons.push({
+                style: ButtonsStyleEnum.RED,
+                label: discordEmojis.x,
+                custom_id: PaginationButtonsIdEnum.X,
+            });
+        }
+
+        paginatedMessage
+            .edit({ components: new MessageButtonsCreator([buttons]).call() })
+            .catch((err) => {
+                console.log('Error adding buttons to paginated embed: ', err);
+            });
     }
 
     private reactionListener(message: Message, maxPage: number): void {
