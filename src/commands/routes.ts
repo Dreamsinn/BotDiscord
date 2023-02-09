@@ -1,5 +1,4 @@
 import { ConnectionHandler } from '../database/connectionHandler';
-import { ServerConfig } from '../database/server/domain/interfaces/serverConfig';
 import { PlayListHandler } from './aplication/playListHandler';
 import { ConfigServerCommand } from './aplication/prefixCommands/configServerCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
@@ -45,7 +44,7 @@ export class Routes {
         playDlAPI: new PlayDlService(),
         spotifyAPI: new SpotifyAPIService(),
     };
-    private displayEmbedBuilder = new DisplayEmbedBuilder(this.serverConfig.prefix);
+    private displayEmbedBuilder = new DisplayEmbedBuilder(this.prefix);
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
     private playMusicByName = new PlayMusicByName(this.musicAPIs, this.usersUsingACommand);
     private playMusicByYouTubeMobileURL = new PlayMusicByYouTubeMobileURL(this.musicAPIs);
@@ -60,7 +59,7 @@ export class Routes {
     constructor(
         private usersUsingACommand: UsersUsingACommand,
         private schemaDictionary: SchemaDictionary,
-        private serverConfig: ServerConfig,
+        private prefix: string,
         private databaseConnection: ConnectionHandler,
     ) {}
 
@@ -90,7 +89,7 @@ export class Routes {
             command: new HelpCommand(
                 this.schemaDictionary['Help Command'],
                 this.usersUsingACommand,
-                this.serverConfig.prefix,
+                this.prefix,
             ),
         },
         {
@@ -183,8 +182,11 @@ export class Routes {
                 this.schemaDictionary['Config Server Command'],
                 this.databaseConnection,
                 this.usersUsingACommand,
-                this.serverConfig,
             ),
         },
     ];
+
+    public resetPrefix(newPrefix: string) {
+        this.prefix = newPrefix;
+    }
 }

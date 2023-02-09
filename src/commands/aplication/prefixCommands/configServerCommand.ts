@@ -1,10 +1,7 @@
 /* eslint-disable arrow-body-style */
 import { Message, MessageOptions, Role } from 'discord.js';
 import { ConnectionHandler } from '../../../database/connectionHandler';
-import {
-    ServerConfig,
-    ServerConfigOptions,
-} from '../../../database/server/domain/interfaces/serverConfig';
+import { ServerConfig } from '../../../database/server/domain/interfaces/serverConfig';
 import { ErrorEnum } from '../../../database/shared/domain/enums/ErrorEnum';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../domain/enums/buttonStyleEnum';
@@ -16,13 +13,17 @@ import { PaginatedMessage } from '../utils/paginatedMessage';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class ConfigServerCommand extends Command {
-    private configChanges: ServerConfigOptions = {};
+    private configChanges: ServerConfig = {};
+    private serverConfig: {
+        prefix: string;
+        adminRole: string;
+        blackList: string[];
+    };
 
     constructor(
         private configSchema: CommandSchema,
         private databaseConnection: ConnectionHandler,
         private usersUsingACommand: UsersUsingACommand,
-        private serverConfig: ServerConfig,
     ) {
         super();
     }
@@ -32,7 +33,18 @@ export class ConfigServerCommand extends Command {
             return;
         }
 
-        await this.createConfigOptionMessage(event);
+        const serverData = await this.databaseConnection.server.getById(event.guild!.id);
+
+        if (serverData) {
+            this.configChanges = {};
+            this.serverConfig = {
+                prefix: serverData.prefix,
+                adminRole: serverData.adminRole,
+                blackList: serverData.blackList ? serverData.blackList.split(',') : [],
+            };
+
+            await this.createConfigOptionMessage(event);
+        }
     }
 
     private async createConfigOptionMessage(
@@ -325,10 +337,15 @@ export class ConfigServerCommand extends Command {
             event.author.id,
             this.configChanges,
         );
+
         if (changes === ErrorEnum.NotFound) {
             await event.channel.send(
                 'Ha habido un problema determinando la id del servidor, por favor vuélvalo a intentar',
             );
+            return;
         }
+
+        const resetMessage = await event.channel.send(`Update: ${event.guildId}`);
+        await resetMessage.delete().catch((err) => console.log('Error sending resetMessage: ', err));
     }
 }

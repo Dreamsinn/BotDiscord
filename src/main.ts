@@ -19,7 +19,13 @@ async function server() {
     serverRouting.createServerList();
 
     bot.client.on('messageCreate', async (event: Message): Promise<void> => {
-        if (event.author.bot) return;
+        if (event.author.bot) {
+            // if it is a message created by the bot, target: update a server
+            if (event.content.includes('Update')) {
+                serverRouting.updateServer(event);
+            }
+            return;
+        }
 
         // if event is not created by a bot
         return await serverRouting.call(event);

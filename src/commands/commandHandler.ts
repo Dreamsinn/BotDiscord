@@ -58,10 +58,10 @@ export class CommandHandler {
         if (event.content.includes(' ')) {
             // si el mensaje tiene ' ', mirar command antes del ' '
             const endCommandPosition = event.content.search(' ');
-            command = event.content.substring(1, endCommandPosition);
+            command = event.content.substring(this.prefix.length, endCommandPosition);
         } else {
             // si no tiene espacio, todo es el command
-            command = event.content.substring(1);
+            command = event.content.substring(this.prefix.length);
         }
 
         for (const route of this.routes.routeList) {
@@ -81,5 +81,10 @@ export class CommandHandler {
                 return route.command.call(event);
             }
         }
+    }
+
+    public resetPrefix(newPrefix: string) {
+        this.prefix = newPrefix;
+        this.routes.resetPrefix(newPrefix);
     }
 }
