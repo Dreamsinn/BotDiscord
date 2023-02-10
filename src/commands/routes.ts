@@ -1,6 +1,6 @@
 import { ConnectionHandler } from '../database/connectionHandler';
 import { PlayListHandler } from './aplication/playListHandler';
-import { ConfigServerCommand } from './aplication/prefixCommands/configServerCommand';
+import { ConfigServerCommand } from './aplication/prefixCommands/configServerCommand/configServerCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
 import { ClearPlayListCommand } from './aplication/prefixCommands/musicCommands/clearPlayListCommand';
