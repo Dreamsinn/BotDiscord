@@ -133,7 +133,6 @@ export class ServerRouting {
             serverToUpdate.adminRole = newServerData.adminRole;
             serverToUpdate.blackList = newServerData.blackList ? newServerData.blackList.split(',') : [];
 
-            console.log(this.serverList.find((server: Server) => server.id === serverId));
             await event.channel.send('Configuración actualizada');
             return;
         }

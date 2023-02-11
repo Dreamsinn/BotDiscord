@@ -1,6 +1,7 @@
 export enum ConfigServerButtonsEnum {
     PREFIX = 'prefix',
-    BLACKLIST = 'blacklist',
+    ADDBLACKLIST = 'Add to blacklist',
+    REMOVEBLACKLIST = 'Remove from blacklist',
     ADMINROLE = 'adminrole',
     CLOSE = 'configClose/Save',
 }

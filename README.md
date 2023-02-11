@@ -12,52 +12,59 @@ Planned changes in the future:
 
 **Node.js 16.6.0 or newer is required.**
 
-- Install:
+-   Install:
 
     ```
     npm install
     ```
+
     or
+
     ```
     yarn install
     ```
 
-- Preparation:
+-   Preparation:
 
     Create .env file, copy .env.sample data and fill it up.
 
-  - TOKEN:
-  
-    Discord's documentation:
-  
-    https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot
-  
-  - API_KEY_YOUTUBE:
-    
-    API key is required: 
-  
-    https://console.cloud.google.com/apis/credentials
-  
-    More data in this page: 
-  
-    https://developers.google.com/youtube/registering_an_application
+    -   TOKEN:
 
-  - PREFIX:
+        Discord's documentation:
 
-    The symbol that the bot will detect to run a command.
+        https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot
 
-  - ADMIN_ROL:
+        > Important! \
+        > While getting token, on the same page, at Privileged Gateway Intents, enable:
+        >
+        > -   PRESENCE INTENT
+        > -   MESSAGE CONTENT INTENT
 
-    Name of the role that will be able to run adminOnly commands.
-    Optional, if not needed, left it blank.
-  
-    > Can be put as adminOnly by writing true in this option on the commands' schema. 
-    > 
-    > All schemas are in this route: 
-     src/commands/domain/commandSchema
-  
+    -   API_KEY_YOUTUBE:
 
-- Activation:
+        API key is required:
+
+        https://console.cloud.google.com/apis/credentials
+
+        More data in this page:
+
+        https://developers.google.com/youtube/registering_an_application
+
+    -   PREFIX:
+
+        The symbol that the bot will detect to run a command.
+
+    -   ADMIN_ROL:
+
+        Name of the role that will be able to run adminOnly commands.
+        Optional, if not needed, left it blank.
+
+        > Can be put as adminOnly by writing true in this option on the commands' schema.
+        >
+        > All schemas are in this route:
+        > src/commands/domain/commandSchema
+
+-   Activation:
     ```
     npm run start
     ```
@@ -106,8 +113,9 @@ Let's take as an example that prefix is: ~
 
 These commands need to be activated by one of _Others prefix commands_. Once activated will read all messages and send a message if the content is correct.
 
-- Dice command: Activated with YDX or DX, or YDX > Z being, Y, X and Z numbers. Example: 3D5, D6, 7D10 or 3D6 <= 3.
-- Reply command: Read specific numbers or words and make a joke depending on the message content.
+-   Dice command: Activated with YDX or DX, or YDX > Z being, Y, X and Z numbers. Example: 3D5, D6, 7D10 or 3D6 <= 3.
+-   Reply command: Read specific numbers or words and make a joke depending on the message content.
 
 # Issues
+
 Since July 2022 if the bot is being run with WSL 2, music will stop sounding after 60s.

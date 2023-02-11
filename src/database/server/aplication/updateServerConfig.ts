@@ -30,7 +30,7 @@ export class UpdateServerConfig {
         };
 
         if (config.blackList) {
-            update.blackList = this.mapBlackList(server.blackList, config.blackList);
+            update.blackList = String(config.blackList);
         }
 
         if (config.prefix) {
@@ -42,15 +42,5 @@ export class UpdateServerConfig {
         }
 
         return this.serverService.update(serverId, update);
-    }
-
-    private mapBlackList(serverBlackList: string | null, updateBlackList: string[]): string {
-        if (!serverBlackList) {
-            return String(updateBlackList);
-        }
-        const serverBlackListArray = serverBlackList.split(',');
-        serverBlackListArray.push(...updateBlackList);
-
-        return String(serverBlackListArray);
     }
 }
