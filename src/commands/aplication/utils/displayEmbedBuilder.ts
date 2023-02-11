@@ -9,11 +9,6 @@ import { MessageCreator } from '../utils/messageCreator';
 export class DisplayEmbedBuilder {
     private playListStatus: PlayListStatus;
     private displayMessage: Message;
-    private prefix: string;
-
-    constructor(prefix: string) {
-        this.prefix = prefix;
-    }
 
     public async call(
         playListStatus: PlayListStatus,
@@ -114,7 +109,7 @@ export class DisplayEmbedBuilder {
                 condition: conectionStatus === 'destroyed',
                 title:
                     `${discordEmojis.problem} Es necesario reconectar el bot, usa los comandos:` +
-                    ` ${this.prefix}p o ${this.prefix}join`,
+                    ` play o join`,
                 URL: undefined,
             },
             {

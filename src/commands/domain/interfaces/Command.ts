@@ -4,12 +4,20 @@ import { ReplyCommand } from '../../aplication/replyCommand';
 import { CheckAdminRole } from '../../aplication/utils/checkAdminRole';
 import { CoolDown } from '../../aplication/utils/coolDown';
 import { CommandSchema } from './commandSchema';
+import { SchemaDictionary } from './schemaDictionary';
+
+interface CommandProps {
+    diceCommand?: DiceCommand;
+    replyCommand?: ReplyCommand;
+    schemaList?: SchemaDictionary;
+    prefix?: string;
+}
 
 export abstract class Command {
     private coolDown = new CoolDown();
     protected checkDevRole = new CheckAdminRole();
 
-    abstract call(event: Message, adminRole: string, props?: DiceCommand | ReplyCommand): Promise<void>;
+    abstract call(event: Message, adminRole: string, props?: CommandProps): Promise<void>;
 
     protected roleAndCooldownValidation(
         event: Message,

@@ -1,5 +1,4 @@
 import { EmbedFieldData, Message, MessageOptions } from 'discord.js';
-import { commandsSchemasList } from '../../domain/commandSchema/schemasList';
 import { CommandsCategoryEnum } from '../../domain/enums/commandsCategoryEnum';
 import { HelpEmbedsTitlesEnum } from '../../domain/enums/helpEmbedsTitlesEnum';
 import { Command } from '../../domain/interfaces/Command';
@@ -10,24 +9,31 @@ import {
     HelpCommandList,
     SubTypeCommandData,
 } from '../../domain/interfaces/helpCommandData';
+import { SchemaDictionary } from '../../domain/interfaces/schemaDictionary';
 import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class HelpCommand extends Command {
     private commandList: HelpCommandList;
+    private prefix: string;
+    private commandSchemaList: CommandSchema[];
 
-    constructor(
-        private helpSchema: CommandSchema,
-        private usersUsingACommand: UsersUsingACommand,
-        private prefix: string,
-    ) {
+    constructor(private helpSchema: CommandSchema, private usersUsingACommand: UsersUsingACommand) {
         super();
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        props: { prefix: string; schemaList: SchemaDictionary },
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.helpSchema, adminRole)) {
             return;
         }
+
+        this.commandSchemaList = Object.values(props.schemaList);
+        this.prefix = props.prefix;
+
         // creamos embed para elejir entre comandos de prfijo o no prefijo, y lo enviamos
         const output = this.createTypeOfCommandsEmbed();
 
@@ -47,7 +53,7 @@ export class HelpCommand extends Command {
         const nonCommandList: HelpCommandData[] = [];
         const musicCommandList: HelpCommandData[] = [];
 
-        commandsSchemasList.forEach((schema: CommandSchema) => {
+        this.commandSchemaList.forEach((schema: CommandSchema) => {
             const schemaData: HelpCommandData = {
                 name: schema.name,
                 description: schema.description,

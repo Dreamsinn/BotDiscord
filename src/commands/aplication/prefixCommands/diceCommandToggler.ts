@@ -11,7 +11,11 @@ export class DiceCommandToggler extends Command {
         this.toggleDiceSchema = toggleDiceSchema;
     }
 
-    public async call(event: Message, adminRole: string, diceCommand: DiceCommand): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        props: { diceCommand: DiceCommand },
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.toggleDiceSchema, adminRole)) {
             return;
         }
@@ -19,7 +23,7 @@ export class DiceCommandToggler extends Command {
         // si on activa la funcion de dados, si off la desactiva
         if (event.content.includes('on')) {
             console.log({ argument: 'on' });
-            const hasBeenActived = diceCommand.toggleDiceCommand(true);
+            const hasBeenActived = props.diceCommand.toggleDiceCommand(true);
             if (hasBeenActived) {
                 event.channel.send('Dados activados');
             }
@@ -28,7 +32,7 @@ export class DiceCommandToggler extends Command {
 
         if (event.content.includes('off')) {
             console.log({ argument: 'off' });
-            const hasBeenDeactivate = diceCommand.toggleDiceCommand(false);
+            const hasBeenDeactivate = props.diceCommand.toggleDiceCommand(false);
             if (hasBeenDeactivate) {
                 event.channel.send('Dados desactivados');
             }

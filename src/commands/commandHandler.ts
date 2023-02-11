@@ -1,10 +1,12 @@
 import { Message } from 'discord.js';
 import { DiceCommand } from './aplication/diceCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
+import { HelpCommand } from './aplication/prefixCommands/helpCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { ReplyCommand, replyCommandOptions } from './aplication/replyCommand';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
+import { SchemaDictionary } from './domain/interfaces/schemaDictionary';
 import { Routes } from './routes';
 
 export class CommandHandler {
@@ -14,6 +16,7 @@ export class CommandHandler {
         private routes: Routes,
         private usersUsingACommand: UsersUsingACommand,
         private prefix: string,
+        private schemaDictionary: SchemaDictionary,
     ) {}
 
     public async isCommand(event: Message, adminRole: string) {
@@ -70,11 +73,18 @@ export class CommandHandler {
                 console.log('Command: ', route.schema.command);
 
                 if (route.command instanceof DiceCommandToggler) {
-                    return route.command.call(event, adminRole, this.diceCommand);
+                    return route.command.call(event, adminRole, { diceCommand: this.diceCommand });
                 }
 
                 if (route.command instanceof ReplyCommandToggler) {
-                    return route.command.call(event, adminRole, this.replyCommand);
+                    return route.command.call(event, adminRole, { replyCommand: this.replyCommand });
+                }
+
+                if (route.command instanceof HelpCommand) {
+                    return route.command.call(event, adminRole, {
+                        prefix: this.prefix,
+                        schemaList: this.schemaDictionary,
+                    });
                 }
 
                 // mirar si se encuentra el comando en los alias
@@ -85,6 +95,5 @@ export class CommandHandler {
 
     public resetPrefix(newPrefix: string) {
         this.prefix = newPrefix;
-        this.routes.resetPrefix(newPrefix);
     }
 }

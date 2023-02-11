@@ -11,7 +11,11 @@ export class ReplyCommandToggler extends Command {
         this.toggleDiceSchema = toggleDiceSchema;
     }
 
-    public async call(event: Message, adminRole: string, replyCommand: ReplyCommand): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        props: { replyCommand: ReplyCommand },
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, this.toggleDiceSchema, adminRole)) {
             return;
         }
@@ -19,7 +23,7 @@ export class ReplyCommandToggler extends Command {
         // si on activa la respuestas de dados, si off la desactiva
         if (event.content.includes('on')) {
             console.log({ argument: 'on' });
-            const hasBeenActived = replyCommand.toggleReplyCommand(true);
+            const hasBeenActived = props.replyCommand.toggleReplyCommand(true);
             if (hasBeenActived) {
                 event.channel.send('Respuestas activados');
             }
@@ -28,7 +32,7 @@ export class ReplyCommandToggler extends Command {
 
         if (event.content.includes('off')) {
             console.log({ argument: 'off' });
-            const hasBeenDeactivate = replyCommand.toggleReplyCommand(false);
+            const hasBeenDeactivate = props.replyCommand.toggleReplyCommand(false);
             if (hasBeenDeactivate) {
                 event.channel.send('Respuestas desactivados');
             }

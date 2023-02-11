@@ -52,9 +52,16 @@ export class ServerRouting {
         const diceCommand = new DiceCommand(schemaDictionary['Dice Command']);
         const replyCommand = new ReplyCommand(schemaDictionary['Reply Command']);
         const usersUsingACommand = new UsersUsingACommand();
-        const routes = new Routes(usersUsingACommand, schemaDictionary, prefix, this.databaseConnection);
+        const routes = new Routes(usersUsingACommand, schemaDictionary, this.databaseConnection);
 
-        return new CommandHandler(diceCommand, replyCommand, routes, usersUsingACommand, prefix);
+        return new CommandHandler(
+            diceCommand,
+            replyCommand,
+            routes,
+            usersUsingACommand,
+            prefix,
+            schemaDictionary,
+        );
     }
 
     private async getSchemas(
