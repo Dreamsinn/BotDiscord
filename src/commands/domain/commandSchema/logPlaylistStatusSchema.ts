@@ -9,7 +9,7 @@ const LogPlaylistStatusSchema: CommandSchema = {
     adminOnly: true,
     description: "Return a console log with discord's and playlist data.",
     command: CommandsNameEnum.LogPlaylistStatusCommand,
-    category: CommandsCategoryEnum.PREFIX,
+    category: CommandsCategoryEnum.DEV,
 };
 
 export { LogPlaylistStatusSchema };
