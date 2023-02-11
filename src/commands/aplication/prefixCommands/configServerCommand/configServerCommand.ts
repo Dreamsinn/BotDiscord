@@ -266,8 +266,8 @@ export class ConfigServerCommand extends Command {
         });
 
         collector.on('end', async () => {
-            // wehn collector end will aprear "inactive" over the message, if messsage is edit this will disapear
-            await configOptionMessage.edit({ content: 'Inactivado.' });
+            // when collector end buttons will disapear
+            await configOptionMessage.edit({ components: [] });
 
             this.usersUsingACommand.removeUserList(event.author.id);
         });
