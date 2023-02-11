@@ -9,6 +9,6 @@ export interface Server {
 }
 
 abstract class CommandsHandler {
-    abstract isCommand(event: Message): void;
+    abstract isCommand(event: Message, adminRole: string): void;
     abstract resetPrefix(newPrefix: string): void;
 }

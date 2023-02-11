@@ -21,8 +21,8 @@ export class DisplayPlayListCommand extends Command {
         super();
     }
 
-    public async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.displaySchema)) {
+    public async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.displaySchema, adminRole)) {
             return;
         }
 
@@ -52,12 +52,12 @@ export class DisplayPlayListCommand extends Command {
         const display = await this.playListHandler.activateDispaly(event);
 
         if (display) {
-            this.reactionListener(event, display);
+            this.reactionListener(event, display, adminRole);
         }
         return;
     }
 
-    private reactionListener(event: Message, display: DisplayMessage): void {
+    private reactionListener(event: Message, display: DisplayMessage, adminRole: string): void {
         // Añade reacciones y escucha las reacciones recibidas, si se reacciona una de las añadidas: se borra relación y actúa dependiendo relación
         this.addButtonsReactions(display.message);
 
@@ -71,7 +71,7 @@ export class DisplayPlayListCommand extends Command {
             collected.deferUpdate();
 
             if (this.displaySchema.adminOnly) {
-                if (!this.checkDevRole.call(event)) {
+                if (!this.checkDevRole.call(event, adminRole)) {
                     return;
                 }
             }

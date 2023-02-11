@@ -1,11 +1,8 @@
 import { Message } from 'discord.js';
 
-export class CheckDevRole {
-    public call(event: Message): boolean {
-        if (
-            event.member &&
-            event.member.roles.cache.some((role) => role.name === process.env.ADMIN_ROL)
-        ) {
+export class CheckAdminRole {
+    public call(event: Message, adminRole: string): boolean {
+        if (event.member && event.member.roles.cache.some((role) => role.name === adminRole)) {
             return true;
         }
         console.log({

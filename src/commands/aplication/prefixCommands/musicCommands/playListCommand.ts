@@ -14,8 +14,8 @@ export class PlayListCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.playListSchema)) {
+    public async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.playListSchema, adminRole)) {
             return;
         }
 

@@ -13,8 +13,8 @@ export class DisconnectCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.botDisconnectSchema)) {
+    public async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.botDisconnectSchema, adminRole)) {
             return;
         }
 

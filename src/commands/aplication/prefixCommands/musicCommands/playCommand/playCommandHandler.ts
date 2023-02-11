@@ -24,8 +24,8 @@ export class PlayCommandHandler extends Command {
         super();
     }
 
-    public async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.playSchema)) {
+    public async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.playSchema, adminRole)) {
             return;
         }
 

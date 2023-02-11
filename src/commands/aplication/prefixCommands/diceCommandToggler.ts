@@ -11,8 +11,8 @@ export class DiceCommandToggler extends Command {
         this.toggleDiceSchema = toggleDiceSchema;
     }
 
-    public async call(event: Message, diceCommand: DiceCommand): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.toggleDiceSchema)) {
+    public async call(event: Message, adminRole: string, diceCommand: DiceCommand): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.toggleDiceSchema, adminRole)) {
             return;
         }
 

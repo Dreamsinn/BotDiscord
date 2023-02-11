@@ -16,14 +16,14 @@ export class CommandHandler {
         private prefix: string,
     ) {}
 
-    public async isCommand(event: Message) {
+    public async isCommand(event: Message, adminRole: string) {
         // si un comando esta a la espera de una respuesta por parte de un usario,
         // ese usuario no podra interactuar con el bot
         if (this.usersUsingACommand.searchIdInUserList(event.author.id)) return;
 
         // si el comando tiene prefijo, para comandos con prefijo
         if (event.content.startsWith(this.prefix)) {
-            return this.isPrefixCommand(event);
+            return this.isPrefixCommand(event, adminRole);
         }
 
         // si el comando tien D para dados
@@ -32,7 +32,7 @@ export class CommandHandler {
             if (this.diceCommand.isDiceCommandActive) {
                 console.log('Guild: ', event.guild?.name);
                 console.log('Command: Dice command');
-                return await this.diceCommand.call(event);
+                return await this.diceCommand.call(event, adminRole);
             }
             return;
         }
@@ -45,7 +45,7 @@ export class CommandHandler {
                 if (event.content.includes(`${key}`)) {
                     console.log('Guild: ', event.guild?.name);
                     console.log('Command: Reply command');
-                    return await this.replyCommand.call(event);
+                    return await this.replyCommand.call(event, adminRole);
                 }
             }
             return;
@@ -53,7 +53,7 @@ export class CommandHandler {
         return;
     }
 
-    private async isPrefixCommand(event: Message) {
+    private async isPrefixCommand(event: Message, adminRole: string) {
         let command: string;
         if (event.content.includes(' ')) {
             // si el mensaje tiene ' ', mirar command antes del ' '
@@ -70,15 +70,15 @@ export class CommandHandler {
                 console.log('Command: ', route.schema.command);
 
                 if (route.command instanceof DiceCommandToggler) {
-                    return route.command.call(event, this.diceCommand);
+                    return route.command.call(event, adminRole, this.diceCommand);
                 }
 
                 if (route.command instanceof ReplyCommandToggler) {
-                    return route.command.call(event, this.replyCommand);
+                    return route.command.call(event, adminRole, this.replyCommand);
                 }
 
                 // mirar si se encuentra el comando en los alias
-                return route.command.call(event);
+                return route.command.call(event, adminRole);
             }
         }
     }

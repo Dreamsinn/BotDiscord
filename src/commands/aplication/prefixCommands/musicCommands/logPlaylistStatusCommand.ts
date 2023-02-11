@@ -13,10 +13,10 @@ export class LogPlaylistStatusCommand extends Command {
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message): Promise<void> {
+    public async call(event: Message, adminRole: string): Promise<void> {
         event.delete();
 
-        if (this.roleAndCooldownValidation(event, this.logSchema)) {
+        if (this.roleAndCooldownValidation(event, this.logSchema, adminRole)) {
             return;
         }
 

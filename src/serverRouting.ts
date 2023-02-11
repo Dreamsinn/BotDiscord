@@ -153,7 +153,7 @@ export class ServerRouting {
             ) {
                 return;
             }
-            return eventServer.instance.isCommand(event);
+            return eventServer.instance.isCommand(event, eventServer.adminRole);
         }
 
         // else create new server in db and put it in memory

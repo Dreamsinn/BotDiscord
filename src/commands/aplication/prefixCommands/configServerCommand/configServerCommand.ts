@@ -44,8 +44,8 @@ export class ConfigServerCommand extends Command {
         super();
     }
 
-    async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.configSchema)) {
+    async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.configSchema, adminRole)) {
             return;
         }
 

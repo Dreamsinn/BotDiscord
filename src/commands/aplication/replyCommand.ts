@@ -21,8 +21,8 @@ export class ReplyCommand extends Command {
         return true;
     }
 
-    public async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.replySchema)) {
+    public async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.replySchema, adminRole)) {
             return;
         }
 

@@ -14,8 +14,8 @@ export class PlayNowCommand extends Command {
         super();
     }
 
-    public async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.playNowSchema)) {
+    public async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.playNowSchema, adminRole)) {
             return;
         }
 

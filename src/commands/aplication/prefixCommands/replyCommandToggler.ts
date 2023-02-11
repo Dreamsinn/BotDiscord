@@ -11,8 +11,8 @@ export class ReplyCommandToggler extends Command {
         this.toggleDiceSchema = toggleDiceSchema;
     }
 
-    public async call(event: Message, replyCommand: ReplyCommand): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.toggleDiceSchema)) {
+    public async call(event: Message, adminRole: string, replyCommand: ReplyCommand): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.toggleDiceSchema, adminRole)) {
             return;
         }
 

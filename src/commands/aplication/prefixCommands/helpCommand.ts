@@ -24,8 +24,8 @@ export class HelpCommand extends Command {
         super();
     }
 
-    public async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.helpSchema)) {
+    public async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.helpSchema, adminRole)) {
             return;
         }
         // creamos embed para elejir entre comandos de prfijo o no prefijo, y lo enviamos

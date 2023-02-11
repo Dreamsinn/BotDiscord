@@ -22,8 +22,8 @@ export class DiceCommand extends Command {
         return true;
     }
 
-    public async call(event: Message): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.diceSchema)) {
+    public async call(event: Message, adminRole: string): Promise<void> {
+        if (this.roleAndCooldownValidation(event, this.diceSchema, adminRole)) {
             return;
         }
 
