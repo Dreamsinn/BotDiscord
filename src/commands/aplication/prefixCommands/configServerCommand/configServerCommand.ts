@@ -107,7 +107,7 @@ export class ConfigServerCommand extends Command {
 
         let configOptionsMessage: Message<boolean> | void;
         if (changeConfigMessage) {
-            // if is called with a message, edit it
+            // if is called with a message, edit it to update it
             configOptionsMessage = await changeConfigMessage.edit(configOptionEmbed).catch(async () => {
                 await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
                 await this.saveChanges(event);
@@ -129,6 +129,7 @@ export class ConfigServerCommand extends Command {
         const configBlacklist = this.blacklistUsers.configBlacklist;
 
         return new MessageCreator({
+            message: { content: '  ' },
             embed: {
                 color: 'WHITE',
                 title: 'Configuración del bot',
@@ -218,7 +219,7 @@ export class ConfigServerCommand extends Command {
                 return;
             }
 
-            // si x borra el msenaje
+            // si close button, save changes
             if (collected.customId === ConfigServerButtonsEnum.CLOSE) {
                 collector.stop();
                 await this.saveChanges(event);
@@ -250,12 +251,17 @@ export class ConfigServerCommand extends Command {
             }
         });
 
-        collector.on('end', () => {
+        collector.on('end', async () => {
+            // wehn collector end will aprear "inactive" over the message, if messsage is edit this will disapear
+            await configOptionMessage.edit({ content: 'Inactivado.' });
+
             this.usersUsingACommand.removeUserList(event.author.id);
         });
     }
 
     private async changePrefix(event: Message, configOptionMessage: Message): Promise<void> {
+        // it is in every route becouse if it were at the start and the end of collector, it would be not working when the changes are selected
+        // if it were at start and saving, if this time out the user would be for ever in the list
         this.usersUsingACommand.updateUserList(event.author.id);
 
         const response = await new ChangePrefix().call(event, configOptionMessage);
@@ -317,11 +323,13 @@ export class ConfigServerCommand extends Command {
         }
 
         if (response.message) {
+            // if it is not already in add array put it in
             const addedUserBlacklist = this.blacklistUsers.configBlacklist.added;
             if (!addedUserBlacklist.some((user: BlackListUser) => user.name === response.user.name)) {
                 addedUserBlacklist.push(response.user);
             }
 
+            // if it is in remove array, remove it from ir
             const removedUssersToBlacklist = this.blacklistUsers.configBlacklist.removed;
             this.blacklistUsers.configBlacklist.removed = removedUssersToBlacklist.filter(
                 (user: BlackListUser) => user.name !== response.user.name,
@@ -419,7 +427,7 @@ export class ConfigServerCommand extends Command {
             return;
         }
 
-        // send a message that will be redded in main.ts to update the server instance
+        // send a message that will be readded in main.ts to update the server instance
         const resetMessage = await event.channel.send(`Update: ${event.guildId}`);
         await resetMessage.delete().catch((err) => console.log('Error sending resetMessage: ', err));
     }

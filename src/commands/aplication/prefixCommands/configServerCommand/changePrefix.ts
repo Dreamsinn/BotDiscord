@@ -13,8 +13,8 @@ export class ChangePrefix {
         const changePrefixEmbed = this.createChangePrefixEmbed(event);
 
         // edit the configOptionMessage with the new embed
-        const changePrefixMessage = await configOptionMessage.edit(changePrefixEmbed).catch((err) => {
-            console.log('Error editing changePrefixMessage: ', err);
+        const changePrefixMessage = await event.channel.send(changePrefixEmbed).catch((err) => {
+            console.log('Error sending changePrefixMessage: ', err);
         });
 
         if (!changePrefixMessage) {
@@ -33,6 +33,9 @@ export class ChangePrefix {
 
                 // delete response message
                 await collectedMessage[0].delete();
+                await changePrefixMessage.delete().catch((err) => {
+                    console.log('Error deleting changePrefixMessage: ', err);
+                });
 
                 if (!['x', 'X'].includes(collectedMessage[0].content)) {
                     return { message: configOptionMessage, prefix: collectedMessage[0].content };
@@ -44,6 +47,10 @@ export class ChangePrefix {
                     console.log('Error in changePrefix collector: ', err);
                     return { message: null };
                 }
+                await changePrefixMessage.delete().catch((err) => {
+                    console.log('Error deleting changePrefixMessage: ', err);
+                });
+
                 return;
             });
     }
