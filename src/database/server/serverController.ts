@@ -21,8 +21,12 @@ export class ServerController {
         this.updateServerConfig = new UpdateServerConfig(serverService);
     }
 
-    public create(serverId: string, serverName: string): Promise<DiscordServer> {
-        return this.createServer.call(serverId, serverName);
+    public create(
+        serverId: string,
+        serverName: string,
+        adminRoleId: string | undefined,
+    ): Promise<DiscordServer> {
+        return this.createServer.call(serverId, serverName, adminRoleId);
     }
 
     public getAll(): Promise<DiscordServer[]> {

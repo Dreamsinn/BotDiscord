@@ -23,6 +23,7 @@ describe('Sever Test', () => {
 
     const guildId = '12341234';
     const guildName = 'Test Guild Name';
+    const adminRoleId = '1231234';
 
     beforeAll(async () => {
         await dataSource.initialize().catch((err) => {
@@ -36,13 +37,30 @@ describe('Sever Test', () => {
     });
 
     it('CreateServer', async () => {
-        const response = await databaseMock.server.create(guildId, guildName);
+        const response = await databaseMock.server.create(guildId, guildName, adminRoleId);
 
         expect(response).toBeInstanceOf(DiscordServer);
         expect(response.id).toEqual(guildId);
         expect(response.name).toEqual(guildName);
         expect(response.prefix).toEqual(process.env.PREFIX);
-        expect(response.adminRole).toEqual(process.env.ADMIN_ROL);
+        expect(response.adminRole).toEqual(adminRoleId);
+        expect(response.playList).toBe(null);
+        expect(response.blackList).toBe(null);
+        expect(response.createdAt instanceof Date).toBe(true);
+        expect(String(response.createdAt) === String(response.updatedAt)).toBe(true);
+        expect(response.updatedBy).toBe(null);
+    });
+
+    it('CreateServer with null as adminRole', async () => {
+        const guildId2 = '12345';
+        const guildName2 = 'Test guild';
+        const response = await databaseMock.server.create(guildId2, guildName2, undefined);
+
+        expect(response).toBeInstanceOf(DiscordServer);
+        expect(response.id).toEqual(guildId2);
+        expect(response.name).toEqual(guildName2);
+        expect(response.prefix).toEqual(process.env.PREFIX);
+        expect(response.adminRole).toEqual(null);
         expect(response.playList).toBe(null);
         expect(response.blackList).toBe(null);
         expect(response.createdAt instanceof Date).toBe(true);
@@ -55,7 +73,7 @@ describe('Sever Test', () => {
 
         expect(response[0]).not.toBe(undefined);
         expect(response[0]).toBeInstanceOf(DiscordServer);
-        expect(response.length).toBe(1);
+        expect(response.length).toBe(2);
     });
 
     it('GetServerById', async () => {

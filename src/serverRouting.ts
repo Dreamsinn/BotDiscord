@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message, Role } from 'discord.js';
 import { DiceCommand } from './commands/aplication/diceCommand';
 import { ReplyCommand } from './commands/aplication/replyCommand';
 import { UsersUsingACommand } from './commands/aplication/utils/usersUsingACommand';
@@ -161,9 +161,15 @@ export class ServerRouting {
     }
 
     private async addSeverToServerList(event: Message): Promise<void> {
+        const adminRole: Role | undefined = event.guild?.roles.cache.find((role: Role) => {
+            return role.name === process.env.ADMIN_ROL || role.id === process.env.ADMIN_ROL;
+        });
+        const adminRoleId = adminRole ? adminRole.id : undefined;
+
         const newDiscordServer = await this.databaseConnection.server.create(
             event.guild!.id,
             event.guild!.name,
+            adminRoleId,
         );
         const server = await this.mapServerData(newDiscordServer);
         this.serverList.push(server);

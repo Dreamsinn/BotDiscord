@@ -8,12 +8,16 @@ export class CreateServer {
         this.serverService = serverService;
     }
 
-    async call(serverId: string, serverName: string): Promise<DiscordServer> {
+    async call(
+        serverId: string,
+        serverName: string,
+        adminRoleId: string | undefined,
+    ): Promise<DiscordServer> {
         const server: NewServer = {
             id: serverId,
             name: serverName,
             prefix: process.env.PREFIX!,
-            adminRole: process.env.ADMIN_ROL!,
+            adminRole: adminRoleId,
         };
 
         return this.serverService.create(server);

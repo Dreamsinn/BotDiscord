@@ -1,8 +1,8 @@
-import { Message } from 'discord.js';
+import { Message, Role } from 'discord.js';
 
 export class CheckAdminRole {
     public call(event: Message, adminRole: string): boolean {
-        if (event.member && event.member.roles.cache.some((role) => role.name === adminRole)) {
+        if (event.member && event.member.roles.cache.some((role: Role) => role.id === adminRole)) {
             return true;
         }
         console.log({
