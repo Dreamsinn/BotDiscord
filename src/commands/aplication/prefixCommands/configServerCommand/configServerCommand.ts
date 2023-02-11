@@ -1,5 +1,5 @@
 /* eslint-disable arrow-body-style */
-import { GuildMember, Message, MessageOptions } from 'discord.js';
+import { GuildMember, Message, MessageOptions, Role } from 'discord.js';
 import { ConnectionHandler } from '../../../../database/connectionHandler';
 import { ServerConfig } from '../../../../database/server/domain/interfaces/serverConfig';
 import { ErrorEnum } from '../../../../database/shared/domain/enums/ErrorEnum';
@@ -22,6 +22,8 @@ interface BlackListUser {
 
 export class ConfigServerCommand extends Command {
     private configChanges: ServerConfig = {};
+    // in config change have to be adminRole Id
+    private configAdminRoleName: string;
     private serverConfig: {
         prefix: string;
         adminRole: string;
@@ -56,6 +58,7 @@ export class ConfigServerCommand extends Command {
         if (serverData) {
             // reset the values of the global variables
             this.configChanges = {};
+            this.configAdminRoleName = '';
             this.blacklistUsers = {
                 serverBlacklist: [],
                 configBlacklist: {
@@ -72,7 +75,7 @@ export class ConfigServerCommand extends Command {
 
             this.serverConfig = {
                 prefix: serverData.prefix,
-                adminRole: serverData.adminRole,
+                adminRole: await this.fetchAdminRole(event, serverData.adminRole),
                 blackList: blackList,
             };
 
@@ -97,6 +100,17 @@ export class ConfigServerCommand extends Command {
                 };
             });
         }
+    }
+
+    private async fetchAdminRole(event: Message, adminRoleId: string | undefined) {
+        const adminRole: Role | undefined = event.guild?.roles.cache.find((role: Role) => {
+            return role.id === adminRoleId;
+        });
+
+        if (adminRole) {
+            return adminRole.name;
+        }
+        return '';
     }
 
     private async createConfigOptionMessage(
@@ -154,7 +168,7 @@ export class ConfigServerCommand extends Command {
                         name: 'Cambios: ',
                         value:
                             `> **Prefijo:** ${this.configChanges.prefix ?? ''}\n` +
-                            `> **AdminRole:** ${this.configChanges.adminRole ?? ''}\n` +
+                            `> **AdminRole:** ${this.configAdminRoleName}\n` +
                             `> **BlackList:** \n` +
                             `> -  *Añadidos*: ${this.mapBlackListUserNames(configBlacklist.added)}\n` +
                             `> -  *Quitados*: ${this.mapBlackListUserNames(configBlacklist.removed)}`,
@@ -299,7 +313,14 @@ export class ConfigServerCommand extends Command {
         }
 
         if (response.message) {
-            this.configChanges.adminRole = response.adminRole;
+            // this constant is for the user see the name
+            this.configAdminRoleName = response.adminRole;
+
+            // this for save the id to db
+            const adminRole = event.guild?.roles.cache.find(
+                (role: Role) => role.name === response.adminRole,
+            );
+            this.configChanges.adminRole = adminRole?.id;
 
             await this.createConfigOptionMessage(event, response.message);
             return;
