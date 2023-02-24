@@ -2,7 +2,7 @@ import { CommandsNameEnum } from '../enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
-export const ConfigServerCommand: CommandSchema = {
+export const ConfigServerCommandSchema: CommandSchema = {
     name: 'Configurar el servidor',
     aliases: ['config'],
     coolDown: 0,

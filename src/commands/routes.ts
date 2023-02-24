@@ -1,5 +1,6 @@
 import { ConnectionHandler } from '../database/connectionHandler';
 import { PlayListHandler } from './aplication/playListHandler';
+import { ConfigSchemaCommand } from './aplication/prefixCommands/configSchemaCommand/configSchemaCommand';
 import { ConfigServerCommand } from './aplication/prefixCommands/configServerCommand/configServerCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
@@ -175,6 +176,14 @@ export class Routes {
             schema: this.schemaDictionary['Config Server Command'],
             command: new ConfigServerCommand(
                 this.schemaDictionary['Config Server Command'],
+                this.databaseConnection,
+                this.usersUsingACommand,
+            ),
+        },
+        {
+            schema: this.schemaDictionary['Config Schema Command'],
+            command: new ConfigSchemaCommand(
+                this.schemaDictionary['Config Schema Command'],
                 this.databaseConnection,
                 this.usersUsingACommand,
             ),

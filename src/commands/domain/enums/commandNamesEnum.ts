@@ -18,4 +18,5 @@ export enum CommandsNameEnum {
     LogPlaylistStatusCommand = 'Log Playlist Status Command',
     PlayNowCommand = 'Play Now Command',
     ConfigServerCommand = 'Config Server Command',
+    ConfigSchemaCommand = 'Config Schema Command',
 }

@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import { DiceCommand } from './aplication/diceCommand';
+import { ConfigSchemaCommand } from './aplication/prefixCommands/configSchemaCommand/configSchemaCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
@@ -85,6 +86,10 @@ export class CommandHandler {
                         prefix: this.prefix,
                         schemaList: this.schemaDictionary,
                     });
+                }
+
+                if (route.command instanceof ConfigSchemaCommand) {
+                    return route.command.call(event, adminRole, { schemaList: this.schemaDictionary });
                 }
 
                 // mirar si se encuentra el comando en los alias
