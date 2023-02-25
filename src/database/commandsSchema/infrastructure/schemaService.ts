@@ -13,4 +13,8 @@ export class SchemaService extends Service {
     public async getAllByGuildId(guildId: string): Promise<Schema[]> {
         return this.schemaRepository.findBy({ guildId });
     }
+
+    public async update(schamaModifications: Schema[]): Promise<Schema[]> {
+        return this.schemaRepository.save(schamaModifications);
+    }
 }

@@ -3,10 +3,12 @@ import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { CommandsNameEnum } from '../../../commands/domain/enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../../../commands/domain/enums/commandsCategoryEnum';
-import { CommandSchema } from '../../../commands/domain/interfaces/commandSchema';
+import { UpdateSchemaProps } from '../../commandsSchema/domain/interfaces/updateShcemaProps';
 import { Schema } from '../../commandsSchema/domain/schemaEntity';
 import { ConnectionHandler } from '../../connectionHandler';
 import { DatabaseConnectionMock } from '../dataSourceMock';
+import { commandsSchemasListMock } from './__mocks__/commandsSchemasListMock';
+import { commandDictionaryMock } from './__mocks__/schemaDictionayMock';
 
 dotenv.config();
 
@@ -23,28 +25,9 @@ describe('Sever Test', () => {
 
     let databaseMock: ConnectionHandler;
 
-    const schemaList: CommandSchema[] = [
-        {
-            name: 'Test schma 1',
-            aliases: ['schema', 'list'],
-            coolDown: 0,
-            adminOnly: false,
-            description: 'long description',
-            category: CommandsCategoryEnum.MUSIC,
-            command: CommandsNameEnum.ClearPlaylistCommand,
-        },
-        {
-            name: 'Test schma 2',
-            aliases: ['schema 2', 'commandSchema'],
-            coolDown: 100,
-            adminOnly: true,
-            description: 'long description 2',
-            category: CommandsCategoryEnum.PREFIX,
-            command: CommandsNameEnum.DiceCommand,
-        },
-    ];
-
     const guildId = '12341234';
+
+    let createdAt: Date;
 
     beforeAll(async () => {
         await dataSource.initialize().catch((err) => {
@@ -59,18 +42,22 @@ describe('Sever Test', () => {
     });
 
     it('CreateSchema, receiving an array of CommandSchema', async () => {
+        const schemaList = commandsSchemasListMock.slice(0, -1);
         const response = await databaseMock.schema.create(schemaList, guildId);
+
+        createdAt = response[0].updatedAt;
 
         expect(response instanceof Array).toBe(true);
         expect(response[0] instanceof Schema).toBe(true);
-        expect(response.length).toBe(2);
+        expect(response.length).toBe(schemaList.length);
         expect(response[0].guildId).toBe(guildId);
         expect(response[0].aliases).toEqual('schema,list');
         expect(response[0].category).toBe(CommandsCategoryEnum.MUSIC);
+        expect(response[0].updatedAt.getTime() === response[5].updatedAt.getTime()).toBe(true);
     });
 
     it('CreateSchema, receiving only one CommandSchema', async () => {
-        const schema = schemaList[0];
+        const schema = commandsSchemasListMock.slice(-1)[0];
         const response = await databaseMock.schema.create(schema, guildId);
 
         expect(response instanceof Array).toBe(true);
@@ -83,7 +70,7 @@ describe('Sever Test', () => {
 
         expect(response instanceof Array).toBe(true);
         expect(response[0] instanceof Schema).toBe(true);
-        expect(response.length).toBe(3);
+        expect(response.length).toBe(commandsSchemasListMock.length);
         expect(response[0].guildId).toBe(guildId);
         expect(response[0].aliases).toEqual('schema,list');
         expect(response[0].category).toBe(CommandsCategoryEnum.MUSIC);
@@ -93,5 +80,30 @@ describe('Sever Test', () => {
         const response = await databaseMock.schema.getAllByGuildId('1234');
 
         expect(response).toEqual([]);
+    });
+
+    it('UpdateSchema', async () => {
+        commandDictionaryMock[CommandsNameEnum.DiceCommand].coolDown = 555;
+        commandDictionaryMock[CommandsNameEnum.DiceCommand].adminOnly = false;
+        commandDictionaryMock[CommandsNameEnum.ClearPlaylistCommand].coolDown = 12345;
+        commandDictionaryMock[CommandsNameEnum.ClearPlaylistCommand].adminOnly = true;
+
+        const updateProps: UpdateSchemaProps = {
+            modifiedsSchemaList: [CommandsNameEnum.DiceCommand, CommandsNameEnum.ClearPlaylistCommand],
+            schemaDictionary: commandDictionaryMock,
+            guildId: guildId,
+            userId: 'Testing user',
+        };
+
+        const response = await databaseMock.schema.update(updateProps);
+
+        expect(response instanceof Array).toBe(true);
+        expect(response[0] instanceof Schema).toBe(true);
+        expect(response.length).toBe(2);
+        expect(response[0].command).toBe(CommandsNameEnum.DiceCommand);
+        expect(response[0].coolDown).toBe(555);
+        expect(response[1].adminOnly).toBe(true);
+        expect(response[1].updatedBy).toBe(updateProps.userId);
+        expect(response[0].updatedAt.getTime() !== createdAt.getTime()).toBe(true);
     });
 });
