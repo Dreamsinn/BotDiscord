@@ -183,23 +183,21 @@ export class ConfigSchemaCommand extends Command {
         }
 
         if (response) {
-            if (response.length) {
-                // if schema is in array, delete it, if not put it in
-                this.adminOnlyModifiedSchemaList = response.flatMap((schema: CommandSchema) => {
-                    // if it is true, set it false
-                    this.schemaList[`${schema.command}`].adminOnly =
-                        !this.schemaList[`${schema.command}`].adminOnly;
+            // if schema is in array, delete it, if not put it in
+            this.adminOnlyModifiedSchemaList = response.flatMap((schema: CommandSchema) => {
+                // if it is true, set it false
+                this.schemaList[`${schema.command}`].adminOnly =
+                    !this.schemaList[`${schema.command}`].adminOnly;
 
-                    if (
-                        this.adminOnlyModifiedSchemaList.some(
-                            (commandName) => commandName === schema.command,
-                        )
-                    ) {
-                        return [];
-                    }
-                    return schema.command;
-                });
-            }
+                if (
+                    this.adminOnlyModifiedSchemaList.some(
+                        (commandName) => commandName === schema.command,
+                    )
+                ) {
+                    return [];
+                }
+                return schema.command;
+            });
         }
 
         return await this.configSchemaListMessage(event, configSchemaListMessage);

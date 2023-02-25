@@ -277,41 +277,43 @@ export class ConfigServerCommand extends Command {
         // if it were at start and saving, if this time out the user would be for ever in the list
         this.usersUsingACommand.updateUserList(event.author.id);
 
-        const response = await new ChangePrefix().call(event, configOptionMessage);
+        const response = await new ChangePrefix().call(event);
 
         this.usersUsingACommand.removeUserList(event.author.id);
 
-        // no response
-        if (!response) {
-            await this.createConfigOptionMessage(event, configOptionMessage);
+        if (response instanceof Error) {
+            await event.channel.send(
+                `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
+            );
+            await this.saveChanges(event);
             return;
         }
 
-        if (response.message) {
+        if (response) {
             this.configChanges.prefix = response.prefix;
-            await this.createConfigOptionMessage(event, response.message);
-            return;
         }
-        // if no message but response = error
-        await event.channel.send(
-            `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
-        );
-        await this.saveChanges(event);
+
+        // no response
+        await this.createConfigOptionMessage(event, configOptionMessage);
+        return;
     }
 
     private async changeAdminRole(event: Message, configOptionMessage: Message): Promise<void> {
         this.usersUsingACommand.updateUserList(event.author.id);
 
-        const response = await new ChangeAdminRole().call(event, configOptionMessage);
+        const response = await new ChangeAdminRole().call(event);
 
         this.usersUsingACommand.removeUserList(event.author.id);
 
-        if (!response) {
-            await this.createConfigOptionMessage(event, configOptionMessage);
+        if (response instanceof Error) {
+            await event.channel.send(
+                `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
+            );
+            await this.saveChanges(event);
             return;
         }
 
-        if (response.message) {
+        if (response) {
             // this constant is for the user see the name
             this.configAdminRoleName = response.adminRole;
 
@@ -320,29 +322,28 @@ export class ConfigServerCommand extends Command {
                 (role: Role) => role.name === response.adminRole,
             );
             this.configChanges.adminRole = adminRole?.id;
-
-            await this.createConfigOptionMessage(event, response.message);
-            return;
         }
-        await event.channel.send(
-            `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
-        );
-        await this.saveChanges(event);
+
+        await this.createConfigOptionMessage(event, configOptionMessage);
+        return;
     }
 
     private async addUserToBlacklist(event: Message, configOptionMessage: Message): Promise<void> {
         this.usersUsingACommand.updateUserList(event.author.id);
 
-        const response = await new AddUserToBlacklist().call(event, configOptionMessage);
+        const response = await new AddUserToBlacklist().call(event);
 
         this.usersUsingACommand.removeUserList(event.author.id);
 
-        if (!response) {
-            await this.createConfigOptionMessage(event, configOptionMessage);
+        if (response instanceof Error) {
+            await event.channel.send(
+                `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
+            );
+            await this.saveChanges(event);
             return;
         }
 
-        if (response.message) {
+        if (response) {
             // if it is not already in add array put it in
             const addedUserBlacklist = this.blacklistUsers.configBlacklist.added;
             if (!addedUserBlacklist.some((user: BlackListUser) => user.name === response.user.name)) {
@@ -354,16 +355,10 @@ export class ConfigServerCommand extends Command {
             this.blacklistUsers.configBlacklist.removed = removedUssersToBlacklist.filter(
                 (user: BlackListUser) => user.name !== response.user.name,
             );
-
-            await this.createConfigOptionMessage(event, response.message);
-            return;
         }
 
-        await event.channel.send(
-            `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
-        );
-
-        await this.saveChanges(event);
+        await this.createConfigOptionMessage(event, configOptionMessage);
+        return;
     }
 
     private async removeUserFromBlacklist(event: Message, configOptionMessage: Message): Promise<void> {
@@ -389,18 +384,19 @@ export class ConfigServerCommand extends Command {
             return;
         }
 
-        const response = await new RemoveUserFromBlacklist().call(event, configOptionMessage, [
-            ...namesFromBlacklistSet,
-        ]);
+        const response = await new RemoveUserFromBlacklist().call(event, [...namesFromBlacklistSet]);
 
         this.usersUsingACommand.removeUserList(event.author.id);
 
-        if (!response) {
-            await this.createConfigOptionMessage(event, configOptionMessage);
+        if (response instanceof Error) {
+            await event.channel.send(
+                `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
+            );
+            await this.saveChanges(event);
             return;
         }
 
-        if (response.message) {
+        if (response) {
             // if the user selected to be removed from blacklist is in the added array, remove it
             const addedUssersToBlacklist = this.blacklistUsers.configBlacklist.added;
             this.blacklistUsers.configBlacklist.added = addedUssersToBlacklist.filter(
@@ -415,16 +411,10 @@ export class ConfigServerCommand extends Command {
             if (userToRemove) {
                 this.blacklistUsers.configBlacklist.removed.push(userToRemove);
             }
-
-            await this.createConfigOptionMessage(event, response.message);
-            return;
         }
 
-        await event.channel.send(
-            `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
-        );
-
-        await this.saveChanges(event);
+        await this.createConfigOptionMessage(event, configOptionMessage);
+        return;
     }
 
     private async saveChanges(event: Message): Promise<void> {

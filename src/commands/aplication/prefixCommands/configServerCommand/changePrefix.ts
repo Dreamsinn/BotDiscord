@@ -1,26 +1,16 @@
 import { Message, MessageOptions } from 'discord.js';
 import { MessageCreator } from '../../utils/messageCreator';
 
-type Response =
-    | {
-          message: Message;
-          prefix: string;
-      }
-    | { message: null };
+type Response = {
+    prefix: string;
+};
 
 export class ChangePrefix {
-    public async call(event: Message, configOptionMessage: Message): Promise<Response | void> {
+    public async call(event: Message): Promise<Response | void | Error> {
         const changePrefixEmbed = this.createChangePrefixEmbed(event);
 
         // edit the configOptionMessage with the new embed
-        const changePrefixMessage = await event.channel.send(changePrefixEmbed).catch((err) => {
-            console.log('Error sending changePrefixMessage: ', err);
-        });
-
-        if (!changePrefixMessage) {
-            // most problably message was deleted
-            return { message: null };
-        }
+        const changePrefixMessage = await event.channel.send(changePrefixEmbed);
 
         const filter = (reaction: Message): boolean => {
             return reaction.author.id === event.author.id;
@@ -38,15 +28,16 @@ export class ChangePrefix {
                 });
 
                 if (!['x', 'X'].includes(collectedMessage[0].content)) {
-                    return { message: configOptionMessage, prefix: collectedMessage[0].content };
+                    return { prefix: collectedMessage[0].content };
                 }
                 return;
             })
             .catch(async (err) => {
                 if (err instanceof Error) {
                     console.log('Error in changePrefix collector: ', err);
-                    return { message: null };
+                    return err;
                 }
+
                 await changePrefixMessage.delete().catch((err) => {
                     console.log('Error deleting changePrefixMessage: ', err);
                 });

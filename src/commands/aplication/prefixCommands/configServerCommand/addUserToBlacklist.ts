@@ -7,25 +7,14 @@ interface BlackListUser {
     name: string;
 }
 
-type Response =
-    | {
-          message: Message;
-          user: BlackListUser;
-      }
-    | { message: null };
+interface Response {
+    user: BlackListUser;
+}
 
 export class AddUserToBlacklist {
-    public async call(event: Message, configOptionMessage: Message): Promise<Response | void> {
+    public async call(event: Message): Promise<Response | void | Error> {
         const addUserToBlacklsitEmbed = this.createAddUserToBlacklsitEmbed(event);
-        const addUserToBlacklsitMessage = await configOptionMessage
-            .edit(addUserToBlacklsitEmbed)
-            .catch((err) => {
-                console.log('Error editing addOrRemoveUserMessage: ', err);
-            });
-
-        if (!addUserToBlacklsitMessage) {
-            return { message: null };
-        }
+        const addUserToBlacklsitMessage = await event.channel.send(addUserToBlacklsitEmbed);
 
         const filter = (reaction: Message): boolean => {
             return reaction.author.id === event.author.id;
@@ -38,6 +27,10 @@ export class AddUserToBlacklist {
 
                 // delete response message
                 await collectedMessage[0].delete();
+
+                await addUserToBlacklsitMessage
+                    .delete()
+                    .catch((err) => console.log('Error deleting addUserToBlacklsitMessage:', err));
 
                 if (['x', 'X'].includes(collectedMessage[0].content)) {
                     return;
@@ -56,25 +49,27 @@ export class AddUserToBlacklist {
                 if (userList.length > 1) {
                     const user = await this.wichUserAddToBlacklist(event, userList);
 
+                    if (user instanceof Error) {
+                        return user;
+                    }
+
                     if (user) {
-                        return {
-                            message: addUserToBlacklsitMessage,
-                            user: { id: user.id, name: user.name },
-                        };
+                        return { user: { id: user.id, name: user.name } };
                     }
                 } else {
-                    return {
-                        message: addUserToBlacklsitMessage,
-                        user: { id: userList[0].id, name: userList[0].name },
-                    };
+                    return { user: { id: userList[0].id, name: userList[0].name } };
                 }
                 return;
             })
             .catch(async (err) => {
                 if (err instanceof Error) {
                     console.log('Error add user to blacklist collector', err);
-                    return { message: null };
+                    return err;
                 }
+
+                await addUserToBlacklsitMessage
+                    .delete()
+                    .catch((err) => console.log('Error deleting addUserToBlacklsitMessage:', err));
 
                 return;
             });
@@ -119,7 +114,7 @@ export class AddUserToBlacklist {
     private async wichUserAddToBlacklist(
         event: Message,
         userList: BlackListUser[],
-    ): Promise<void | BlackListUser> {
+    ): Promise<void | BlackListUser | Error> {
         const userName = event.member?.nickname ?? event.author.username;
 
         const indexedUsers: string[] = userList.map(
@@ -178,6 +173,7 @@ export class AddUserToBlacklist {
             .catch(async (err) => {
                 if (err instanceof Error) {
                     console.log('Error in changePrefix collector: ', err);
+                    return err;
                 }
 
                 return;

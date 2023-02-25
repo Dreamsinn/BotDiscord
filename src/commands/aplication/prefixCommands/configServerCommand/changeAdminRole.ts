@@ -1,15 +1,12 @@
 import { Message, Role } from 'discord.js';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 
-type Response =
-    | {
-          message: Message;
-          adminRole: string;
-      }
-    | { message: null };
+type Response = {
+    adminRole: string;
+};
 
 export class ChangeAdminRole {
-    public async call(event: Message, configOptionMessage: Message): Promise<void | Response> {
+    public async call(event: Message): Promise<void | Response | Error> {
         const roles = await this.fetchAndMapRoles(event);
 
         if (!roles) {
@@ -43,7 +40,7 @@ export class ChangeAdminRole {
 
                 if (!['x', 'X'].includes(collectedMessage[0].content)) {
                     const selectedRoll = roles[Number(collectedMessage[0].content) - 1];
-                    return { message: configOptionMessage, adminRole: selectedRoll };
+                    return { adminRole: selectedRoll };
                 }
 
                 return;
@@ -51,7 +48,7 @@ export class ChangeAdminRole {
             .catch(async (err) => {
                 if (err instanceof Error) {
                     console.log('Error in changeAdminRole collector: ', err);
-                    return { message: null };
+                    return err;
                 }
 
                 await changeAdminRoleMessage

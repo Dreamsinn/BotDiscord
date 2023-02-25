@@ -1,19 +1,12 @@
 import { Message } from 'discord.js';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 
-type Response =
-    | {
-          message: Message;
-          user: string;
-      }
-    | { message: null };
+type Response = {
+    user: string;
+};
 
 export class RemoveUserFromBlacklist {
-    public async call(
-        event: Message,
-        configOptionMessage: Message,
-        blacklist: string[],
-    ): Promise<Response | void> {
+    public async call(event: Message, blacklist: string[]): Promise<Response | void | Error> {
         const removeUserFromBlacklistMessage = await this.createRemoveUserFromBlacklistMessage(
             event,
             blacklist,
@@ -43,7 +36,7 @@ export class RemoveUserFromBlacklist {
 
                 if (!['x', 'X'].includes(collectedMessage[0].content)) {
                     const selectedRoll = blacklist[Number(collectedMessage[0].content) - 1];
-                    return { message: configOptionMessage, user: selectedRoll };
+                    return { user: selectedRoll };
                 }
 
                 return;
@@ -51,7 +44,7 @@ export class RemoveUserFromBlacklist {
             .catch(async (err) => {
                 if (err instanceof Error) {
                     console.log('Error in changeAdminRole collector: ', err);
-                    return { message: null };
+                    return err;
                 }
 
                 await removeUserFromBlacklistMessage
