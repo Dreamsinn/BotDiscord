@@ -12,7 +12,11 @@ export class ChangeCoolDown {
     public async call(event: Message, schemaList: CommandSchema[]): Promise<Response | void> {
         const selectSchemaMessage = await this.createSelectSchemaMessage(event, schemaList);
 
-        const collectorResonse = await this.selectSchemaCollector(event, schemaList);
+        const collectorResonse = await this.selectSchemaCollector(
+            event,
+            schemaList,
+            selectSchemaMessage,
+        );
 
         if (collectorResonse) {
             const changeCoolDownEmbed = this.createChangeCoolDownEmbed(event, collectorResonse);
@@ -65,6 +69,7 @@ export class ChangeCoolDown {
     private async selectSchemaCollector(
         event: Message,
         schemaList: CommandSchema[],
+        selectSchemaMessage: Message,
     ): Promise<void | CommandSchema> {
         const filter = (reaction: Message): boolean => {
             const userCondition = reaction.author.id === event.author.id;
@@ -87,6 +92,10 @@ export class ChangeCoolDown {
                 await collectedMessage[0].delete();
 
                 if (['x', 'X'].includes(collectedMessage[0].content)) {
+                    await selectSchemaMessage
+                        .delete()
+                        .catch((err) => console.log('Error deleting selectSchemaMessage:', err));
+
                     return;
                 }
 
@@ -97,6 +106,10 @@ export class ChangeCoolDown {
                     console.log('Error in changeAdminRole collector: ', err);
                     return;
                 }
+
+                await selectSchemaMessage
+                    .delete()
+                    .catch((err) => console.log('Error deleting selectSchemaMessage:', err));
 
                 return;
             });

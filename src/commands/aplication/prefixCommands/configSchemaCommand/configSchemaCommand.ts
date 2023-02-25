@@ -39,7 +39,6 @@ export class ConfigSchemaCommand extends Command {
         configSchema: CommandSchema,
         props: { schemaList: SchemaDictionary },
     ): Promise<void> {
-        console.log({ configSchema });
         if (this.roleAndCooldownValidation(event, configSchema, adminRole)) {
             return;
         }
@@ -264,7 +263,7 @@ export class ConfigSchemaCommand extends Command {
             guildId: event.guild!.id,
             userId: event.author.id,
         });
-        console.log({ a });
+
         // send a message that will be readded in main.ts to update the server instance
         const resetMessage = await event.channel.send(`UpdateSchema: ${event.guildId}`);
         await resetMessage
