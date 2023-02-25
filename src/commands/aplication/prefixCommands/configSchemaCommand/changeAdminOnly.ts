@@ -3,7 +3,10 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 
 export class ChangeAdminOnly {
-    public async call(event: Message, schemaList: CommandSchema[]): Promise<CommandSchema[] | void> {
+    public async call(
+        event: Message,
+        schemaList: CommandSchema[],
+    ): Promise<CommandSchema[] | void | Error> {
         const changeAdminOnlyMessage = await this.createChangeAdminOnlyMessage(event, schemaList);
 
         const filter = (reaction: Message): boolean => {
@@ -43,7 +46,7 @@ export class ChangeAdminOnly {
             .catch(async (err) => {
                 if (err instanceof Error) {
                     console.log('Error in changeAdminRole collector: ', err);
-                    return;
+                    return err;
                 }
 
                 await changeAdminOnlyMessage

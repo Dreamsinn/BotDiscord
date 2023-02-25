@@ -172,32 +172,36 @@ export class ConfigSchemaCommand extends Command {
             return schema.category !== CommandsCategoryEnum.DEV;
         });
 
-        const adminOnlyModifications = await new ChangeAdminOnly().call(event, schemaArray);
+        const response = await new ChangeAdminOnly().call(event, schemaArray);
 
-        if (adminOnlyModifications) {
-            if (adminOnlyModifications.length) {
-                // if schema is in array, delete it, if not put it in
-                this.adminOnlyModifiedSchemaList = adminOnlyModifications.flatMap(
-                    (schema: CommandSchema) => {
-                        // if it is true, set it false
-                        this.schemaList[`${schema.command}`].adminOnly =
-                            !this.schemaList[`${schema.command}`].adminOnly;
-
-                        if (
-                            this.adminOnlyModifiedSchemaList.some(
-                                (commandName) => commandName === schema.command,
-                            )
-                        ) {
-                            return [];
-                        }
-                        return schema.command;
-                    },
-                );
-            }
-
-            return await this.configSchemaListMessage(event, configSchemaListMessage);
+        if (response instanceof Error) {
+            await event.channel.send(
+                `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
+            );
+            await this.saveChanges(event);
+            return;
         }
-        console.log('error');
+
+        if (response) {
+            if (response.length) {
+                // if schema is in array, delete it, if not put it in
+                this.adminOnlyModifiedSchemaList = response.flatMap((schema: CommandSchema) => {
+                    // if it is true, set it false
+                    this.schemaList[`${schema.command}`].adminOnly =
+                        !this.schemaList[`${schema.command}`].adminOnly;
+
+                    if (
+                        this.adminOnlyModifiedSchemaList.some(
+                            (commandName) => commandName === schema.command,
+                        )
+                    ) {
+                        return [];
+                    }
+                    return schema.command;
+                });
+            }
+        }
+
         return await this.configSchemaListMessage(event, configSchemaListMessage);
     }
 
@@ -207,6 +211,14 @@ export class ConfigSchemaCommand extends Command {
         });
 
         const respose = await new ChangeCoolDown().call(event, schemaArray);
+
+        if (respose instanceof Error) {
+            await event.channel.send(
+                `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
+            );
+            await this.saveChanges(event);
+            return;
+        }
 
         if (respose) {
             // was the command already modified?
@@ -236,14 +248,11 @@ export class ConfigSchemaCommand extends Command {
                 });
                 this.schemaList[`${respose.schema.command}`].coolDown = respose.newCoolDown;
             }
-            return await this.configSchemaListMessage(event, configSchemaListMessage);
         }
-
-        console.log('error');
         return await this.configSchemaListMessage(event, configSchemaListMessage);
     }
 
-    private async saveChanges(event: Message) {
+    private async saveChanges(event: Message): Promise<void> {
         // check if ther is any change
         if (!this.isSaveNeeded()) {
             await event.channel.send('No se ha efectuado ningún cambio.');
@@ -257,7 +266,7 @@ export class ConfigSchemaCommand extends Command {
 
         const modifiedsSchemasSet = new Set(modifiedsSchemas);
 
-        const a = await this.databaseConnection.schema.update({
+        await this.databaseConnection.schema.update({
             modifiedsSchemaList: [...modifiedsSchemasSet],
             schemaDictionary: this.schemaList,
             guildId: event.guild!.id,

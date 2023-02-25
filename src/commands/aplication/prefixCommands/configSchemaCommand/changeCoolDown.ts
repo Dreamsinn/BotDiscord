@@ -9,7 +9,7 @@ interface Response {
 }
 
 export class ChangeCoolDown {
-    public async call(event: Message, schemaList: CommandSchema[]): Promise<Response | void> {
+    public async call(event: Message, schemaList: CommandSchema[]): Promise<Response | void | Error> {
         const selectSchemaMessage = await this.createSelectSchemaMessage(event, schemaList);
 
         const collectorResonse = await this.selectSchemaCollector(
@@ -17,6 +17,10 @@ export class ChangeCoolDown {
             schemaList,
             selectSchemaMessage,
         );
+
+        if (collectorResonse instanceof Error) {
+            return collectorResonse;
+        }
 
         if (collectorResonse) {
             const changeCoolDownEmbed = this.createChangeCoolDownEmbed(event, collectorResonse);
@@ -70,7 +74,7 @@ export class ChangeCoolDown {
         event: Message,
         schemaList: CommandSchema[],
         selectSchemaMessage: Message,
-    ): Promise<void | CommandSchema> {
+    ): Promise<void | CommandSchema | Error> {
         const filter = (reaction: Message): boolean => {
             const userCondition = reaction.author.id === event.author.id;
 
@@ -104,7 +108,7 @@ export class ChangeCoolDown {
             .catch(async (err) => {
                 if (err instanceof Error) {
                     console.log('Error in changeAdminRole collector: ', err);
-                    return;
+                    return err;
                 }
 
                 await selectSchemaMessage
@@ -139,7 +143,7 @@ export class ChangeCoolDown {
         event: Message,
         changeCoolDownMessage: Message,
         schemaSelected: CommandSchema,
-    ): Promise<Response | void> {
+    ): Promise<Response | void | Error> {
         const filter = (reaction: Message): boolean => {
             const userCondition = reaction.author.id === event.author.id;
 
@@ -172,7 +176,7 @@ export class ChangeCoolDown {
             .catch(async (err) => {
                 if (err instanceof Error) {
                     console.log('Error in changeAdminRole collector: ', err);
-                    return;
+                    return err;
                 }
 
                 await changeCoolDownMessage
