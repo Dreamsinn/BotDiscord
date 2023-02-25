@@ -11,6 +11,7 @@ import { SchemaDictionary } from '../../../domain/interfaces/schemaDictionary';
 import { MessageCreator } from '../../utils/messageCreator';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 import { ChangeAdminOnly } from './changeAdminOnly';
+import { ChangeCoolDown } from './changeCoolDown';
 
 interface CooldownModifiedSchema {
     command: CommandsNameEnum;
@@ -84,7 +85,6 @@ export class ConfigSchemaCommand extends Command {
         const adminOnlyNames = String(this.adminOnlyModifiedSchemaList).replaceAll(',', ', ');
 
         return new MessageCreator({
-            message: { content: '  ' },
             embed: {
                 color: 'WHITE',
                 title: 'Configuración de comandos',
@@ -155,7 +155,7 @@ export class ConfigSchemaCommand extends Command {
 
             if (collected.customId === ConfigSchemaCommandButtonsEnum.COOLDOWN) {
                 collector.stop();
-                // await this.changePrefix(event, configSchemaListMessage);
+                await this.changeCoolDown(event, configSchemaListMessage);
                 return;
             }
         });
@@ -168,7 +168,7 @@ export class ConfigSchemaCommand extends Command {
         });
     }
 
-    private async changeAdminOnly(event: Message, configSchemaListMessage: Message) {
+    private async changeAdminOnly(event: Message, configSchemaListMessage: Message): Promise<void> {
         const schemaArray = Object.values(this.schemaList).filter((schema: CommandSchema) => {
             return schema.category !== CommandsCategoryEnum.DEV;
         });
@@ -198,6 +198,48 @@ export class ConfigSchemaCommand extends Command {
 
             return await this.configSchemaListMessage(event, configSchemaListMessage);
         }
+        console.log('error');
+        return await this.configSchemaListMessage(event, configSchemaListMessage);
+    }
+
+    private async changeCoolDown(event: Message, configSchemaListMessage: Message): Promise<void> {
+        const schemaArray = Object.values(this.schemaList).filter((schema: CommandSchema) => {
+            return schema.category !== CommandsCategoryEnum.DEV;
+        });
+
+        const respose = await new ChangeCoolDown().call(event, schemaArray);
+
+        if (respose) {
+            // was the command already modified?
+            const selectedSchema = this.cooldownModifiedSchemaList.find(
+                (schema: CooldownModifiedSchema) => schema.command === respose.schema.command,
+            );
+
+            // if it was
+            if (selectedSchema) {
+                // set new cooldown
+                this.schemaList[`${respose.schema.command}`].coolDown = respose.newCoolDown;
+                selectedSchema.coolDown.after = respose.newCoolDown;
+                // if new cooldown === first cooldown deleter it from modified array
+                if (selectedSchema.coolDown.after === selectedSchema.coolDown.before) {
+                    this.cooldownModifiedSchemaList = this.cooldownModifiedSchemaList.filter(
+                        (schema: CooldownModifiedSchema) => schema.command !== respose.schema.command,
+                    );
+                }
+            } else {
+                // if not, put it in the array and set new cooldown
+                this.cooldownModifiedSchemaList.push({
+                    command: respose.schema.command,
+                    coolDown: {
+                        before: respose.schema.coolDown,
+                        after: respose.newCoolDown,
+                    },
+                });
+                this.schemaList[`${respose.schema.command}`].coolDown = respose.newCoolDown;
+            }
+            return await this.configSchemaListMessage(event, configSchemaListMessage);
+        }
+
         console.log('error');
         return await this.configSchemaListMessage(event, configSchemaListMessage);
     }

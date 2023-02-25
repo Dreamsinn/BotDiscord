@@ -28,7 +28,7 @@ export class ChangeAdminOnly {
 
                 // delete response message
                 await collectedMessage[0].delete();
-                console.log(1);
+
                 await changeAdminOnlyMessage
                     .delete()
                     .catch((err) => console.log('Error deleting changeAdminRoleMessage:', err));
@@ -36,11 +36,9 @@ export class ChangeAdminOnly {
                 if (['x', 'X'].includes(collectedMessage[0].content)) {
                     return [];
                 }
-                console.log(2);
+
                 const numberArray = collectedMessage[0].content.split(',');
-                const a = numberArray.map((number: string) => schemaList[Number(number) - 1]);
-                console.log({ a });
-                return a;
+                return numberArray.map((number: string) => schemaList[Number(number) - 1]);
             })
             .catch(async (err) => {
                 if (err instanceof Error) {
@@ -51,7 +49,6 @@ export class ChangeAdminOnly {
                 await changeAdminOnlyMessage
                     .delete()
                     .catch((err) => console.log('Error deleting changeAdminRoleMessage:', err));
-                console.log(3);
                 return [];
             });
     }
