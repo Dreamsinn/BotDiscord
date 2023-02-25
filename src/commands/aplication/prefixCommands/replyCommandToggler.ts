@@ -4,19 +4,13 @@ import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { ReplyCommand } from '../replyCommand';
 
 export class ReplyCommandToggler extends Command {
-    private toggleDiceSchema: CommandSchema;
-
-    constructor(toggleDiceSchema: CommandSchema) {
-        super();
-        this.toggleDiceSchema = toggleDiceSchema;
-    }
-
     public async call(
         event: Message,
         adminRole: string,
+        toggleDiceSchema: CommandSchema,
         props: { replyCommand: ReplyCommand },
     ): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.toggleDiceSchema, adminRole)) {
+        if (this.roleAndCooldownValidation(event, toggleDiceSchema, adminRole)) {
             return;
         }
 

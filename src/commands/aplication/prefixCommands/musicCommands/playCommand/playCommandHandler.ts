@@ -12,7 +12,6 @@ import { PlayPlayListByYoutubeURL } from './playPlayListByYoutubeURL';
 
 export class PlayCommandHandler extends Command {
     constructor(
-        private playSchema: CommandSchema,
         private playListHandler: PlayListHandler,
         private playMusicByName: PlayMusicByName,
         private playMusicByYouTubeMobileURL: PlayMusicByYouTubeMobileURL,
@@ -24,8 +23,8 @@ export class PlayCommandHandler extends Command {
         super();
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.playSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, playSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, playSchema, adminRole)) {
             return;
         }
 

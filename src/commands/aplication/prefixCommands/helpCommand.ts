@@ -18,16 +18,17 @@ export class HelpCommand extends Command {
     private prefix: string;
     private commandSchemaList: CommandSchema[];
 
-    constructor(private helpSchema: CommandSchema, private usersUsingACommand: UsersUsingACommand) {
+    constructor(private usersUsingACommand: UsersUsingACommand) {
         super();
     }
 
     public async call(
         event: Message,
         adminRole: string,
+        helpSchema: CommandSchema,
         props: { prefix: string; schemaList: SchemaDictionary },
     ): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.helpSchema, adminRole)) {
+        if (this.roleAndCooldownValidation(event, helpSchema, adminRole)) {
             return;
         }
 

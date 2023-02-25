@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import { SchemaDictionary } from './schemaDictionary';
 
 export interface Server {
     id: string;
@@ -11,4 +12,5 @@ export interface Server {
 abstract class CommandsHandler {
     abstract isCommand(event: Message, adminRole: string): void;
     abstract resetPrefix(newPrefix: string): void;
+    abstract resetSchemas(newSchemas: SchemaDictionary): void;
 }

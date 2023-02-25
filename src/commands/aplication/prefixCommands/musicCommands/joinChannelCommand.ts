@@ -4,17 +4,15 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class JoinChannelCommand extends Command {
-    private joinSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(joinSchema: CommandSchema, playListHandler: PlayListHandler) {
+    constructor(playListHandler: PlayListHandler) {
         super();
-        this.joinSchema = joinSchema;
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.joinSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, joinSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, joinSchema, adminRole)) {
             return;
         }
 

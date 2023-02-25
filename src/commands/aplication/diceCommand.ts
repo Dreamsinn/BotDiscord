@@ -5,13 +5,8 @@ import { rollSymbol, SuccessesSymbol } from '../domain/interfaces/successesSymbo
 import { MessageCreator } from './utils/messageCreator';
 
 export class DiceCommand extends Command {
-    private diceSchema: CommandSchema;
     public isDiceCommandActive = false;
-
-    constructor(diceSchema: CommandSchema) {
-        super();
-        this.diceSchema = diceSchema;
-    }
+    private diceSchema: CommandSchema;
 
     // activa o desactuva los dados
     public toggleDiceCommand(active: boolean): boolean {
@@ -22,10 +17,11 @@ export class DiceCommand extends Command {
         return true;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.diceSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, diceSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, diceSchema, adminRole)) {
             return;
         }
+        this.diceSchema = diceSchema;
 
         // para tiradas que incluyen < o >
         if (event.content.includes('<') || event.content.includes('>')) {

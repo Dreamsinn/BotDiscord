@@ -27,7 +27,6 @@ export class ConfigSchemaCommand extends Command {
     private adminOnlyModifiedSchemaList: CommandsNameEnum[];
 
     constructor(
-        private configSchema: CommandSchema,
         private databaseConnection: ConnectionHandler,
         private usersUsingACommand: UsersUsingACommand,
     ) {
@@ -37,12 +36,13 @@ export class ConfigSchemaCommand extends Command {
     public async call(
         event: Message,
         adminRole: string,
+        configSchema: CommandSchema,
         props: { schemaList: SchemaDictionary },
     ): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.configSchema, adminRole)) {
+        console.log({ configSchema });
+        if (this.roleAndCooldownValidation(event, configSchema, adminRole)) {
             return;
         }
-        console.log(this.databaseConnection.schema.create);
         this.schemaList = props.schemaList;
         this.cooldownModifiedSchemaList = [];
         this.adminOnlyModifiedSchemaList = [];
@@ -143,7 +143,7 @@ export class ConfigSchemaCommand extends Command {
             // si close button, save changes
             if (collected.customId === ConfigSchemaCommandButtonsEnum.CLOSE) {
                 collector.stop();
-                // await this.saveChanges(event);
+                await this.saveChanges(event);
                 return;
             }
 
@@ -242,5 +242,40 @@ export class ConfigSchemaCommand extends Command {
 
         console.log('error');
         return await this.configSchemaListMessage(event, configSchemaListMessage);
+    }
+
+    private async saveChanges(event: Message) {
+        // check if ther is any change
+        if (!this.isSaveNeeded()) {
+            await event.channel.send('No se ha efectuado ningún cambio.');
+            return;
+        }
+
+        const modifiedsSchemas: CommandsNameEnum[] = [...this.adminOnlyModifiedSchemaList];
+        this.cooldownModifiedSchemaList.forEach((schema: CooldownModifiedSchema) => {
+            modifiedsSchemas.push(schema.command);
+        });
+
+        const modifiedsSchemasSet = new Set(modifiedsSchemas);
+
+        const a = await this.databaseConnection.schema.update({
+            modifiedsSchemaList: [...modifiedsSchemasSet],
+            schemaDictionary: this.schemaList,
+            guildId: event.guild!.id,
+            userId: event.author.id,
+        });
+        console.log({ a });
+        // send a message that will be readded in main.ts to update the server instance
+        const resetMessage = await event.channel.send(`UpdateSchema: ${event.guildId}`);
+        await resetMessage
+            .delete()
+            .catch((err) => console.log('Error deleting resetSchemaMessage: ', err));
+    }
+
+    private isSaveNeeded(): boolean {
+        if (this.cooldownModifiedSchemaList.length || this.adminOnlyModifiedSchemaList.length) {
+            return true;
+        }
+        return false;
     }
 }

@@ -4,17 +4,19 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class DisconnectCommand extends Command {
-    private botDisconnectSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(botDisconnectSchema: CommandSchema, playListHandler: PlayListHandler) {
+    constructor(playListHandler: PlayListHandler) {
         super();
-        this.botDisconnectSchema = botDisconnectSchema;
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.botDisconnectSchema, adminRole)) {
+    public async call(
+        event: Message,
+        adminRole: string,
+        botDisconnectSchema: CommandSchema,
+    ): Promise<void> {
+        if (this.roleAndCooldownValidation(event, botDisconnectSchema, adminRole)) {
             return;
         }
 

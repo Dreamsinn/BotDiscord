@@ -5,17 +5,15 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class PauseCommand extends Command {
-    private pauseSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(pauseSchema: CommandSchema, playListHandler: PlayListHandler) {
+    constructor(playListHandler: PlayListHandler) {
         super();
-        this.pauseSchema = pauseSchema;
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.pauseSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, pauseSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, pauseSchema, adminRole)) {
             return;
         }
 

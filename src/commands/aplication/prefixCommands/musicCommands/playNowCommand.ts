@@ -7,15 +7,14 @@ import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 
 export class PlayNowCommand extends Command {
     constructor(
-        private playNowSchema: CommandSchema,
         private playListHandler: PlayListHandler,
         private usersUsingACommand: UsersUsingACommand,
     ) {
         super();
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.playNowSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, playNowSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, playNowSchema, adminRole)) {
             return;
         }
 

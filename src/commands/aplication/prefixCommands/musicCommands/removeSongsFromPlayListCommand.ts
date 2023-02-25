@@ -7,15 +7,14 @@ import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 
 export class RemoveSongsFromPlayListCommand extends Command {
     constructor(
-        private removeSchema: CommandSchema,
         private playListHandler: PlayListHandler,
         private usersUsingACommand: UsersUsingACommand,
     ) {
         super();
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.removeSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, removeSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, removeSchema, adminRole)) {
             return;
         }
 

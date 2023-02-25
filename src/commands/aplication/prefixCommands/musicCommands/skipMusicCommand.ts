@@ -5,17 +5,15 @@ import { PlayListHandler } from '../../playListHandler';
 import { MessageCreator } from '../../utils/messageCreator';
 
 export class SkipMusicCommand extends Command {
-    private skipSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(skipSchema: CommandSchema, playListHandler: PlayListHandler) {
+    constructor(playListHandler: PlayListHandler) {
         super();
-        this.skipSchema = skipSchema;
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.skipSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, skipSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, skipSchema, adminRole)) {
             return;
         }
 

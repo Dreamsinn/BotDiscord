@@ -5,17 +5,15 @@ import { PlayListHandler } from '../../playListHandler';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 
 export class PlayListCommand extends Command {
-    private playListSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(playListSchema: CommandSchema, playListHandler: PlayListHandler) {
+    constructor(playListHandler: PlayListHandler) {
         super();
-        this.playListSchema = playListSchema;
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.playListSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, playListSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, playListSchema, adminRole)) {
             return;
         }
 

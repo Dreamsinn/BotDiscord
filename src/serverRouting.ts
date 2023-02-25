@@ -49,8 +49,8 @@ export class ServerRouting {
     private async newCommandHandlerInstance(serverId: string, prefix: string) {
         const schemaDictionary = await this.getSchemas(this.commandSchemaList, serverId);
 
-        const diceCommand = new DiceCommand(schemaDictionary['Dice Command']);
-        const replyCommand = new ReplyCommand(schemaDictionary['Reply Command']);
+        const diceCommand = new DiceCommand();
+        const replyCommand = new ReplyCommand();
         const usersUsingACommand = new UsersUsingACommand();
         const routes = new Routes(usersUsingACommand, schemaDictionary, this.databaseConnection);
 
@@ -126,12 +126,19 @@ export class ServerRouting {
         return this.mapSchemaDictionary(commandSchemaList);
     }
 
-    public async updateServer(event: Message) {
+    public async updateServer(event: Message): Promise<void> {
         // when server config is changed, set it
         const serverIdPosition = event.content.indexOf(':');
         const serverId = event.content.substring(serverIdPosition + 2);
 
         const serverToUpdate = this.serverList.find((server: Server) => server.id === serverId);
+
+        if (event.content.includes('UpdateSchema')) {
+            // update schemas
+            this.updateServerSchemas(serverId, serverToUpdate);
+            await event.channel.send('Esquemas actualizados');
+            return;
+        }
 
         const newServerData = await this.databaseConnection.server.getById(serverId);
         if (serverToUpdate && newServerData) {
@@ -142,6 +149,17 @@ export class ServerRouting {
 
             await event.channel.send('Configuración actualizada');
             return;
+        }
+    }
+
+    private async updateServerSchemas(
+        serverId: string,
+        serverToUpdate: Server | undefined,
+    ): Promise<void> {
+        if (serverToUpdate) {
+            const rawSchemas = await this.databaseConnection.schema.getAllByGuildId(serverId);
+            const schemaDictionary = this.convertSchemaToCommandSchema(rawSchemas);
+            serverToUpdate.instance.resetSchemas(schemaDictionary);
         }
     }
 

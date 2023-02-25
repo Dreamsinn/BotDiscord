@@ -17,7 +17,12 @@ export abstract class Command {
     private coolDown = new CoolDown();
     protected checkDevRole = new CheckAdminRole();
 
-    abstract call(event: Message, adminRole: string, props?: CommandProps): Promise<void>;
+    abstract call(
+        event: Message,
+        adminRole: string,
+        schema: CommandSchema,
+        props?: CommandProps,
+    ): Promise<void>;
 
     protected roleAndCooldownValidation(
         event: Message,

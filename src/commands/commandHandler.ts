@@ -36,7 +36,11 @@ export class CommandHandler {
             if (this.diceCommand.isDiceCommandActive) {
                 console.log('Guild: ', event.guild?.name);
                 console.log('Command: Dice command');
-                return await this.diceCommand.call(event, adminRole);
+                return await this.diceCommand.call(
+                    event,
+                    adminRole,
+                    this.schemaDictionary['Dice Command'],
+                );
             }
             return;
         }
@@ -49,7 +53,11 @@ export class CommandHandler {
                 if (event.content.includes(`${key}`)) {
                     console.log('Guild: ', event.guild?.name);
                     console.log('Command: Reply command');
-                    return await this.replyCommand.call(event, adminRole);
+                    return await this.replyCommand.call(
+                        event,
+                        adminRole,
+                        this.schemaDictionary['Reply Command'],
+                    );
                 }
             }
             return;
@@ -73,32 +81,44 @@ export class CommandHandler {
                 console.log('Guild: ', event.guild?.name);
                 console.log('Command: ', route.schema.command);
 
+                // we cant take route.schema directly becouse this dont get update when schemas are updated
+                const schema = this.schemaDictionary[`${route.schema.command}`];
+
                 if (route.command instanceof DiceCommandToggler) {
-                    return route.command.call(event, adminRole, { diceCommand: this.diceCommand });
+                    return route.command.call(event, adminRole, schema, {
+                        diceCommand: this.diceCommand,
+                    });
                 }
 
                 if (route.command instanceof ReplyCommandToggler) {
-                    return route.command.call(event, adminRole, { replyCommand: this.replyCommand });
+                    return route.command.call(event, adminRole, schema, {
+                        replyCommand: this.replyCommand,
+                    });
                 }
 
                 if (route.command instanceof HelpCommand) {
-                    return route.command.call(event, adminRole, {
+                    return route.command.call(event, adminRole, schema, {
                         prefix: this.prefix,
                         schemaList: this.schemaDictionary,
                     });
                 }
 
                 if (route.command instanceof ConfigSchemaCommand) {
-                    return route.command.call(event, adminRole, { schemaList: this.schemaDictionary });
+                    return route.command.call(event, adminRole, schema, {
+                        schemaList: this.schemaDictionary,
+                    });
                 }
 
-                // mirar si se encuentra el comando en los alias
-                return route.command.call(event, adminRole);
+                return route.command.call(event, adminRole, schema);
             }
         }
     }
 
     public resetPrefix(newPrefix: string) {
         this.prefix = newPrefix;
+    }
+
+    public resetSchemas(newSchemas: SchemaDictionary) {
+        this.schemaDictionary = newSchemas;
     }
 }

@@ -39,15 +39,14 @@ export class ConfigServerCommand extends Command {
     };
 
     constructor(
-        private configSchema: CommandSchema,
         private databaseConnection: ConnectionHandler,
         private usersUsingACommand: UsersUsingACommand,
     ) {
         super();
     }
 
-    async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.configSchema, adminRole)) {
+    async call(event: Message, adminRole: string, configSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, configSchema, adminRole)) {
             return;
         }
 
@@ -450,7 +449,7 @@ export class ConfigServerCommand extends Command {
 
         // send a message that will be readded in main.ts to update the server instance
         const resetMessage = await event.channel.send(`Update: ${event.guildId}`);
-        await resetMessage.delete().catch((err) => console.log('Error sending resetMessage: ', err));
+        await resetMessage.delete().catch((err) => console.log('Error deleting resetMessage: ', err));
     }
 
     private isSaveNeeded(): boolean {

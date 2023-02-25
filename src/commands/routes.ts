@@ -67,7 +67,6 @@ export class Routes {
         {
             schema: this.schemaDictionary['Play Command'],
             command: new PlayCommandHandler(
-                this.schemaDictionary['Play Command'],
                 this.playListHandler,
                 this.playMusicByName,
                 this.playMusicByYouTubeMobileURL,
@@ -79,114 +78,71 @@ export class Routes {
         },
         {
             schema: this.schemaDictionary['Playlist Command'],
-            command: new PlayListCommand(
-                this.schemaDictionary['Playlist Command'],
-                this.playListHandler,
-            ),
+            command: new PlayListCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Help Command'],
-            command: new HelpCommand(this.schemaDictionary['Help Command'], this.usersUsingACommand),
+            command: new HelpCommand(this.usersUsingACommand),
         },
         {
             schema: this.schemaDictionary['Pause Command'],
-            command: new PauseCommand(this.schemaDictionary['Pause Command'], this.playListHandler),
+            command: new PauseCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Skip Music Command'],
-            command: new SkipMusicCommand(
-                this.schemaDictionary['Skip Music Command'],
-                this.playListHandler,
-            ),
+            command: new SkipMusicCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Disconnect Command'],
-            command: new DisconnectCommand(
-                this.schemaDictionary['Disconnect Command'],
-                this.playListHandler,
-            ),
+            command: new DisconnectCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Join Channel Command'],
-            command: new JoinChannelCommand(
-                this.schemaDictionary['Join Channel Command'],
-                this.playListHandler,
-            ),
+            command: new JoinChannelCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Clear Playlist Command'],
-            command: new ClearPlayListCommand(
-                this.schemaDictionary['Clear Playlist Command'],
-                this.playListHandler,
-            ),
+            command: new ClearPlayListCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Remove Songs From Playlist Command'],
-            command: new RemoveSongsFromPlayListCommand(
-                this.schemaDictionary['Remove Songs From Playlist Command'],
-                this.playListHandler,
-                this.usersUsingACommand,
-            ),
+            command: new RemoveSongsFromPlayListCommand(this.playListHandler, this.usersUsingACommand),
         },
         {
             schema: this.schemaDictionary['Shuffle Playlist Command'],
-            command: new ShufflePlayListCommand(
-                this.schemaDictionary['Shuffle Playlist Command'],
-                this.playListHandler,
-            ),
+            command: new ShufflePlayListCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Loop Playlist Mode Command'],
-            command: new LoopPlayListModeCommand(
-                this.schemaDictionary['Loop Playlist Mode Command'],
-                this.playListHandler,
-            ),
+            command: new LoopPlayListModeCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Display Playlist Command'],
-            command: new DisplayPlayListCommand(
-                this.schemaDictionary['Display Playlist Command'],
-                this.playListHandler,
-            ),
+            command: new DisplayPlayListCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Dice Command Toggler'],
-            command: new DiceCommandToggler(this.schemaDictionary['Dice Command Toggler']),
+            command: new DiceCommandToggler(),
         },
         {
             schema: this.schemaDictionary['Reply Command Toggler'],
-            command: new ReplyCommandToggler(this.schemaDictionary['Reply Command Toggler']),
+            command: new ReplyCommandToggler(),
         },
         {
             schema: this.schemaDictionary['Log Playlist Status Command'],
-            command: new LogPlaylistStatusCommand(
-                this.schemaDictionary['Log Playlist Status Command'],
-                this.playListHandler,
-            ),
+            command: new LogPlaylistStatusCommand(this.playListHandler),
         },
         {
             schema: this.schemaDictionary['Play Now Command'],
-            command: new PlayNowCommand(
-                this.schemaDictionary['Play Now Command'],
-                this.playListHandler,
-                this.usersUsingACommand,
-            ),
+            command: new PlayNowCommand(this.playListHandler, this.usersUsingACommand),
         },
         {
             schema: this.schemaDictionary['Config Server Command'],
-            command: new ConfigServerCommand(
-                this.schemaDictionary['Config Server Command'],
-                this.databaseConnection,
-                this.usersUsingACommand,
-            ),
+            command: new ConfigServerCommand(this.databaseConnection, this.usersUsingACommand),
         },
         {
             schema: this.schemaDictionary['Config Schema Command'],
-            command: new ConfigSchemaCommand(
-                this.schemaDictionary['Config Schema Command'],
-                this.databaseConnection,
-                this.usersUsingACommand,
-            ),
+            command: new ConfigSchemaCommand(this.databaseConnection, this.usersUsingACommand),
         },
     ];
 }

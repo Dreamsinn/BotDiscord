@@ -4,17 +4,15 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class ClearPlayListCommand extends Command {
-    private clearSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(clearSchema: CommandSchema, playListHandler: PlayListHandler) {
+    constructor(playListHandler: PlayListHandler) {
         super();
-        this.clearSchema = clearSchema;
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.clearSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, clearSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, clearSchema, adminRole)) {
             return;
         }
 

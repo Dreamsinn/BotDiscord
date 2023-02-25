@@ -12,19 +12,21 @@ import { MessageCreator } from '../../utils/messageCreator';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 
 export class DisplayPlayListCommand extends Command {
+    private displaySchema: CommandSchema;
     private isDisplayActive = false;
     private showingReadme = false;
     private playListEmbed: Message | undefined;
     private collector: InteractionCollector<ButtonInteraction<CacheType>>;
 
-    constructor(private displaySchema: CommandSchema, private playListHandler: PlayListHandler) {
+    constructor(private playListHandler: PlayListHandler) {
         super();
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.displaySchema, adminRole)) {
+    public async call(event: Message, adminRole: string, displaySchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, displaySchema, adminRole)) {
             return;
         }
+        this.displaySchema = displaySchema;
 
         if (event.content.includes('kill')) {
             console.log({ argument: 'kill' });

@@ -4,13 +4,7 @@ import { CommandSchema } from '../domain/interfaces/commandSchema';
 import { MessageCreator } from './utils/messageCreator';
 
 export class ReplyCommand extends Command {
-    private replySchema: CommandSchema;
     public isReplyCommandActive = false;
-
-    constructor(replySchema: CommandSchema) {
-        super();
-        this.replySchema = replySchema;
-    }
 
     // activa o desactuva las respuestas
     public toggleReplyCommand(active: boolean): boolean {
@@ -21,14 +15,14 @@ export class ReplyCommand extends Command {
         return true;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.replySchema, adminRole)) {
+    public async call(event: Message, adminRole: string, replySchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, replySchema, adminRole)) {
             return;
         }
 
         // TODO: no fer recorsivitat de if, es podria fer un filter
         // concatenar if fa que sigui lios
-        this.replySchema.aliases.forEach((alias: string) => {
+        replySchema.aliases.forEach((alias: string) => {
             // mirar si se encuntra el alias al principio, o ente ' '
             if (event.content.startsWith(alias) || event.content.includes(` ${alias} `)) {
                 // mirar si cumple la condicion de coolDown

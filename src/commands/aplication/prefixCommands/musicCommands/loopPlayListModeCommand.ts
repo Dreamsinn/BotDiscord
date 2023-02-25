@@ -4,17 +4,15 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class LoopPlayListModeCommand extends Command {
-    private loopSchema: CommandSchema;
     private playListHandler: PlayListHandler;
 
-    constructor(loopSchema: CommandSchema, playListHandler: PlayListHandler) {
+    constructor(playListHandler: PlayListHandler) {
         super();
-        this.loopSchema = loopSchema;
         this.playListHandler = playListHandler;
     }
 
-    public async call(event: Message, adminRole: string): Promise<void> {
-        if (this.roleAndCooldownValidation(event, this.loopSchema, adminRole)) {
+    public async call(event: Message, adminRole: string, loopSchema: CommandSchema): Promise<void> {
+        if (this.roleAndCooldownValidation(event, loopSchema, adminRole)) {
             return;
         }
 
