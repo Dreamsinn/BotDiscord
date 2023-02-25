@@ -53,6 +53,8 @@ export class ConfigSchemaCommand extends Command {
         event: Message,
         configSchemaListMessage: Message | void = undefined,
     ) {
+        this.usersUsingACommand.updateUserList(event.author.id);
+
         const configSchemaListEmbed = await this.createConfigSchemaListEmbed(event);
 
         if (configSchemaListMessage) {
@@ -160,10 +162,10 @@ export class ConfigSchemaCommand extends Command {
         });
 
         collector.on('end', async () => {
+            this.usersUsingACommand.removeUserList(event.author.id);
+
             // when collector end buttons will disapear
             await configSchemaListMessage.edit({ components: [] });
-
-            this.usersUsingACommand.removeUserList(event.author.id);
         });
     }
 
@@ -172,7 +174,11 @@ export class ConfigSchemaCommand extends Command {
             return schema.category !== CommandsCategoryEnum.DEV;
         });
 
+        this.usersUsingACommand.updateUserList(event.author.id);
+
         const response = await new ChangeAdminOnly().call(event, schemaArray);
+
+        this.usersUsingACommand.removeUserList(event.author.id);
 
         if (response instanceof Error) {
             await event.channel.send(
@@ -208,7 +214,11 @@ export class ConfigSchemaCommand extends Command {
             return schema.category !== CommandsCategoryEnum.DEV;
         });
 
+        this.usersUsingACommand.updateUserList(event.author.id);
+
         const respose = await new ChangeCoolDown().call(event, schemaArray);
+
+        this.usersUsingACommand.removeUserList(event.author.id);
 
         if (respose instanceof Error) {
             await event.channel.send(
