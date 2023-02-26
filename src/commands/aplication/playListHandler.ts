@@ -9,7 +9,7 @@ import { TogglePauseOutputEnums } from '../domain/enums/togglePauseOutputEnums';
 import { DisplayMessage } from '../domain/interfaces/displayMessage';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
-import { NewSong, SongData, SongDuration } from '../domain/interfaces/song';
+import { SongData, SongDuration, SongsToPlaylist } from '../domain/interfaces/song';
 import { PlayDlService } from '../infrastructure/playDlService';
 import { DisplayEmbedBuilder } from './utils/displayEmbedBuilder';
 import { MessageCreator } from './utils/messageCreator';
@@ -31,7 +31,7 @@ export class PlayListHandler {
         this.displayEmbedBuilder = displayEmbedBuilder;
     }
 
-    public async update({ member, channel, newSongs }: NewSong): Promise<void> {
+    public async update({ member, channel, newSongs }: SongsToPlaylist): Promise<void> {
         this.playListDuration = this.calculateListDuration(this.playList);
 
         if (newSongs instanceof Array) {

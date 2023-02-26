@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
-import { NewSong, SongData } from '../../../../domain/interfaces/song';
+import { SongData, SongsToPlaylist } from '../../../../domain/interfaces/song';
 import { PlayListHandler } from '../../../playListHandler';
 import { PlayMusicByName } from './playMusicByName';
 import { PlayMusicBySpotifySongURL } from './playMusicBySpotifySongURL';
@@ -94,7 +94,7 @@ export class PlayCommandHandler extends Command {
 
     private async updatePlayList(event: Message, songsData: SongData | SongData[]): Promise<void> {
         if (event.member) {
-            const newSongList: NewSong = {
+            const newSongList: SongsToPlaylist = {
                 newSongs: songsData,
                 channel: event.channel,
                 member: event.member,

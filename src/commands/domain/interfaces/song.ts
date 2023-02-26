@@ -7,7 +7,7 @@ export interface SongData {
     thumbnails: string;
 }
 
-export interface NewSong {
+export interface SongsToPlaylist {
     newSongs: SongData | SongData[];
     channel: Message['channel'];
     member: GuildMember;
