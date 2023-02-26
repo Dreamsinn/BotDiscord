@@ -1,5 +1,4 @@
 /* eslint-disable arrow-body-style */
-import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { CommandsNameEnum } from '../../../commands/domain/enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../../../commands/domain/enums/commandsCategoryEnum';
@@ -10,9 +9,7 @@ import { DatabaseConnectionMock } from '../dataSourceMock';
 import { commandsSchemasListMock } from './__mocks__/commandsSchemasListMock';
 import { commandDictionaryMock } from './__mocks__/schemaDictionayMock';
 
-dotenv.config();
-
-describe('Sever Test', () => {
+describe('Schema Test', () => {
     const dataSource = new DataSource({
         type: 'sqlite',
         database: ':memory:',
