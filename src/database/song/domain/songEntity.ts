@@ -1,14 +1,9 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Song extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id: string;
-
-    @Column({
-        unique: true,
-    })
-    YouTubeId: string;
 
     @Column()
     name: string;

@@ -62,7 +62,7 @@ describe('Song Test', () => {
         expect(response instanceof Array).toBe(true);
         expect(response[0] instanceof Song).toBe(true);
         expect(response.length).toBe(2);
-        expect(response[0].YouTubeId).toBe(SongArray[0].songId);
+        expect(response[0].id).toBe(SongArray[0].songId);
         expect(response[1].name).toBe(SongArray[1].songName);
         expect(response[1].durationString).toBe(SongArray[1].duration.string);
     });
@@ -85,6 +85,7 @@ describe('Song Test', () => {
         expect(response instanceof Array).toBe(true);
         expect(response[0] instanceof Song).toBe(true);
         expect(response.length).toBe(1);
+        expect(response[0].id).toBe(songData.songId);
     });
 
     it('CreateSong with alredy existing YouTubeId', async () => {
@@ -94,27 +95,24 @@ describe('Song Test', () => {
         expect(response.length).toBe(0);
     });
 
-    it('GetSongByYoutbeId with a youbute id array', async () => {
-        const response = await databaseMock.song.getByYoutubeId([
-            SongArray[0].songId,
-            SongArray[1].songId,
-        ]);
+    it('GetSongById with a youbute id array', async () => {
+        const response = await databaseMock.song.getById([SongArray[0].songId, SongArray[1].songId]);
 
         expect(response instanceof Array).toBe(true);
         expect(response[0] instanceof Song).toBe(true);
         expect(response.length).toBe(2);
     });
 
-    it('GetSongByYoutbeId with 1 only id', async () => {
-        const response = await databaseMock.song.getByYoutubeId(SongArray[0].songId);
+    it('GetSongById with 1 only id', async () => {
+        const response = await databaseMock.song.getById(SongArray[0].songId);
 
         expect(response instanceof Array).toBe(true);
         expect(response[0] instanceof Song).toBe(true);
         expect(response.length).toBe(1);
     });
 
-    it('GetSongByYoutbeId with nonexistent id', async () => {
-        const response = await databaseMock.song.getByYoutubeId('12345');
+    it('GetSongById with nonexistent id', async () => {
+        const response = await databaseMock.song.getById('12345');
 
         expect(response instanceof Array).toBe(true);
         expect(response.length).toBe(0);

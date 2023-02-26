@@ -22,21 +22,19 @@ export class CreateSong {
     }
 
     private async finAlreadyCreatedSongs(songArray: SongData[]): Promise<Song[]> {
-        const mappedYoutubeId = songArray.map((song: SongData) => {
-            return { YouTubeId: song.songId };
+        const mappedSongId = songArray.map((song: SongData) => {
+            return { id: song.songId };
         });
 
-        return this.songService.getByYoutbeId(mappedYoutubeId);
+        return this.songService.getByYoutbeId(mappedSongId);
     }
 
     private mapSongArray(songArray: SongData[], alreadyCreatedSongs: Song[]): NewSong[] {
         const mapedSongs: NewSong[] = songArray.flatMap((song: SongData) => {
             // if not created already map it
-            if (
-                !alreadyCreatedSongs.some((createdSong: Song) => song.songId === createdSong.YouTubeId)
-            ) {
+            if (!alreadyCreatedSongs.some((createdSong: Song) => song.songId === createdSong.id)) {
                 const newSong: NewSong = {
-                    YouTubeId: song.songId,
+                    id: song.songId,
                     name: song.songName,
                     durationHours: song.duration.hours,
                     durationMinutes: song.duration.minutes,

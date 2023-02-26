@@ -10,7 +10,7 @@ export class SongService extends Service {
         return this.serverRepository.save(song);
     }
 
-    public async getByYoutbeId(youtubeIdList: { YouTubeId: string }[]): Promise<Song[]> {
-        return this.serverRepository.find({ where: youtubeIdList });
+    public async getByYoutbeId(songIdList: { id: string }[]): Promise<Song[]> {
+        return this.serverRepository.find({ where: songIdList });
     }
 }

@@ -1,5 +1,5 @@
 export interface NewSong {
-    YouTubeId: string;
+    id: string;
     name: string;
     durationHours: number;
     durationMinutes: number;
