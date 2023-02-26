@@ -2,6 +2,7 @@ import { DataSource } from 'typeorm';
 import { Schema } from './commandsSchema/domain/schemaEntity';
 import { DiscordServer } from './server/domain/discordServerEntity';
 import { AppDataSource } from './shared/domain/interface/appDataSource';
+import { Song } from './song/domain/songEntity';
 
 export class DatabaseConnection extends AppDataSource {
     constructor() {
@@ -11,7 +12,7 @@ export class DatabaseConnection extends AppDataSource {
             database: 'db.sqlite',
             synchronize: true,
             logging: true,
-            entities: [Schema, DiscordServer],
+            entities: [Schema, DiscordServer, Song],
             subscribers: [],
             migrations: [],
         });
