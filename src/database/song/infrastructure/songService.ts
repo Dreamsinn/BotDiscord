@@ -9,4 +9,8 @@ export class SongService extends Service {
         const song = this.serverRepository.create(newSong);
         return this.serverRepository.save(song);
     }
+
+    public async getByYoutbeId(youtubeIdList: { YouTubeId: string }[]): Promise<Song[]> {
+        return this.serverRepository.find({ where: youtubeIdList });
+    }
 }

@@ -22,7 +22,7 @@ describe('Song Test', () => {
 
     const SongArray: SongData[] = [
         {
-            songId: 'yutube id',
+            songId: 'yuotube id',
             songName: 'test Name song',
             duration: {
                 hours: 0,
@@ -33,7 +33,7 @@ describe('Song Test', () => {
             thumbnails: 'imga link',
         },
         {
-            songId: 'yutube id 2',
+            songId: 'yuotube id 2',
             songName: 'test Name song 2',
             duration: {
                 hours: 1,
@@ -58,7 +58,7 @@ describe('Song Test', () => {
 
     it('CreateSong with a songArray', async () => {
         const response = await databaseMock.song.create(SongArray);
-        console.log({ response });
+
         expect(response instanceof Array).toBe(true);
         expect(response[0] instanceof Song).toBe(true);
         expect(response.length).toBe(2);
@@ -81,16 +81,42 @@ describe('Song Test', () => {
         };
 
         const response = await databaseMock.song.create(songData);
-        console.log({ response });
 
         expect(response instanceof Array).toBe(true);
         expect(response[0] instanceof Song).toBe(true);
         expect(response.length).toBe(1);
     });
 
-    // it('CreateSong with alredy existing YouTubeId', async () => {
-    //     const response = await databaseMock.song.create(SongArray)
-    //     console.log({ response })
+    it('CreateSong with alredy existing YouTubeId', async () => {
+        const response = await databaseMock.song.create(SongArray);
 
-    // });
+        expect(response instanceof Array).toBe(true);
+        expect(response.length).toBe(0);
+    });
+
+    it('GetSongByYoutbeId with a youbute id array', async () => {
+        const response = await databaseMock.song.getByYoutubeId([
+            SongArray[0].songId,
+            SongArray[1].songId,
+        ]);
+
+        expect(response instanceof Array).toBe(true);
+        expect(response[0] instanceof Song).toBe(true);
+        expect(response.length).toBe(2);
+    });
+
+    it('GetSongByYoutbeId with 1 only id', async () => {
+        const response = await databaseMock.song.getByYoutubeId(SongArray[0].songId);
+
+        expect(response instanceof Array).toBe(true);
+        expect(response[0] instanceof Song).toBe(true);
+        expect(response.length).toBe(1);
+    });
+
+    it('GetSongByYoutbeId with nonexistent id', async () => {
+        const response = await databaseMock.song.getByYoutubeId('12345');
+
+        expect(response instanceof Array).toBe(true);
+        expect(response.length).toBe(0);
+    });
 });
