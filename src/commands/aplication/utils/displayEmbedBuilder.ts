@@ -3,7 +3,7 @@ import { discordEmojis } from '../../domain/discordEmojis';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { DisplayMessage } from '../../domain/interfaces/displayMessage';
 import { PlayListStatus } from '../../domain/interfaces/PlayListStatus';
-import { Song } from '../../domain/interfaces/song';
+import { SongData } from '../../domain/interfaces/song';
 import { MessageCreator } from '../utils/messageCreator';
 
 export class DisplayEmbedBuilder {
@@ -95,7 +95,7 @@ export class DisplayEmbedBuilder {
     }
 
     private mapTitleAndURlData(
-        playinSong: Song,
+        playinSong: SongData,
         playerStatus: string,
         conectionStatus: string,
     ): { title: string; URL: string | undefined } {
@@ -209,7 +209,7 @@ export class DisplayEmbedBuilder {
     }
 
     private mapSongThumbnailUrl(
-        playinSong: Song,
+        playinSong: SongData,
         playerStatus: string,
         conectionStatus: string,
     ): string | undefined {
@@ -227,7 +227,7 @@ export class DisplayEmbedBuilder {
         return;
     }
 
-    private mapNextSongData(playList: Song[]): EmbedFieldData | void {
+    private mapNextSongData(playList: SongData[]): EmbedFieldData | void {
         if (playList[1]) {
             return {
                 name: 'Siguiente cancion',

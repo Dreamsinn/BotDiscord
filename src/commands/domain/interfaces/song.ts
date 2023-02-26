@@ -1,6 +1,6 @@
 import { GuildMember, Message } from 'discord.js';
 
-export interface Song {
+export interface SongData {
     songName: string;
     songId: string;
     duration: SongDuration;
@@ -8,7 +8,7 @@ export interface Song {
 }
 
 export interface NewSong {
-    newSongs: Song | Song[];
+    newSongs: SongData | SongData[];
     channel: Message['channel'];
     member: GuildMember;
 }

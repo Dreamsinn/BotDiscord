@@ -9,14 +9,14 @@ import { TogglePauseOutputEnums } from '../domain/enums/togglePauseOutputEnums';
 import { DisplayMessage } from '../domain/interfaces/displayMessage';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
 import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
-import { NewSong, Song, SongDuration } from '../domain/interfaces/song';
+import { NewSong, SongData, SongDuration } from '../domain/interfaces/song';
 import { PlayDlService } from '../infrastructure/playDlService';
 import { DisplayEmbedBuilder } from './utils/displayEmbedBuilder';
 import { MessageCreator } from './utils/messageCreator';
 import { PaginatedMessage } from './utils/paginatedMessage';
 
 export class PlayListHandler {
-    private playList: Song[] = [];
+    private playList: SongData[] = [];
     private playListDuration: SongDuration;
     private botConnection: any;
     private player: any;
@@ -64,7 +64,7 @@ export class PlayListHandler {
 
     private async newListToPlayListEmbed(
         member: GuildMember,
-        songList: Song[],
+        songList: SongData[],
         channel: Message['channel'],
     ): Promise<Message> {
         const songListDuration = this.calculateListDuration(songList);
@@ -115,14 +115,14 @@ export class PlayListHandler {
         }).call();
     }
 
-    private songArrayToPaginationData(songList: Song[]): string[] {
-        const playListString: string[] = songList.map((song: Song, i: number) =>
+    private songArrayToPaginationData(songList: SongData[]): string[] {
+        const playListString: string[] = songList.map((song: SongData, i: number) =>
             this.mapPagesData(song, i),
         );
         return playListString;
     }
 
-    private mapPagesData(songData: Song, index: number): string {
+    private mapPagesData(songData: SongData, index: number): string {
         const songsString = `${index + 1} - ${songData.songName} '${songData.duration.string}'\n`;
 
         return songsString;
@@ -130,7 +130,7 @@ export class PlayListHandler {
 
     private newSongToPlayListEmbed(
         member: GuildMember,
-        newSong: Song,
+        newSong: SongData,
         channel: Message['channel'],
     ): Promise<Message> {
         const output = new MessageCreator({
@@ -163,7 +163,7 @@ export class PlayListHandler {
         return channel.send(output);
     }
 
-    private calculateListDuration(songList: Song[]): SongDuration {
+    private calculateListDuration(songList: SongData[]): SongDuration {
         const listDuration: SongDuration = { hours: 0, minutes: 0, seconds: 0, string: '0s' };
         if (!songList[0]) {
             return listDuration;
@@ -296,8 +296,8 @@ export class PlayListHandler {
         return;
     }
 
-    public async skipMusic(): Promise<Song | void> {
-        let musicToSkip: Song | undefined = undefined;
+    public async skipMusic(): Promise<SongData | void> {
+        let musicToSkip: SongData | undefined = undefined;
 
         if (!this.player) {
             return;
@@ -415,7 +415,7 @@ export class PlayListHandler {
         if (!this.playList[0]) {
             return false;
         }
-        const newPlayList: Song[] = [];
+        const newPlayList: SongData[] = [];
 
         // si esta sonando, para que no cambie el orden de la primera
         if (
@@ -439,7 +439,7 @@ export class PlayListHandler {
         return true;
     }
 
-    private randomNextSong(i: number): Song {
+    private randomNextSong(i: number): SongData {
         const randomIndex = Math.random() * Number(i);
         const randomSong = this.playList.splice(randomIndex, 1);
         return randomSong[0];
@@ -485,7 +485,7 @@ export class PlayListHandler {
         return;
     }
 
-    public putSongInFirstPoistionOfPlaylist(songIndex: number): Song | void {
+    public putSongInFirstPoistionOfPlaylist(songIndex: number): SongData | void {
         const chosenMusic = this.playList.find((n, i) => songIndex === i + 1);
         if (chosenMusic) {
             // remove chosen song

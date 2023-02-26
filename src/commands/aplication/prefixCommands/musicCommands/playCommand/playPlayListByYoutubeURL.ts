@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { RawSong, Song } from '../../../../domain/interfaces/song';
+import { RawSong, SongData } from '../../../../domain/interfaces/song';
 import { MessageCreator } from '../../../utils/messageCreator';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
@@ -14,7 +14,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, url: string): Promise<Song | Song[] | void> {
+    async call(event: Message, url: string): Promise<SongData | SongData[] | void> {
         if (!url.includes('&list=')) {
             // sino se esta rerpoduciendo un video
             this.notStartedPlayListUrl(event, url);
@@ -42,7 +42,10 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         return await this.isPlayListDesired(event, playListId, url);
     }
 
-    private async notStartedPlayListUrl(event: Message, url: string): Promise<Song[] | Song | void> {
+    private async notStartedPlayListUrl(
+        event: Message,
+        url: string,
+    ): Promise<SongData[] | SongData | void> {
         const playListId = url
             .replace('https://', '')
             .replace('www.', '')
@@ -72,7 +75,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         event: Message,
         playListId: string,
         url: string,
-    ): Promise<Song[] | Song | void> {
+    ): Promise<SongData[] | SongData | void> {
         // preguntamos al usuario si quiere reproducir la cancion el la playlist
         const output = new MessageCreator({
             embed: {
@@ -143,9 +146,9 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         }
     }
 
-    private mapPlayDLPlayListData(rawPlayList: RawSong[]): Song[] {
-        const playList: Song[] = rawPlayList.map((song: RawSong) => {
-            const newSong: Song = {
+    private mapPlayDLPlayListData(rawPlayList: RawSong[]): SongData[] {
+        const playList: SongData[] = rawPlayList.map((song: RawSong) => {
+            const newSong: SongData = {
                 songName: song.songName ?? "It has not been possible to get song's title",
                 songId: song.songId,
                 duration: this.parseSongDuration(String(song.duration), true),
@@ -160,7 +163,7 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         event: Message,
         playListId: string,
         url: string,
-    ): Promise<Song | Song[] | void> {
+    ): Promise<SongData | SongData[] | void> {
         // llama a la API de youtube
         const youtubeResponse: APIResponse<string> = await this.youtubeAPIService.searchPlaylist(
             playListId,
@@ -181,15 +184,15 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
         return this.mapPlayListData(event, youtubeResponse.data);
     }
 
-    protected async mapPlayListData(event: Message, songIdList: string): Promise<Song[] | void> {
+    protected async mapPlayListData(event: Message, songIdList: string): Promise<SongData[] | void> {
         // youtube api tiene la capacided de buscar multiples ids a la vez
         const youtubeResponse: APIResponse<RawSong[]> = await this.youtubeAPIService.searchSongById(
             songIdList,
         );
 
         if (!youtubeResponse.isError) {
-            const playListData: Song[] = youtubeResponse.data.map((rawSong: RawSong) => {
-                const song: Song = {
+            const playListData: SongData[] = youtubeResponse.data.map((rawSong: RawSong) => {
+                const song: SongData = {
                     songId: rawSong.songId,
                     songName: rawSong.songName ?? "It has not been possible to get song's title",
                     duration: this.parseSongDuration(rawSong.duration, false),
@@ -203,12 +206,12 @@ export class PlayPlayListByYoutubeURL extends PlayCommand {
 
         // si falla vamos una por una con playDL
         const songIdArray: string[] = songIdList.split(',');
-        const playListData: Song[] = [];
+        const playListData: SongData[] = [];
 
         for (const songId of songIdArray) {
             const playDlResponse: APIResponse<RawSong> = await this.playDlService.getSongInfo(songId);
             if (!playDlResponse.isError) {
-                const song: Song = {
+                const song: SongData = {
                     songId: playDlResponse.data.songId,
                     songName:
                         playDlResponse.data.songName ?? "It has not been possible to get song's title",

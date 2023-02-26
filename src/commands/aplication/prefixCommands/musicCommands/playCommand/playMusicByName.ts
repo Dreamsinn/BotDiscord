@@ -3,7 +3,7 @@ import { discordEmojis } from '../../../../domain/discordEmojis';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { RawSong, Song } from '../../../../domain/interfaces/song';
+import { RawSong, SongData } from '../../../../domain/interfaces/song';
 import { MessageCreator } from '../../../utils/messageCreator';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
@@ -15,7 +15,7 @@ export class PlayMusicByName extends PlayCommand {
         this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, argument: string): Promise<Song | void> {
+    async call(event: Message, argument: string): Promise<SongData | void> {
         let unchosenMusic: RawSong[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
 
@@ -47,7 +47,7 @@ export class PlayMusicByName extends PlayCommand {
         return await this.listenUserChoices(event, unchosenMusic);
     }
 
-    private async listenUserChoices(event: Message, unchosenMusic: RawSong[]): Promise<Song | void> {
+    private async listenUserChoices(event: Message, unchosenMusic: RawSong[]): Promise<SongData | void> {
         const { output, numberChoices } = this.createSelectChoicesEmbed(unchosenMusic);
 
         // subimos al usuario a la lista para que no pueda usar otros comandos

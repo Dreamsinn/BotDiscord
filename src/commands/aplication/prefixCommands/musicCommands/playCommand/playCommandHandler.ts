@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
-import { NewSong, Song } from '../../../../domain/interfaces/song';
+import { NewSong, SongData } from '../../../../domain/interfaces/song';
 import { PlayListHandler } from '../../../playListHandler';
 import { PlayMusicByName } from './playMusicByName';
 import { PlayMusicBySpotifySongURL } from './playMusicBySpotifySongURL';
@@ -55,7 +55,7 @@ export class PlayCommandHandler extends Command {
     private async findSongByArgumentType(
         argument: string,
         event: Message,
-    ): Promise<void | Song | Song[]> {
+    ): Promise<void | SongData | SongData[]> {
         const argumentTypeDictionary = {
             mobil: {
                 condition: argument.includes('youtu.be/'),
@@ -92,7 +92,7 @@ export class PlayCommandHandler extends Command {
         return await argumentType?.route.call(event, argument);
     }
 
-    private async updatePlayList(event: Message, songsData: Song | Song[]): Promise<void> {
+    private async updatePlayList(event: Message, songsData: SongData | SongData[]): Promise<void> {
         if (event.member) {
             const newSongList: NewSong = {
                 newSongs: songsData,

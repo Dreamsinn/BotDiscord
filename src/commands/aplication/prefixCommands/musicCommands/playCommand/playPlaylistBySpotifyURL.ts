@@ -1,10 +1,10 @@
 import { Message } from 'discord.js';
 import { APIResponse } from '../../../../domain/interfaces/APIResponse';
 import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { Song, SpotifyRawSong } from '../../../../domain/interfaces/song';
+import { SongData, SpotifyRawSong } from '../../../../domain/interfaces/song';
 
 export class PlayPlaylistBySpotifyURL extends PlayCommand {
-    public async call(event: Message, url: string): Promise<Song[] | void> {
+    public async call(event: Message, url: string): Promise<SongData[] | void> {
         const idPosition = url.indexOf('playlist/');
         const pathParameterPosition = url.indexOf('?si');
 
@@ -24,12 +24,12 @@ export class PlayPlaylistBySpotifyURL extends PlayCommand {
     private async mapPlaylistDataFromSpotify(
         event: Message,
         playListId: string,
-    ): Promise<Song[] | void> {
+    ): Promise<SongData[] | void> {
         const spotifyResponse: APIResponse<SpotifyRawSong[]> =
             await this.spotifyService.getSongsDataFromSpotifyPlaylistId(playListId);
 
         if (!spotifyResponse.isError) {
-            const playlist: Song[] = [];
+            const playlist: SongData[] = [];
 
             for (const rawSong of spotifyResponse.data) {
                 const song = await this.mapSpotifySongData(rawSong);

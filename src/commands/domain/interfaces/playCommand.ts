@@ -5,7 +5,7 @@ import { SpotifyAPIService } from '../../infrastructure/spotifyAPIService';
 import { YouTubeAPIService } from '../../infrastructure/youTubeAPIService';
 import { APIResponse } from './APIResponse';
 import { MusicAPIs } from './musicAPIs';
-import { RawSong, Song, SpotifyRawSong } from './song';
+import { RawSong, SongData, SpotifyRawSong } from './song';
 
 export abstract class PlayCommand {
     protected youtubeAPIService: YouTubeAPIService;
@@ -22,9 +22,9 @@ export abstract class PlayCommand {
         event: Message,
         argument: string,
         usersUsingACommand?: UsersUsingACommand,
-    ): Promise<Song | Song[] | void>;
+    ): Promise<SongData | SongData[] | void>;
 
-    protected async findSongIdFromYoutubeURL(event: Message, url: string): Promise<Song | void> {
+    protected async findSongIdFromYoutubeURL(event: Message, url: string): Promise<SongData | void> {
         // encontramos la id del video
         const rawSongId = url
             .replace('https://', '')
@@ -46,15 +46,15 @@ export abstract class PlayCommand {
         return songData;
     }
 
-    protected isSongData(argument: Song | void): argument is Song {
-        return (argument as Song).duration?.string !== undefined;
+    protected isSongData(argument: SongData | void): argument is SongData {
+        return (argument as SongData).duration?.string !== undefined;
     }
 
-    protected async mapSongData(event: Message, songId: string): Promise<Song | void> {
+    protected async mapSongData(event: Message, songId: string): Promise<SongData | void> {
         // llama primero a Play-dl y si falla a Youtube API para no gastar el token
         const playDlResponse: APIResponse<RawSong> = await this.playDlService.getSongInfo(songId);
         if (!playDlResponse.isError) {
-            const song: Song = {
+            const song: SongData = {
                 songId: playDlResponse.data.songId,
                 songName: playDlResponse.data.songName ?? "It has not been possible to get song's title",
                 duration: this.parseSongDuration(playDlResponse.data.duration, true),
@@ -72,7 +72,7 @@ export abstract class PlayCommand {
 
         if (!youtubeResponse.isError) {
             if (youtubeResponse.data.length) {
-                const song: Song = {
+                const song: SongData = {
                     songId: youtubeResponse.data[0].songId,
                     songName:
                         youtubeResponse.data[0].songName ??
@@ -89,10 +89,10 @@ export abstract class PlayCommand {
         return;
     }
 
-    protected async mapSpotifySongData(rawSong: SpotifyRawSong): Promise<Song | void> {
+    protected async mapSpotifySongData(rawSong: SpotifyRawSong): Promise<SongData | void> {
         const songId = await this.getYoutubeIdFromSpotyId(rawSong);
         if (songId) {
-            const song: Song = {
+            const song: SongData = {
                 songId,
                 songName: rawSong.songName,
                 duration: this.parseSongDuration(String(rawSong.duration), true),
@@ -123,7 +123,7 @@ export abstract class PlayCommand {
         return;
     }
 
-    protected parseSongDuration(durationString = '', onlySeconds: boolean): Song['duration'] {
+    protected parseSongDuration(durationString = '', onlySeconds: boolean): SongData['duration'] {
         if (onlySeconds) {
             // si cojemos la de play-dl, lo pasamos al formato de la respuesta de youtube
             const duration = Number(durationString);
