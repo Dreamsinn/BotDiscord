@@ -1,4 +1,4 @@
-import { commandsSchemasList } from '../../../../commands/domain/commandSchema/schemasList';
+import { commandsSchemasList } from '../../../../commands/domain/commandSchema';
 import { CommandsNameEnum } from '../../../../commands/domain/enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../../../../commands/domain/enums/commandsCategoryEnum';
 import { CommandSchema } from '../../../../commands/domain/interfaces/commandSchema';
