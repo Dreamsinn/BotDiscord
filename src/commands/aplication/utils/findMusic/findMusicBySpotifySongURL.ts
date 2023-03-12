@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
-import { APIResponse } from '../../../../domain/interfaces/APIResponse';
-import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { SongData, SpotifyRawSong } from '../../../../domain/interfaces/song';
+import { APIResponse } from '../../../domain/interfaces/APIResponse';
+import { PlayCommand } from '../../../domain/interfaces/playCommand';
+import { SongData, SpotifyRawSong } from '../../../domain/interfaces/song';
 
-export class PlayMusicBySpotifySongURL extends PlayCommand {
+export class FindMusicBySpotifySongURL extends PlayCommand {
     public async call(event: Message, url: string): Promise<SongData | void> {
         const songIdPosition = url.indexOf('track/');
         const pathParameterPosition = url.indexOf('?si');

@@ -1,13 +1,13 @@
 import { Message, MessageOptions } from 'discord.js';
-import { discordEmojis } from '../../../../domain/discordEmojis';
-import { APIResponse } from '../../../../domain/interfaces/APIResponse';
-import { MusicAPIs } from '../../../../domain/interfaces/musicAPIs';
-import { PlayCommand } from '../../../../domain/interfaces/playCommand';
-import { RawSong, SongData } from '../../../../domain/interfaces/song';
-import { MessageCreator } from '../../../utils/messageCreator';
-import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
+import { discordEmojis } from '../../../domain/discordEmojis';
+import { APIResponse } from '../../../domain/interfaces/APIResponse';
+import { MusicAPIs } from '../../../domain/interfaces/musicAPIs';
+import { PlayCommand } from '../../../domain/interfaces/playCommand';
+import { RawSong, SongData } from '../../../domain/interfaces/song';
+import { MessageCreator } from '../messageCreator';
+import { UsersUsingACommand } from '../usersUsingACommand';
 
-export class PlayMusicByName extends PlayCommand {
+export class FindMusicByName extends PlayCommand {
     private usersUsingACommand: UsersUsingACommand;
 
     constructor(musicAPIs: MusicAPIs, usersUsingACommand: UsersUsingACommand) {

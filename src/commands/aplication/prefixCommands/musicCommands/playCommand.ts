@@ -1,24 +1,24 @@
 import { Message } from 'discord.js';
-import { Command } from '../../../../domain/interfaces/Command';
-import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
-import { SongData, SongsToPlaylist } from '../../../../domain/interfaces/song';
-import { PlayListHandler } from '../../../playListHandler';
-import { PlayMusicByName } from './playMusicByName';
-import { PlayMusicBySpotifySongURL } from './playMusicBySpotifySongURL';
-import { PlayMusicByYouTubeMobileURL } from './playMusicByYouTubeMobileURL';
-import { PlayMusicByYouTubeURL } from './playMusicByYouTubeURL';
-import { PlayPlaylistBySpotifyURL } from './playPlaylistBySpotifyURL';
-import { PlayPlayListByYoutubeURL } from './playPlayListByYoutubeURL';
+import { Command } from '../../../domain/interfaces/Command';
+import { CommandSchema } from '../../../domain/interfaces/commandSchema';
+import { SongData, SongsToPlaylist } from '../../../domain/interfaces/song';
+import { PlayListHandler } from '../../playListHandler';
+import { FindMusicByName } from '../../utils/findMusic/findMusicByName';
+import { FindMusicBySpotifySongURL } from '../../utils/findMusic/findMusicBySpotifySongURL';
+import { FindMusicByYouTubeMobileURL } from '../../utils/findMusic/findMusicByYouTubeMobileURL';
+import { FindMusicByYouTubeURL } from '../../utils/findMusic/findMusicByYouTubeURL';
+import { FindPlaylistBySpotifyURL } from '../../utils/findMusic/findPlaylistBySpotifyURL';
+import { FindPlayListByYoutubeURL } from '../../utils/findMusic/findPlayListByYoutubeURL';
 
-export class PlayCommandHandler extends Command {
+export class PlayCommand extends Command {
     constructor(
         private playListHandler: PlayListHandler,
-        private playMusicByName: PlayMusicByName,
-        private playMusicByYouTubeMobileURL: PlayMusicByYouTubeMobileURL,
-        private playPlayListByYoutubeURL: PlayPlayListByYoutubeURL,
-        private playMusicByYouTubeURL: PlayMusicByYouTubeURL,
-        private playMusicBySpotifySongURL: PlayMusicBySpotifySongURL,
-        private playMusicBySpotifyPlaylistURL: PlayPlaylistBySpotifyURL,
+        private findMusicByName: FindMusicByName,
+        private findMusicByYouTubeMobileURL: FindMusicByYouTubeMobileURL,
+        private findPlayListByYoutubeURL: FindPlayListByYoutubeURL,
+        private findMusicByYouTubeURL: FindMusicByYouTubeURL,
+        private findMusicBySpotifySongURL: FindMusicBySpotifySongURL,
+        private findMusicBySpotifyPlaylistURL: FindPlaylistBySpotifyURL,
     ) {
         super();
     }
@@ -59,31 +59,31 @@ export class PlayCommandHandler extends Command {
         const argumentTypeDictionary = {
             mobil: {
                 condition: argument.includes('youtu.be/'),
-                route: this.playMusicByYouTubeMobileURL,
+                route: this.findMusicByYouTubeMobileURL,
             },
             youtubePlayListURl: {
                 condition: Boolean(
                     argument.includes('youtube.com/playlist?list=') ||
                         (argument.includes('youtube.com') && argument.includes('&list=')),
                 ),
-                route: this.playPlayListByYoutubeURL,
+                route: this.findPlayListByYoutubeURL,
             },
             youtubeSongURL: {
                 condition: argument.includes('youtube.com/watch?v='),
-                route: this.playMusicByYouTubeURL,
+                route: this.findMusicByYouTubeURL,
             },
             spotifySong: {
                 condition: argument.includes('spotify') && argument.includes('track'),
-                route: this.playMusicBySpotifySongURL,
+                route: this.findMusicBySpotifySongURL,
             },
             spotifyPlaylist: {
                 condition: argument.includes('spotify') && argument.includes('playlist'),
-                route: this.playMusicBySpotifyPlaylistURL,
+                route: this.findMusicBySpotifyPlaylistURL,
             },
             songName: {
                 //default
                 condition: true,
-                route: this.playMusicByName,
+                route: this.findMusicByName,
             },
         };
 

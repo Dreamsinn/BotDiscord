@@ -11,13 +11,7 @@ import { JoinChannelCommand } from './aplication/prefixCommands/musicCommands/jo
 import { LogPlaylistStatusCommand } from './aplication/prefixCommands/musicCommands/logPlaylistStatusCommand';
 import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicCommands/loopPlayListModeCommand';
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
-import { PlayCommandHandler } from './aplication/prefixCommands/musicCommands/playCommand/playCommandHandler';
-import { PlayMusicByName } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByName';
-import { PlayMusicBySpotifySongURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicBySpotifySongURL';
-import { PlayMusicByYouTubeMobileURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByYouTubeMobileURL';
-import { PlayMusicByYouTubeURL } from './aplication/prefixCommands/musicCommands/playCommand/playMusicByYouTubeURL';
-import { PlayPlaylistBySpotifyURL } from './aplication/prefixCommands/musicCommands/playCommand/playPlaylistBySpotifyURL';
-import { PlayPlayListByYoutubeURL } from './aplication/prefixCommands/musicCommands/playCommand/playPlayListByYoutubeURL';
+import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
 import { PlayNowCommand } from './aplication/prefixCommands/musicCommands/playNowCommand';
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
@@ -25,6 +19,12 @@ import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommand
 import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/skipMusicCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { DisplayEmbedBuilder } from './aplication/utils/displayEmbedBuilder';
+import { FindMusicByName } from './aplication/utils/findMusic/findMusicByName';
+import { FindMusicBySpotifySongURL } from './aplication/utils/findMusic/findMusicBySpotifySongURL';
+import { FindMusicByYouTubeMobileURL } from './aplication/utils/findMusic/findMusicByYouTubeMobileURL';
+import { FindMusicByYouTubeURL } from './aplication/utils/findMusic/findMusicByYouTubeURL';
+import { FindPlaylistBySpotifyURL } from './aplication/utils/findMusic/findPlaylistBySpotifyURL';
+import { FindPlayListByYoutubeURL } from './aplication/utils/findMusic/findPlayListByYoutubeURL';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { Command } from './domain/interfaces/Command';
 import { CommandSchema } from './domain/interfaces/commandSchema';
@@ -47,15 +47,15 @@ export class Routes {
     };
     private displayEmbedBuilder = new DisplayEmbedBuilder();
     private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
-    private playMusicByName = new PlayMusicByName(this.musicAPIs, this.usersUsingACommand);
-    private playMusicByYouTubeMobileURL = new PlayMusicByYouTubeMobileURL(this.musicAPIs);
-    private playPlayListByYoutubeURL = new PlayPlayListByYoutubeURL(
+    private findMusicByName = new FindMusicByName(this.musicAPIs, this.usersUsingACommand);
+    private findMusicByYouTubeMobileURL = new FindMusicByYouTubeMobileURL(this.musicAPIs);
+    private findPlayListByYoutubeURL = new FindPlayListByYoutubeURL(
         this.musicAPIs,
         this.usersUsingACommand,
     );
-    private playMusicByYouTubeURL = new PlayMusicByYouTubeURL(this.musicAPIs);
-    private playMusicBySpotifySongURL = new PlayMusicBySpotifySongURL(this.musicAPIs);
-    private playMusicBySpotifyPlaylistURL = new PlayPlaylistBySpotifyURL(this.musicAPIs);
+    private findMusicByYouTubeURL = new FindMusicByYouTubeURL(this.musicAPIs);
+    private findMusicBySpotifySongURL = new FindMusicBySpotifySongURL(this.musicAPIs);
+    private findMusicBySpotifyPlaylistURL = new FindPlaylistBySpotifyURL(this.musicAPIs);
 
     constructor(
         private usersUsingACommand: UsersUsingACommand,
@@ -66,14 +66,14 @@ export class Routes {
     public routeList: Route[] = [
         {
             schema: this.schemaDictionary['Play Command'],
-            command: new PlayCommandHandler(
+            command: new PlayCommand(
                 this.playListHandler,
-                this.playMusicByName,
-                this.playMusicByYouTubeMobileURL,
-                this.playPlayListByYoutubeURL,
-                this.playMusicByYouTubeURL,
-                this.playMusicBySpotifySongURL,
-                this.playMusicBySpotifyPlaylistURL,
+                this.findMusicByName,
+                this.findMusicByYouTubeMobileURL,
+                this.findPlayListByYoutubeURL,
+                this.findMusicByYouTubeURL,
+                this.findMusicBySpotifySongURL,
+                this.findMusicBySpotifyPlaylistURL,
             ),
         },
         {
