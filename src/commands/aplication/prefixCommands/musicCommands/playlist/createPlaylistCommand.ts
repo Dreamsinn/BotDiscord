@@ -1,6 +1,7 @@
 import { Message } from 'discord.js';
 import { ConnectionHandler } from '../../../../../database/connectionHandler';
 import { NewPlaylist } from '../../../../../database/playlist/domain/interfaces/newPlaylist';
+import { ErrorEnum } from '../../../../../database/shared/domain/enums/ErrorEnum';
 import { discordEmojis } from '../../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../../domain/enums/buttonStyleEnum';
 import { CreatePlaylistButtonsEnum } from '../../../../domain/enums/createPlaylistButtonsEnum';
@@ -67,6 +68,8 @@ export class CreatePlaylistCommand extends Command {
     }
 
     private async createPlaylistOptionsMessage(event: Message, playlistMessage: Message | null = null) {
+        this.usersUsingACommand.updateUserList(event.author.id);
+
         const playlistOptionsEmbed = this.createPlaylistOptionsEmbed(event);
 
         let playlistOptionsMessage: Message<boolean> | void;
@@ -201,18 +204,6 @@ export class CreatePlaylistCommand extends Command {
                 console.log('Error deleting songsInPlaylistMessage: ', err);
             });
 
-            if (collected.customId === CreatePlaylistButtonsEnum.CANCEL) {
-                collector.stop();
-                console.log('canceled');
-                return;
-            }
-
-            if (collected.customId === CreatePlaylistButtonsEnum.SAVE) {
-                collector.stop();
-                console.log('save');
-                return;
-            }
-
             if (collected.customId === CreatePlaylistButtonsEnum.ADD) {
                 collector.stop();
                 return this.addSongsToPlaylist(event, playlistOptionsMessage);
@@ -232,6 +223,16 @@ export class CreatePlaylistCommand extends Command {
                 collector.stop();
                 return this.changePlaylistName(event, playlistOptionsMessage);
             }
+
+            if (collected.customId === CreatePlaylistButtonsEnum.CANCEL) {
+                collector.stop();
+                return;
+            }
+
+            if (collected.customId === CreatePlaylistButtonsEnum.SAVE) {
+                collector.stop();
+                return this.saveChanges(event, playlistOptionsMessage);
+            }
         });
 
         collector.on('end', async () => {
@@ -243,6 +244,8 @@ export class CreatePlaylistCommand extends Command {
     }
 
     private async addSongsToPlaylist(event: Message, playlistOptionsMessage: Message): Promise<void> {
+        this.usersUsingACommand.updateUserList(event.author.id);
+
         let newSongs = await new AddSongsToPlaylist(
             this.findMusicByName,
             this.findMusicByYouTubeMobileURL,
@@ -251,6 +254,8 @@ export class CreatePlaylistCommand extends Command {
             this.findMusicBySpotifySongURL,
             this.findMusicBySpotifyPlaylistURL,
         ).call(event);
+
+        this.usersUsingACommand.removeUserList(event.author.id);
 
         if (newSongs instanceof Error) {
             await event.channel.send('Ha habido un error añadiendo las canciones');
@@ -290,12 +295,16 @@ export class CreatePlaylistCommand extends Command {
         event: Message,
         playlistOptionsMessage: Message,
     ): Promise<void> {
+        this.usersUsingACommand.updateUserList(event.author.id);
+
         const modifiedPlaylist = await new RemoveSongsFromPlayList().call(event, this.playlistSongs);
 
         if (modifiedPlaylist instanceof Error) {
             await event.channel.send('Ha habido un error cambiando el nombre de la playlist');
             return this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
         }
+
+        this.usersUsingACommand.removeUserList(event.author.id);
 
         if (modifiedPlaylist) {
             this.playlistSongs = modifiedPlaylist;
@@ -305,7 +314,11 @@ export class CreatePlaylistCommand extends Command {
     }
 
     private async changePlaylistName(event: Message, playlistOptionsMessage: Message): Promise<void> {
+        this.usersUsingACommand.updateUserList(event.author.id);
+
         const response = await new ChangePlaylistName().call(event);
+
+        this.usersUsingACommand.removeUserList(event.author.id);
 
         if (response instanceof Error) {
             await event.channel.send('Ha habido un error cambiando el nombre de la playlist');
@@ -317,5 +330,52 @@ export class CreatePlaylistCommand extends Command {
         }
 
         await this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
+    }
+
+    private async saveChanges(event: Message, playlistOptionsMessage: Message) {
+        if (await this.checkPlaylistData(event)) {
+            return this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
+        }
+
+        await this.databaseConnection.song.create(this.playlistSongs);
+
+        const response = await this.databaseConnection.playlist.create({
+            songsId: this.playlistSongs.map((song: SongData) => song.songId),
+            name: this.playlistData.name,
+            privatePl: this.playlistData.privatePl,
+            author: this.playlistData.author,
+        });
+
+        if (response === ErrorEnum.BadRequest) {
+            event.channel.send(
+                'No se pueden tener nombres de palylist repetidos por autor, ya sea usuario o servidor.',
+            );
+        } else {
+            event.channel.send(
+                `Playlist: ${this.playlistData.name}   Author: ${this.playlistData.author}\nGuardada correctamente`,
+            );
+        }
+
+        return;
+    }
+
+    private async checkPlaylistData(event: Message) {
+        if (!this.playlistSongs.length) {
+            const errorMessage = await event.channel.send('No se pueden guardar paylist vacias');
+            setTimeout(() => {
+                errorMessage.delete().catch(() => '');
+            }, 10000);
+            return true;
+        }
+
+        if (!this.playlistData.name) {
+            const errorMessage = await event.channel.send('No se pueden guardar paylist sin nombre');
+            setTimeout(() => {
+                errorMessage.delete().catch(() => '');
+            }, 10000);
+            return true;
+        }
+
+        return false;
     }
 }
