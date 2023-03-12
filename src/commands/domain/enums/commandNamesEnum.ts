@@ -19,4 +19,5 @@ export enum CommandsNameEnum {
     PlayNowCommand = 'Play Now Command',
     ConfigServerCommand = 'Config Server Command',
     ConfigSchemaCommand = 'Config Schema Command',
+    CreatePlaylistCommand = 'Create Playlist Command',
 }

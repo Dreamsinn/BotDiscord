@@ -496,4 +496,8 @@ export class PlayListHandler {
             return chosenMusic;
         }
     }
+
+    public getPlaylist() {
+        return [...this.playList];
+    }
 }

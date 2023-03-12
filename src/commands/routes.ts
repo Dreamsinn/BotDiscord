@@ -12,6 +12,7 @@ import { LogPlaylistStatusCommand } from './aplication/prefixCommands/musicComma
 import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicCommands/loopPlayListModeCommand';
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
 import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
+import { CreatePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/createPlaylistCommand';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
 import { PlayNowCommand } from './aplication/prefixCommands/musicCommands/playNowCommand';
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
@@ -143,6 +144,20 @@ export class Routes {
         {
             schema: this.schemaDictionary['Config Schema Command'],
             command: new ConfigSchemaCommand(this.databaseConnection, this.usersUsingACommand),
+        },
+        {
+            schema: this.schemaDictionary['Create Playlist Command'],
+            command: new CreatePlaylistCommand(
+                this.playListHandler,
+                this.databaseConnection,
+                this.usersUsingACommand,
+                this.findMusicByName,
+                this.findMusicByYouTubeMobileURL,
+                this.findPlayListByYoutubeURL,
+                this.findMusicByYouTubeURL,
+                this.findMusicBySpotifySongURL,
+                this.findMusicBySpotifyPlaylistURL,
+            ),
         },
     ];
 }

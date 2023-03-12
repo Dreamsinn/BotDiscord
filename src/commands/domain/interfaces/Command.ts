@@ -15,7 +15,7 @@ interface CommandProps {
 
 export abstract class Command {
     private coolDown = new CoolDown();
-    protected checkDevRole = new CheckAdminRole();
+    protected checkAdminRole = new CheckAdminRole();
 
     abstract call(
         event: Message,
@@ -33,7 +33,7 @@ export abstract class Command {
 
         //role check
         if (schema.adminOnly) {
-            if (!this.checkDevRole.call(event, adminRole)) {
+            if (!this.checkAdminRole.call(event, adminRole)) {
                 interrupt = true;
             }
         }

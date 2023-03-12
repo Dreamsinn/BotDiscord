@@ -73,7 +73,7 @@ export class DisplayPlayListCommand extends Command {
             collected.deferUpdate();
 
             if (this.displaySchema.adminOnly) {
-                if (!this.checkDevRole.call(event, adminRole)) {
+                if (!this.checkAdminRole.call(event, adminRole)) {
                     return;
                 }
             }
