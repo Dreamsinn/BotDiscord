@@ -48,7 +48,7 @@ export class CreatePlaylistCommand extends Command {
         // reset playlistData and playlistSongs
         this.playlistData = {
             privatePl: true,
-            author: '',
+            author: event.author.id,
             name: '',
             songsId: '',
         };
@@ -61,9 +61,9 @@ export class CreatePlaylistCommand extends Command {
                 return;
             }
             this.playlistData.privatePl = false;
+            this.playlistData.author = event.guild!.id;
         }
 
-        // Botones: añadir canciones, añadir canciones de la playlist(paginadas, con opcion para pasra todas)), quitar canciones(paginada), cancelar, guardar
         await this.createPlaylistOptionsMessage(event);
     }
 
@@ -77,13 +77,13 @@ export class CreatePlaylistCommand extends Command {
             // if is called with a message, edit it to update it
             playlistOptionsMessage = await playlistMessage.edit(playlistOptionsEmbed).catch(async () => {
                 await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
-                // await this.saveChanges(event);
             });
         } else {
-            // if first tame this method is called, create the message
+            // if first time this method is called, create the message
             playlistOptionsMessage = await event.channel.send(playlistOptionsEmbed);
         }
 
+        // under the main message will be the list of songs in playlist
         const songsInPlaylistMessage = await this.createSongsInPlaylistMessage(
             event,
             this.playlistSongs,
@@ -97,8 +97,6 @@ export class CreatePlaylistCommand extends Command {
     private createPlaylistOptionsEmbed(event: Message) {
         const userName = event.member?.nickname ?? event.author.username;
 
-        this.playlistData.author = this.playlistData.privatePl ? userName : event.guild!.name;
-
         return new MessageCreator({
             embed: {
                 color: '#d817ff',
@@ -109,11 +107,12 @@ export class CreatePlaylistCommand extends Command {
                 },
                 description:
                     '**Solo** podrá interactuar la **persona** que haya **activado el comando**.\n' +
-                    'Mientras este **comando** este **en uso no podrá usar otro comando**.\n',
+                    'Mientras este **comando** este **en uso no podrá usar otro comando**.\n\n' +
+                    '**__ No se pueden tener 2 playlist con el mismo nombre por autor __**',
                 field: {
                     name: this.playlistData.privatePl ? 'Playlist privada:' : 'Playlist del servidor:',
                     value:
-                        `> **Autor:** ${this.playlistData.author}\n` +
+                        `> **Autor:** ${this.playlistData.privatePl ? userName : event.guild?.name}\n` +
                         `> **Nombre playlist:** ${this.playlistData.name}\n` +
                         `> **Nº canciones:** ${this.playlistSongs.length}\n`,
                     inline: false,
@@ -200,37 +199,32 @@ export class CreatePlaylistCommand extends Command {
             }
 
             collector.stop();
+            // when a button is pushed, delete the song list
             await songsInPlaylistMessage.delete().catch((err) => {
                 console.log('Error deleting songsInPlaylistMessage: ', err);
             });
 
             if (collected.customId === CreatePlaylistButtonsEnum.ADD) {
-                collector.stop();
                 return this.addSongsToPlaylist(event, playlistOptionsMessage);
             }
 
             if (collected.customId === CreatePlaylistButtonsEnum.ADDPLAYING) {
-                collector.stop();
                 return this.addPlayingSongsToPlaylist(event, playlistOptionsMessage);
             }
 
             if (collected.customId === CreatePlaylistButtonsEnum.REMOVE) {
-                collector.stop();
                 return this.removeSongsFromPlaylist(event, playlistOptionsMessage);
             }
 
             if (collected.customId === CreatePlaylistButtonsEnum.NAME) {
-                collector.stop();
                 return this.changePlaylistName(event, playlistOptionsMessage);
             }
 
             if (collected.customId === CreatePlaylistButtonsEnum.CANCEL) {
-                collector.stop();
                 return;
             }
 
             if (collected.customId === CreatePlaylistButtonsEnum.SAVE) {
-                collector.stop();
                 return this.saveChanges(event, playlistOptionsMessage);
             }
         });
@@ -246,6 +240,7 @@ export class CreatePlaylistCommand extends Command {
     private async addSongsToPlaylist(event: Message, playlistOptionsMessage: Message): Promise<void> {
         this.usersUsingACommand.updateUserList(event.author.id);
 
+        // this class works almost the same that the play command
         let newSongs = await new AddSongsToPlaylist(
             this.findMusicByName,
             this.findMusicByYouTubeMobileURL,
@@ -268,6 +263,7 @@ export class CreatePlaylistCommand extends Command {
 
         newSongs = Array.isArray(newSongs) ? newSongs : [newSongs];
 
+        // for each song we look if it is already in the songs array, if it is not, push it
         newSongs.forEach((newSong: SongData) => {
             if (!this.playlistSongs.some((song: SongData) => newSong.songId === song.songId)) {
                 this.playlistSongs.push(newSong);
@@ -281,6 +277,8 @@ export class CreatePlaylistCommand extends Command {
         event: Message,
         playlistOptionsMessage: Message,
     ): Promise<void> {
+        // add al songs from the playing ones, if they are not yet in the playlist
+
         const playingSongs = this.playListHandler.getPlaylist();
         playingSongs.forEach((newSong: SongData) => {
             if (!this.playlistSongs.some((song: SongData) => newSong.songId === song.songId)) {
@@ -297,6 +295,7 @@ export class CreatePlaylistCommand extends Command {
     ): Promise<void> {
         this.usersUsingACommand.updateUserList(event.author.id);
 
+        // remove songs, this works almost the same that RemoveSongsFromPlayListCommand
         const modifiedPlaylist = await new RemoveSongsFromPlayList().call(event, this.playlistSongs);
 
         if (modifiedPlaylist instanceof Error) {
@@ -306,6 +305,7 @@ export class CreatePlaylistCommand extends Command {
 
         this.usersUsingACommand.removeUserList(event.author.id);
 
+        // modifiedPlaylist is te playlist without the eresed ones
         if (modifiedPlaylist) {
             this.playlistSongs = modifiedPlaylist;
         }
@@ -333,10 +333,12 @@ export class CreatePlaylistCommand extends Command {
     }
 
     private async saveChanges(event: Message, playlistOptionsMessage: Message) {
+        // if no name of no songs can't be saved
         if (await this.checkPlaylistData(event)) {
             return this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
         }
 
+        // we add the songs on songs DB
         await this.databaseConnection.song.create(this.playlistSongs);
 
         const response = await this.databaseConnection.playlist.create({
@@ -346,13 +348,17 @@ export class CreatePlaylistCommand extends Command {
             author: this.playlistData.author,
         });
 
+        // Error if the author has a playlist with the same name
         if (response === ErrorEnum.BadRequest) {
             event.channel.send(
                 'No se pueden tener nombres de palylist repetidos por autor, ya sea usuario o servidor.',
             );
         } else {
+            const userName = event.member?.nickname ?? event.author.username;
             event.channel.send(
-                `Playlist: ${this.playlistData.name}   Author: ${this.playlistData.author}\nGuardada correctamente`,
+                `Playlist: ${this.playlistData.name}  -  Author: ${
+                    this.playlistData.privatePl ? userName : event.guild?.name
+                }\n` + 'Guardada correctamente',
             );
         }
 

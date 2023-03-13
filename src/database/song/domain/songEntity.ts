@@ -3,7 +3,7 @@ import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 @Entity()
 export class Song extends BaseEntity {
     @PrimaryColumn()
-    id: string;
+    id: string; //youtube id
 
     @Column()
     name: string;

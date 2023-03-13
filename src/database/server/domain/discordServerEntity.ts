@@ -3,7 +3,7 @@ import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDate
 @Entity()
 export class DiscordServer extends BaseEntity {
     @PrimaryColumn()
-    id: string;
+    id: string; //discord guild id
 
     @Column()
     name: string;
