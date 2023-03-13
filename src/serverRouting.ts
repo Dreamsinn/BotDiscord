@@ -165,7 +165,7 @@ export class ServerRouting {
 
     public async call(event: Message): Promise<void> {
         // event handler
-        if (!event.guild) {
+        if (!event.guild || !event.guild.id) {
             return;
         }
         // look if the server is alredy instanced, if it is, call it
