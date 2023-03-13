@@ -4,6 +4,7 @@ import { CreatePlaylistProps } from '../../playlist/domain/interfaces/createPlay
 import { Playlist } from '../../playlist/domain/playlistEntity';
 import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
 import { DatabaseConnectionMock } from '../dataSourceMock';
+import { forceJestError } from '../forceJestError';
 
 describe('Playlist Test', () => {
     const dataSource = new DataSource({
@@ -42,23 +43,8 @@ describe('Playlist Test', () => {
         const response = await databaseMock.playlist.create(playlist);
 
         if (!(response instanceof Playlist)) {
-            throw new Error(
-                'expect(' +
-                    '\x1b[31m' +
-                    'received' +
-                    '\x1b[37m' +
-                    ').toBe(' +
-                    '\x1b[32m' +
-                    'expected' +
-                    '\x1b[37m' +
-                    ')\n\n' +
-                    'Expected: ' +
-                    '\x1b[32m' +
-                    'Playlist \n\x1b[37m' +
-                    'Received: ' +
-                    '\x1b[31m' +
-                    `${ErrorEnum.BadRequest}`,
-            );
+            // in theory should not go this way
+            forceJestError('Playlist', ErrorEnum);
         } else {
             expect(response instanceof Playlist).toBe(true);
             expect(response.privatePl).toBe(playlist.privatePl);
@@ -90,5 +76,65 @@ describe('Playlist Test', () => {
         const response = await databaseMock.playlist.getByAuthorAndName(author, name + 1);
 
         expect(response).toBe(null);
+    });
+
+    it('UpdatePlaylist', async () => {
+        const playlist = await databaseMock.playlist.getByAuthorAndName(author, name);
+
+        const updateData = {
+            id: playlist!.id,
+            updatedBy: 'me',
+            name: 'new Name',
+            songsId: ['songId', 'songId2', 'songId3'],
+        };
+        const response = await databaseMock.playlist.update(updateData);
+
+        if (!(response instanceof Playlist)) {
+            // in theory should not go this way
+            forceJestError('Playlist', ErrorEnum);
+        } else {
+            expect(response instanceof Playlist).toBe(true);
+            expect(playlist?.updatedAt.getTime() === response.updatedAt.getTime()).toBe(false);
+            expect(response.songsId).toBe(String(updateData.songsId));
+            expect(response.name).toBe(updateData.name);
+            expect(response.updatedBy).toBe(updateData.updatedBy);
+        }
+    });
+
+    it('UpdatePlaylist without name and songsID', async () => {
+        const response = await databaseMock.playlist.update({
+            id: '1',
+            updatedBy: author,
+        });
+
+        expect(response).toBe(ErrorEnum.BadRequest);
+    });
+
+    it('UpdatePlaylist with existing [name, author]', async () => {
+        await databaseMock.playlist.create({
+            songsId: ['test id'],
+            author,
+            privatePl: true,
+            name: 'name 2',
+        });
+
+        const response = await databaseMock.playlist.update({
+            id: '1',
+            updatedBy: author,
+            name: 'name 2',
+        });
+
+        expect(response).toBe(ErrorEnum.BadRequest);
+    });
+
+    it('UpdatePlaylist with nonexisting platlist id', async () => {
+        const response = await databaseMock.playlist.update({
+            id: '1234',
+            updatedBy: 'me',
+            name: 'testing error',
+            songsId: ['songId', 'songId2'],
+        });
+
+        expect(response).toBe(ErrorEnum.NotFound);
     });
 });

@@ -18,4 +18,12 @@ export class PlaylistService extends Service {
             },
         });
     }
+
+    public async getById(id: string): Promise<Playlist | null> {
+        return this.playlistRepository.findOne({ where: { id } });
+    }
+
+    public async update(paylist: Playlist): Promise<Playlist> {
+        return this.playlistRepository.save(paylist);
+    }
 }
