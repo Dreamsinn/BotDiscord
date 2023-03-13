@@ -18,7 +18,7 @@ export class CreatePlaylist {
     }: CreatePlaylistProps): Promise<Playlist | ErrorEnum> {
         const playlist = await this.playlistService.getByNameAndAuthor(name, author);
 
-        if (playlist.length) {
+        if (playlist) {
             return ErrorEnum.BadRequest;
         }
 

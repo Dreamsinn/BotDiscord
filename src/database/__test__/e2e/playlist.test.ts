@@ -77,4 +77,18 @@ describe('Playlist Test', () => {
 
         expect(response).toBe(ErrorEnum.BadRequest);
     });
+
+    it('GetPlaylistByAuthorAndName', async () => {
+        const response = await databaseMock.playlist.getByAuthorAndName(author, name);
+
+        expect(response instanceof Playlist).toBe(true);
+        expect(response?.songsId).toBe(String(['test id 1', 'test id 2', 'test id 3', 'test id 4']));
+        expect(response?.privatePl).toBe(true);
+    });
+
+    it('GetPlaylistByAuthorAndName with nonexistent [author, name]', async () => {
+        const response = await databaseMock.playlist.getByAuthorAndName(author, name + 1);
+
+        expect(response).toBe(null);
+    });
 });
