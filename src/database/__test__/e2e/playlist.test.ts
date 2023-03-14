@@ -39,6 +39,7 @@ describe('Playlist Test', () => {
             author,
             privatePl: true,
             name,
+            createdBy: author,
         };
         const response = await databaseMock.playlist.create(playlist);
 
@@ -49,6 +50,7 @@ describe('Playlist Test', () => {
             expect(response instanceof Playlist).toBe(true);
             expect(response.privatePl).toBe(playlist.privatePl);
             expect(response.songsId).toBe(String(playlist.songsId));
+            expect(response.author === response.createdBy).toBe(true);
         }
     });
 
@@ -58,6 +60,7 @@ describe('Playlist Test', () => {
             author,
             privatePl: true,
             name,
+            createdBy: author,
         };
         const response = await databaseMock.playlist.create(playlist);
 
@@ -116,6 +119,7 @@ describe('Playlist Test', () => {
             author,
             privatePl: true,
             name: 'name 2',
+            createdBy: author,
         });
 
         const response = await databaseMock.playlist.update({

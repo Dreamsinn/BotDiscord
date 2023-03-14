@@ -13,6 +13,7 @@ export class CreatePlaylist {
     public async call({
         songsId,
         author,
+        createdBy,
         privatePl,
         name,
     }: CreatePlaylistProps): Promise<Playlist | ErrorEnum> {
@@ -27,6 +28,7 @@ export class CreatePlaylist {
             songsId: String(songsId),
             privatePl,
             author: author,
+            createdBy: createdBy,
         };
 
         return this.playlistService.create(newPlaylist);

@@ -49,6 +49,7 @@ export class CreatePlaylistCommand extends Command {
         this.playlistData = {
             privatePl: true,
             author: event.author.id,
+            createdBy: event.author.id,
             name: '',
             songsId: '',
         };
@@ -346,6 +347,7 @@ export class CreatePlaylistCommand extends Command {
             name: this.playlistData.name,
             privatePl: this.playlistData.privatePl,
             author: this.playlistData.author,
+            createdBy: this.playlistData.createdBy,
         });
 
         // Error if the author has a playlist with the same name
