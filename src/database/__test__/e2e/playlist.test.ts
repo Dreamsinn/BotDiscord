@@ -141,4 +141,19 @@ describe('Playlist Test', () => {
 
         expect(response).toBe(ErrorEnum.NotFound);
     });
+
+    it('GetPlaylistByAuthor', async () => {
+        const response = await databaseMock.playlist.getByAuthor(author);
+
+        expect(response instanceof Array).toBe(true);
+        expect(response[0] instanceof Playlist).toBe(true);
+        expect(response.length).toBe(2);
+    });
+
+    it('GetPlaylistByAuthor with nonexistent author', async () => {
+        const response = await databaseMock.playlist.getByAuthor(author + 1);
+
+        expect(response instanceof Array).toBe(true);
+        expect(response.length).toBe(0);
+    });
 });
