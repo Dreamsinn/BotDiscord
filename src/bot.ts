@@ -22,7 +22,10 @@ export class Bot {
             console.log('Discord conection ready!');
         });
 
+        // this.client.on("debug", console.log)
+
         // Login to Discord with your client's token
         await this.client.login(process.env.TOKEN);
+        // .catch((error) => console.log({ error }));
     }
 }
