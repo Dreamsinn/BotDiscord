@@ -156,4 +156,20 @@ describe('Playlist Test', () => {
         expect(response instanceof Array).toBe(true);
         expect(response.length).toBe(0);
     });
+
+    it('DeletePlaylist', async () => {
+        const playlist = await databaseMock.playlist.getByAuthorAndName(author, name);
+
+        await databaseMock.playlist.delete(playlist!.id);
+
+        const deletedPlaylist = await databaseMock.playlist.getByAuthorAndName(author, name);
+
+        expect(deletedPlaylist).toBe(null);
+    });
+
+    it('DeletePlaylist, with nonexistent id', async () => {
+        const resposne = await databaseMock.playlist.delete('1111');
+
+        expect(resposne).toBe(ErrorEnum.NotFound);
+    });
 });
