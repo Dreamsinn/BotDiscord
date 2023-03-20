@@ -13,6 +13,7 @@ import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicComman
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
 import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
 import { CreatePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/createPlaylistCommand';
+import { DeletePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/deletePlaylistCommand';
 import { ShowPlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/showPlaylistCommand';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
 import { PlayNowCommand } from './aplication/prefixCommands/musicCommands/playNowCommand';
@@ -163,6 +164,10 @@ export class Routes {
         {
             schema: this.schemaDictionary['Show Playlist Command'],
             command: new ShowPlaylistCommand(this.databaseConnection, this.usersUsingACommand),
+        },
+        {
+            schema: this.schemaDictionary['Delete Playlist Command'],
+            command: new DeletePlaylistCommand(this.databaseConnection, this.usersUsingACommand),
         },
     ];
 }

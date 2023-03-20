@@ -21,4 +21,5 @@ export const enum CommandsNameEnum {
     ConfigSchemaCommand = 'Config Schema Command',
     CreatePlaylistCommand = 'Create Playlist Command',
     ShowPlayListCommand = 'Show Playlist Command',
+    DeletePlaylistCommand = 'Delete Playlist Command',
 }

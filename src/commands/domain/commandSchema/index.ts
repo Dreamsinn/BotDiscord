@@ -3,6 +3,7 @@ import { ClearPlayListCommandSchema } from './clearPlayListCommandSchema';
 import { ConfigSchemaCommandSchema } from './configSchemaCommandSchema';
 import { ConfigServerCommandSchema } from './configServerCommandSchema';
 import { CreatePlaylistCommandSchema } from './createPlaylisyCommandSchema';
+import { DeletePlaylistCommandSchema } from './deletePlaylistCommandSchema';
 import { DiceCommandSchema } from './diceCommandSchema';
 import { DiceCommandTogglerSchema } from './diceCommandTogglerSchema';
 import { DisconnectCommandSchema } from './disconnectCommandSchema';
@@ -45,4 +46,5 @@ export const commandsSchemasList: CommandSchema[] = [
     ConfigSchemaCommandSchema,
     CreatePlaylistCommandSchema,
     ShowPlaylistCommandSchema,
+    DeletePlaylistCommandSchema,
 ];
