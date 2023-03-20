@@ -18,6 +18,7 @@ import { PlayNowCommandSchema } from './playNowCommandSchema';
 import { RemoveSongsFromPlayListCommandSchema } from './removeSongsFromPlayListCommandSchema';
 import { ReplyCommandSchema } from './replyCommandSchema';
 import { ReplyCommandTogglerSchema } from './replyCommandTogglerSchema';
+import { ShowPlaylistCommandSchema } from './showPlaylistCommand';
 import { ShufflePlayListCommandSchema } from './shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from './skipMusicCommandSchema';
 
@@ -43,4 +44,5 @@ export const commandsSchemasList: CommandSchema[] = [
     ConfigServerCommandSchema,
     ConfigSchemaCommandSchema,
     CreatePlaylistCommandSchema,
+    ShowPlaylistCommandSchema,
 ];

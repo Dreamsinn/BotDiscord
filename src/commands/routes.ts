@@ -13,6 +13,7 @@ import { LoopPlayListModeCommand } from './aplication/prefixCommands/musicComman
 import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCommand';
 import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
 import { CreatePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/createPlaylistCommand';
+import { ShowPlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/showPlaylistCommand';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
 import { PlayNowCommand } from './aplication/prefixCommands/musicCommands/playNowCommand';
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
@@ -158,6 +159,10 @@ export class Routes {
                 this.findMusicBySpotifySongURL,
                 this.findMusicBySpotifyPlaylistURL,
             ),
+        },
+        {
+            schema: this.schemaDictionary['Show Playlist Command'],
+            command: new ShowPlaylistCommand(this.databaseConnection, this.usersUsingACommand),
         },
     ];
 }
