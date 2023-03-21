@@ -22,4 +22,5 @@ export const enum CommandsNameEnum {
     CreatePlaylistCommand = 'Create Playlist Command',
     ShowPlayListCommand = 'Show Playlist Command',
     DeletePlaylistCommand = 'Delete Playlist Command',
+    UpdatePlaylistCommand = 'Update Playlist Command',
 }

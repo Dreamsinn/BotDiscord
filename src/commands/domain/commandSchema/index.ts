@@ -22,6 +22,7 @@ import { ReplyCommandTogglerSchema } from './replyCommandTogglerSchema';
 import { ShowPlaylistCommandSchema } from './showPlaylistCommand';
 import { ShufflePlayListCommandSchema } from './shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from './skipMusicCommandSchema';
+import { UpdatePlaylistCommandSchema } from './updatePlaylistCommandSchema';
 
 export const commandsSchemasList: CommandSchema[] = [
     DiceCommandSchema,
@@ -47,4 +48,5 @@ export const commandsSchemasList: CommandSchema[] = [
     CreatePlaylistCommandSchema,
     ShowPlaylistCommandSchema,
     DeletePlaylistCommandSchema,
+    UpdatePlaylistCommandSchema,
 ];

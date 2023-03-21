@@ -3,11 +3,20 @@ import { SongData } from '../../../../../domain/interfaces/song';
 import { PaginatedMessage } from '../../../../utils/paginatedMessage';
 
 export class RemoveSongsFromPlayList {
-    public async call(event: Message, playList: SongData[]): Promise<SongData[] | void | Error> {
+    private returnSongsToRemove: boolean;
+
+    public async call(
+        event: Message,
+        playList: SongData[],
+        returnSongsToRemove = false,
+    ): Promise<SongData[] | void | Error> {
         if (!playList[0]) {
             event.channel.send('No hay canciones en la lista');
             return;
         }
+
+        this.returnSongsToRemove = returnSongsToRemove;
+
         const removeSongsFromPlaylistMessage = await this.createRemoveSongsFromPlatlistMessage(
             event,
             playList,
@@ -43,7 +52,11 @@ export class RemoveSongsFromPlayList {
                     return;
                 }
 
-                return this.removeSongFromPlayList(collectedMessage[0].content, playList);
+                if (this.returnSongsToRemove) {
+                    return this.songsToRemoveFromPlaylist(collectedMessage[0].content, playList);
+                } else {
+                    return this.removeSongFromPlayList(collectedMessage[0].content, playList);
+                }
             })
             .catch(async (err) => {
                 if (err instanceof Error) {
@@ -91,6 +104,15 @@ export class RemoveSongsFromPlayList {
                 author: event.author,
             },
         }).call();
+    }
+
+    private songsToRemoveFromPlaylist(content: string, playList: SongData[]): SongData[] {
+        const stringOfNumbersArray = content.split(',');
+
+        const songsIndex = stringOfNumbersArray.map((str) => Number(str));
+
+        // hace una array con las canciones selecionas
+        return playList.filter((n, i) => songsIndex.includes(i + 1));
     }
 
     private removeSongFromPlayList(content: string, playList: SongData[]): SongData[] {

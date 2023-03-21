@@ -15,6 +15,7 @@ import { PlayCommand } from './aplication/prefixCommands/musicCommands/playComma
 import { CreatePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/createPlaylistCommand';
 import { DeletePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/deletePlaylistCommand';
 import { ShowPlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/showPlaylistCommand';
+import { UpdatePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/updatePlaylistCommand';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
 import { PlayNowCommand } from './aplication/prefixCommands/musicCommands/playNowCommand';
 import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musicCommands/removeSongsFromPlayListCommand';
@@ -168,6 +169,20 @@ export class Routes {
         {
             schema: this.schemaDictionary['Delete Playlist Command'],
             command: new DeletePlaylistCommand(this.databaseConnection, this.usersUsingACommand),
+        },
+        {
+            schema: this.schemaDictionary['Update Playlist Command'],
+            command: new UpdatePlaylistCommand(
+                this.playListHandler,
+                this.databaseConnection,
+                this.usersUsingACommand,
+                this.findMusicByName,
+                this.findMusicByYouTubeMobileURL,
+                this.findPlayListByYoutubeURL,
+                this.findMusicByYouTubeURL,
+                this.findMusicBySpotifySongURL,
+                this.findMusicBySpotifyPlaylistURL,
+            ),
         },
     ];
 }

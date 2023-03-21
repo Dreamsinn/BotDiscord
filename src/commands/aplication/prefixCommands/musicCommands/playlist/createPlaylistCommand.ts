@@ -334,7 +334,7 @@ export class CreatePlaylistCommand extends Command {
     }
 
     private async saveChanges(event: Message, playlistOptionsMessage: Message) {
-        // if no name of no songs can't be saved
+        // if no name or no songs can't be saved
         if (await this.checkPlaylistData(event)) {
             return this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
         }
