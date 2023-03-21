@@ -15,7 +15,7 @@ export class UpdatePlaylist {
         songsId,
         updatedBy,
     }: UpdatePlaylistProps): Promise<Playlist | ErrorEnum> {
-        if (!name && !songsId?.length) {
+        if (!name && !songsId) {
             return ErrorEnum.BadRequest;
         }
 
