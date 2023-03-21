@@ -39,6 +39,11 @@ export class UpdatePlaylistCommand extends Command {
             removed: SongDictionary;
         };
     };
+    // a song in 'added' cant be in 'current'
+    // a song to be added into 'removed' first must be in 'current' or 'added'
+    // when a song is added into 'added', will be removed from 'removed' if posible
+    // when a song is added into 'removed', will be removed from 'added' if posible
+    // 'added' and 'removed' cant have duplicated songs
 
     private showSongs: 'playlist' | 'added' | 'removed';
 
@@ -84,6 +89,7 @@ export class UpdatePlaylistCommand extends Command {
 
         this.usersUsingACommand.updateUserList(event.author.id);
 
+        // message collection to select which playlist update
         await this.createMessageCollector(event);
     }
 
@@ -201,16 +207,13 @@ export class UpdatePlaylistCommand extends Command {
     }
 
     private async setPlaylistData(playlist: Playlist, event: Message) {
+        // once chosen, set the class variables
         this.playlistData = playlist;
 
         const songList = await this.databaseConnection.song.getById(playlist.songsId.split(','));
         const songDataList = this.convetSongIntoSongData(songList);
 
-        const songDictionary = this.createSongDictionary(songDataList);
-
-        Array.from(songDictionary.entries()).forEach(([key, value]) =>
-            this.playlistSongs.current.set(key, value),
-        );
+        songDataList.forEach((song: SongData) => this.playlistSongs.current.set(song.songId, song));
 
         return await this.createPlaylistOptionsMessage(event);
     }
@@ -239,14 +242,6 @@ export class UpdatePlaylistCommand extends Command {
         return songDataList;
     }
 
-    private createSongDictionary(songList: SongData[]): SongDictionary {
-        const songDictionary: SongDictionary = new Map();
-
-        songList.forEach((song: SongData) => songDictionary.set(song.songId, song));
-
-        return songDictionary;
-    }
-
     private async createPlaylistOptionsMessage(event: Message, playlistMessage: Message | null = null) {
         this.usersUsingACommand.updateUserList(event.author.id);
 
@@ -263,7 +258,9 @@ export class UpdatePlaylistCommand extends Command {
             playlistOptionsMessage = await event.channel.send(playlistOptionsEmbed);
         }
 
+        // this.showSongs establish wich array will be seen: playlist, added or removed
         const songListToPaginate = this.mapSongsToPagination();
+
         // under the main message will be the list of songs in playlist
         const songsInPlaylistMessage = await this.createSongsInPlaylistMessage(
             event,
@@ -524,22 +521,20 @@ export class UpdatePlaylistCommand extends Command {
 
         newSongs = Array.isArray(newSongs) ? newSongs : [newSongs];
 
-        const songDictionary = this.createSongDictionary(newSongs);
-
-        Array.from(songDictionary.entries()).map(([id, song]) => {
-            if (this.playlistSongs.toUpdate.added.has(id)) {
+        newSongs.map((song: SongData) => {
+            if (this.playlistSongs.toUpdate.added.has(song.songId)) {
                 return;
             }
 
-            if (this.playlistSongs.toUpdate.removed.has(id)) {
-                this.playlistSongs.toUpdate.removed.delete(id);
+            if (this.playlistSongs.toUpdate.removed.has(song.songId)) {
+                this.playlistSongs.toUpdate.removed.delete(song.songId);
             }
 
-            if (this.playlistSongs.current.has(id)) {
+            if (this.playlistSongs.current.has(song.songId)) {
                 return;
             }
 
-            this.playlistSongs.toUpdate.added.set(id, song);
+            this.playlistSongs.toUpdate.added.set(song.songId, song);
         });
 
         await this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
@@ -553,22 +548,20 @@ export class UpdatePlaylistCommand extends Command {
 
         const playingSongs = this.playListHandler.getPlaylist();
 
-        const songDictionary = this.createSongDictionary(playingSongs);
-
-        Array.from(songDictionary.entries()).map(([id, song]) => {
-            if (this.playlistSongs.toUpdate.added.has(id)) {
+        playingSongs.map((song: SongData) => {
+            if (this.playlistSongs.toUpdate.added.has(song.songId)) {
                 return;
             }
 
-            if (this.playlistSongs.toUpdate.removed.has(id)) {
-                this.playlistSongs.toUpdate.removed.delete(id);
+            if (this.playlistSongs.toUpdate.removed.has(song.songId)) {
+                this.playlistSongs.toUpdate.removed.delete(song.songId);
             }
 
-            if (this.playlistSongs.current.has(id)) {
+            if (this.playlistSongs.current.has(song.songId)) {
                 return;
             }
 
-            this.playlistSongs.toUpdate.added.set(id, song);
+            this.playlistSongs.toUpdate.added.set(song.songId, song);
         });
 
         await this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
@@ -599,19 +592,17 @@ export class UpdatePlaylistCommand extends Command {
             return this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
         }
 
-        const songDictionary = this.createSongDictionary(songsToRemove);
-
-        Array.from(songDictionary.entries()).map(([id, song]) => {
-            if (this.playlistSongs.toUpdate.removed.has(id)) {
+        songsToRemove.map((song: SongData) => {
+            if (this.playlistSongs.toUpdate.removed.has(song.songId)) {
                 return;
             }
 
-            if (this.playlistSongs.toUpdate.added.has(id)) {
-                this.playlistSongs.toUpdate.added.delete(id);
+            if (this.playlistSongs.toUpdate.added.has(song.songId)) {
+                this.playlistSongs.toUpdate.added.delete(song.songId);
                 return;
             }
 
-            this.playlistSongs.toUpdate.removed.set(id, song);
+            this.playlistSongs.toUpdate.removed.set(song.songId, song);
         });
 
         await this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
@@ -637,13 +628,13 @@ export class UpdatePlaylistCommand extends Command {
     }
 
     private async saveChanges(event: Message, playlistOptionsMessage: Message) {
-        // if no name or no songs can't be saved
+        // if no changes will be not saved
         if (await this.isSaveNeeded()) {
             await event.channel.send('No se ha efectuado ningún cambio.');
             return;
         }
 
-        // add new songs on songs DB
+        // add new songs on DB
         if (this.playlistSongs.toUpdate.added.size) {
             await this.databaseConnection.song.create(
                 Array.from(this.playlistSongs.toUpdate.added.values()),
@@ -670,6 +661,7 @@ export class UpdatePlaylistCommand extends Command {
             this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
             return;
         } else {
+            // if all ok
             const userName = event.member?.nickname ?? event.author.username;
             event.channel.send(
                 `Playlist: ${this.playlistData.name}  -  Author: ${
