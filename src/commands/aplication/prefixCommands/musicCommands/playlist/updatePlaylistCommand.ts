@@ -651,16 +651,13 @@ export class UpdatePlaylistCommand extends Command {
         }
         const songs = this.updateSongsArray();
 
-        console.log('-------');
-        console.log(this.newPlaylistName ?? undefined);
-
         const response = await this.databaseConnection.playlist.update({
             id: this.playlistData.id,
             name: this.newPlaylistName ?? undefined,
             songsId: songs.map((song: SongData) => song.songId),
             updatedBy: event.author.id,
         });
-        console.log({ response });
+
         // Error if the author has a playlist with the same name
         if (response === ErrorEnum.BadRequest) {
             const errorMessage = await event.channel.send(
