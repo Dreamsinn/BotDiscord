@@ -159,7 +159,9 @@ export class DeletePlaylistCommand extends Command {
         const playListArrayString: string[] = playListArray.map((playList: Playlist, i: number) => {
             const songArray = playList.songsId.split(',');
 
-            return `${i + 1} - ${playList.name} 'Nº canciones:' ${songArray.length}\n`;
+            return `${i + 1} - ${playList.name} 'Nº canciones:' ${
+                playList.songsId.length ? songArray.length : 0
+            }\n`;
         });
 
         return playListArrayString;

@@ -191,8 +191,10 @@ export class UpdatePlaylistCommand extends Command {
         // numerated array of playlist created by this author
         const playListArrayString: string[] = playListArray.map((playList: Playlist, i: number) => {
             const songArray = playList.songsId.split(',');
-            console.log({ songArray, length: songArray.length });
-            return `${i + 1} - ${playList.name} 'Nº canciones:' ${songArray.length}\n`;
+
+            return `${i + 1} - ${playList.name} 'Nº canciones:' ${
+                playList.songsId.length ? songArray.length : 0
+            }\n`;
         });
 
         return playListArrayString;
@@ -649,13 +651,16 @@ export class UpdatePlaylistCommand extends Command {
         }
         const songs = this.updateSongsArray();
 
+        console.log('-------');
+        console.log(this.newPlaylistName ?? undefined);
+
         const response = await this.databaseConnection.playlist.update({
             id: this.playlistData.id,
             name: this.newPlaylistName ?? undefined,
             songsId: songs.map((song: SongData) => song.songId),
             updatedBy: event.author.id,
         });
-
+        console.log({ response });
         // Error if the author has a playlist with the same name
         if (response === ErrorEnum.BadRequest) {
             const errorMessage = await event.channel.send(
