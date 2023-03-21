@@ -352,10 +352,17 @@ export class CreatePlaylistCommand extends Command {
 
         // Error if the author has a playlist with the same name
         if (response === ErrorEnum.BadRequest) {
-            event.channel.send(
+            const errorMessage = await event.channel.send(
                 'No se pueden tener nombres de palylist repetidos por autor, ya sea usuario o servidor.',
             );
+            setTimeout(() => {
+                errorMessage.delete().catch(() => '');
+            }, 10000);
+
+            this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
+            return;
         } else {
+            // if all ok
             const userName = event.member?.nickname ?? event.author.username;
             event.channel.send(
                 `Playlist: ${this.playlistData.name}  -  Author: ${
