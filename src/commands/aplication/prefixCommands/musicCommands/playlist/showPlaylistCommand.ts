@@ -82,13 +82,13 @@ export class ShowPlaylistCommand extends Command {
                 await collectedMessage[0].delete();
                 this.usersUsingACommand.removeUserList(event.author.id);
 
-                await paginatedPlaylistArrayMessage
-                    .delete()
-                    .catch((err) => console.log('Error deleting paginatedPlaylistArrayMessage:', err));
-
                 if (['x', 'X'].includes(collectedMessage[0].content)) {
                     return;
                 }
+
+                await paginatedPlaylistArrayMessage
+                    .delete()
+                    .catch((err) => console.log('Error deleting paginatedPlaylistArrayMessage:', err));
 
                 const playlistSelected = playListArray[Number(collectedMessage[0].content) - 1];
                 return this.createPlayListDataMessage(event, playlistSelected, songDictionary);
