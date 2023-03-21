@@ -89,22 +89,17 @@ export class DeletePlaylistCommand extends Command {
 
                 const playlistSelected = playListArray[Number(collectedMessage[0].content) - 1];
 
-                try {
-                    const deletedPl = await this.databaseConnection.playlist.delete(playlistSelected.id);
+                const deletedPl = await this.databaseConnection.playlist.delete(playlistSelected.id);
 
-                    if (deletedPl instanceof Playlist) {
-                        await event.channel.send(
-                            `Playlist: '${deletedPl.name}' ha sido borrada correctamente.`,
-                        );
-                        return;
-                    }
-
-                    await event.channel.send(`No se ha podido borrar la playlist`);
-                    return;
-                } catch (err) {
-                    await event.reply('Ha habido un error al intentar borrar la playlist');
+                if (deletedPl instanceof Playlist) {
+                    await event.channel.send(
+                        `Playlist: '${deletedPl.name}' ha sido borrada correctamente.`,
+                    );
                     return;
                 }
+
+                await event.channel.send(`No se ha podido borrar la playlist`);
+                return;
             })
             .catch(async (err) => {
                 this.usersUsingACommand.removeUserList(event.author.id);
