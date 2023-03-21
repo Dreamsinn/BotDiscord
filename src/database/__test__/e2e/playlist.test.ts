@@ -158,11 +158,11 @@ describe('Playlist Test', () => {
     });
 
     it('DeletePlaylist', async () => {
-        const playlist = await databaseMock.playlist.getByAuthorAndName(author, name);
+        const playlist = await databaseMock.playlist.getByAuthorAndName(author, 'new Name');
 
         await databaseMock.playlist.delete(playlist!.id);
 
-        const deletedPlaylist = await databaseMock.playlist.getByAuthorAndName(author, name);
+        const deletedPlaylist = await databaseMock.playlist.getByAuthorAndName(author, 'new Name');
 
         expect(deletedPlaylist).toBe(null);
     });
