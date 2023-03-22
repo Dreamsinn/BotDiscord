@@ -21,10 +21,8 @@ export class DiscordServer extends BaseEntity {
     })
     blackList: string;
 
-    @Column({
-        nullable: true,
-    })
-    playList: string;
+    @Column()
+    language: string;
 
     @CreateDateColumn()
     createdAt: Date;

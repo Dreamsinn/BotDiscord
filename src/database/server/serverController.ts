@@ -25,8 +25,9 @@ export class ServerController {
         serverId: string,
         serverName: string,
         adminRoleId: string | undefined,
+        language: string | undefined,
     ): Promise<DiscordServer> {
-        return this.createServer.call(serverId, serverName, adminRoleId);
+        return this.createServer.call(serverId, serverName, adminRoleId, language);
     }
 
     public getAll(): Promise<DiscordServer[]> {
