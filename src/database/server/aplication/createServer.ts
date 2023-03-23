@@ -1,4 +1,5 @@
-import { Languages, languagesArray } from '../../../languages/languageService';
+import { Languages } from '../../../languages/languageService';
+import { typeIsLanguage } from '../../../languages/utils/typeIsLanguage';
 import { DiscordServer } from '../domain/discordServerEntity';
 import { NewServer } from '../domain/interfaces/newServer';
 import { ServerService } from '../infrastructure/serverService';
@@ -17,11 +18,9 @@ export class CreateServer {
     ): Promise<DiscordServer> {
         let verifiedLanguage: Languages = 'en';
 
-        languagesArray.forEach((values: Languages) => {
-            if (language === values) {
-                verifiedLanguage = language;
-            }
-        });
+        if (language && typeIsLanguage(language)) {
+            verifiedLanguage = language;
+        }
 
         const server: NewServer = {
             id: serverId,
