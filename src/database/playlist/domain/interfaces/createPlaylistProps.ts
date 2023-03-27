@@ -3,4 +3,5 @@ export type CreatePlaylistProps = {
     name: string;
     privatePl: boolean;
     author: string;
+    createdBy: string;
 };

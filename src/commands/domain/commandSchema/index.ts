@@ -3,6 +3,7 @@ import { ClearPlayListCommandSchema } from './clearPlayListCommandSchema';
 import { ConfigSchemaCommandSchema } from './configSchemaCommandSchema';
 import { ConfigServerCommandSchema } from './configServerCommandSchema';
 import { CreatePlaylistCommandSchema } from './createPlaylisyCommandSchema';
+import { DeletePlaylistCommandSchema } from './deletePlaylistCommandSchema';
 import { DiceCommandSchema } from './diceCommandSchema';
 import { DiceCommandTogglerSchema } from './diceCommandTogglerSchema';
 import { DisconnectCommandSchema } from './disconnectCommandSchema';
@@ -18,8 +19,10 @@ import { PlayNowCommandSchema } from './playNowCommandSchema';
 import { RemoveSongsFromPlayListCommandSchema } from './removeSongsFromPlayListCommandSchema';
 import { ReplyCommandSchema } from './replyCommandSchema';
 import { ReplyCommandTogglerSchema } from './replyCommandTogglerSchema';
+import { ShowPlaylistCommandSchema } from './showPlaylistCommand';
 import { ShufflePlayListCommandSchema } from './shufflePlayListCommandSchema';
 import { SkipMusicCommandSchema } from './skipMusicCommandSchema';
+import { UpdatePlaylistCommandSchema } from './updatePlaylistCommandSchema';
 
 export const commandsSchemasList: CommandSchema[] = [
     DiceCommandSchema,
@@ -43,4 +46,7 @@ export const commandsSchemasList: CommandSchema[] = [
     ConfigServerCommandSchema,
     ConfigSchemaCommandSchema,
     CreatePlaylistCommandSchema,
+    ShowPlaylistCommandSchema,
+    DeletePlaylistCommandSchema,
+    UpdatePlaylistCommandSchema,
 ];

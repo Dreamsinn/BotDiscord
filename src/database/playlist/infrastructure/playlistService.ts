@@ -26,4 +26,12 @@ export class PlaylistService extends Service {
     public async update(paylist: Playlist): Promise<Playlist> {
         return this.playlistRepository.save(paylist);
     }
+
+    public async getByAuthor(author: string): Promise<Playlist[]> {
+        return this.playlistRepository.find({ where: { author } });
+    }
+
+    public async remove(playlist: Playlist): Promise<Playlist> {
+        return this.playlistRepository.remove(playlist);
+    }
 }

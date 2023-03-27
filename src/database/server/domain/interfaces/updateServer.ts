@@ -1,3 +1,5 @@
+import { Languages } from '../../../../languages/languageService';
+
 export interface UpdateServer {
     updatedBy: string;
     updatedAt: Date;
@@ -5,4 +7,5 @@ export interface UpdateServer {
     adminRole?: string;
     blackList?: string;
     playList?: string;
+    language?: Languages;
 }

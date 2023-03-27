@@ -37,35 +37,45 @@ describe('Sever Test', () => {
     });
 
     it('CreateServer', async () => {
-        const response = await databaseMock.server.create(guildId, guildName, adminRoleId);
+        const language = 'es';
+        const response = await databaseMock.server.create(guildId, guildName, adminRoleId, language);
 
         expect(response).toBeInstanceOf(DiscordServer);
         expect(response.id).toEqual(guildId);
         expect(response.name).toEqual(guildName);
         expect(response.prefix).toEqual(process.env.PREFIX);
         expect(response.adminRole).toEqual(adminRoleId);
-        expect(response.playList).toBe(null);
+        expect(response.language).toBe(language);
         expect(response.blackList).toBe(null);
         expect(response.createdAt instanceof Date).toBe(true);
         expect(String(response.createdAt) === String(response.updatedAt)).toBe(true);
         expect(response.updatedBy).toBe(null);
     });
 
-    it('CreateServer with null as adminRole', async () => {
+    it('CreateServer with null as adminRole and nonexistent language', async () => {
+        const language = 'dsfgh';
         const guildId2 = '12345';
         const guildName2 = 'Test guild';
-        const response = await databaseMock.server.create(guildId2, guildName2, undefined);
+        const response = await databaseMock.server.create(guildId2, guildName2, undefined, language);
 
         expect(response).toBeInstanceOf(DiscordServer);
         expect(response.id).toEqual(guildId2);
         expect(response.name).toEqual(guildName2);
         expect(response.prefix).toEqual(process.env.PREFIX);
+        expect(response.language).toEqual('en');
         expect(response.adminRole).toEqual(null);
-        expect(response.playList).toBe(null);
         expect(response.blackList).toBe(null);
         expect(response.createdAt instanceof Date).toBe(true);
         expect(String(response.createdAt) === String(response.updatedAt)).toBe(true);
         expect(response.updatedBy).toBe(null);
+    });
+
+    it('CreateServer with lenguage undefined', async () => {
+        const guildId2 = '123456';
+        const response = await databaseMock.server.create(guildId2, guildName, undefined, undefined);
+
+        expect(response).toBeInstanceOf(DiscordServer);
+        expect(response.language).toEqual('en');
     });
 
     it('GetAllServers', async () => {
@@ -73,7 +83,7 @@ describe('Sever Test', () => {
 
         expect(response[0]).not.toBe(undefined);
         expect(response[0]).toBeInstanceOf(DiscordServer);
-        expect(response.length).toBe(2);
+        expect(response.length).toBe(3);
     });
 
     it('GetServerById', async () => {
@@ -93,6 +103,7 @@ describe('Sever Test', () => {
             adminRole: 'testAdminRole',
             blackList: ['testUserID', 'testUserID2', 'testUserID3'],
             prefix: '>>',
+            language: 'es',
         };
         const userId = '123456';
 
@@ -101,6 +112,7 @@ describe('Sever Test', () => {
 
         expect(response).toBeInstanceOf(UpdateResult);
         expect(updatedServer?.prefix).toEqual('>>');
+        expect(updatedServer?.language).toEqual('es');
         expect(updatedServer?.blackList).toEqual('testUserID,testUserID2,testUserID3');
         expect(updatedServer?.adminRole).toEqual('testAdminRole');
         expect(updatedServer?.updatedBy).toEqual(userId);

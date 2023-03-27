@@ -27,12 +27,17 @@ export class Playlist extends BaseEntity {
     @Column()
     author: string;
 
+    // userId
+    @Column()
+    createdBy: string;
+
     @CreateDateColumn()
     createdAt: Date;
 
     @UpdateDateColumn()
     updatedAt: Date;
 
+    // userId
     @Column({
         nullable: true,
     })

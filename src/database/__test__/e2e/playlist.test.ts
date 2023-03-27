@@ -39,6 +39,7 @@ describe('Playlist Test', () => {
             author,
             privatePl: true,
             name,
+            createdBy: author,
         };
         const response = await databaseMock.playlist.create(playlist);
 
@@ -49,6 +50,7 @@ describe('Playlist Test', () => {
             expect(response instanceof Playlist).toBe(true);
             expect(response.privatePl).toBe(playlist.privatePl);
             expect(response.songsId).toBe(String(playlist.songsId));
+            expect(response.author === response.createdBy).toBe(true);
         }
     });
 
@@ -58,6 +60,7 @@ describe('Playlist Test', () => {
             author,
             privatePl: true,
             name,
+            createdBy: author,
         };
         const response = await databaseMock.playlist.create(playlist);
 
@@ -116,6 +119,7 @@ describe('Playlist Test', () => {
             author,
             privatePl: true,
             name: 'name 2',
+            createdBy: author,
         });
 
         const response = await databaseMock.playlist.update({
@@ -136,5 +140,36 @@ describe('Playlist Test', () => {
         });
 
         expect(response).toBe(ErrorEnum.NotFound);
+    });
+
+    it('GetPlaylistByAuthor', async () => {
+        const response = await databaseMock.playlist.getByAuthor(author);
+
+        expect(response instanceof Array).toBe(true);
+        expect(response[0] instanceof Playlist).toBe(true);
+        expect(response.length).toBe(2);
+    });
+
+    it('GetPlaylistByAuthor with nonexistent author', async () => {
+        const response = await databaseMock.playlist.getByAuthor(author + 1);
+
+        expect(response instanceof Array).toBe(true);
+        expect(response.length).toBe(0);
+    });
+
+    it('DeletePlaylist', async () => {
+        const playlist = await databaseMock.playlist.getByAuthorAndName(author, 'new Name');
+
+        await databaseMock.playlist.delete(playlist!.id);
+
+        const deletedPlaylist = await databaseMock.playlist.getByAuthorAndName(author, 'new Name');
+
+        expect(deletedPlaylist).toBe(null);
+    });
+
+    it('DeletePlaylist, with nonexistent id', async () => {
+        const resposne = await databaseMock.playlist.delete('1111');
+
+        expect(resposne).toBe(ErrorEnum.NotFound);
     });
 });

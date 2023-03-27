@@ -1,4 +1,4 @@
-export enum CommandsNameEnum {
+export const enum CommandsNameEnum {
     PlayCommand = 'Play Command',
     PlaylistCommand = 'Playlist Command',
     HelpCommand = 'Help Command',
@@ -20,4 +20,7 @@ export enum CommandsNameEnum {
     ConfigServerCommand = 'Config Server Command',
     ConfigSchemaCommand = 'Config Schema Command',
     CreatePlaylistCommand = 'Create Playlist Command',
+    ShowPlayListCommand = 'Show Playlist Command',
+    DeletePlaylistCommand = 'Delete Playlist Command',
+    UpdatePlaylistCommand = 'Update Playlist Command',
 }

@@ -41,6 +41,10 @@ export class UpdateServerConfig {
             update.adminRole = config.adminRole;
         }
 
+        if (config.language) {
+            update.language = config.language;
+        }
+
         return this.serverService.update(serverId, update);
     }
 }

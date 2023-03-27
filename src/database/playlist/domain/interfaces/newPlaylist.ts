@@ -3,4 +3,5 @@ export interface NewPlaylist {
     songsId: string;
     privatePl: boolean;
     author: string;
+    createdBy: string;
 }

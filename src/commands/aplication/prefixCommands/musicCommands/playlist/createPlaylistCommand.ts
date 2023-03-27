@@ -49,6 +49,7 @@ export class CreatePlaylistCommand extends Command {
         this.playlistData = {
             privatePl: true,
             author: event.author.id,
+            createdBy: event.author.id,
             name: '',
             songsId: '',
         };
@@ -333,7 +334,7 @@ export class CreatePlaylistCommand extends Command {
     }
 
     private async saveChanges(event: Message, playlistOptionsMessage: Message) {
-        // if no name of no songs can't be saved
+        // if no name or no songs can't be saved
         if (await this.checkPlaylistData(event)) {
             return this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
         }
@@ -346,14 +347,22 @@ export class CreatePlaylistCommand extends Command {
             name: this.playlistData.name,
             privatePl: this.playlistData.privatePl,
             author: this.playlistData.author,
+            createdBy: this.playlistData.createdBy,
         });
 
         // Error if the author has a playlist with the same name
         if (response === ErrorEnum.BadRequest) {
-            event.channel.send(
+            const errorMessage = await event.channel.send(
                 'No se pueden tener nombres de palylist repetidos por autor, ya sea usuario o servidor.',
             );
+            setTimeout(() => {
+                errorMessage.delete().catch(() => '');
+            }, 10000);
+
+            this.createPlaylistOptionsMessage(event, playlistOptionsMessage);
+            return;
         } else {
+            // if all ok
             const userName = event.member?.nickname ?? event.author.username;
             event.channel.send(
                 `Playlist: ${this.playlistData.name}  -  Author: ${
