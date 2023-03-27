@@ -1,4 +1,4 @@
-import { Service } from '../../shared/infrastructure/Service';
+import { Service } from '../../shared/infrastructure/service';
 import { NewSong } from '../domain/interface/newSong';
 import { Song } from '../domain/songEntity';
 

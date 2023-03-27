@@ -1,5 +1,5 @@
 import { UpdateResult } from 'typeorm';
-import { Service } from '../../shared/infrastructure/Service';
+import { Service } from '../../shared/infrastructure/service';
 import { DiscordServer } from '../domain/discordServerEntity';
 import { NewServer } from '../domain/interfaces/newServer';
 import { UpdateServer } from '../domain/interfaces/updateServer';
