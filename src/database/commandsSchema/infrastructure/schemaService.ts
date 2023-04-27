@@ -1,4 +1,4 @@
-import { Service } from '../../shared/infrastructure/Service';
+import { Service } from '../../shared/infrastructure/service';
 import { NewSchema } from '../domain/interfaces/newSchema';
 import { Schema } from '../domain/schemaEntity';
 
