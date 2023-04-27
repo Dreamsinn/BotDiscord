@@ -6,7 +6,7 @@
         "@discordjs/builders": "^0.12.0",
         "@discordjs/opus": "^0.7.0",
         "@discordjs/rest": "^0.3.0",
-        "@discordjs/voice": "^0.9.0",
+        "@discordjs/voice": "^0.16.0",
         "@types/node": "^18.11.18",
         "@types/qs": "^6.9.7",
         "@types/spotify-api": "^0.0.19",
