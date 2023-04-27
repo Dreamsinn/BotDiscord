@@ -70,7 +70,7 @@ describe('Sever Test', () => {
         expect(response.updatedBy).toBe(null);
     });
 
-    it('CreateServer with lenguage undefined', async () => {
+    it('CreateServer with language undefined', async () => {
         const guildId2 = '123456';
         const response = await databaseMock.server.create(guildId2, guildName, undefined, undefined);
 

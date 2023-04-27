@@ -3,6 +3,8 @@ import { GuildMember, Message, MessageOptions, Role } from 'discord.js';
 import { ConnectionHandler } from '../../../../database/connectionHandler';
 import { ServerConfig } from '../../../../database/server/domain/interfaces/serverConfig';
 import { ErrorEnum } from '../../../../database/shared/domain/enums/ErrorEnum';
+import { Languages, languagesArray } from '../../../../languages/languageService';
+import { typeIsLanguage } from '../../../../languages/utils/typeIsLanguage';
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../domain/enums/buttonStyleEnum';
 import { ConfigServerButtonsEnum } from '../../../domain/enums/configServerButtonsEnum';
@@ -12,6 +14,7 @@ import { MessageCreator } from '../../utils/messageCreator';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 import { AddUserToBlacklist } from './addUserToBlacklist';
 import { ChangeAdminRole } from './changeAdminRole';
+import { ChangeLanguage } from './changeLanguage';
 import { ChangePrefix } from './changePrefix';
 import { RemoveUserFromBlacklist } from './removeUserFromBlacklist';
 
@@ -28,6 +31,7 @@ export class ConfigServerCommand extends Command {
         prefix: string;
         adminRole: string;
         blackList: string[];
+        language: Languages;
     };
 
     private blacklistUsers: {
@@ -76,6 +80,7 @@ export class ConfigServerCommand extends Command {
                 prefix: serverData.prefix,
                 adminRole: await this.fetchAdminRole(event, serverData.adminRole),
                 blackList: blackList,
+                language: typeIsLanguage(serverData.language) ? serverData.language : 'en',
             };
 
             await this.createConfigOptionMessage(event);
@@ -160,6 +165,7 @@ export class ConfigServerCommand extends Command {
                         value:
                             `> **Prefijo:** ${this.serverConfig.prefix}\n` +
                             `> **AdminRole:** ${this.serverConfig.adminRole}\n` +
+                            `> **Language:** ${this.serverConfig.language}\n` +
                             `> **BlackList:** ${this.mapBlackListUserNames(serverBlacklist)}`,
                         inline: false,
                     },
@@ -168,6 +174,7 @@ export class ConfigServerCommand extends Command {
                         value:
                             `> **Prefijo:** ${this.configChanges.prefix ?? ''}\n` +
                             `> **AdminRole:** ${this.configAdminRoleName}\n` +
+                            `> **Language:** ${this.configChanges.language}\n` +
                             `> **BlackList:** \n` +
                             `> -  *Añadidos*: ${this.mapBlackListUserNames(configBlacklist.added)}\n` +
                             `> -  *Quitados*: ${this.mapBlackListUserNames(configBlacklist.removed)}`,
@@ -196,6 +203,11 @@ export class ConfigServerCommand extends Command {
                         style: ButtonsStyleEnum.BLUE,
                         label: 'Remove from blacklist',
                         custom_id: ConfigServerButtonsEnum.REMOVEBLACKLIST,
+                    },
+                    {
+                        style: ButtonsStyleEnum.BLUE,
+                        label: 'Change lenguage',
+                        custom_id: ConfigServerButtonsEnum.LANGUAGE,
                     },
                 ],
                 [
@@ -232,35 +244,31 @@ export class ConfigServerCommand extends Command {
                 return;
             }
 
-            // si close button, save changes
+            collector.stop();
+
+            // if close button, save changes
             if (collected.customId === ConfigServerButtonsEnum.CLOSE) {
-                collector.stop();
-                await this.saveChanges(event);
-                return;
+                return this.saveChanges(event);
             }
 
             if (collected.customId === ConfigServerButtonsEnum.PREFIX) {
-                collector.stop();
-                await this.changePrefix(event, configOptionMessage);
-                return;
+                return this.changePrefix(event, configOptionMessage);
             }
 
             if (collected.customId === ConfigServerButtonsEnum.ADMINROLE) {
-                collector.stop();
-                await this.changeAdminRole(event, configOptionMessage);
-                return;
+                return this.changeAdminRole(event, configOptionMessage);
             }
 
             if (collected.customId === ConfigServerButtonsEnum.ADDBLACKLIST) {
-                collector.stop();
-                await this.addUserToBlacklist(event, configOptionMessage);
-                return;
+                return this.addUserToBlacklist(event, configOptionMessage);
             }
 
             if (collected.customId === ConfigServerButtonsEnum.REMOVEBLACKLIST) {
-                collector.stop();
-                await this.removeUserFromBlacklist(event, configOptionMessage);
-                return;
+                return this.removeUserFromBlacklist(event, configOptionMessage);
+            }
+
+            if (collected.customId === ConfigServerButtonsEnum.LANGUAGE) {
+                return this.changeLenguage(event, configOptionMessage);
             }
         });
 
@@ -417,6 +425,29 @@ export class ConfigServerCommand extends Command {
         return;
     }
 
+    private async changeLenguage(event: Message, configOptionMessage: Message): Promise<void> {
+        this.usersUsingACommand.updateUserList(event.author.id);
+
+        const response = await new ChangeLanguage().call(event, languagesArray);
+
+        this.usersUsingACommand.removeUserList(event.author.id);
+
+        if (response instanceof Error) {
+            await event.channel.send(
+                `Ha habido un error, se guardaran los cambios efectuados hasta el momento`,
+            );
+            await this.saveChanges(event);
+            return;
+        }
+
+        if (response && this.serverConfig.language !== response.language) {
+            this.configChanges.language = response.language;
+        }
+
+        await this.createConfigOptionMessage(event, configOptionMessage);
+        return;
+    }
+
     private async saveChanges(event: Message): Promise<void> {
         // check if ther is any change
         if (!this.isSaveNeeded()) {
@@ -461,10 +492,15 @@ export class ConfigServerCommand extends Command {
             this.createNewBlacklist();
         }
 
+        if (!this.configChanges.language) {
+            this.configChanges.language = this.serverConfig.language;
+        }
+
         if (
             this.configChanges.adminRole === this.serverConfig.adminRole &&
             this.configChanges.prefix === this.serverConfig.prefix &&
-            this.configChanges.blackList === this.serverConfig.blackList
+            this.configChanges.blackList === this.serverConfig.blackList &&
+            this.configChanges.language === this.serverConfig.language
         ) {
             return false;
         }
