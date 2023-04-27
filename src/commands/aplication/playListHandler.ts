@@ -254,6 +254,12 @@ export class PlayListHandler {
     }
 
     private musicEventListener(): void {
+        // const start = new Date()
+        // this.player.on("debug", (status: any) => {
+        //     console.log('\x1b[32m' + status + '\x1b[37m')
+        //     const secondsFromStart = ((new Date().getTime() - start.getTime()) / 1000).toFixed()
+        //     console.log(secondsFromStart + 's')
+        // })
         this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
             if (this.isDisplay.active) {
                 this.sendPlayListDataToDisplay();

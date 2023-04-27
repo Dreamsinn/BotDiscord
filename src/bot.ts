@@ -22,7 +22,9 @@ export class Bot {
             console.log('Discord conection ready!');
         });
 
-        // this.client.on("debug", console.log)
+        // this.client.on("debug", (status: any) => {
+        //     console.log('\x1B[34m' + status + '\x1b[37m')
+        // })
 
         // Login to Discord with your client's token
         await this.client.login(process.env.TOKEN);
