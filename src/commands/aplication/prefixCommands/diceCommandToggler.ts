@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
-import { DiceCommand } from '../diceCommand';
+import { DiceCommand } from '../non-prefixCommands/diceCommand';
 
 export class DiceCommandToggler extends Command {
     public async call(

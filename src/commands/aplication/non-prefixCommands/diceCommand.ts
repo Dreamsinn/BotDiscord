@@ -1,8 +1,8 @@
 import { Message, MessageOptions } from 'discord.js';
-import { Command } from '../domain/interfaces/Command';
-import { CommandSchema } from '../domain/interfaces/commandSchema';
-import { rollSymbol, SuccessesSymbol } from '../domain/interfaces/successesSymbol';
-import { MessageCreator } from './utils/messageCreator';
+import { Command } from '../../domain/interfaces/Command';
+import { CommandSchema } from '../../domain/interfaces/commandSchema';
+import { rollSymbol, SuccessesSymbol } from '../../domain/interfaces/successesSymbol';
+import { MessageCreator } from '../utils/messageCreator';
 
 export class DiceCommand extends Command {
     public isDiceCommandActive = false;

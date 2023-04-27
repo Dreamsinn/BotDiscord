@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { Command } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
-import { ReplyCommand } from '../replyCommand';
+import { ReplyCommand } from '../non-prefixCommands/replyCommand';
 
 export class ReplyCommandToggler extends Command {
     public async call(

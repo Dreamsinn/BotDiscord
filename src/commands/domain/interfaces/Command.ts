@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
-import { DiceCommand } from '../../aplication/diceCommand';
-import { ReplyCommand } from '../../aplication/replyCommand';
+import { DiceCommand } from '../../aplication/non-prefixCommands/diceCommand';
+import { ReplyCommand } from '../../aplication/non-prefixCommands/replyCommand';
 import { CheckAdminRole } from '../../aplication/utils/checkAdminRole';
 import { CoolDown } from '../../aplication/utils/coolDown';
 import { CommandSchema } from './commandSchema';

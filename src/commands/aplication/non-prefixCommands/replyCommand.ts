@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
-import { Command } from '../domain/interfaces/Command';
-import { CommandSchema } from '../domain/interfaces/commandSchema';
-import { MessageCreator } from './utils/messageCreator';
+import { Command } from '../../domain/interfaces/Command';
+import { CommandSchema } from '../../domain/interfaces/commandSchema';
+import { MessageCreator } from '../utils/messageCreator';
 
 export class ReplyCommand extends Command {
     public isReplyCommandActive = false;

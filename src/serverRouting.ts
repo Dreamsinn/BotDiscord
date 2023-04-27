@@ -1,6 +1,6 @@
 import { Message, Role } from 'discord.js';
-import { DiceCommand } from './commands/aplication/diceCommand';
-import { ReplyCommand } from './commands/aplication/replyCommand';
+import { DiceCommand } from './commands/aplication/non-prefixCommands/diceCommand';
+import { ReplyCommand } from './commands/aplication/non-prefixCommands/replyCommand';
 import { UsersUsingACommand } from './commands/aplication/utils/usersUsingACommand';
 import { CommandHandler } from './commands/commandHandler';
 import { CommandSchema } from './commands/domain/interfaces/commandSchema';
@@ -195,6 +195,7 @@ export class ServerRouting {
             event.guild!.id,
             event.guild!.name,
             adminRoleId,
+            process.env.LANGUAGE,
         );
         const server = await this.mapServerData(newDiscordServer);
         this.serverList.push(server);
