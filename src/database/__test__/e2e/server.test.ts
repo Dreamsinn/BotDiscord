@@ -119,7 +119,7 @@ describe('Sever Test', () => {
         expect(updatedServer?.createdAt.getTime() !== updatedServer?.updatedAt.getTime()).toBe(true);
     });
 
-    it('UpdateServerConfig with voiden config boject', async () => {
+    it('UpdateServerConfig with voiden config object', async () => {
         const update: ServerConfig = {};
         const userId = '123456';
 

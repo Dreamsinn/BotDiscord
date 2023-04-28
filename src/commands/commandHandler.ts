@@ -80,7 +80,6 @@ export class CommandHandler {
         }
 
         for (const route of this.routes.routeList) {
-            console.log(this.language);
             if (route.schema.aliases.find((alias) => alias === command.toLowerCase())) {
                 console.log('Guild: ', event.guild?.name);
                 console.log('Command: ', route.schema.command);

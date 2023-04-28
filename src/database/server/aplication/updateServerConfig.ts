@@ -15,7 +15,7 @@ export class UpdateServerConfig {
         userId: string,
         config: ServerConfig,
     ): Promise<UpdateResult | ErrorEnum> {
-        if (!config.adminRole && !config.blackList && !config.prefix) {
+        if (!config.adminRole && !config.blackList && !config.prefix && !config.language) {
             return ErrorEnum.BadRequest;
         }
 
