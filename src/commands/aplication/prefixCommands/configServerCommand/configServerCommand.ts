@@ -219,8 +219,13 @@ export class ConfigServerCommand extends Command {
                 [
                     {
                         style: ButtonsStyleEnum.RED,
-                        label: `${discordEmojis.x} Close / Guardar`,
+                        label: `${discordEmojis.x} Close`,
                         custom_id: ConfigServerButtonsEnum.CLOSE,
+                    },
+                    {
+                        style: ButtonsStyleEnum.GRENN,
+                        label: `${discordEmojis.save} Save`,
+                        custom_id: ConfigServerButtonsEnum.SAVE,
                     },
                 ],
             ],
@@ -252,8 +257,11 @@ export class ConfigServerCommand extends Command {
 
             collector.stop();
 
-            // if close button, save changes
             if (collected.customId === ConfigServerButtonsEnum.CLOSE) {
+                return;
+            }
+
+            if (collected.customId === ConfigServerButtonsEnum.SAVE) {
                 return this.saveChanges(event);
             }
 

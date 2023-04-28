@@ -4,5 +4,6 @@ export const enum ConfigServerButtonsEnum {
     REMOVEBLACKLIST = 'Remove from blacklist',
     ADMINROLE = 'adminrole',
     LANGUAGE = 'language',
-    CLOSE = 'configClose/Save',
+    CLOSE = 'configClose',
+    SAVE = 'configSave',
 }

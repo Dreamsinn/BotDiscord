@@ -117,10 +117,17 @@ export class ConfigSchemaCommand extends Command {
                         label: 'Change admin needed',
                         custom_id: ConfigSchemaCommandButtonsEnum.ADMINONLY,
                     },
+                ],
+                [
                     {
                         style: ButtonsStyleEnum.RED,
-                        label: `${discordEmojis.x} Close / Guardar`,
+                        label: `${discordEmojis.x} Close`,
                         custom_id: ConfigSchemaCommandButtonsEnum.CLOSE,
+                    },
+                    {
+                        style: ButtonsStyleEnum.GRENN,
+                        label: `${discordEmojis.save} Save`,
+                        custom_id: ConfigSchemaCommandButtonsEnum.SAVE,
                     },
                 ],
             ],
@@ -141,23 +148,22 @@ export class ConfigSchemaCommand extends Command {
                 return;
             }
 
-            // si close button, save changes
+            collector.stop();
+
             if (collected.customId === ConfigSchemaCommandButtonsEnum.CLOSE) {
-                collector.stop();
-                await this.saveChanges(event);
                 return;
+            }
+
+            if (collected.customId === ConfigSchemaCommandButtonsEnum.SAVE) {
+                return this.saveChanges(event);
             }
 
             if (collected.customId === ConfigSchemaCommandButtonsEnum.ADMINONLY) {
-                collector.stop();
-                await this.changeAdminOnly(event, configSchemaListMessage);
-                return;
+                return this.changeAdminOnly(event, configSchemaListMessage);
             }
 
             if (collected.customId === ConfigSchemaCommandButtonsEnum.COOLDOWN) {
-                collector.stop();
-                await this.changeCoolDown(event, configSchemaListMessage);
-                return;
+                return this.changeCoolDown(event, configSchemaListMessage);
             }
         });
 
