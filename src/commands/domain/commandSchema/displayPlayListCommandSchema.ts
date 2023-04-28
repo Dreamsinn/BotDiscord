@@ -9,10 +9,11 @@ const DisplayPlayListCommandSchema: CommandSchema = {
     coolDown: 0,
     adminOnly: false,
     description:
-        'Crea un hilo con el nombre de Displayer y envia un mensaje a dicho hilo.\n' +
+        'Crea un hilo con el nombre de Displayer y envía un mensaje a dicho hilo.\n' +
         'En este mensaje se tienen disponibles casi todos los comandos de música mediante botones.\n' +
-        'En caso que se quiera cerrar el display se puede usar **display kill**.\n' +
-        `Para más información, en el ${discordEmojis.readme} del display.`,
+        'En caso de que se quiera cerrar el display se puede usar `{{prefix}}display kill`.\n' +
+        'Solo puede haber un displayer abierto por servidor. \n' +
+        `**Para más información, en el botón ${discordEmojis.readme} del display.**`,
     command: CommandsNameEnum.DisplayPlaylistCommand,
     category: CommandsCategoryEnum.MUSIC,
 };

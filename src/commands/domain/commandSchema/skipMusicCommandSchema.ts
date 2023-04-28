@@ -3,7 +3,7 @@ import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const SkipMusicCommandSchema: CommandSchema = {
-    name: 'Pasar musica',
+    name: 'Pasar música',
     aliases: ['skip', 's'],
     coolDown: 0,
     adminOnly: false,

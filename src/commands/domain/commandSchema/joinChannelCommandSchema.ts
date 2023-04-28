@@ -7,7 +7,8 @@ const JoinChannelCommandSchema: CommandSchema = {
     aliases: ['j', 'join'],
     coolDown: 0,
     adminOnly: false,
-    description: 'Conecta el bot al canal de voz del usuario, requiere estar en un canal de voz',
+    description:
+        'Conecta el bot al canal de voz en el que se encuentra el usuario, **requiere estar en un canal de voz.**',
     command: CommandsNameEnum.JoinChannelCommand,
     category: CommandsCategoryEnum.MUSIC,
 };

@@ -6,13 +6,13 @@ const ReplyCommandTogglerSchema: CommandSchema = {
     name: 'Activador del commando de respuestas',
     aliases: ['reply'],
     coolDown: 0,
-    adminOnly: false,
+    adminOnly: true,
     description:
         'Activa o desactiva el comando de respuestas.\n' +
         'Este comando debe ir seguido de `on` u `off`\n' +
         `Ejemplo: reply on`,
     command: CommandsNameEnum.ReplyCommandToggler,
-    category: CommandsCategoryEnum.PREFIX,
+    category: CommandsCategoryEnum.DEV,
 };
 
 export { ReplyCommandTogglerSchema };

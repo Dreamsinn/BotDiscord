@@ -9,7 +9,7 @@ const DisconnectCommandSchema: CommandSchema = {
     adminOnly: false,
     description:
         'Desconecta el bot del canal de voz.\n' +
-        'Para que vuelva a sonar requerira añadir una nueva cancion o reconectar el bot mediante el comando join.',
+        'Para que vuelva a sonar requerirá añadir una nueva canción o reconectar el bot mediante el comando `{{prefix}}join`.',
     command: CommandsNameEnum.DisconnectCommand,
     category: CommandsCategoryEnum.MUSIC,
 };

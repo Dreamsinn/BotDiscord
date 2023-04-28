@@ -9,7 +9,7 @@ const DiceCommandTogglerSchema: CommandSchema = {
     adminOnly: false,
     description:
         'Activa o desactiva el comando de dados.\n' +
-        'Este comando debe ir seguido de `on` u `off`\n' +
+        'Este comando debe ir seguido de `on` u `off` \n' +
         `Ejemplo: dice on`,
     command: CommandsNameEnum.DiceCommandToggler,
     category: CommandsCategoryEnum.PREFIX,

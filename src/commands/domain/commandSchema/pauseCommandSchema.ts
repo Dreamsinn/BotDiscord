@@ -7,7 +7,7 @@ const PauseCommandSchema: CommandSchema = {
     aliases: ['pause', 'stop'],
     coolDown: 0,
     adminOnly: false,
-    description: 'Si esta sonando una cancion la parara, si esta parada la activara de nuevo.',
+    description: 'Si está sonando lo parara, si está parado lo activara de nuevo.',
     command: CommandsNameEnum.PauseCommand,
     category: CommandsCategoryEnum.MUSIC,
 };

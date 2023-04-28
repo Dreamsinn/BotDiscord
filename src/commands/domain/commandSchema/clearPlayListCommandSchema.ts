@@ -7,7 +7,7 @@ const ClearPlayListCommandSchema: CommandSchema = {
     aliases: ['c', 'clear'],
     coolDown: 0,
     adminOnly: false,
-    description: `Borra todas las canciones de la lista.`,
+    description: `Este comando borra todas las canciones de la playlist.`,
     command: CommandsNameEnum.ClearPlaylistCommand,
     category: CommandsCategoryEnum.MUSIC,
 };

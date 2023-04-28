@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import { Languages } from '../../../languages/languageService';
 import { DiceCommand } from '../../aplication/non-prefixCommands/diceCommand';
 import { ReplyCommand } from '../../aplication/non-prefixCommands/replyCommand';
 import { CheckAdminRole } from '../../aplication/utils/checkAdminRole';
@@ -11,6 +12,7 @@ interface CommandProps {
     replyCommand?: ReplyCommand;
     schemaList?: SchemaDictionary;
     prefix?: string;
+    language?: Languages;
 }
 
 export abstract class Command {

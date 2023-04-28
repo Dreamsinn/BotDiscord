@@ -8,10 +8,12 @@ export const ConfigServerCommandSchema: CommandSchema = {
     coolDown: 0,
     adminOnly: false,
     description:
-        'Este comando permite cambiar el prefijo en el servidor, el admin role del bot, y añadir y quitar usuarios a la blacklist.\n' +
-        'Hay que tener en cuenta:\n' +
-        '> - Durante el proceso el usuario no podrá usar otros comandos.' +
-        '> - Solo puede haber un admin role.',
+        'Este comando permite gestionar los siguientes apartados del bot en el servidor: \n' +
+        '> - Prefijo \n' +
+        '> - Admin role (solo puede haber un admin role) \n' +
+        '> - Blacklist \n' +
+        '> - Idioma \n\n' +
+        '__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__',
     command: CommandsNameEnum.ConfigServerCommand,
     category: CommandsCategoryEnum.PREFIX,
 };
