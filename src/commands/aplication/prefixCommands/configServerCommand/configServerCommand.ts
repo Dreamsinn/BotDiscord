@@ -29,7 +29,10 @@ export class ConfigServerCommand extends Command {
     private configAdminRoleName: string;
     private serverConfig: {
         prefix: string;
-        adminRole: string;
+        adminRole: {
+            name: string;
+            id: string;
+        };
         blackList: string[];
         language: Languages;
     };
@@ -78,7 +81,10 @@ export class ConfigServerCommand extends Command {
 
             this.serverConfig = {
                 prefix: serverData.prefix,
-                adminRole: await this.fetchAdminRole(event, serverData.adminRole),
+                adminRole: {
+                    name: await this.fetchAdminRole(event, serverData.adminRole),
+                    id: serverData.adminRole,
+                },
                 blackList: blackList,
                 language: typeIsLanguage(serverData.language) ? serverData.language : 'en',
             };
@@ -164,7 +170,7 @@ export class ConfigServerCommand extends Command {
                         name: 'Configuración actual: ',
                         value:
                             `> **Prefijo:** ${this.serverConfig.prefix}\n` +
-                            `> **AdminRole:** ${this.serverConfig.adminRole}\n` +
+                            `> **AdminRole:** ${this.serverConfig.adminRole.name}\n` +
                             `> **Language:** ${this.serverConfig.language}\n` +
                             `> **BlackList:** ${this.mapBlackListUserNames(serverBlacklist)}`,
                         inline: false,
@@ -174,7 +180,7 @@ export class ConfigServerCommand extends Command {
                         value:
                             `> **Prefijo:** ${this.configChanges.prefix ?? ''}\n` +
                             `> **AdminRole:** ${this.configAdminRoleName}\n` +
-                            `> **Language:** ${this.configChanges.language}\n` +
+                            `> **Language:** ${this.configChanges.language ?? ''}\n` +
                             `> **BlackList:** \n` +
                             `> -  *Añadidos*: ${this.mapBlackListUserNames(configBlacklist.added)}\n` +
                             `> -  *Quitados*: ${this.mapBlackListUserNames(configBlacklist.removed)}`,
@@ -297,7 +303,8 @@ export class ConfigServerCommand extends Command {
             return;
         }
 
-        if (response) {
+        // if response, and the actual prefix is not the same as the chosen one
+        if (response && this.serverConfig.prefix !== response.prefix) {
             this.configChanges.prefix = response.prefix;
         }
 
@@ -322,14 +329,21 @@ export class ConfigServerCommand extends Command {
         }
 
         if (response) {
-            // this constant is for the user see the name
-            this.configAdminRoleName = response.adminRole;
-
-            // this for save the id to db
+            // find role id
             const adminRole = event.guild?.roles.cache.find(
                 (role: Role) => role.name === response.adminRole,
             );
-            this.configChanges.adminRole = adminRole?.id;
+
+            // if actual adminRole is not the same than the chosen one
+            if (this.serverConfig.adminRole.id !== adminRole?.id) {
+                console.log('actual =', this.serverConfig.adminRole.id);
+                console.log('new =', adminRole?.id);
+
+                this.configChanges.adminRole = adminRole?.id;
+
+                // this constant is to shwo the user name in the message
+                this.configAdminRoleName = response.adminRole;
+            }
         }
 
         await this.createConfigOptionMessage(event, configOptionMessage);
@@ -352,17 +366,22 @@ export class ConfigServerCommand extends Command {
         }
 
         if (response) {
-            // if it is not already in add array put it in
-            const addedUserBlacklist = this.blacklistUsers.configBlacklist.added;
-            if (!addedUserBlacklist.some((user: BlackListUser) => user.name === response.user.name)) {
-                addedUserBlacklist.push(response.user);
-            }
-
             // if it is in remove array, remove it from ir
             const removedUssersToBlacklist = this.blacklistUsers.configBlacklist.removed;
             this.blacklistUsers.configBlacklist.removed = removedUssersToBlacklist.filter(
                 (user: BlackListUser) => user.name !== response.user.name,
             );
+
+            // if the user is not already in blacklist in DB
+            if (!this.serverConfig.blackList.some((user: string) => user === response.user.id)) {
+                // if it is not already in add array put it in
+                const addedUserBlacklist = this.blacklistUsers.configBlacklist.added;
+                if (
+                    !addedUserBlacklist.some((user: BlackListUser) => user.name === response.user.name)
+                ) {
+                    addedUserBlacklist.push(response.user);
+                }
+            }
         }
 
         await this.createConfigOptionMessage(event, configOptionMessage);
@@ -474,36 +493,23 @@ export class ConfigServerCommand extends Command {
     }
 
     private isSaveNeeded(): boolean {
-        if (!this.configChanges.adminRole) {
-            this.configChanges.adminRole = this.serverConfig.adminRole;
-        }
-
-        if (!this.configChanges.prefix) {
-            this.configChanges.prefix = this.serverConfig.prefix;
-        }
-
         if (
-            !this.blacklistUsers.configBlacklist.added.length &&
-            !this.blacklistUsers.configBlacklist.removed.length
+            this.blacklistUsers.configBlacklist.added.length ||
+            this.blacklistUsers.configBlacklist.removed.length
         ) {
-            this.configChanges.blackList = this.serverConfig.blackList;
-        } else {
-            // it is here becosue if not, i should check again if added or remove has length
             this.createNewBlacklist();
+            return true;
         }
-
-        if (!this.configChanges.language) {
-            this.configChanges.language = this.serverConfig.language;
-        }
+        //  prefix siendo igual
 
         if (
-            this.configChanges.adminRole === this.serverConfig.adminRole &&
-            this.configChanges.prefix === this.serverConfig.prefix &&
-            this.configChanges.blackList === this.serverConfig.blackList &&
-            this.configChanges.language === this.serverConfig.language
+            !this.configChanges.adminRole &&
+            !this.configChanges.prefix &&
+            !this.configChanges.language
         ) {
             return false;
         }
+
         return true;
     }
 

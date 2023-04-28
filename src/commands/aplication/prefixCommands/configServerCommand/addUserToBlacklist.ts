@@ -83,9 +83,7 @@ export class AddUserToBlacklist {
                 color: 'WHITE',
                 title: 'Añadir usuario a blackList',
                 description:
-                    'Escriba:\n' +
-                    '- El **nombre**, **alias** o **id** del usuario\n' +
-                    '- **x** para cancelar',
+                    'Escriba:\n' + '- El **nombre** o **alias** del usuario\n' + '- **x** para cancelar',
                 author: {
                     name: `${userName}`,
                     iconURL: `${event.member?.user.displayAvatarURL()}`,
