@@ -336,9 +336,6 @@ export class ConfigServerCommand extends Command {
 
             // if actual adminRole is not the same than the chosen one
             if (this.serverConfig.adminRole.id !== adminRole?.id) {
-                console.log('actual =', this.serverConfig.adminRole.id);
-                console.log('new =', adminRole?.id);
-
                 this.configChanges.adminRole = adminRole?.id;
 
                 // this constant is to shwo the user name in the message
@@ -500,7 +497,6 @@ export class ConfigServerCommand extends Command {
             this.createNewBlacklist();
             return true;
         }
-        //  prefix siendo igual
 
         if (
             !this.configChanges.adminRole &&
