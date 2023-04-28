@@ -1,5 +1,5 @@
 import { Message, Role } from 'discord.js';
-import { PaginatedMessage } from '../../utils/paginatedMessage';
+import { PaginatedMessage } from '../../../utils/paginatedMessage';
 
 type Response = {
     adminRole: string;

@@ -1,6 +1,6 @@
 import { GuildMember, Message } from 'discord.js';
-import { MessageCreator } from '../../utils/messageCreator';
-import { PaginatedMessage } from '../../utils/paginatedMessage';
+import { MessageCreator } from '../../../utils/messageCreator';
+import { PaginatedMessage } from '../../../utils/paginatedMessage';
 
 interface BlackListUser {
     id: string;

@@ -10,8 +10,8 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { SchemaDictionary } from '../../../domain/interfaces/schemaDictionary';
 import { MessageCreator } from '../../utils/messageCreator';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
-import { ChangeAdminOnly } from './changeAdminOnly';
-import { ChangeCoolDown } from './changeCoolDown';
+import { ChangeAdminOnly } from './utils/changeAdminOnly';
+import { ChangeCoolDown } from './utils/changeCoolDown';
 
 interface CooldownModifiedSchema {
     command: CommandsNameEnum;

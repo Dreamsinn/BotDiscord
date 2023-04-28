@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
-import { UnionToArray } from '../../../../languages/interfaces/unionToArray';
-import { Languages } from '../../../../languages/languageService';
-import { typeIsLanguage } from '../../../../languages/utils/typeIsLanguage';
-import { PaginatedMessage } from '../../utils/paginatedMessage';
+import { UnionToArray } from '../../../../../languages/interfaces/unionToArray';
+import { Languages } from '../../../../../languages/languageService';
+import { typeIsLanguage } from '../../../../../languages/utils/typeIsLanguage';
+import { PaginatedMessage } from '../../../utils/paginatedMessage';
 
 type response = {
     language: Languages;

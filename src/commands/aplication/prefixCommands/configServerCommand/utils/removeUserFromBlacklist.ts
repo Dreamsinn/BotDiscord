@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { PaginatedMessage } from '../../utils/paginatedMessage';
+import { PaginatedMessage } from '../../../utils/paginatedMessage';
 
 type Response = {
     user: string;

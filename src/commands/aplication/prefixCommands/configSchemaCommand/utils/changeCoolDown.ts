@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
-import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { MessageCreator } from '../../utils/messageCreator';
-import { PaginatedMessage } from '../../utils/paginatedMessage';
+import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
+import { MessageCreator } from '../../../utils/messageCreator';
+import { PaginatedMessage } from '../../../utils/paginatedMessage';
 
 interface Response {
     newCoolDown: number;

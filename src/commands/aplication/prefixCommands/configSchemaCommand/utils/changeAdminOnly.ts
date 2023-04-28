@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
-import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { PaginatedMessage } from '../../utils/paginatedMessage';
+import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
+import { PaginatedMessage } from '../../../utils/paginatedMessage';
 
 export class ChangeAdminOnly {
     public async call(

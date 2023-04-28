@@ -1,5 +1,5 @@
 import { Message, MessageOptions } from 'discord.js';
-import { MessageCreator } from '../../utils/messageCreator';
+import { MessageCreator } from '../../../utils/messageCreator';
 
 type Response = {
     prefix: string;

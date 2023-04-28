@@ -12,11 +12,11 @@ import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { MessageCreator } from '../../utils/messageCreator';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
-import { AddUserToBlacklist } from './addUserToBlacklist';
-import { ChangeAdminRole } from './changeAdminRole';
-import { ChangeLanguage } from './changeLanguage';
-import { ChangePrefix } from './changePrefix';
-import { RemoveUserFromBlacklist } from './removeUserFromBlacklist';
+import { AddUserToBlacklist } from './utils/addUserToBlacklist';
+import { ChangeAdminRole } from './utils/changeAdminRole';
+import { ChangeLanguage } from './utils/changeLanguage';
+import { ChangePrefix } from './utils/changePrefix';
+import { RemoveUserFromBlacklist } from './utils/removeUserFromBlacklist';
 
 interface BlackListUser {
     id: string;
