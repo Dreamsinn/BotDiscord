@@ -355,7 +355,7 @@ export class UpdatePlaylistCommand extends Command {
                     },
                     {
                         style: ButtonsStyleEnum.GRENN,
-                        label: 'Save',
+                        label: `${discordEmojis.save} Save`,
                         custom_id: UpdatePlaylistButtonsEnum.SAVE,
                     },
                 ],

@@ -150,7 +150,7 @@ export class CreatePlaylistCommand extends Command {
                     },
                     {
                         style: ButtonsStyleEnum.GRENN,
-                        label: 'Save',
+                        label: `${discordEmojis.save} Save`,
                         custom_id: CreatePlaylistButtonsEnum.SAVE,
                     },
                 ],
