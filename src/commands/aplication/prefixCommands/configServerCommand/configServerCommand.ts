@@ -303,9 +303,13 @@ export class ConfigServerCommand extends Command {
             return;
         }
 
-        // if response, and the actual prefix is not the same as the chosen one
-        if (response && this.serverConfig.prefix !== response.prefix) {
+        // writen this way because if (response && this.serverConfig.prefix !== response.prefix), if i change the prefix i can't the one in serverConfig again
+        if (response) {
             this.configChanges.prefix = response.prefix;
+
+            if (this.serverConfig.prefix === response.prefix) {
+                this.configChanges.prefix = undefined;
+            }
         }
 
         // no response
@@ -334,12 +338,15 @@ export class ConfigServerCommand extends Command {
                 (role: Role) => role.name === response.adminRole,
             );
 
-            // if actual adminRole is not the same than the chosen one
-            if (this.serverConfig.adminRole.id !== adminRole?.id) {
-                this.configChanges.adminRole = adminRole?.id;
+            // writen this way because if (this.serverConfig.adminRole.id !== adminRole?.id) and in ther i set adminId and name, if i change the adminRole for a new one, i can't get the one in serverConfig again
+            this.configChanges.adminRole = adminRole?.id;
+            // this constant is to shwo the user name in the message
+            this.configAdminRoleName = response.adminRole;
 
-                // this constant is to shwo the user name in the message
-                this.configAdminRoleName = response.adminRole;
+            // if actual adminRole is not the same than the chosen one
+            if (this.serverConfig.adminRole.id === adminRole?.id) {
+                this.configChanges.adminRole = undefined;
+                this.configAdminRoleName = '';
             }
         }
 
