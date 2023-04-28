@@ -10,6 +10,8 @@ import { Routes } from './commands/routes';
 import { Schema } from './database/commandsSchema/domain/schemaEntity';
 import { ConnectionHandler } from './database/connectionHandler';
 import { DiscordServer } from './database/server/domain/discordServerEntity';
+import { Languages } from './languages/languageService';
+import { typeIsLanguage } from './languages/utils/typeIsLanguage';
 
 export class ServerRouting {
     private serverList: Server[] = [];
@@ -34,19 +36,25 @@ export class ServerRouting {
 
     private async mapServerData(discordServer: DiscordServer): Promise<Server> {
         const blackList: string[] = discordServer.blackList ? discordServer.blackList.split(',') : [];
+        const language = typeIsLanguage(discordServer.language) ? discordServer.language : 'en';
 
         const server: Server = {
             id: discordServer.id,
             prefix: discordServer.prefix,
             adminRole: discordServer.adminRole,
+            language: language,
             blackList,
-            instance: await this.newCommandHandlerInstance(discordServer.id, discordServer.prefix),
+            instance: await this.newCommandHandlerInstance(
+                discordServer.id,
+                discordServer.prefix,
+                language,
+            ),
         };
 
         return server;
     }
 
-    private async newCommandHandlerInstance(serverId: string, prefix: string) {
+    private async newCommandHandlerInstance(serverId: string, prefix: string, language: Languages) {
         const schemaDictionary = await this.getSchemas(this.commandSchemaList, serverId);
 
         const diceCommand = new DiceCommand();
@@ -60,6 +68,7 @@ export class ServerRouting {
             routes,
             usersUsingACommand,
             prefix,
+            language,
             schemaDictionary,
         );
     }
@@ -143,7 +152,10 @@ export class ServerRouting {
         const newServerData = await this.databaseConnection.server.getById(serverId);
         if (serverToUpdate && newServerData) {
             serverToUpdate.prefix = newServerData.prefix;
-            serverToUpdate.instance.resetPrefix(newServerData.prefix);
+            serverToUpdate.language = typeIsLanguage(newServerData.language)
+                ? newServerData.language
+                : serverToUpdate.language;
+            serverToUpdate.instance.resetServerData(newServerData.prefix, serverToUpdate.language);
             serverToUpdate.adminRole = newServerData.adminRole;
             serverToUpdate.blackList = newServerData.blackList ? newServerData.blackList.split(',') : [];
 

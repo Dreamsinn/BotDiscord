@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import { Languages } from '../languages/languageService';
 import { DiceCommand } from './aplication/non-prefixCommands/diceCommand';
 import { ReplyCommand, replyCommandOptions } from './aplication/non-prefixCommands/replyCommand';
 import { ConfigSchemaCommand } from './aplication/prefixCommands/configSchemaCommand/configSchemaCommand';
@@ -17,6 +18,7 @@ export class CommandHandler {
         private routes: Routes,
         private usersUsingACommand: UsersUsingACommand,
         private prefix: string,
+        private language: Languages,
         private schemaDictionary: SchemaDictionary,
     ) {}
 
@@ -66,6 +68,7 @@ export class CommandHandler {
     }
 
     private async isPrefixCommand(event: Message, adminRole: string) {
+        console.log('lenguage =', this.language);
         let command: string;
         if (event.content.includes(' ')) {
             // si el mensaje tiene ' ', mirar command antes del ' '
@@ -77,6 +80,7 @@ export class CommandHandler {
         }
 
         for (const route of this.routes.routeList) {
+            console.log(this.language);
             if (route.schema.aliases.find((alias) => alias === command.toLowerCase())) {
                 console.log('Guild: ', event.guild?.name);
                 console.log('Command: ', route.schema.command);
@@ -114,8 +118,9 @@ export class CommandHandler {
         }
     }
 
-    public resetPrefix(newPrefix: string) {
+    public resetServerData(newPrefix: string, newLanguage: Languages) {
         this.prefix = newPrefix;
+        this.language = newLanguage;
     }
 
     public resetSchemas(newSchemas: SchemaDictionary) {

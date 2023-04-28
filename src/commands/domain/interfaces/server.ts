@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import { Languages } from '../../../languages/languageService';
 import { SchemaDictionary } from './schemaDictionary';
 
 export interface Server {
@@ -7,10 +8,11 @@ export interface Server {
     adminRole: string;
     blackList: string[];
     instance: CommandsHandler;
+    language: Languages;
 }
 
 abstract class CommandsHandler {
     abstract isCommand(event: Message, adminRole: string): void;
-    abstract resetPrefix(newPrefix: string): void;
+    abstract resetServerData(newPrefix: string, newLanguage: Languages): void;
     abstract resetSchemas(newSchemas: SchemaDictionary): void;
 }
