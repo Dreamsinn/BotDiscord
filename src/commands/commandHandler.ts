@@ -103,6 +103,7 @@ export class CommandHandler {
                     return route.command.call(event, adminRole, schema, {
                         prefix: this.prefix,
                         schemaList: this.schemaDictionary,
+                        language: this.language,
                     });
                 }
 

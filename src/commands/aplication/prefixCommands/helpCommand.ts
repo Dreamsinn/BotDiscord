@@ -1,4 +1,5 @@
 import { EmbedFieldData, Message, MessageOptions } from 'discord.js';
+import ls, { Languages } from '../../../languages/languageService';
 import { CommandsCategoryEnum } from '../../domain/enums/commandsCategoryEnum';
 import { HelpEmbedsTitlesEnum } from '../../domain/enums/helpEmbedsTitlesEnum';
 import { Command } from '../../domain/interfaces/Command';
@@ -16,6 +17,7 @@ import { UsersUsingACommand } from '../utils/usersUsingACommand';
 export class HelpCommand extends Command {
     private commandList: HelpCommandList;
     private prefix: string;
+    private language: Languages;
     private commandSchemaList: CommandSchema[];
 
     constructor(private usersUsingACommand: UsersUsingACommand) {
@@ -26,7 +28,7 @@ export class HelpCommand extends Command {
         event: Message,
         adminRole: string,
         helpSchema: CommandSchema,
-        props: { prefix: string; schemaList: SchemaDictionary },
+        props: { prefix: string; schemaList: SchemaDictionary; language: Languages },
     ): Promise<void> {
         if (this.roleAndCooldownValidation(event, helpSchema, adminRole)) {
             return;
@@ -34,6 +36,7 @@ export class HelpCommand extends Command {
 
         this.commandSchemaList = Object.values(props.schemaList);
         this.prefix = props.prefix;
+        this.language = props.language;
 
         // creamos embed para elejir entre comandos de prfijo o no prefijo, y lo enviamos
         const output = this.createTypeOfCommandsEmbed();
@@ -126,6 +129,7 @@ export class HelpCommand extends Command {
             if (typeOfEmbed === HelpEmbedsTitlesEnum.TYPES) {
                 letterCondition = ['x', 'X'].includes(reaction.content);
             }
+
             // los embeds con la descripcion de comandos no tienen condicion numerica, porque no tienen que elegir nada llegado el punto
             if (
                 Object.values(HelpEmbedsTitlesEnum).some((enumsTitle: string) =>
@@ -149,20 +153,19 @@ export class HelpCommand extends Command {
                 const collectedMessage = collected.map((e: Message) => e);
 
                 collectedMessage[0].delete();
-                // quitamos usuario de la lista de no poder usar comandos
-                this.usersUsingACommand.removeUserList(event.author.id);
 
                 // Si se responde una X se borra el mensaje
                 if (['x', 'X'].includes(collectedMessage[0].content)) {
                     event.reply('Help Command ha expirado');
-
                     return;
                 }
+
                 // ir al embed anterior
                 if (['b', 'B', 'back', 'BACK'].includes(collectedMessage[0].content)) {
                     this.findPreviousEmbed(helpEmbed, event, typeOfEmbed);
                     return;
                 }
+
                 // ir al siguiente embed
                 this.findNextEmbedToCreate(collectedMessage[0], helpEmbed, event);
                 return;
@@ -237,7 +240,7 @@ export class HelpCommand extends Command {
             let response: { output: MessageOptions; type: HelpEmbedsTitlesEnum | CommandsCategoryEnum };
             if (previousEmbed.methodData) {
                 response = {
-                    output: this.createSubTypeCommandsEmbed(previousEmbed.methodData),
+                    output: await this.createSubTypeCommandsEmbed(previousEmbed.methodData),
                     type: previousEmbed.prevType,
                 };
             } else {
@@ -246,7 +249,8 @@ export class HelpCommand extends Command {
                     type: previousEmbed.prevType,
                 };
             }
-            return await helpEmbed
+
+            await helpEmbed
                 .edit(response.output)
                 .then((previousEmbedMessage) =>
                     this.messageResponseListener(previousEmbedMessage, event, response.type),
@@ -306,12 +310,15 @@ export class HelpCommand extends Command {
 
         if (nextEmbed) {
             response = {
-                output: this.createSubTypeCommandsEmbed(nextEmbed.methodData),
+                output: await this.createSubTypeCommandsEmbed(nextEmbed.methodData),
                 type: nextEmbed.nextType,
             };
         } else {
             // default - commandEmbed
-            const commandEmbed = this.createCommandEmbed(helpEmbed, Number(collectedMessage.content));
+            const commandEmbed = await this.createCommandEmbed(
+                helpEmbed,
+                Number(collectedMessage.content),
+            );
             if (!commandEmbed) {
                 return;
             }
@@ -320,7 +327,6 @@ export class HelpCommand extends Command {
                 type: commandEmbed.category,
             };
         }
-
         await helpEmbed
             .edit(response.output)
             .then((nextEmbedMessage) =>
@@ -332,7 +338,9 @@ export class HelpCommand extends Command {
         return;
     }
 
-    private createSubTypeCommandsEmbed(commandCategory: SubTypeCommandData): MessageOptions {
+    private async createSubTypeCommandsEmbed(
+        commandCategory: SubTypeCommandData,
+    ): Promise<MessageOptions> {
         const embedFileds: EmbedFieldData[] = [];
         let index = 0;
         if (commandCategory.title === HelpEmbedsTitlesEnum.PREFIX) {
@@ -343,10 +351,11 @@ export class HelpCommand extends Command {
                 inline: false,
             });
         }
-        commandCategory.commandArray.forEach((commandData: HelpCommandData) => {
+
+        for (const commandData of commandCategory.commandArray) {
             index += 1;
-            embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
-        });
+            embedFileds.push(await this.mapTypeCommandsFieldsData(commandData, index));
+        }
 
         const output = new MessageCreator({
             embed: {
@@ -369,14 +378,21 @@ export class HelpCommand extends Command {
         return output;
     }
 
-    private mapTypeCommandsFieldsData(commandData: HelpCommandData, index: number): EmbedFieldData {
-        return { name: '\u200b', value: `**${index} - ${commandData.name}**`, inline: false };
+    private async mapTypeCommandsFieldsData(
+        commandData: HelpCommandData,
+        index: number,
+    ): Promise<EmbedFieldData> {
+        return {
+            name: '\u200b',
+            value: `**${index} - ${await ls.t(this.language, commandData.name)}**`,
+            inline: false,
+        };
     }
 
-    private createCommandEmbed(
+    private async createCommandEmbed(
         helpEmbed: Message,
         selected: number,
-    ): { output: MessageOptions; category: CommandsCategoryEnum } | void {
+    ): Promise<void | { output: MessageOptions; category: CommandsCategoryEnum }> {
         const selectedCommand = this.findSelectedCommand(helpEmbed, selected);
         if (!selectedCommand) {
             return;
@@ -407,14 +423,19 @@ export class HelpCommand extends Command {
                 rol = 'Requerido, pero no se ha definido el nombre del rol.';
             }
         }
-
         const embed: EmbedOptions = {
             color: '#BFFF00',
-            title: selectedCommand.name,
+            title: await ls.t(this.language, selectedCommand.name),
             description,
             fields: [
                 { name: 'Alias', value: aliases, inline: false },
-                { name: 'Descripcion', value: selectedCommand.description, inline: false },
+                {
+                    name: 'Descripcion',
+                    value: await ls.t(this.language, selectedCommand.description, {
+                        prefix: this.prefix,
+                    }),
+                    inline: false,
+                },
                 { name: 'Cooldown', value: `${selectedCommand.coolDown} ms`, inline: false },
                 { name: 'Rol requerido', value: rol, inline: false },
             ],
@@ -452,9 +473,18 @@ export class HelpCommand extends Command {
         );
 
         if (typeCommandSelected && typeCommandSelected !== HelpEmbedsTitlesEnum.TYPES) {
-            return typeCommandDictionary[typeCommandSelected].find((commandData: HelpCommandData) =>
-                commandTitile.includes(commandData.name),
-            );
+            // this regex look for the first number in a string
+            const regex = /\d+/g;
+
+            // that number was the index + 1, so it is needed to -1
+            let number = Number(commandTitile.match(regex)![0]) - 1;
+
+            if (typeCommandSelected === HelpEmbedsTitlesEnum.PREFIX) {
+                // in case of type prefix, first option is music commands, so i have to -1 another one
+                number -= 1;
+            }
+
+            return typeCommandDictionary[typeCommandSelected][number];
         }
     }
 }
