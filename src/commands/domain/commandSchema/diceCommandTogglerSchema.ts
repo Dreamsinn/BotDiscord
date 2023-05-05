@@ -3,14 +3,15 @@ import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const DiceCommandTogglerSchema: CommandSchema = {
-    name: 'Activador del comando de dados',
+    name: 'schemas.diceToggler.name',
+    // 'Activador del comando de dados'
     aliases: ['dice', 'roll'],
     coolDown: 0,
     adminOnly: false,
-    description:
-        'Activa o desactiva el comando de dados.\n' +
-        'Este comando debe ir seguido de `on` u `off` \n' +
-        `Ejemplo: dice on`,
+    description: 'schemas.diceToggler.description',
+    // 'Activa o desactiva el comando de dados.\n' +
+    // 'Este comando debe ir seguido de `on` u `off` \n' +
+    // `Ejemplo: dice on`,
     command: CommandsNameEnum.DiceCommandToggler,
     category: CommandsCategoryEnum.PREFIX,
 };

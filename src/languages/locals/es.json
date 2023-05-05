@@ -1,1 +1,100 @@
-{}
+{
+    "schemas": {
+        "clearPlaylist": {
+            "name": "Borrar playlist",
+            "description": "Este comando borra todas las canciones de la playlist."
+        },
+        "configSchemas": {
+            "name": "Configurar esquemas",
+            "description": "Este comando permite gestionar el cooldown y si el comando necesita admin role (true/false) en los comandos. \nHay que tener en cuenta: \n> - El tiempo de cd es en milisegundos. \n> - Respecto el admin role, al seleccionar un comando este automáticamente cambiara al contrario de como esta. Ej: si está en true, se pondrá en false. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        },
+        "configServer": {
+            "name": "Configurar el servidor",
+            "description": "Este comando permite gestionar los siguientes apartados del bot en el servidor: \n> - Prefijo \n> - Admin role (solo puede haber un admin role) \n> - Blacklist \n> - Idioma \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        },
+        "createPlaylist": {
+            "name": "Crear playlist",
+            "description": "Este comando permite crear playlist tanto personal como para el servidor. \nHay que tener en cuenta: \n> - Un servidor o un usuario no pueden tener 2 playlists con el mismo nombre. \n> - Para crear una playlist para el servidor hay que añadir `guild` al comando. \n> - Crear una playlist para el servidor requiere obligatoriamente tener admin role.\n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        },
+        "deletePlaylist": {
+            "name": "Eliminar playlist",
+            "description": "Este comando permite eliminar una playlists creada por uno mismo o del servidor. \nPara eliminar una playlist del servidor hay que añadir  `guild` al comando. Se requiere obligatoriamente tener admin role. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        },
+        "diceCommand": {
+            "name": "Tirar dados",
+            "description": "**Requiere de un comando de prefijo previo para ser activado:** \n- `{{prefix}}roll on` o `{{prefix}}dice on`, de la misma forma, off para desactivarla. \n\nUsos: \n- Tirar dados: escribir en el chat YDX o DX, siendo Y e X números, lanza Y dados de X caras. También permite tirar más  de un dado a la vez, separado por ','. \n Ejemplo: 2D5, 4D3 \n\n- Número de aciertos: se puede añadir a una tirada < o <= o > o >= y un número, para ver el número de aciertos de dicha tirada. No permite más de una tirada a la vez. \n Ejemplo: 4D6 > 3."
+        },
+        "diceToggler": {
+            "name": "Activador del comando de dados",
+            "description": "Activa o desactiva el comando de dados.\nEste comando debe ir seguido de `on` u `off` \nEjemplo: dice on"
+        },
+        "disconnectCommand": {
+            "name": "Desconectar bot del canal de voz",
+            "description": "Desconecta el bot del canal de voz. \nPara que vuelva a sonar requerirá añadir una nueva canción o reconectar el bot mediante el comando `{{prefix}}join`."
+        },
+        "displayerCommand": {
+            "name": "Mostrar display",
+            "description": "Crea un hilo con el nombre de Displayer y envía un mensaje a dicho hilo. \nEn este mensaje se tienen disponibles casi todos los comandos de música mediante botones. \nEn caso de que se quiera cerrar el display se puede usar `{{prefix}}display kill`.\nSolo puede haber un displayer abierto por servidor. \nPara más información, en el botón **README** del display."
+        },
+        "helpCommand": {
+            "name": "Ayuda",
+            "description": "Explica el uso y los alias de los comandos. Muestra los cooldowns y si requieren admin role. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        },
+        "joinChannel": {
+            "name": "Conectar bot al canal de voz",
+            "description": "Conecta el bot al canal de voz en el que se encuentra el usuario, **requiere estar en un canal de voz.**"
+        },
+        "logCommand": {
+            "name": "PlayList Status Log",
+            "description": ""
+        },
+        "loopCommand": {
+            "name": "Loop playlist",
+            "description": "Este comando activa y desactiva el modo loop. Si está activo lo desactiva, y viceversa. \nCuando este activo la canción que acabe de sonar se pondrá la última de la playlist."
+        },
+        "pauseCommand": {
+            "name": "Pausar canción",
+            "description": "Si está sonando lo parara, si está parado lo activara de nuevo."
+        },
+        "playCommand": {
+            "name": "Play",
+            "description": "Este comando debe ir seguido de la canción que se quiere escuchar. \nSe lae puede pasar como argumento: \n\u200b\n-**Nombre de la cancion**: se puede buscar como si se estuviera buscando en la misma plataforma y elegir una de las primeras 9 opciones. \n>  > __Durante este proceso no se podrán usar otros comandos.__ \n\u200b\n-**Url de la canción de Youtube**: tanto de móvil como de pc. \n\u200b\n-**Url playlist de Youtube**: En esta búsqueda hay que tener en cuenta: \n>  > Si se estaba escuchando una canción de la playlist se preguntara si se desea escuchar la canción o la playlist. \n>  > En el caso anterior, si se falla a conseguir la información de la playlist sonará la canción del enlace. \n>  > Los 'Mix' que hace youtube en funcion de gustos personales muchas veces dan error. \n\u200b\n-**Url de la canción de Spotify**. \n\u200b\n-**Url playlist de Spotify**.\n"
+        },
+        "playlistCommand": {
+            "name": "Ver playlist actual",
+            "description": "Muestra una lista paginada de todas las canciones, con su duración, de la playlist que está sonando."
+        },
+        "playNowCommand": {
+            "name": "Cambiar la canción que está sonando",
+            "description": "Cambia la primera canción de la playlist. \nAl ejecutar el comando aparecerá una lista paginada de la playlist, y el bot leerá el siguiente mensaje. \nSe deberá escribir el número de la canciones que se quiera que suena. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        },
+        "removeSongs": {
+            "name": "Eliminar canciones de la playlist",
+            "description": "Elimina n canciones de la playlist. \nAl ejecutar el comando aparecerá una lista paginada de la playlist, y el bot leerá el siguiente mensaje. \nSe deberá escribir el número de las canciones que se quieran borrar separadas por ','. \n\nEl bot solo leerá los mensajes bien escritos, es decir, mensajes con números más grandes que el número de canciones, con letras, etc, serán ignorados. \nEjemplo: 1, 6, 23 \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        },
+        "replyCommand": {
+            "name": "Comando de respuesta",
+            "description": "Requiere de un comando de prefijo para ser activado: \n- `{{prefix}}reply on`, de la misma forma, off para desactivarla. \nEste comando cuando este activo leerá todos los mensajes y al encontrar un alias ara una chanza."
+        },
+        "replyToggler": {
+            "name": "Activador del commando de respuestas",
+            "description": "Activa o desactiva el comando de respuestas. \nEste comando debe ir seguido de `on` u `off` \nEjemplo: reply on"
+        },
+        "showPlaylist": {
+            "name": "Ver playlists guardadas en la base de datos",
+            "description": "Este comando permite ver las playlist creadas por uno mismo o las del servidor. \nPara ver una playlist del servidor hay que añadir  `guild` al comando. Se requiere obligatoriamente tener admin role. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        },
+        "shuffleCommand": {
+            "name": "Barajar el orden de las canciones",
+            "description": "Aleatoriza el orden de las canciones de la playlist."
+        },
+        "skipMusic": {
+            "name": "Pasar música",
+            "description": "Pasa la canción que esté sonando"
+        },
+        "updatePlaylist": {
+            "name": "Modificar playlist",
+            "description": "Este comando permite modificar playlists ya creadas. \nHay que tener en cuenta: \n> - Un servidor o un usuario no pueden tener 2 playlists con el mismo nombre. \n> - Para modificar una playlist del servidor hay que añadir  `guild` al comando. \n> - Modificar una playlist del servidor requiere obligatoriamente tener admin role.\n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+        }
+    }
+}

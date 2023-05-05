@@ -3,12 +3,13 @@ import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const PlayListCommandSchema: CommandSchema = {
-    name: 'Ver playlist actual',
+    name: 'schemas.playlistCommand.name',
+    // Ver playlist actual
     aliases: ['playlist', 'pl'],
     coolDown: 0,
     adminOnly: false,
-    description:
-        'Muestra una lista paginada de todas las canciones, con su duración, de la playlist que está sonando.',
+    description: 'schemas.playlistCommand.description',
+    // 'Muestra una lista paginada de todas las canciones, con su duración, de la playlist que está sonando.',
     command: CommandsNameEnum.PlaylistCommand,
     category: CommandsCategoryEnum.MUSIC,
 };
