@@ -3,7 +3,7 @@ import { CreateSchema } from './aplication/createSchema';
 import { GetAllSchemasByGuildId } from './aplication/getAllByGuildIdSchema';
 import { UpdateSchema } from './aplication/updateSchema';
 import { UpdateSchemaProps } from './domain/interfaces/updateShcemaProps';
-import { Schema } from './domain/schemaEntity';
+import { SchemaDTO } from './domain/schemaDTO';
 import { SchemaService } from './infrastructure/schemaService';
 
 export class SchemaController {
@@ -20,15 +20,15 @@ export class SchemaController {
     public create(
         commandSchemaList: CommandSchema | CommandSchema[],
         guildId: string,
-    ): Promise<Schema[]> {
+    ): Promise<SchemaDTO[]> {
         return this.createSchema.call(commandSchemaList, guildId);
     }
 
-    public getAllByGuildId(guildId: string): Promise<Schema[]> {
+    public getAllByGuildId(guildId: string): Promise<SchemaDTO[]> {
         return this.getAllSchemasByGuildId.call(guildId);
     }
 
-    public update(props: UpdateSchemaProps): Promise<Schema[]> {
+    public update(props: UpdateSchemaProps): Promise<SchemaDTO[]> {
         return this.updateSchema.call(props);
     }
 }

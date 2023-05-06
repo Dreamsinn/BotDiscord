@@ -7,7 +7,7 @@ import { CommandSchema } from './commands/domain/interfaces/commandSchema';
 import { SchemaDictionary } from './commands/domain/interfaces/schemaDictionary';
 import { Server } from './commands/domain/interfaces/server';
 import { Routes } from './commands/routes';
-import { Schema } from './database/commandsSchema/domain/schemaEntity';
+import { SchemaDTO } from './database/commandsSchema/domain/schemaDTO';
 import { ConnectionHandler } from './database/connectionHandler';
 import { ServerDTO } from './database/server/domain/serverDTO';
 import { Languages } from './languages/languageService';
@@ -74,7 +74,7 @@ export class ServerRouting {
         serverId: string,
     ): Promise<SchemaDictionary> {
         // serach all schemas in db by serverId and return
-        const schemaList: Schema[] = await this.databaseConnection.schema.getAllByGuildId(serverId);
+        const schemaList: SchemaDTO[] = await this.databaseConnection.schema.getAllByGuildId(serverId);
 
         if (!schemaList.length) {
             // if none create them and return SchemaDictionary object
@@ -103,11 +103,11 @@ export class ServerRouting {
     }
 
     private findLackingSchemas(
-        schemaList: Schema[],
+        schemaList: SchemaDTO[],
         commandSchemaList: CommandSchema[],
     ): CommandSchema[] {
         const lackingSchema = commandSchemaList.filter((commandSchema: CommandSchema) => {
-            return !schemaList.some((schema: Schema) => {
+            return !schemaList.some((schema: SchemaDTO) => {
                 return commandSchema.command === schema.command;
             });
         });
@@ -115,11 +115,11 @@ export class ServerRouting {
         return lackingSchema;
     }
 
-    private convertSchemaToCommandSchema(schemaList: Schema[]): SchemaDictionary {
-        const commandSchemaList: CommandSchema[] = schemaList.map((schema: Schema) => {
+    private convertSchemaToCommandSchema(schemaList: SchemaDTO[]): SchemaDictionary {
+        const commandSchemaList: CommandSchema[] = schemaList.map((schema: SchemaDTO) => {
             const commandSchema: CommandSchema = {
                 name: schema.name,
-                aliases: schema.aliases.split(','),
+                aliases: schema.aliases,
                 coolDown: schema.coolDown,
                 adminOnly: schema.adminOnly,
                 description: schema.description,

@@ -1,5 +1,6 @@
 import { CommandSchema } from '../../../commands/domain/interfaces/commandSchema';
 import { NewSchema } from '../domain/interfaces/newSchema';
+import { SchemaDTO } from '../domain/schemaDTO';
 import { Schema } from '../domain/schemaEntity';
 import { SchemaService } from '../infrastructure/schemaService';
 
@@ -9,14 +10,20 @@ export class CreateSchema {
         this.schemaService = schemaService;
     }
 
-    async call(commandSchema: CommandSchema | CommandSchema[], guildId: string): Promise<Schema[]> {
+    async call(commandSchema: CommandSchema | CommandSchema[], guildId: string): Promise<SchemaDTO[]> {
+        let schemaList: NewSchema[];
+
         if (commandSchema instanceof Array) {
-            const schemaList = this.mapCommandSchemaArray(commandSchema, guildId);
-            return this.schemaService.create(schemaList);
+            schemaList = this.mapCommandSchemaArray(commandSchema, guildId);
+        } else {
+            schemaList = this.mapCommandSchemaArray([commandSchema], guildId);
         }
 
-        const schemaList = this.mapCommandSchemaArray([commandSchema], guildId);
-        return this.schemaService.create(schemaList);
+        const createdSchemaArray = await this.schemaService.create(schemaList);
+
+        return createdSchemaArray.map((schema: Schema) => {
+            return new SchemaDTO(schema);
+        });
     }
 
     private mapCommandSchemaArray(commandSchemaList: CommandSchema[], guildId: string): NewSchema[] {

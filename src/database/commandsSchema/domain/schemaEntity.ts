@@ -1,4 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from 'typeorm';
 import { CommandsNameEnum } from '../../../commands/domain/enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../../../commands/domain/enums/commandsCategoryEnum';
 
@@ -30,6 +37,9 @@ export class Schema extends BaseEntity {
 
     @Column()
     category: CommandsCategoryEnum;
+
+    @CreateDateColumn()
+    createdAt: Date;
 
     @UpdateDateColumn()
     updatedAt: Date;

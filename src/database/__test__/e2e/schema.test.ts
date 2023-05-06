@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { CommandsNameEnum } from '../../../commands/domain/enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../../../commands/domain/enums/commandsCategoryEnum';
 import { UpdateSchemaProps } from '../../commandsSchema/domain/interfaces/updateShcemaProps';
+import { SchemaDTO } from '../../commandsSchema/domain/schemaDTO';
 import { Schema } from '../../commandsSchema/domain/schemaEntity';
 import { ConnectionHandler } from '../../connectionHandler';
 import { DatabaseConnectionMock } from '../dataSourceMock';
@@ -24,8 +25,6 @@ describe('Schema Test', () => {
 
     const guildId = '12341234';
 
-    let createdAt: Date;
-
     beforeAll(async () => {
         await dataSource.initialize().catch((err) => {
             console.error('Error during testing Data Source initialization', err);
@@ -42,14 +41,13 @@ describe('Schema Test', () => {
         const schemaList = commandsSchemasListMock.slice(0, -1);
         const response = await databaseMock.schema.create(schemaList, guildId);
 
-        createdAt = response[0].updatedAt;
-
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Schema).toBe(true);
+        expect(response[0]).toBeInstanceOf(SchemaDTO);
         expect(response.length).toBe(schemaList.length);
         expect(response[0].guildId).toBe(guildId);
-        expect(response[0].aliases).toEqual('schema,list');
+        expect(response[0].aliases).toEqual(['schema', 'list']);
         expect(response[0].category).toBe(CommandsCategoryEnum.MUSIC);
+        expect(response[0].createdAt.getTime() === response[5].createdAt.getTime()).toBe(true);
         expect(response[0].updatedAt.getTime() === response[5].updatedAt.getTime()).toBe(true);
     });
 
@@ -58,7 +56,7 @@ describe('Schema Test', () => {
         const response = await databaseMock.schema.create(schema, guildId);
 
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Schema).toBe(true);
+        expect(response[0]).toBeInstanceOf(SchemaDTO);
         expect(response.length).toBe(1);
     });
 
@@ -66,10 +64,10 @@ describe('Schema Test', () => {
         const response = await databaseMock.schema.getAllByGuildId(guildId);
 
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Schema).toBe(true);
+        expect(response[0]).toBeInstanceOf(SchemaDTO);
         expect(response.length).toBe(commandsSchemasListMock.length);
         expect(response[0].guildId).toBe(guildId);
-        expect(response[0].aliases).toEqual('schema,list');
+        expect(response[0].aliases).toEqual(['schema', 'list']);
         expect(response[0].category).toBe(CommandsCategoryEnum.MUSIC);
     });
 
@@ -95,12 +93,12 @@ describe('Schema Test', () => {
         const response = await databaseMock.schema.update(updateProps);
 
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Schema).toBe(true);
+        expect(response[0]).toBeInstanceOf(SchemaDTO);
         expect(response.length).toBe(2);
         expect(response[0].command).toBe(CommandsNameEnum.DiceCommand);
         expect(response[0].coolDown).toBe(555);
         expect(response[1].adminOnly).toBe(true);
         expect(response[1].updatedBy).toBe(updateProps.userId);
-        expect(response[0].updatedAt.getTime() !== createdAt.getTime()).toBe(true);
+        expect(response[0].updatedAt.getTime() !== response[0].createdAt.getTime()).toBe(true);
     });
 });
