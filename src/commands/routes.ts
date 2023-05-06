@@ -14,6 +14,7 @@ import { PauseCommand } from './aplication/prefixCommands/musicCommands/pauseCom
 import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
 import { CreatePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/createPlaylistCommand';
 import { DeletePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/deletePlaylistCommand';
+import { PlayPlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/playPlaylistCommand';
 import { ShowPlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/showPlaylistCommand';
 import { UpdatePlaylistCommand } from './aplication/prefixCommands/musicCommands/playlist/updatePlaylistCommand';
 import { PlayListCommand } from './aplication/prefixCommands/musicCommands/playListCommand';
@@ -182,6 +183,14 @@ export class Routes {
                 this.findMusicByYouTubeURL,
                 this.findMusicBySpotifySongURL,
                 this.findMusicBySpotifyPlaylistURL,
+            ),
+        },
+        {
+            schema: this.schemaDictionary['Play Playlist Command'],
+            command: new PlayPlaylistCommand(
+                this.playListHandler,
+                this.databaseConnection,
+                this.usersUsingACommand,
             ),
         },
     ];

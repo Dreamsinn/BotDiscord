@@ -68,6 +68,10 @@
             "name": "Cambiar la canción que está sonando",
             "description": "Cambia la primera canción de la playlist. \nAl ejecutar el comando aparecerá una lista paginada de la playlist, y el bot leerá el siguiente mensaje. \nSe deberá escribir el número de la canciones que se quiera que suena. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
         },
+        "playPlaylist": {
+            "name": "Play playlist creadas",
+            "description": "Este comando permite reproducir playlists ya creadas. \nMuestra una lista paginada de las tus playlists y se reproduce la elegida. \nHay que tener en cuenta: \n> - Para elegir una playlist del servidor hay que añadir `guild` al comando. \n> - Elegir una playlist del servidor requiere obligatoriamente tener admin role.\n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__',"
+        },
         "removeSongs": {
             "name": "Eliminar canciones de la playlist",
             "description": "Elimina n canciones de la playlist. \nAl ejecutar el comando aparecerá una lista paginada de la playlist, y el bot leerá el siguiente mensaje. \nSe deberá escribir el número de las canciones que se quieran borrar separadas por ','. \n\nEl bot solo leerá los mensajes bien escritos, es decir, mensajes con números más grandes que el número de canciones, con letras, etc, serán ignorados. \nEjemplo: 1, 6, 23 \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
