@@ -49,7 +49,8 @@ describe('Sever Test', () => {
         expect(response.adminRole).toEqual(adminRoleId);
         expect(response.language).toBe(language);
         expect(typeIsLanguage(response.language)).toBe(true);
-        expect(response.blackList).toBe(null);
+        expect(response.blackList).toBeInstanceOf(Array);
+        expect(response.blackList.length).toBe(0);
         expect(response.createdAt instanceof Date).toBe(true);
         expect(String(response.createdAt) === String(response.updatedAt)).toBe(true);
         expect(response.updatedBy).toBe(null);
@@ -66,8 +67,8 @@ describe('Sever Test', () => {
         expect(response.name).toEqual(guildName2);
         expect(response.prefix).toEqual(process.env.PREFIX);
         expect(response.language).toEqual('en');
-        expect(response.adminRole).toEqual(null);
-        expect(response.blackList).toBe(null);
+        expect(response.adminRole).toBe(null);
+        expect(response.blackList).toBeInstanceOf(Array);
         expect(response.createdAt instanceof Date).toBe(true);
         expect(String(response.createdAt) === String(response.updatedAt)).toBe(true);
         expect(response.updatedBy).toBe(null);
