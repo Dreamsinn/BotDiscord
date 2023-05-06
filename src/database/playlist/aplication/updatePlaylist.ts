@@ -30,7 +30,7 @@ export class UpdatePlaylist {
                 name,
                 playlist.author,
             );
-            console.log({ playlistWithSameName });
+
             if (playlistWithSameName) {
                 return ErrorEnum.BadRequest;
             }
