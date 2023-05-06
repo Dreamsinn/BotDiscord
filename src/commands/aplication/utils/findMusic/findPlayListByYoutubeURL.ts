@@ -17,8 +17,7 @@ export class FindPlayListByYoutubeURL extends PlayCommand {
     async call(event: Message, url: string): Promise<SongData | SongData[] | void> {
         if (!url.includes('&list=')) {
             // sino se esta rerpoduciendo un video
-            this.notStartedPlayListUrl(event, url);
-            return;
+            return this.notStartedPlayListUrl(event, url);
         }
 
         // si esta reproduciendo un video
@@ -124,6 +123,7 @@ export class FindPlayListByYoutubeURL extends PlayCommand {
                 message.delete();
                 const playDlResponse: APIResponse<RawSong[]> =
                     await this.playDlService.getSognsInfoFromPlayList(url);
+
                 if (!playDlResponse.isError) {
                     return this.mapPlayDLPlayListData(playDlResponse.data);
                 }
