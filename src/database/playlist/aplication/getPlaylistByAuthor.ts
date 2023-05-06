@@ -1,3 +1,4 @@
+import { PlaylistDTO } from '../domain/playlistDTO';
 import { Playlist } from '../domain/playlistEntity';
 import { PlaylistService } from '../infrastructure/playlistService';
 
@@ -7,7 +8,13 @@ export class GetPlaylistByAuthor {
         this.playlistService = playlistService;
     }
 
-    public async call(author: string): Promise<Playlist[]> {
-        return this.playlistService.getByAuthor(author);
+    public async call(author: string): Promise<PlaylistDTO[]> {
+        const playlistArray: Playlist[] = await this.playlistService.getByAuthor(author);
+
+        const playlistDTOArray: PlaylistDTO[] = playlistArray.map((playlist: Playlist) => {
+            return new PlaylistDTO(playlist);
+        });
+
+        return playlistDTOArray;
     }
 }

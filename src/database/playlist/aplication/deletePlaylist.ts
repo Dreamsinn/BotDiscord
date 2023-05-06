@@ -1,5 +1,5 @@
 import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
-import { Playlist } from '../domain/playlistEntity';
+import { PlaylistDTO } from '../domain/playlistDTO';
 import { PlaylistService } from '../infrastructure/playlistService';
 
 export class DeletePlaylist {
@@ -8,11 +8,11 @@ export class DeletePlaylist {
         this.playlistService = playlistService;
     }
 
-    public async call(playlistId: string): Promise<Playlist | ErrorEnum> {
+    public async call(playlistId: string): Promise<PlaylistDTO | ErrorEnum> {
         const playlist = await this.playlistService.getById(playlistId);
 
         if (playlist) {
-            return this.playlistService.remove(playlist);
+            return new PlaylistDTO(await this.playlistService.remove(playlist));
         }
 
         return ErrorEnum.NotFound;

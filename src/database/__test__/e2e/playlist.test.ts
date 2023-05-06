@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { ConnectionHandler } from '../../connectionHandler';
 import { CreatePlaylistProps } from '../../playlist/domain/interfaces/createPlaylistProps';
+import { PlaylistDTO } from '../../playlist/domain/playlistDTO';
 import { Playlist } from '../../playlist/domain/playlistEntity';
 import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
 import { DatabaseConnectionMock } from '../dataSourceMock';
@@ -43,13 +44,13 @@ describe('Playlist Test', () => {
         };
         const response = await databaseMock.playlist.create(playlist);
 
-        if (!(response instanceof Playlist)) {
+        if (!(response instanceof PlaylistDTO)) {
             // in theory should not go this way
             forceJestError('Playlist', ErrorEnum);
         } else {
-            expect(response instanceof Playlist).toBe(true);
+            expect(response).toBeInstanceOf(PlaylistDTO);
             expect(response.privatePl).toBe(playlist.privatePl);
-            expect(response.songsId).toBe(String(playlist.songsId));
+            expect(response.songsId).toEqual(playlist.songsId);
             expect(response.author === response.createdBy).toBe(true);
         }
     });
@@ -70,8 +71,8 @@ describe('Playlist Test', () => {
     it('GetPlaylistByAuthorAndName', async () => {
         const response = await databaseMock.playlist.getByAuthorAndName(author, name);
 
-        expect(response instanceof Playlist).toBe(true);
-        expect(response?.songsId).toBe(String(['test id 1', 'test id 2', 'test id 3', 'test id 4']));
+        expect(response).toBeInstanceOf(PlaylistDTO);
+        expect(response?.songsId).toEqual(['test id 1', 'test id 2', 'test id 3', 'test id 4']);
         expect(response?.privatePl).toBe(true);
     });
 
@@ -92,13 +93,13 @@ describe('Playlist Test', () => {
         };
         const response = await databaseMock.playlist.update(updateData);
 
-        if (!(response instanceof Playlist)) {
+        if (!(response instanceof PlaylistDTO)) {
             // in theory should not go this way
             forceJestError('Playlist', ErrorEnum);
         } else {
-            expect(response instanceof Playlist).toBe(true);
+            expect(response).toBeInstanceOf(PlaylistDTO);
             expect(playlist?.updatedAt.getTime() === response.updatedAt.getTime()).toBe(false);
-            expect(response.songsId).toBe(String(updateData.songsId));
+            expect(response.songsId).toEqual(updateData.songsId);
             expect(response.name).toBe(updateData.name);
             expect(response.updatedBy).toBe(updateData.updatedBy);
         }
@@ -146,7 +147,7 @@ describe('Playlist Test', () => {
         const response = await databaseMock.playlist.getByAuthor(author);
 
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Playlist).toBe(true);
+        expect(response[0]).toBeInstanceOf(PlaylistDTO);
         expect(response.length).toBe(2);
     });
 

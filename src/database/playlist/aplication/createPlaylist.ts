@@ -1,6 +1,7 @@
 import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
 import { CreatePlaylistProps } from '../domain/interfaces/createPlaylistProps';
 import { NewPlaylist } from '../domain/interfaces/newPlaylist';
+import { PlaylistDTO } from '../domain/playlistDTO';
 import { Playlist } from '../domain/playlistEntity';
 import { PlaylistService } from '../infrastructure/playlistService';
 
@@ -16,7 +17,7 @@ export class CreatePlaylist {
         createdBy,
         privatePl,
         name,
-    }: CreatePlaylistProps): Promise<Playlist | ErrorEnum> {
+    }: CreatePlaylistProps): Promise<PlaylistDTO | ErrorEnum> {
         const playlist = await this.playlistService.getByNameAndAuthor(name, author);
 
         if (playlist) {
@@ -31,6 +32,8 @@ export class CreatePlaylist {
             createdBy: createdBy,
         };
 
-        return this.playlistService.create(newPlaylist);
+        const createdPlaylist: Playlist = await this.playlistService.create(newPlaylist);
+
+        return new PlaylistDTO(createdPlaylist);
     }
 }

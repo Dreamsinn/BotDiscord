@@ -6,7 +6,7 @@ import { GetPlaylistByAuthorAndName } from './aplication/getPlaylistByAuthorAndN
 import { UpdatePlaylist } from './aplication/updatePlaylist';
 import { CreatePlaylistProps } from './domain/interfaces/createPlaylistProps';
 import { UpdatePlaylistProps } from './domain/interfaces/updatePlaylistProps';
-import { Playlist } from './domain/playlistEntity';
+import { PlaylistDTO } from './domain/playlistDTO';
 import { PlaylistService } from './infrastructure/playlistService';
 
 export class PlaylistController {
@@ -24,23 +24,23 @@ export class PlaylistController {
         this.deletePlaylist = new DeletePlaylist(playlistService);
     }
 
-    public create(props: CreatePlaylistProps): Promise<Playlist | ErrorEnum> {
+    public create(props: CreatePlaylistProps): Promise<PlaylistDTO | ErrorEnum> {
         return this.createPlaylist.call(props);
     }
 
-    public getByAuthorAndName(author: string, name: string): Promise<Playlist | null> {
+    public getByAuthorAndName(author: string, name: string): Promise<PlaylistDTO | null> {
         return this.getPlaylistByAuthorAndName.call(author, name);
     }
 
-    public update(props: UpdatePlaylistProps): Promise<Playlist | ErrorEnum> {
+    public update(props: UpdatePlaylistProps): Promise<PlaylistDTO | ErrorEnum> {
         return this.updatePlaylist.call(props);
     }
 
-    public getByAuthor(author: string): Promise<Playlist[]> {
+    public getByAuthor(author: string): Promise<PlaylistDTO[]> {
         return this.getPlaylistByAuthor.call(author);
     }
 
-    public delete(playlistId: string): Promise<Playlist | ErrorEnum> {
+    public delete(playlistId: string): Promise<PlaylistDTO | ErrorEnum> {
         return this.deletePlaylist.call(playlistId);
     }
 }

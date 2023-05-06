@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { ConnectionHandler } from '../../../../../database/connectionHandler';
-import { Playlist } from '../../../../../database/playlist/domain/playlistEntity';
+import { PlaylistDTO } from '../../../../../database/playlist/domain/playlistDTO';
 import { Song } from '../../../../../database/song/domain/songEntity';
 import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
@@ -141,17 +141,16 @@ export class ShowPlaylistCommand extends Command {
     }
 
     private async mapPlaylistArray(
-        playListArray: Playlist[],
+        playListArray: PlaylistDTO[],
     ): Promise<{ playListArrayString: string[]; songDictionary: SongDictionary }> {
         const songDictionary = await this.createSongDictionary(playListArray);
 
         // numerated array of playlist created by this author
-        const playListArrayString: string[] = playListArray.map((playList: Playlist, i: number) => {
-            const songArray = playList.songsId.split(',');
-            const playlistDuration = this.calculatePlaylistDuration(songArray, songDictionary);
+        const playListArrayString: string[] = playListArray.map((playList: PlaylistDTO, i: number) => {
+            const playlistDuration = this.calculatePlaylistDuration(playList.songsId, songDictionary);
 
             return (
-                `${i + 1} - ${playList.name} 'Nº canciones:' ${songArray.length}\n` +
+                `${i + 1} - ${playList.name} 'Nº canciones:' ${playList.songsId.length}\n` +
                 `     Duración: ${playlistDuration} \n\n`
             );
         });
@@ -159,13 +158,12 @@ export class ShowPlaylistCommand extends Command {
         return { playListArrayString, songDictionary };
     }
 
-    private async createSongDictionary(playListArray: Playlist[]): Promise<SongDictionary> {
+    private async createSongDictionary(playListArray: PlaylistDTO[]): Promise<SongDictionary> {
         // this is only to make only 1 search to database, else I should make 1 search for each playlist
         const songIdInAllPlaylist: string[] = [];
 
-        playListArray.forEach((playlist: Playlist) => {
-            const songsIdArray = playlist.songsId.split(',');
-            songIdInAllPlaylist.push(...songsIdArray);
+        playListArray.forEach((playlist: PlaylistDTO) => {
+            songIdInAllPlaylist.push(...playlist.songsId);
         });
 
         // delete repeated songs
@@ -229,13 +227,11 @@ export class ShowPlaylistCommand extends Command {
 
     private async createPlayListDataMessage(
         event: Message,
-        playlistSelected: Playlist,
+        playlistSelected: PlaylistDTO,
         songDictionary: SongDictionary,
     ): Promise<Message<boolean>> {
-        const songsId = playlistSelected.songsId.split(',');
-
         // numerated array of songs in the chosen playlist
-        const songsString = songsId.map((id: string, i: number) => {
+        const songsString = playlistSelected.songsId.map((id: string, i: number) => {
             const song = songDictionary[id];
             return `${i + 1} - ${song.name} '${song.durationString}' \n`;
         });

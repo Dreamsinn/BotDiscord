@@ -1,6 +1,6 @@
 import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
 import { UpdatePlaylistProps } from '../domain/interfaces/updatePlaylistProps';
-import { Playlist } from '../domain/playlistEntity';
+import { PlaylistDTO } from '../domain/playlistDTO';
 import { PlaylistService } from '../infrastructure/playlistService';
 
 export class UpdatePlaylist {
@@ -14,7 +14,7 @@ export class UpdatePlaylist {
         name,
         songsId,
         updatedBy,
-    }: UpdatePlaylistProps): Promise<Playlist | ErrorEnum> {
+    }: UpdatePlaylistProps): Promise<PlaylistDTO | ErrorEnum> {
         if (!name && !songsId) {
             return ErrorEnum.BadRequest;
         }
@@ -47,6 +47,8 @@ export class UpdatePlaylist {
         const updatedAt = new Date();
         playlist.updatedAt = updatedAt;
 
-        return this.playlistService.update(playlist);
+        const updatedPlaylist = await this.playlistService.update(playlist);
+
+        return new PlaylistDTO(updatedPlaylist);
     }
 }

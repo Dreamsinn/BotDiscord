@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { ConnectionHandler } from '../../../../../database/connectionHandler';
-import { Playlist } from '../../../../../database/playlist/domain/playlistEntity';
+import { PlaylistDTO } from '../../../../../database/playlist/domain/playlistDTO';
 import { ErrorEnum } from '../../../../../database/shared/domain/enums/ErrorEnum';
 import { Song } from '../../../../../database/song/domain/songEntity';
 import { discordEmojis } from '../../../../domain/discordEmojis';
@@ -28,7 +28,7 @@ type SongDictionary = Map<string, SongData>;
 export class UpdatePlaylistCommand extends Command {
     private privatePlaylist: boolean;
 
-    private playlistData: Playlist;
+    private playlistData: PlaylistDTO;
 
     private newPlaylistName: string;
 
@@ -193,24 +193,22 @@ export class UpdatePlaylistCommand extends Command {
         }).call();
     }
 
-    private async mapPlaylistArray(playListArray: Playlist[]): Promise<string[]> {
+    private async mapPlaylistArray(playListArray: PlaylistDTO[]): Promise<string[]> {
         // numerated array of playlist created by this author
-        const playListArrayString: string[] = playListArray.map((playList: Playlist, i: number) => {
-            const songArray = playList.songsId.split(',');
-
+        const playListArrayString: string[] = playListArray.map((playList: PlaylistDTO, i: number) => {
             return `${i + 1} - ${playList.name} 'Nº canciones:' ${
-                playList.songsId.length ? songArray.length : 0
+                playList.songsId.length ? playList.songsId.length : 0
             }\n`;
         });
 
         return playListArrayString;
     }
 
-    private async setPlaylistData(playlist: Playlist, event: Message) {
+    private async setPlaylistData(playlist: PlaylistDTO, event: Message) {
         // once chosen, set the class variables
         this.playlistData = playlist;
 
-        const songList = await this.databaseConnection.song.getById(playlist.songsId.split(','));
+        const songList = await this.databaseConnection.song.getById(playlist.songsId);
         const songDataList = this.convetSongIntoSongData(songList);
 
         songDataList.forEach((song: SongData) => this.playlistSongs.current.set(song.songId, song));

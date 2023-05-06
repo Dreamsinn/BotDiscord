@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { ConnectionHandler } from '../../../../../database/connectionHandler';
-import { Playlist } from '../../../../../database/playlist/domain/playlistEntity';
+import { PlaylistDTO } from '../../../../../database/playlist/domain/playlistDTO';
 import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { PaginatedMessage } from '../../../utils/paginatedMessage';
@@ -91,7 +91,7 @@ export class DeletePlaylistCommand extends Command {
 
                 const deletedPl = await this.databaseConnection.playlist.delete(playlistSelected.id);
 
-                if (deletedPl instanceof Playlist) {
+                if (deletedPl instanceof PlaylistDTO) {
                     await event.channel.send(
                         `Playlist: '${deletedPl.name}' ha sido borrada correctamente.`,
                     );
@@ -149,13 +149,11 @@ export class DeletePlaylistCommand extends Command {
         }).call();
     }
 
-    private async mapPlaylistArray(playListArray: Playlist[]): Promise<string[]> {
+    private async mapPlaylistArray(playListArray: PlaylistDTO[]): Promise<string[]> {
         // numerated array of playlist created by this author
-        const playListArrayString: string[] = playListArray.map((playList: Playlist, i: number) => {
-            const songArray = playList.songsId.split(',');
-
+        const playListArrayString: string[] = playListArray.map((playList: PlaylistDTO, i: number) => {
             return `${i + 1} - ${playList.name} 'Nº canciones:' ${
-                playList.songsId.length ? songArray.length : 0
+                playList.songsId.length ? playList.songsId.length : 0
             }\n`;
         });
 
