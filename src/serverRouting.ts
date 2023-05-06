@@ -207,7 +207,7 @@ export class ServerRouting {
             event.guild!.id,
             event.guild!.name,
             adminRoleId,
-            process.env.LANGUAGE,
+            process.env.BOT_LANGUAGE,
         );
         const server = await this.mapServerData(newDiscordServer);
         this.serverList.push(server);
