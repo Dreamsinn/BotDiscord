@@ -1,4 +1,5 @@
 import { DiscordServer } from '../domain/discordServerEntity';
+import { ServerDTO } from '../domain/serverDTO';
 import { ServerService } from '../infrastructure/serverService';
 
 export class GetServerById {
@@ -7,7 +8,13 @@ export class GetServerById {
         this.serverService = serverService;
     }
 
-    public async call(serverId: string): Promise<DiscordServer | null> {
-        return await this.serverService.getById(serverId);
+    public async call(serverId: string): Promise<ServerDTO | null> {
+        const server: DiscordServer | null = await this.serverService.getById(serverId);
+
+        if (!server) {
+            return server;
+        }
+
+        return new ServerDTO(server);
     }
 }

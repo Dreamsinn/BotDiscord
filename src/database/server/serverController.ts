@@ -4,8 +4,8 @@ import { CreateServer } from './aplication/createServer';
 import { GetAllServers } from './aplication/getAllServers';
 import { GetServerById } from './aplication/getServerById';
 import { UpdateServerConfig } from './aplication/updateServerConfig';
-import { DiscordServer } from './domain/discordServerEntity';
 import { ServerConfig } from './domain/interfaces/serverConfig';
+import { ServerDTO } from './domain/serverDTO';
 import { ServerService } from './infrastructure/serverService';
 
 export class ServerController {
@@ -26,15 +26,15 @@ export class ServerController {
         serverName: string,
         adminRoleId: string | undefined,
         language: string | undefined,
-    ): Promise<DiscordServer> {
+    ): Promise<ServerDTO> {
         return this.createServer.call(serverId, serverName, adminRoleId, language);
     }
 
-    public getAll(): Promise<DiscordServer[]> {
+    public getAll(): Promise<ServerDTO[]> {
         return this.getAllServers.call();
     }
 
-    public getById(serverId: string): Promise<DiscordServer | null> {
+    public getById(serverId: string): Promise<ServerDTO | null> {
         return this.getServerById.call(serverId);
     }
 

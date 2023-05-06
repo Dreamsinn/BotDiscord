@@ -4,7 +4,6 @@ import { ConnectionHandler } from '../../../../database/connectionHandler';
 import { ServerConfig } from '../../../../database/server/domain/interfaces/serverConfig';
 import { ErrorEnum } from '../../../../database/shared/domain/enums/ErrorEnum';
 import { Languages, languagesArray } from '../../../../languages/languageService';
-import { typeIsLanguage } from '../../../../languages/utils/typeIsLanguage';
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../domain/enums/buttonStyleEnum';
 import { ConfigServerButtonsEnum } from '../../../domain/enums/configServerButtonsEnum';
@@ -73,10 +72,9 @@ export class ConfigServerCommand extends Command {
                 },
             };
 
-            let blackList: string[] = [];
-            if (serverData.blackList) {
-                blackList = serverData.blackList.split(',');
-                await this.fetchAndMapServerBlacklistUsers(event, blackList);
+            // if blacklist map it in this.blacklistUsers.serverBlacklist
+            if (serverData.blackList.length) {
+                await this.fetchAndMapServerBlacklistUsers(event, serverData.blackList);
             }
 
             this.serverConfig = {
@@ -85,8 +83,8 @@ export class ConfigServerCommand extends Command {
                     name: await this.fetchAdminRole(event, serverData.adminRole),
                     id: serverData.adminRole,
                 },
-                blackList: blackList,
-                language: typeIsLanguage(serverData.language) ? serverData.language : 'en',
+                blackList: serverData.blackList,
+                language: serverData.language,
             };
 
             await this.createConfigOptionMessage(event);

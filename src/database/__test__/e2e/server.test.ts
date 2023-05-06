@@ -1,8 +1,10 @@
 import * as dotenv from 'dotenv';
 import { DataSource, UpdateResult } from 'typeorm';
+import { typeIsLanguage } from '../../../languages/utils/typeIsLanguage';
 import { ConnectionHandler } from '../../connectionHandler';
 import { DiscordServer } from '../../server/domain/discordServerEntity';
 import { ServerConfig } from '../../server/domain/interfaces/serverConfig';
+import { ServerDTO } from '../../server/domain/serverDTO';
 import { ErrorEnum } from '../../shared/domain/enums/ErrorEnum';
 import { DatabaseConnectionMock } from '../dataSourceMock';
 
@@ -40,12 +42,13 @@ describe('Sever Test', () => {
         const language = 'es';
         const response = await databaseMock.server.create(guildId, guildName, adminRoleId, language);
 
-        expect(response).toBeInstanceOf(DiscordServer);
+        expect(response).toBeInstanceOf(ServerDTO);
         expect(response.id).toEqual(guildId);
         expect(response.name).toEqual(guildName);
         expect(response.prefix).toEqual(process.env.PREFIX);
         expect(response.adminRole).toEqual(adminRoleId);
         expect(response.language).toBe(language);
+        expect(typeIsLanguage(response.language)).toBe(true);
         expect(response.blackList).toBe(null);
         expect(response.createdAt instanceof Date).toBe(true);
         expect(String(response.createdAt) === String(response.updatedAt)).toBe(true);
@@ -58,7 +61,7 @@ describe('Sever Test', () => {
         const guildName2 = 'Test guild';
         const response = await databaseMock.server.create(guildId2, guildName2, undefined, language);
 
-        expect(response).toBeInstanceOf(DiscordServer);
+        expect(response).toBeInstanceOf(ServerDTO);
         expect(response.id).toEqual(guildId2);
         expect(response.name).toEqual(guildName2);
         expect(response.prefix).toEqual(process.env.PREFIX);
@@ -74,7 +77,7 @@ describe('Sever Test', () => {
         const guildId2 = '123456';
         const response = await databaseMock.server.create(guildId2, guildName, undefined, undefined);
 
-        expect(response).toBeInstanceOf(DiscordServer);
+        expect(response).toBeInstanceOf(ServerDTO);
         expect(response.language).toEqual('en');
     });
 
@@ -82,14 +85,14 @@ describe('Sever Test', () => {
         const response = await databaseMock.server.getAll();
 
         expect(response[0]).not.toBe(undefined);
-        expect(response[0]).toBeInstanceOf(DiscordServer);
+        expect(response[0]).toBeInstanceOf(ServerDTO);
         expect(response.length).toBe(3);
     });
 
     it('GetServerById', async () => {
         const response = await databaseMock.server.getById(guildId);
 
-        expect(response).toBeInstanceOf(DiscordServer);
+        expect(response).toBeInstanceOf(ServerDTO);
     });
 
     it('GetServerById with no existing id', async () => {
@@ -113,7 +116,7 @@ describe('Sever Test', () => {
         expect(response).toBeInstanceOf(UpdateResult);
         expect(updatedServer?.prefix).toEqual('>>');
         expect(updatedServer?.language).toEqual('es');
-        expect(updatedServer?.blackList).toEqual('testUserID,testUserID2,testUserID3');
+        expect(updatedServer?.blackList).toEqual(['testUserID', 'testUserID2', 'testUserID3']);
         expect(updatedServer?.adminRole).toEqual('testAdminRole');
         expect(updatedServer?.updatedBy).toEqual(userId);
         expect(updatedServer?.createdAt.getTime() !== updatedServer?.updatedAt.getTime()).toBe(true);

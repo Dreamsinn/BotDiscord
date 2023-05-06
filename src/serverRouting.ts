@@ -9,9 +9,8 @@ import { Server } from './commands/domain/interfaces/server';
 import { Routes } from './commands/routes';
 import { Schema } from './database/commandsSchema/domain/schemaEntity';
 import { ConnectionHandler } from './database/connectionHandler';
-import { DiscordServer } from './database/server/domain/discordServerEntity';
+import { ServerDTO } from './database/server/domain/serverDTO';
 import { Languages } from './languages/languageService';
-import { typeIsLanguage } from './languages/utils/typeIsLanguage';
 
 export class ServerRouting {
     private serverList: Server[] = [];
@@ -25,29 +24,26 @@ export class ServerRouting {
 
     public async createServerList() {
         // take servers from db and put in memory
-        const discordServerList = await this.databaseConnection.server.getAll();
-        if (discordServerList.length) {
-            for (const discordServer of discordServerList) {
-                const server = await this.mapServerData(discordServer);
+        const serverDTOList = await this.databaseConnection.server.getAll();
+        if (serverDTOList.length) {
+            for (const serverDTO of serverDTOList) {
+                const server = await this.mapServerData(serverDTO);
                 this.serverList.push(server);
             }
         }
     }
 
-    private async mapServerData(discordServer: DiscordServer): Promise<Server> {
-        const blackList: string[] = discordServer.blackList ? discordServer.blackList.split(',') : [];
-        const language = typeIsLanguage(discordServer.language) ? discordServer.language : 'en';
-
+    private async mapServerData(serverDTO: ServerDTO): Promise<Server> {
         const server: Server = {
-            id: discordServer.id,
-            prefix: discordServer.prefix,
-            adminRole: discordServer.adminRole,
-            language: language,
-            blackList,
+            id: serverDTO.id,
+            prefix: serverDTO.prefix,
+            adminRole: serverDTO.adminRole,
+            language: serverDTO.language,
+            blackList: serverDTO.blackList,
             instance: await this.newCommandHandlerInstance(
-                discordServer.id,
-                discordServer.prefix,
-                language,
+                serverDTO.id,
+                serverDTO.prefix,
+                serverDTO.language,
             ),
         };
 
@@ -152,12 +148,10 @@ export class ServerRouting {
         const newServerData = await this.databaseConnection.server.getById(serverId);
         if (serverToUpdate && newServerData) {
             serverToUpdate.prefix = newServerData.prefix;
-            serverToUpdate.language = typeIsLanguage(newServerData.language)
-                ? newServerData.language
-                : serverToUpdate.language;
+            serverToUpdate.language = newServerData.language;
             serverToUpdate.instance.resetServerData(newServerData.prefix, serverToUpdate.language);
             serverToUpdate.adminRole = newServerData.adminRole;
-            serverToUpdate.blackList = newServerData.blackList ? newServerData.blackList.split(',') : [];
+            serverToUpdate.blackList = newServerData.blackList;
 
             await event.channel.send('Configuración actualizada');
             return;

@@ -176,7 +176,7 @@ export class PaginatedMessage {
             // if deleteWhenTimeOut, delete message
             if (this.pagination.deleteWhenTimeOut) {
                 message.delete().catch((err) => {
-                    console.log('Pagination editing error: ', err);
+                    console.log('Pagination deleting error: ', err);
                 });
                 return;
             }
