@@ -1,13 +1,13 @@
 import { Message } from 'discord.js';
 import { ConnectionHandler } from '../../../../../database/connectionHandler';
 import { PlaylistDTO } from '../../../../../database/playlist/domain/playlistDTO';
-import { Song } from '../../../../../database/song/domain/songEntity';
+import { SongDTO } from '../../../../../database/song/domain/SongDTO';
 import { Command } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { PaginatedMessage } from '../../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
-type SongDictionary = { [key: string]: Song };
+type SongDictionary = { [key: string]: SongDTO };
 
 export class ShowPlaylistCommand extends Command {
     private privatePlaylist: boolean;
@@ -173,7 +173,7 @@ export class ShowPlaylistCommand extends Command {
 
         const songDictionary: SongDictionary = {};
 
-        songArray.forEach((song: Song) => {
+        songArray.forEach((song: SongDTO) => {
             songDictionary[song.id] = song;
         });
 
@@ -190,9 +190,9 @@ export class ShowPlaylistCommand extends Command {
 
         soingsId.forEach((id: string) => {
             const song = songDictionary[id];
-            duration.hours += song.durationHours;
-            duration.mins += song.durationMinutes;
-            duration.seconds += song.durationSeconds;
+            duration.hours += song.duration.hours;
+            duration.mins += song.duration.minutes;
+            duration.seconds += song.duration.seconds;
 
             if (duration.seconds >= 60) {
                 duration.seconds -= 60;
@@ -233,7 +233,7 @@ export class ShowPlaylistCommand extends Command {
         // numerated array of songs in the chosen playlist
         const songsString = playlistSelected.songsId.map((id: string, i: number) => {
             const song = songDictionary[id];
-            return `${i + 1} - ${song.name} '${song.durationString}' \n`;
+            return `${i + 1} - ${song.name} '${song.duration.string}' \n`;
         });
 
         const userName = event.member?.nickname ?? event.author.username;

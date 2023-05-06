@@ -1,12 +1,14 @@
+import { SongDTO } from '../domain/SongDTO';
+import { Song } from '../domain/songEntity';
 import { SongService } from '../infrastructure/songService';
 
-export class GetSongById {
+export class GetSongsById {
     private songService: SongService;
     constructor(songService: SongService) {
         this.songService = songService;
     }
 
-    public async call(songId: string | string[]) {
+    public async call(songId: string | string[]): Promise<SongDTO[]> {
         if (!(songId instanceof Array)) {
             songId = [songId];
         }
@@ -15,6 +17,10 @@ export class GetSongById {
             return { id };
         });
 
-        return this.songService.getByYoutbeId(mappedId);
+        const songs: Song[] = await this.songService.getByYoutbeId(mappedId);
+
+        return songs.map((song: Song) => {
+            return new SongDTO(song);
+        });
     }
 }

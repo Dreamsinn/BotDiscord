@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { ConnectionHandler } from '../../../../../database/connectionHandler';
 import { PlaylistDTO } from '../../../../../database/playlist/domain/playlistDTO';
 import { ErrorEnum } from '../../../../../database/shared/domain/enums/ErrorEnum';
-import { Song } from '../../../../../database/song/domain/songEntity';
+import { SongDTO } from '../../../../../database/song/domain/SongDTO';
 import { discordEmojis } from '../../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../../domain/enums/buttonStyleEnum';
 import { UpdatePlaylistButtonsEnum } from '../../../../domain/enums/updatePlaylistButtonsEnum';
@@ -216,20 +216,20 @@ export class UpdatePlaylistCommand extends Command {
         return await this.createPlaylistOptionsMessage(event);
     }
 
-    private convetSongIntoSongData(songList: Song[]): SongData[] {
+    private convetSongIntoSongData(songList: SongDTO[]): SongData[] {
         if (!songList.length) {
             return [];
         }
 
-        const songDataList: SongData[] = songList.map((song: Song) => {
+        const songDataList: SongData[] = songList.map((song: SongDTO) => {
             const songData: SongData = {
                 songId: song.id,
                 songName: song.name,
                 duration: {
-                    hours: song.durationHours,
-                    minutes: song.durationMinutes,
-                    seconds: song.durationSeconds,
-                    string: song.durationString,
+                    hours: song.duration.hours,
+                    minutes: song.duration.minutes,
+                    seconds: song.duration.seconds,
+                    string: song.duration.string,
                 },
                 thumbnails: song.thumbnail,
             };

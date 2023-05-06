@@ -1,5 +1,6 @@
 import { SongData } from '../../../commands/domain/interfaces/song';
 import { NewSong } from '../domain/interface/newSong';
+import { SongDTO } from '../domain/SongDTO';
 import { Song } from '../domain/songEntity';
 import { SongService } from '../infrastructure/songService';
 
@@ -9,19 +10,24 @@ export class CreateSong {
         this.songService = songService;
     }
 
-    public async call(songData: SongData | SongData[]): Promise<Song[]> {
+    public async call(songData: SongData | SongData[]): Promise<SongDTO[]> {
         if (!(songData instanceof Array)) {
             songData = [songData];
         }
 
         // find song in db with the same youtube id of any song in songData
-        const alreadyCreatedSongs = await this.finAlreadyCreatedSongs(songData);
+        const alreadyCreatedSongs = await this.findAlreadyCreatedSongs(songData);
 
-        const newSongArray = this.mapSongArray(songData, alreadyCreatedSongs);
-        return this.songService.create(newSongArray);
+        const newSongArray = this.mapSongsAndRemoveAlreadyCreatedOnes(songData, alreadyCreatedSongs);
+
+        const newCreatedSongs: Song[] = await this.songService.create(newSongArray);
+
+        return newCreatedSongs.map((song: Song) => {
+            return new SongDTO(song);
+        });
     }
 
-    private async finAlreadyCreatedSongs(songArray: SongData[]): Promise<Song[]> {
+    private async findAlreadyCreatedSongs(songArray: SongData[]): Promise<Song[]> {
         const mappedSongId = songArray.map((song: SongData) => {
             return { id: song.songId };
         });
@@ -29,7 +35,10 @@ export class CreateSong {
         return this.songService.getByYoutbeId(mappedSongId);
     }
 
-    private mapSongArray(songArray: SongData[], alreadyCreatedSongs: Song[]): NewSong[] {
+    private mapSongsAndRemoveAlreadyCreatedOnes(
+        songArray: SongData[],
+        alreadyCreatedSongs: Song[],
+    ): NewSong[] {
         const mapedSongs: NewSong[] = songArray.flatMap((song: SongData) => {
             // if not created already map it
             if (!alreadyCreatedSongs.some((createdSong: Song) => song.songId === createdSong.id)) {

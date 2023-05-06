@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
 import { SongData } from '../../../commands/domain/interfaces/song';
 import { ConnectionHandler } from '../../connectionHandler';
+import { SongDTO } from '../../song/domain/SongDTO';
 import { Song } from '../../song/domain/songEntity';
 import { DatabaseConnectionMock } from '../dataSourceMock';
 
@@ -60,11 +61,11 @@ describe('Song Test', () => {
         const response = await databaseMock.song.create(SongArray);
 
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Song).toBe(true);
+        expect(response[0]).toBeInstanceOf(SongDTO);
         expect(response.length).toBe(2);
         expect(response[0].id).toBe(SongArray[0].songId);
         expect(response[1].name).toBe(SongArray[1].songName);
-        expect(response[1].durationString).toBe(SongArray[1].duration.string);
+        expect(response[1].duration.string).toBe(SongArray[1].duration.string);
     });
 
     it('CreateSong with only 1 song', async () => {
@@ -83,7 +84,7 @@ describe('Song Test', () => {
         const response = await databaseMock.song.create(songData);
 
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Song).toBe(true);
+        expect(response[0]).toBeInstanceOf(SongDTO);
         expect(response.length).toBe(1);
         expect(response[0].id).toBe(songData.songId);
     });
@@ -99,7 +100,7 @@ describe('Song Test', () => {
         const response = await databaseMock.song.getById([SongArray[0].songId, SongArray[1].songId]);
 
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Song).toBe(true);
+        expect(response[0]).toBeInstanceOf(SongDTO);
         expect(response.length).toBe(2);
     });
 
@@ -107,7 +108,7 @@ describe('Song Test', () => {
         const response = await databaseMock.song.getById(SongArray[0].songId);
 
         expect(response instanceof Array).toBe(true);
-        expect(response[0] instanceof Song).toBe(true);
+        expect(response[0]).toBeInstanceOf(SongDTO);
         expect(response.length).toBe(1);
     });
 
