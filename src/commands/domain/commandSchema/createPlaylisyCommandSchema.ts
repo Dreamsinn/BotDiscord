@@ -16,5 +16,5 @@ export const CreatePlaylistCommandSchema: CommandSchema = {
     // '> - Crear una playlist para el servidor requiere obligatoriamente tener admin role.\n\n' +
     // '__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__',
     command: CommandsNameEnum.CreatePlaylistCommand,
-    category: CommandsCategoryEnum.MUSIC,
+    category: CommandsCategoryEnum.PLAYLIST,
 };

@@ -16,7 +16,7 @@ const PlayPlaylistCommandSchema: CommandSchema = {
     // '> - Elegir una playlist del servidor requiere obligatoriamente tener admin role.\n\n' +
     // '__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__',
     command: CommandsNameEnum.PlayPlaylistCommand,
-    category: CommandsCategoryEnum.MUSIC,
+    category: CommandsCategoryEnum.PLAYLIST,
 };
 
 export { PlayPlaylistCommandSchema };

@@ -18,7 +18,7 @@
         },
         "deletePlaylist": {
             "name": "Eliminar playlist",
-            "description": "Este comando permite eliminar una playlists creada por uno mismo o del servidor. \nPara eliminar una playlist del servidor hay que añadir  `guild` al comando. Se requiere obligatoriamente tener admin role. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+            "description": "Este comando permite eliminar una playlists creada por uno mismo o del servidor. \nPara eliminar una playlist del servidor hay que añadir  `guild` al comando, se requiere obligatoriamente tener admin role. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
         },
         "diceCommand": {
             "name": "Tirar dados",
@@ -69,7 +69,7 @@
             "description": "Cambia la primera canción de la playlist. \nAl ejecutar el comando aparecerá una lista paginada de la playlist, y el bot leerá el siguiente mensaje. \nSe deberá escribir el número de la canciones que se quiera que suena. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
         },
         "playPlaylist": {
-            "name": "Play playlist creadas",
+            "name": "Play playlist",
             "description": "Este comando permite reproducir playlists ya creadas. \nMuestra una lista paginada de las tus playlists y se reproduce la elegida. \nHay que tener en cuenta: \n> - Para elegir una playlist del servidor hay que añadir `guild` al comando. \n> - Elegir una playlist del servidor requiere obligatoriamente tener admin role.\n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__',"
         },
         "removeSongs": {
@@ -85,8 +85,8 @@
             "description": "Activa o desactiva el comando de respuestas. \nEste comando debe ir seguido de `on` u `off` \nEjemplo: reply on"
         },
         "showPlaylist": {
-            "name": "Ver playlists guardadas en la base de datos",
-            "description": "Este comando permite ver las playlist creadas por uno mismo o las del servidor. \nPara ver una playlist del servidor hay que añadir  `guild` al comando. Se requiere obligatoriamente tener admin role. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
+            "name": "Ver playlists",
+            "description": "Este comando permite ver las playlist creadas por uno mismo o las del servidor. \nPara ver una playlist del servidor hay que añadir  `guild` al comando, se requiere obligatoriamente tener admin role. \n\n__Mientras este comando este en uso, no se podrán usar otros comandos. \nSe cerrará automáticamente tras 1min de inactividad.__"
         },
         "shuffleCommand": {
             "name": "Barajar el orden de las canciones",

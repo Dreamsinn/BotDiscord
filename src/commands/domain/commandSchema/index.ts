@@ -46,9 +46,9 @@ export const commandsSchemasList: CommandSchema[] = [
     LogPlaylistStatusSchema,
     ConfigServerCommandSchema,
     ConfigSchemaCommandSchema,
-    CreatePlaylistCommandSchema,
     PlayPlaylistCommandSchema,
+    CreatePlaylistCommandSchema,
     ShowPlaylistCommandSchema,
-    DeletePlaylistCommandSchema,
     UpdatePlaylistCommandSchema,
+    DeletePlaylistCommandSchema,
 ];

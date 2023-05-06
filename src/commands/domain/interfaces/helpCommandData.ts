@@ -13,6 +13,7 @@ export interface HelpCommandList {
     prefix: HelpCommandData[];
     nonPrefix: HelpCommandData[];
     music: HelpCommandData[];
+    playlist: HelpCommandData[];
 }
 
 export interface SubTypeCommandData {

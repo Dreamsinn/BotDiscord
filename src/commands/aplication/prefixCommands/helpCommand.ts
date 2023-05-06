@@ -56,6 +56,7 @@ export class HelpCommand extends Command {
         const prefixCommandList: HelpCommandData[] = [];
         const nonCommandList: HelpCommandData[] = [];
         const musicCommandList: HelpCommandData[] = [];
+        const playListCommandList: HelpCommandData[] = [];
 
         this.commandSchemaList.forEach((schema: CommandSchema) => {
             const schemaData: HelpCommandData = {
@@ -77,11 +78,16 @@ export class HelpCommand extends Command {
             if (schema.category === CommandsCategoryEnum.MUSIC) {
                 musicCommandList.push(schemaData);
             }
+
+            if (schema.category === CommandsCategoryEnum.PLAYLIST) {
+                playListCommandList.push(schemaData);
+            }
         });
         return (this.commandList = {
             prefix: prefixCommandList,
             nonPrefix: nonCommandList,
             music: musicCommandList,
+            playlist: playListCommandList,
         });
     }
 
@@ -212,6 +218,14 @@ export class HelpCommand extends Command {
                 prevType: HelpEmbedsTitlesEnum.PREFIX,
             },
             {
+                condition: typeOfEmbed === HelpEmbedsTitlesEnum.PLAYLIST,
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.MUSIC,
+                    commandArray: this.commandList.music,
+                },
+                prevType: HelpEmbedsTitlesEnum.MUSIC,
+            },
+            {
                 condition: typeOfEmbed === CommandsCategoryEnum.PREFIX,
                 methodData: {
                     title: HelpEmbedsTitlesEnum.PREFIX,
@@ -231,6 +245,14 @@ export class HelpCommand extends Command {
                 condition: typeOfEmbed === CommandsCategoryEnum.MUSIC,
                 methodData: { title: HelpEmbedsTitlesEnum.MUSIC, commandArray: this.commandList.music },
                 prevType: HelpEmbedsTitlesEnum.MUSIC,
+            },
+            {
+                condition: typeOfEmbed === CommandsCategoryEnum.PLAYLIST,
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.PLAYLIST,
+                    commandArray: this.commandList.playlist,
+                },
+                prevType: HelpEmbedsTitlesEnum.PLAYLIST,
             },
         ];
 
@@ -302,6 +324,16 @@ export class HelpCommand extends Command {
                 },
                 nextType: HelpEmbedsTitlesEnum.MUSIC,
             },
+            {
+                condition:
+                    helpEmbed.embeds[0].title === HelpEmbedsTitlesEnum.MUSIC &&
+                    collectedMessage.content === '1',
+                methodData: {
+                    title: HelpEmbedsTitlesEnum.PLAYLIST,
+                    commandArray: [...this.commandList.playlist],
+                },
+                nextType: HelpEmbedsTitlesEnum.PLAYLIST,
+            },
         ];
 
         const nextEmbed = nextEmbedDictionary.find((option) => option.condition);
@@ -348,6 +380,15 @@ export class HelpCommand extends Command {
             embedFileds.push({
                 name: '\u200b',
                 value: `**${index} - ${HelpEmbedsTitlesEnum.MUSIC}**`,
+                inline: false,
+            });
+        }
+
+        if (commandCategory.title === HelpEmbedsTitlesEnum.MUSIC) {
+            index = +1;
+            embedFileds.push({
+                name: '\u200b',
+                value: `**${index} - ${HelpEmbedsTitlesEnum.PLAYLIST}**`,
                 inline: false,
             });
         }
@@ -466,6 +507,7 @@ export class HelpCommand extends Command {
             [HelpEmbedsTitlesEnum.PREFIX]: this.commandList.prefix,
             [HelpEmbedsTitlesEnum.NONPREFIX]: this.commandList.nonPrefix,
             [HelpEmbedsTitlesEnum.MUSIC]: this.commandList.music,
+            [HelpEmbedsTitlesEnum.PLAYLIST]: this.commandList.playlist,
         };
 
         const typeCommandSelected = Object.values(HelpEmbedsTitlesEnum).find((enumsTitle: string) =>
@@ -479,8 +521,12 @@ export class HelpCommand extends Command {
             // that number was the index + 1, so it is needed to -1
             let number = Number(commandTitile.match(regex)![0]) - 1;
 
-            if (typeCommandSelected === HelpEmbedsTitlesEnum.PREFIX) {
+            if (
+                typeCommandSelected === HelpEmbedsTitlesEnum.PREFIX ||
+                typeCommandSelected === HelpEmbedsTitlesEnum.MUSIC
+            ) {
                 // in case of type prefix, first option is music commands, so i have to -1 another one
+                // same with music and playlist
                 number -= 1;
             }
 
