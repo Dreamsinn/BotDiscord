@@ -262,7 +262,7 @@ export class HelpCommand extends Command {
             let response: { output: MessageOptions; type: HelpEmbedsTitlesEnum | CommandsCategoryEnum };
             if (previousEmbed.methodData) {
                 response = {
-                    output: await this.createSubTypeCommandsEmbed(previousEmbed.methodData),
+                    output: this.createSubTypeCommandsEmbed(previousEmbed.methodData),
                     type: previousEmbed.prevType,
                 };
             } else {
@@ -342,12 +342,12 @@ export class HelpCommand extends Command {
 
         if (nextEmbed) {
             response = {
-                output: await this.createSubTypeCommandsEmbed(nextEmbed.methodData),
+                output:  this.createSubTypeCommandsEmbed(nextEmbed.methodData),
                 type: nextEmbed.nextType,
             };
         } else {
-            // default - commandEmbed
-            const commandEmbed = await this.createCommandEmbed(
+            // default - commandEmbed 
+            const commandEmbed =  this.createCommandEmbed(
                 helpEmbed,
                 Number(collectedMessage.content),
             );
@@ -370,9 +370,9 @@ export class HelpCommand extends Command {
         return;
     }
 
-    private async createSubTypeCommandsEmbed(
+    private createSubTypeCommandsEmbed(
         commandCategory: SubTypeCommandData,
-    ): Promise<MessageOptions> {
+    ): MessageOptions {
         const embedFileds: EmbedFieldData[] = [];
         let index = 0;
         if (commandCategory.title === HelpEmbedsTitlesEnum.PREFIX) {
@@ -395,7 +395,7 @@ export class HelpCommand extends Command {
 
         for (const commandData of commandCategory.commandArray) {
             index += 1;
-            embedFileds.push(await this.mapTypeCommandsFieldsData(commandData, index));
+            embedFileds.push(this.mapTypeCommandsFieldsData(commandData, index));
         }
 
         const output = new MessageCreator({
@@ -419,21 +419,21 @@ export class HelpCommand extends Command {
         return output;
     }
 
-    private async mapTypeCommandsFieldsData(
+    private mapTypeCommandsFieldsData(
         commandData: HelpCommandData,
         index: number,
-    ): Promise<EmbedFieldData> {
+    ): EmbedFieldData {
         return {
             name: '\u200b',
-            value: `**${index} - ${await ls.t(this.language, commandData.name)}**`,
+            value: `**${index} - ${ls.t(this.language, commandData.name)}**`,
             inline: false,
         };
     }
 
-    private async createCommandEmbed(
+    private createCommandEmbed(
         helpEmbed: Message,
         selected: number,
-    ): Promise<void | { output: MessageOptions; category: CommandsCategoryEnum }> {
+    ): void | { output: MessageOptions; category: CommandsCategoryEnum } {
         const selectedCommand = this.findSelectedCommand(helpEmbed, selected);
         if (!selectedCommand) {
             return;
@@ -466,13 +466,13 @@ export class HelpCommand extends Command {
         }
         const embed: EmbedOptions = {
             color: '#BFFF00',
-            title: await ls.t(this.language, selectedCommand.name),
+            title: ls.t(this.language, selectedCommand.name),
             description,
             fields: [
                 { name: 'Alias', value: aliases, inline: false },
                 {
                     name: 'Descripcion',
-                    value: await ls.t(this.language, selectedCommand.description, {
+                    value: ls.t(this.language, selectedCommand.description, {
                         prefix: this.prefix,
                     }),
                     inline: false,
