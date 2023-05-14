@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import { Bot } from './bot';
 import { commandsSchemasList } from './commands/domain/commandSchema';
 import Database from './database/connectionHandler';
+import ls from './languages/languageService';
 import { ServerRouting } from './serverRouting';
 
 dotenv.config();
@@ -17,6 +18,9 @@ async function server() {
 
     const serverRouting = new ServerRouting(Database, commandsSchemasList);
     serverRouting.createServerList();
+
+    // initialize LanguageService
+    await ls.init();
 
     bot.client.on('messageCreate', async (event: Message): Promise<void> => {
         if (event.author.bot) {

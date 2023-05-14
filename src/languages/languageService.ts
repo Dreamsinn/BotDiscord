@@ -5,30 +5,35 @@ export type Languages = 'es' | 'en';
 export const languagesArray: UnionToArray<Languages> = ['es', 'en'];
 
 class LanguageService {
-    private jsonDictionary: { [key in Languages]: any };
+    private languageDictionary: { [key in Languages]: any };
 
-    constructor() {
-        this.jsonDictionary = this.createJsonDictionary();
+    public async init() {
+        // create object with all languages
+        const jsonDictionary = await this.createJsonDictionary();
+
+        this.languageDictionary = jsonDictionary;
     }
 
-    private createJsonDictionary(): any {
-        // create object with all languages
+    private async createJsonDictionary(): Promise<any> {
         const jsonDictionary: { [key in Languages]?: any } = {};
 
-        languagesArray.forEach((lengauge: Languages) => {
-            jsonDictionary[lengauge] = import(`./locals/${lengauge}.json`);
-        });
+        for (const language of languagesArray) {
+            jsonDictionary[language] = JSON.parse(
+                JSON.stringify(await import(`./locals/${language}.json`)),
+            );
+        }
 
         return jsonDictionary;
     }
 
-    public async t(language: Languages, route: string, variables?: { [key: string]: string }) {
-        const json = await this.jsonDictionary[language];
+    public t(language: Languages, route: string, variables?: { [key: string]: string }) {
+        const languageObject = this.languageDictionary[language];
 
-        const routeSteps = route.split('.');
+        // route ex: 'schemas.clearPlaylist.name'
+        const routeKeys = route.split('.');
 
-        let step = json;
-        routeSteps.forEach((key: string) => {
+        let step = languageObject;
+        routeKeys.forEach((key: string) => {
             step = step[key];
         });
 
