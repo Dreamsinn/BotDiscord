@@ -1,5 +1,5 @@
 import { MessageActionRow, MessageButton } from 'discord.js';
-import { Button, ButtonRow, ButtonRowList } from '../../domain/interfaces/createEmbedOptions';
+import { Button, ButtonRow, ButtonRowList } from '../../domain/interfaces/button';
 
 export class MessageButtonsCreator {
     private buttons: ButtonRowList;
@@ -8,31 +8,35 @@ export class MessageButtonsCreator {
         this.buttons = buttons;
     }
 
-    public call() {
-        const buttonRows = [];
-
-        this.buttons.map((row: ButtonRow) => {
-            buttonRows.push(this.buttonCreator(row));
+    public call(): MessageActionRow[] {
+        const buttonRows: MessageActionRow[] = [];
+        this.buttons.forEach((row: ButtonRow | undefined) => {
+            if (row) {
+                buttonRows.push(this.buttonCreator(row));
+            }
         });
 
         return buttonRows;
     }
 
-    private buttonCreator(rowData: ButtonRow) {
+    private buttonCreator(rowData: ButtonRow): MessageActionRow {
         const buttonsRow = new MessageActionRow();
 
-        rowData.forEach((buttonData: Button) => {
-            const button = new MessageButton()
-                .setStyle(buttonData.style.valueOf())
-                .setCustomId(buttonData.custom_id ? buttonData.custom_id : null)
-                .setLabel(buttonData.label ? buttonData.label : null)
-                .setDisabled(buttonData.disabled ? buttonData.disabled : null);
+        rowData.forEach((buttonData: Button | undefined) => {
+            if (buttonData) {
+                const button = new MessageButton()
+                    .setStyle(buttonData.style.valueOf())
+                    .setCustomId(buttonData.custom_id)
+                    .setLabel(buttonData.label)
+                    .setDisabled(buttonData.disabled === undefined ? false : buttonData.disabled);
 
-            if (buttonData.url) {
-                button.setURL(buttonData.url);
+                if (buttonData.url) {
+                    // urls no puede ser null
+                    button.setURL(buttonData.url);
+                }
+
+                buttonsRow.addComponents(button);
             }
-
-            buttonsRow.addComponents(button);
         });
         return buttonsRow;
     }

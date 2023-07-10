@@ -6,14 +6,18 @@ import {
     Message,
     User,
 } from 'discord.js';
-import { MessageButtonStyles } from 'discord.js/typings/enums';
-import { SongData } from './songData';
+import { ButtonRowList } from './button';
 
-export interface CreateMessageOptions {
+// hay mas opciones disponibles en MessageOptions
+export interface CreateMessage {
     message?: MessageContent;
     embed?: EmbedOptions;
     buttons?: ButtonRowList;
-    pagination?: PaginationOptions;
+}
+
+export interface CreatePaginatedMessage extends CreateMessage {
+    embed: EmbedOptions;
+    pagination: PaginationOptions;
 }
 
 export interface MessageContent {
@@ -38,34 +42,26 @@ export interface EmbedOptions {
     footer?: EmbedFooterData;
 }
 
-export type ButtonRowList = [ButtonRow?, ButtonRow?, ButtonRow?, ButtonRow?, ButtonRow?];
-
-export type ButtonRow = [Button?, Button?, Button?, Button?, Button?];
-
-export interface Button {
-    style: ButtonsStyle;
-    label?: string;
-    custom_id?: string;
-    url?: string;
-    disabled?: boolean;
-}
-
-export enum ButtonsStyle {
-    BLUE = MessageButtonStyles.PRIMARY,
-    GREY = MessageButtonStyles.SECONDARY,
-    GRENN = MessageButtonStyles.SUCCESS,
-    RED = MessageButtonStyles.DANGER,
-    LINK = MessageButtonStyles.LINK,
-}
-
-export interface PaginationOptions {
-    event?: Message;
-    channel?: Message['channel'];
-    rawDataToPaginate?: SongData[];
-    dataToPaginate?: string[];
-    dataPerPage: number;
-    timeOut: number;
-    jsFormat: boolean;
-    reply: boolean;
-    author?: User;
-}
+export type PaginationOptions =
+    | {
+          reply: true;
+          event: Message;
+          dataToPaginate: string[];
+          dataPerPage: number;
+          timeOut: number;
+          deleteWhenTimeOut: boolean;
+          jsFormat: boolean;
+          closeButton: boolean;
+          author?: User;
+      }
+    | {
+          reply: false;
+          channel: Message['channel'];
+          dataToPaginate: string[];
+          dataPerPage: number;
+          timeOut: number;
+          deleteWhenTimeOut: boolean;
+          jsFormat: boolean;
+          closeButton: boolean;
+          author?: User;
+      };

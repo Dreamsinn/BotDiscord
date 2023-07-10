@@ -6,4 +6,5 @@ export enum DisplayButtonsIdEnum {
     CLEAR = 'clear',
     README = 'readme',
     CLOSE = 'close',
+    PLAYLIST = 'playlist',
 }

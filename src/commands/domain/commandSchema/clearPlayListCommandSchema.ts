@@ -1,13 +1,17 @@
+import { CommandsNameEnum } from '../enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../enums/commandsCategoryEnum';
 import { CommandSchema } from '../interfaces/commandSchema';
 
 const ClearPlayListCommandSchema: CommandSchema = {
+    name: 'schemas.clearPlaylist.name',
+    // Borrar playlist
     aliases: ['c', 'clear'],
     coolDown: 0,
     adminOnly: false,
-    description: `Borra todas las canciones de la lista.`,
+    description: 'schemas.clearPlaylist.description',
+    // Este comando borra todas las canciones de la playlist.
+    command: CommandsNameEnum.ClearPlaylistCommand,
     category: CommandsCategoryEnum.MUSIC,
-    name: 'Borrar playlist',
 };
 
 export { ClearPlayListCommandSchema };

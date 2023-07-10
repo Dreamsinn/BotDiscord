@@ -1,20 +1,28 @@
+import { Message } from 'discord.js';
+
 export class CoolDown {
-    lastCall: Date;
-    newCall: Date;
-    public call(coolDown: number) {
+    private lastCall: Date;
+    private newCall: Date;
+
+    public call(coolDown: number, event: Message): boolean {
         if (coolDown > 0) {
-            console.log('lastCall', this.lastCall);
             if (this.lastCall) {
                 this.newCall = new Date();
                 const timeLapse = this.newCall.getTime() - this.lastCall.getTime();
-                console.log('timeLapse =', timeLapse);
-                console.log('coolDown =', coolDown);
-                console.log(coolDown);
+
                 if (timeLapse < coolDown) {
-                    return 1;
+                    console.log({
+                        username: event.author.username,
+                        nickname: event.member?.nickname,
+                        timeLapse,
+                        coolDown,
+                        error: 'Iterrupted for spam',
+                    });
+                    return true;
                 }
             }
             this.lastCall = new Date();
         }
+        return false;
     }
 }

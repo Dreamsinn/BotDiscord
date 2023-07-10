@@ -1,27 +1,22 @@
 import { MessageEmbed, MessageOptions } from 'discord.js';
-import {
-    ButtonRowList,
-    CreateMessageOptions,
-    EmbedOptions,
-    MessageContent,
-} from '../../domain/interfaces/createEmbedOptions';
+import { ButtonRowList } from '../../domain/interfaces/button';
+import { CreateMessage, EmbedOptions, MessageContent } from '../../domain/interfaces/createEmbedOptions';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 
 export class MessageCreator {
-    private message: MessageContent;
-    private embed: EmbedOptions;
-    private buttons: ButtonRowList;
+    private message: MessageContent | undefined;
+    private embed: EmbedOptions | undefined;
+    private buttons: ButtonRowList | undefined;
 
-    constructor(messageData: CreateMessageOptions) {
+    constructor(messageData: CreateMessage) {
         this.message = messageData.message;
         this.embed = messageData.embed;
         this.buttons = messageData.buttons;
     }
 
-    public call() {
-        let embed;
+    public call(): MessageOptions {
+        const embed = new MessageEmbed();
         if (this.embed) {
-            embed = new MessageEmbed();
             this.embed.color ? embed.setColor(this.embed.color) : null;
             this.embed.title ? embed.setTitle(this.embed.title) : null;
             this.embed.URL ? embed.setURL(this.embed.URL) : null;
@@ -38,9 +33,9 @@ export class MessageCreator {
         }
 
         const output: MessageOptions = {
-            components: this.buttons ? new MessageButtonsCreator(this.buttons).call() : null,
+            components: this.buttons ? new MessageButtonsCreator(this.buttons).call() : [],
             content: this.message ? this.message.content : null,
-            embeds: embed ? [embed] : null,
+            embeds: [embed] ?? null,
         };
 
         return output;

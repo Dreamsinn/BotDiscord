@@ -1,5 +1,10 @@
-export interface APIResponse<dataType> {
-    isError: boolean;
-    data: dataType;
-    errorData?: TypeError;
-}
+export type APIResponse<dataType> =
+    | {
+          isError: false;
+          data: dataType;
+      }
+    | {
+          isError: true;
+          data: null;
+          errorData: TypeError;
+      };

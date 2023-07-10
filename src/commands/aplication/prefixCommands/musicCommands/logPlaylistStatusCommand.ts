@@ -1,38 +1,27 @@
-import { Message } from 'discord.js';
-import { LogPlaylistStatusSchema } from '../../../domain/commandSchema/logPlaylistStatusSchema';
-import { Command } from '../../../domain/interfaces/Command';
-import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { PlayListHandler } from '../../playListHandler';
-import { CheckAdminRole } from '../../utils/CheckAdminRole';
-import { CoolDown } from '../../utils/coolDown';
+import { Message } from "discord.js";
+import { Command } from "../../../domain/interfaces/Command";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
+import { PlayListHandler } from "../../playListHandler";
 
 export class LogPlaylistStatusCommand extends Command {
-    private logSchema: CommandSchema = LogPlaylistStatusSchema;
-    private coolDown = new CoolDown();
-    private checkAdminRole = new CheckAdminRole();
-    private playListHandler: PlayListHandler;
+  private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
-        super();
-        this.playListHandler = playListHandler;
+  constructor(playListHandler: PlayListHandler) {
+    super();
+    this.playListHandler = playListHandler;
+  }
+
+  public async call(
+    event: Message,
+    adminRole: string,
+    logSchema: CommandSchema
+  ): Promise<void> {
+    event.delete();
+
+    if (this.roleAndCooldownValidation(event, logSchema, adminRole)) {
+      return;
     }
 
-    public async call(event: Message) {
-        event.delete();
-
-        if (this.logSchema.adminOnly) {
-            const interrupt = this.checkAdminRole.call(event);
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        const interrupt = this.coolDown.call(this.logSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
-            return;
-        }
-
-        return await this.playListHandler.logPlaylistStatus();
-    }
+    return this.playListHandler.logPlaylistStatus();
+  }
 }

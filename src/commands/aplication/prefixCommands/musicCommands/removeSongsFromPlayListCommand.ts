@@ -1,152 +1,148 @@
-import { Message } from 'discord.js';
-import { RemoveSongsFromPlayListCommandSchema } from '../../../domain/commandSchema/removeSongsFromPlayListCommandSchema';
-import { Command } from '../../../domain/interfaces/Command';
-import { CommandSchema } from '../../../domain/interfaces/commandSchema';
-import { SongData } from '../../../domain/interfaces/songData';
-import { PlayListHandler } from '../../playListHandler';
-import { CheckAdminRole } from '../../utils/CheckAdminRole';
-import { CoolDown } from '../../utils/coolDown';
-import { PaginatedMessage } from '../../utils/paginatedMessage';
-import { UsersUsingACommand } from '../../utils/usersUsingACommand';
+import { Message } from "discord.js";
+import { Command } from "../../../domain/interfaces/Command";
+import { CommandSchema } from "../../../domain/interfaces/commandSchema";
+import { PlayListHandler } from "../../playListHandler";
+import { PaginatedMessage } from "../../utils/paginatedMessage";
+import { UsersUsingACommand } from "../../utils/usersUsingACommand";
 
 export class RemoveSongsFromPlayListCommand extends Command {
-    private removeSchema: CommandSchema = RemoveSongsFromPlayListCommandSchema;
-    private coolDown = new CoolDown();
-    private checkAdminRole = new CheckAdminRole();
-    private playListHandler: PlayListHandler;
-    private usersUsingACommand: UsersUsingACommand;
+  constructor(
+    private playListHandler: PlayListHandler,
+    private usersUsingACommand: UsersUsingACommand
+  ) {
+    super();
+  }
 
-    constructor(playListHandler: PlayListHandler) {
-        super();
-        this.playListHandler = playListHandler;
+  public async call(
+    event: Message,
+    adminRole: string,
+    removeSchema: CommandSchema
+  ): Promise<void> {
+    if (this.roleAndCooldownValidation(event, removeSchema, adminRole)) {
+      return;
     }
 
-    public async call(event: Message, usersUsingACommand: UsersUsingACommand) {
-        if (this.removeSchema.adminOnly) {
-            const interrupt = this.checkAdminRole.call(event);
-            if (!interrupt) {
-                return;
-            }
+    const playList: string[] = this.playListHandler.readPlayList();
+
+    if (!playList[0]) {
+      event.reply("There is no playList");
+      return;
+    }
+
+    await new PaginatedMessage({
+      embed: {
+        color: "ORANGE",
+        title: "Remove songs from playlist:",
+        author: {
+          name: `${event.member!.user.username}`,
+          iconURL: `${event.member!.user.displayAvatarURL()}`,
+        },
+        description: `Write the **numbers** of the songs you wish to remove split by " , " \nWrite **X** to cancel operation`,
+      },
+      pagination: {
+        channel: event.channel,
+        dataToPaginate: [...playList],
+        dataPerPage: 10,
+        timeOut: 60000,
+        jsFormat: true,
+        deleteWhenTimeOut: false,
+        reply: false,
+        closeButton: false,
+        author: event.author,
+      },
+    }).call();
+
+    this.messageCollector(event, playList);
+  }
+
+  private messageCollector(event: Message, playList: string[]): void {
+    // usuario no pueda ejecutar otros comandos
+    this.usersUsingACommand.updateUserList(event.author.id);
+
+    const lastSongIndex = playList.length;
+
+    const filter = (message: Message) => {
+      const userConditions = event.author.id === message.author.id;
+      const numbersArray = message.content.split(",");
+      const numbersConditions =
+        !numbersArray.find((n) => isNaN(Number(n))) &&
+        Math.max(Number(...numbersArray)) <= lastSongIndex &&
+        Math.min(Number(...numbersArray)) >= 1;
+      const letterConditoin =
+        message.content === "x" || message.content === "X";
+
+      return userConditions && (numbersConditions || letterConditoin);
+    };
+
+    event.channel
+      .awaitMessages({ filter, time: 60000, max: 1, errors: ["time"] })
+      .then((collected) => {
+        this.usersUsingACommand.removeUserList(event.author.id);
+        const collectedMessage: Message<boolean>[] = collected.map(
+          (e: Message) => e
+        );
+
+        if (
+          collectedMessage[0].content === "x" ||
+          collectedMessage[0].content === "X"
+        ) {
+          // cancela el comando
+          event.channel.send("Remove command cancelled");
+          return;
         }
 
-        this.usersUsingACommand = usersUsingACommand;
-
-        const interrupt = this.coolDown.call(this.removeSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
-            return;
+        return this.removeSongFromPlayList(collectedMessage[0].content, event);
+      })
+      .catch((err) => {
+        if (err instanceof TypeError) {
+          console.log("Remove Song colector error: ", err);
+          event.channel.send(
+            "Ha habido un error, por favor vuelvelo a intentar"
+          );
+        } else {
+          event.reply("Time out");
         }
 
-        const playList: SongData[] = this.playListHandler.readPlayList();
+        this.usersUsingACommand.removeUserList(event.author.id);
+        return;
+      });
+  }
 
-        if (!playList[0]) {
-            return event.reply('There is no playList');
-        }
+  private removeSongFromPlayList(content: string, event: Message): void {
+    // pasa a playListHandler el indice(-1) de las canciones
+    const stringOfNumbersArray = content.split(",");
 
-        await new PaginatedMessage({
-            embed: {
-                color: 'ORANGE',
-                title: 'Remove songs from playlist:',
-                author: {
-                    name: `${event.member.user.username}`,
-                    iconURL: `${event.member.user.displayAvatarURL()}`,
-                },
-                description:
-                    'Write the numbers of the songs you wish to remove split by " , " \nWrite " X " to cancel operation',
-            },
-            pagination: {
-                event: event,
-                rawDataToPaginate: playList,
-                dataPerPage: 10,
-                timeOut: 60000,
-                jsFormat: true,
-                reply: false,
-                author: event.author,
-            },
-        }).call();
+    const numberArray = stringOfNumbersArray.map((str) => Number(str));
 
-        return this.messageCollector(event, playList);
-    }
+    const removedMusic =
+      this.playListHandler.removeSongsFromPlayList(numberArray);
+    this.removedMusicEmbed(removedMusic, event);
+  }
 
-    private messageCollector(event: Message, playList: SongData[]) {
-        this.usersUsingACommand.updateUserList(event.author.id);
-
-        const lastSongIndex = playList.length;
-
-        const filter = (message: Message) => {
-            const userConditions = event.author.id === message.author.id;
-            const numbersArray = message.content.split(',');
-            const numbersConditions =
-                !numbersArray.find((n) => isNaN(Number(n))) &&
-                Math.max(Number(...numbersArray)) <= lastSongIndex &&
-                Math.min(Number(...numbersArray)) >= 1;
-            const letterConditoin = message.content === 'x' || message.content === 'X';
-
-            return userConditions && (numbersConditions || letterConditoin);
-        };
-
-        event.channel
-            .awaitMessages({ filter, time: 60000, max: 1, errors: ['time'] })
-            .then((collected) => {
-                this.usersUsingACommand.removeUserList(event.author.id);
-                let collectedMessage: Message;
-                collected.map((e: Message) => (collectedMessage = e));
-
-                if (collectedMessage.content === 'x' || collectedMessage.content === 'X') {
-                    console.log('Remove command cancelled');
-                    event.channel.send('Remove command cancelled');
-                    return;
-                }
-
-                return this.removeSongFromPlayList(collectedMessage.content, event);
-            })
-            .catch((err) => {
-                if (err instanceof TypeError) {
-                    console.log(err);
-                    event.channel.send(`Error: ${err.message}`);
-                } else {
-                    event.reply('Time out');
-                }
-
-                this.usersUsingACommand.removeUserList(event.author.id);
-                return;
-            });
-    }
-
-    private removeSongFromPlayList(content: string, event: Message) {
-        const stringNumbersArray = content.split(',');
-
-        const numberArray: number[] = [];
-
-        stringNumbersArray.forEach((str) => {
-            const n = Number(str);
-            if (n !== 0) {
-                numberArray.push(Number(str));
-            }
-        });
-
-        const removedMusic = this.playListHandler.removeSongsFromPlayList(numberArray);
-        return this.removedMusicEmbed(removedMusic, event);
-    }
-
-    private async removedMusicEmbed(removedMusic: SongData[], event: Message) {
-        return await new PaginatedMessage({
-            embed: {
-                color: 'ORANGE',
-                title: `${removedMusic.length} songs removeds from Playlist`,
-                author: {
-                    name: `${event.member.user.username}`,
-                    iconURL: `${event.member.user.displayAvatarURL()}`,
-                },
-            },
-            pagination: {
-                event: event,
-                rawDataToPaginate: removedMusic,
-                dataPerPage: 10,
-                timeOut: 30000,
-                reply: false,
-                jsFormat: true,
-            },
-        }).call();
-    }
+  private async removedMusicEmbed(
+    removedMusic: string[],
+    event: Message
+  ): Promise<void> {
+    await new PaginatedMessage({
+      embed: {
+        color: "ORANGE",
+        title: `${removedMusic.length} songs removeds from Playlist`,
+        author: {
+          name: `${event.member?.user.username}`,
+          iconURL: `${event.member?.user.displayAvatarURL()}`,
+        },
+      },
+      pagination: {
+        channel: event.channel,
+        dataToPaginate: removedMusic,
+        dataPerPage: 10,
+        timeOut: 30000,
+        deleteWhenTimeOut: false,
+        reply: false,
+        closeButton: true,
+        jsFormat: true,
+      },
+    }).call();
+    return;
+  }
 }

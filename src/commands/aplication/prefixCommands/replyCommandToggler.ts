@@ -1,48 +1,37 @@
-import { Message } from 'discord.js';
-import { ReplyCommandTogglerSchema } from '../../domain/commandSchema/replyCommandTogglerSchema';
-import { Command } from '../../domain/interfaces/Command';
-import { CommandSchema } from '../../domain/interfaces/commandSchema';
-import { ReplyCommand } from '../replyCommand';
-import { CheckAdminRole } from '../utils/CheckAdminRole';
-import { CoolDown } from '../utils/coolDown';
+import { Message } from "discord.js";
+import { Command } from "../../domain/interfaces/Command";
+import { CommandSchema } from "../../domain/interfaces/commandSchema";
+import { ReplyCommand } from "../non-prefixCommands/replyCommand";
 
 export class ReplyCommandToggler extends Command {
-    private toggleDiceSchema: CommandSchema = ReplyCommandTogglerSchema;
-    private coolDown = new CoolDown();
-    private checkAdminRole = new CheckAdminRole();
-    private replyCommand: ReplyCommand;
-
-    public async call(event: Message, replyCommand): Promise<Message> {
-        if (this.toggleDiceSchema.adminOnly) {
-            const interrupt = this.checkAdminRole.call(event);
-            if (!interrupt) {
-                return;
-            }
-        }
-
-        this.replyCommand = replyCommand;
-
-        const interrupt = this.coolDown.call(this.toggleDiceSchema.coolDown);
-        if (interrupt === 1) {
-            console.log('command interrupted by cooldown');
-            return;
-        }
-
-        if (event.content.includes('on')) {
-            const hasBeenActived = this.replyCommand.toggleReplyCommand(true);
-            if (hasBeenActived) {
-                event.channel.send('Respuestas activados');
-            }
-            return;
-        }
-
-        if (event.content.includes('off')) {
-            const hasBeenDeactivate = this.replyCommand.toggleReplyCommand(false);
-            if (hasBeenDeactivate) {
-                event.channel.send('Respuestas desactivados');
-            }
-            return;
-        }
-        return;
+  public async call(
+    event: Message,
+    adminRole: string,
+    toggleDiceSchema: CommandSchema,
+    props: { replyCommand: ReplyCommand }
+  ): Promise<void> {
+    if (this.roleAndCooldownValidation(event, toggleDiceSchema, adminRole)) {
+      return;
     }
+
+    // si on activa la respuestas de dados, si off la desactiva
+    if (event.content.includes("on")) {
+      console.log({ argument: "on" });
+      const hasBeenActived = props.replyCommand.toggleReplyCommand(true);
+      if (hasBeenActived) {
+        event.channel.send("Respuestas activados");
+      }
+      return;
+    }
+
+    if (event.content.includes("off")) {
+      console.log({ argument: "off" });
+      const hasBeenDeactivate = props.replyCommand.toggleReplyCommand(false);
+      if (hasBeenDeactivate) {
+        event.channel.send("Respuestas desactivados");
+      }
+      return;
+    }
+    return;
+  }
 }

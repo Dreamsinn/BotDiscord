@@ -5,8 +5,8 @@ An intuitive, easy to use, and designed by and for the user, multi guild, music 
 Right now, it's only available in the spanish language.
 Planned changes in the future:
 
--   Language as env param.
--   BD connection to save guild's bot configuration.
+- Language as env param.
+- BD connection to save guild's bot configuration.
 
 # Installation and usage
 
@@ -14,32 +14,40 @@ Planned changes in the future:
 
 - Install:
 
-    ```
-    npm install
-    ```
-    or
-    ```
-    yarn install
-    ```
+  ```
+  npm install
+  ```
+
+  or
+
+  ```
+  yarn install
+  ```
 
 - Preparation:
 
-    Create .env file, copy .env.sample data and fill it up.
+  Create .env file, copy .env.sample data and fill it up.
 
   - TOKEN:
-  
+
     Discord's documentation:
-  
+
     https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot
-  
+
+    > Important! \
+    > While getting token, on the same page, at Privileged Gateway Intents, enable:
+    >
+    > - PRESENCE INTENT
+    > - MESSAGE CONTENT INTENT
+
   - API_KEY_YOUTUBE:
-    
-    API key is required: 
-  
+
+    API key is required:
+
     https://console.cloud.google.com/apis/credentials
-  
-    More data in this page: 
-  
+
+    More data in this page:
+
     https://developers.google.com/youtube/registering_an_application
 
   - PREFIX:
@@ -50,21 +58,20 @@ Planned changes in the future:
 
     Name of the role that will be able to run adminOnly commands.
     Optional, if not needed, left it blank.
-  
-    > A command can be put as adminOnly by writing true in this option on the commands' schema. 
-    > 
-    > All schemas are in this route: 
-     src/commands/domain/commandSchema
-  
+
+    > Can be put as adminOnly by writing true in this option on the commands' schema.
+    >
+    > All schemas are in this route:
+    > src/commands/domain/commandSchema
 
 - Activation:
-    ```
-    npm run start
-    ```
-    or
-    ```
-    yarn start
-    ```
+  ```
+  npm run start
+  ```
+  or
+  ```
+  yarn start
+  ```
 
 ## Commands
 
@@ -110,4 +117,5 @@ These commands need to be activated by one of _Others prefix commands_. Once act
 - Reply command: Read specific numbers or words and make a joke depending on the message content.
 
 # Issues
+
 Since July 2022 if the bot is being run with WSL 2, music will stop sounding after 60s.

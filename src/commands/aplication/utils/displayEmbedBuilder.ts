@@ -1,16 +1,21 @@
-import { EmbedFieldData, Message } from 'discord.js';
+import { EmbedFieldData, Message, ThreadChannel } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import { DisplayMessage } from '../../domain/interfaces/displayMessage';
 import { PlayListStatus } from '../../domain/interfaces/PlayListStatus';
-import { SongData } from '../../domain/interfaces/songData';
+import { SongData } from '../../domain/interfaces/song';
 import { MessageCreator } from '../utils/messageCreator';
 
 export class DisplayEmbedBuilder {
     private playListStatus: PlayListStatus;
     private displayMessage: Message;
 
-    public async call(playListStatus: PlayListStatus, event: Message, newEmbed: boolean) {
+    public async call(
+        playListStatus: PlayListStatus,
+        event: Message | undefined,
+        newEmbed: boolean,
+    ): Promise<DisplayMessage | void> {
+        // si newEmbed crea un mensaje con toda la informacion, sino edita el mensaje ya creado
         this.playListStatus = playListStatus;
 
         const output = new MessageCreator({
@@ -22,32 +27,35 @@ export class DisplayEmbedBuilder {
         if (newEmbed) {
             const display: DisplayMessage = {
                 thread: await this.selectChannel(event),
-                channelEventWasThread: event.channel.isThread() ? true : false,
+                channelEventWasThread: event?.channel.isThread() ? true : false,
                 message: (this.displayMessage = await thread.send(output)),
             };
             return display;
         }
 
         if (this.displayMessage) {
-            await this.displayMessage.edit(output).catch(() => {
-                console.log('Error editing display');
-            });
+            await this.displayMessage
+                .edit({ embeds: output.embeds, components: this.displayMessage.components })
+                .catch((err) => {
+                    console.log('Error editing display', err);
+                });
         }
-
-        return;
     }
 
-    private async selectChannel(event) {
+    private async selectChannel(event: any): Promise<ThreadChannel> {
+        // si el chat es un hilo lo devolvemos
         if (event.channel.isThread()) {
             return event.channel;
         }
 
-        let threadChannel;
-        event.channel.threads.cache.find((thread) => {
-            if (thread.name === 'Displayer') {
-                threadChannel = thread;
-            }
-        });
+        // buscamos si el chat tiene un hilo con el nombre de displayer, y si existe se fevuelve
+        const threadChannel: ThreadChannel = event.channel.threads.cache.find(
+            (thread: ThreadChannel) => {
+                if (thread.name === 'Displayer') {
+                    return thread;
+                }
+            },
+        );
         if (threadChannel) {
             return threadChannel;
         }
@@ -85,37 +93,50 @@ export class DisplayEmbedBuilder {
         return embed;
     }
 
-    private mapTitleAndURlData(playinSong: SongData, playerStatus: string, conectionStatus: string) {
-        let title: string;
-        let URL: string | null;
-        if (!playerStatus || !conectionStatus) {
-            title = `${discordEmojis.problem} La función de música aún no está activada, añada alguna cancion`;
-            URL = null;
-            return { title, URL };
-        }
-        if (conectionStatus === 'destroyed') {
-            title =
-                `${discordEmojis.problem} Es necesario reconectar el bot, usa los comandos:` +
-                ` ${process.env.PREFIX}p o ${process.env.PREFIX}join`;
-            URL = null;
-            return { title, URL };
-        }
-        if (playerStatus === 'idle') {
-            title = '**Ready to play!**';
-            URL = null;
-            return { title, URL };
-        }
-        if (playerStatus === 'paused') {
-            title = `${discordEmojis.musicEmojis.pause} Pausado\n` + `${playinSong.songName}`;
-            URL = `https://www.youtube.com/watch?v=${playinSong.songId}`;
-            return { title, URL };
-        }
+    private mapTitleAndURlData(
+        playinSong: SongData,
+        playerStatus: string,
+        conectionStatus: string,
+    ): { title: string; URL: string | undefined } {
+        const titleAndURLOptions: { condition: boolean; title: string; URL: string | undefined }[] = [
+            {
+                condition: !playerStatus || !conectionStatus,
+                title: `${discordEmojis.problem} La función de música aún no está activada, añada alguna cancion`,
+                URL: undefined,
+            },
+            {
+                condition: conectionStatus === 'destroyed',
+                title:
+                    `${discordEmojis.problem} Es necesario reconectar el bot, usa los comandos:` +
+                    ` play o join`,
+                URL: undefined,
+            },
+            {
+                condition: playerStatus === 'idle',
+                title: '**Ready to play!**',
+                URL: undefined,
+            },
+            {
+                condition: playerStatus === 'paused',
+                title: `${discordEmojis.musicEmojis.pause} Pausado\n` + `${playinSong?.songName}`,
+                URL: `https://www.youtube.com/watch?v=${playinSong?.songId}`,
+            },
+            {
+                condition: true, //default
+                title:
+                    `${discordEmojis.musicEmojis.playing} Playing ${discordEmojis.musicEmojis.playing}\n` +
+                    `${playinSong?.songName}`,
+                URL: `https://www.youtube.com/watch?v=${playinSong?.songId}`,
+            },
+        ];
+        const titleAndUrl = titleAndURLOptions.find(
+            (option: { condition: boolean; title: string; URL: string | undefined }) => option.condition,
+        );
 
-        title =
-            `${discordEmojis.musicEmojis.playing} Playing ${discordEmojis.musicEmojis.playing}\n` +
-            `${playinSong.songName}`;
-        URL = `https://www.youtube.com/watch?v=${playinSong.songId}`;
-        return { title, URL };
+        return {
+            title: titleAndUrl!.title,
+            URL: titleAndUrl!.URL,
+        };
     }
 
     private mapFieldData(playListStatus: PlayListStatus): EmbedFieldData[] {
@@ -162,7 +183,7 @@ export class DisplayEmbedBuilder {
         playerStatus,
         conectionStatus,
         ...playListStatus
-    }: PlayListStatus) {
+    }: PlayListStatus): { duration: string; queueData: string } {
         let duration: string;
         let queueData: string;
 
@@ -186,23 +207,26 @@ export class DisplayEmbedBuilder {
         return { duration, queueData };
     }
 
-    private mapSongThumbnailUrl(playinSong: SongData, playerStatus: string, conectionStatus: string) {
+    private mapSongThumbnailUrl(
+        playinSong: SongData,
+        playerStatus: string,
+        conectionStatus: string,
+    ): string | undefined {
         if (
             !playerStatus ||
             !conectionStatus ||
             conectionStatus === 'destroyed' ||
-            !playinSong ||
             playerStatus === 'idle'
         ) {
             return;
         }
-        if (playinSong.thumbnails) {
+        if (playinSong?.thumbnails) {
             return playinSong.thumbnails;
         }
         return;
     }
 
-    private mapNextSongData(playList: SongData[]) {
+    private mapNextSongData(playList: SongData[]): EmbedFieldData | void {
         if (playList[1]) {
             return {
                 name: 'Siguiente cancion',

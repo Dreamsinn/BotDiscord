@@ -1,52 +1,49 @@
-import { Message } from 'discord.js';
+import { ButtonInteraction, CacheType, Message, MessageOptions } from 'discord.js';
 import { discordEmojis } from '../../domain/discordEmojis';
+import { ButtonsStyleEnum } from '../../domain/enums/buttonStyleEnum';
 import { PaginationButtonsIdEnum } from '../../domain/enums/paginationButtonsIdEnum';
+import { ButtonRow } from '../../domain/interfaces/button';
 import {
-    ButtonRowList,
-    ButtonsStyle,
-    CreateMessageOptions,
+    CreatePaginatedMessage,
     EmbedOptions,
     MessageContent,
     PaginationOptions,
 } from '../../domain/interfaces/createEmbedOptions';
-import { SongData } from '../../domain/interfaces/songData';
 import { MessageButtonsCreator } from './messageButtonsCreator';
 import { MessageCreator } from './messageCreator';
-
 export class PaginatedMessage {
-    private message: MessageContent;
+    private message: MessageContent | undefined;
     private embed: EmbedOptions;
     private pagination: PaginationOptions;
     private page = 1;
     private paginatedStringData: string[];
 
-    constructor(messageData: CreateMessageOptions) {
+    constructor(messageData: CreatePaginatedMessage) {
         this.message = messageData.message;
         this.embed = messageData.embed;
         this.pagination = messageData.pagination;
     }
 
-    public async call() {
-        if (this.pagination.rawDataToPaginate) {
-            this.pagination.dataToPaginate = this.createPaginationData();
-        }
-
+    public async call(): Promise<Message> {
         this.paginatedStringData = this.paginateData();
 
         const output = this.createPageEmbed();
 
-        let paginatedMessage: Message;
-        if (this.pagination.reply) {
-            paginatedMessage = await this.pagination.event.reply(output);
-        } else
-            paginatedMessage = this.pagination.event
-                ? await this.pagination.event.channel.send(output)
-                : await this.pagination.channel.send(output);
+        let message: Promise<Message<boolean>>;
+        if (this.pagination.reply === true) {
+            message = this.pagination.event.reply(output);
+        } else {
+            message = this.pagination.channel.send(output);
+        }
 
+        // for type isses, if message was sending the message then if(!(maxPage > 1)) would return void
+        // if only 1 page send without buttons
         const maxPage = this.paginatedStringData.length;
         if (!(maxPage > 1)) {
-            return;
+            return await message;
         }
+
+        const paginatedMessage = await message;
 
         this.addButtonsReactions(paginatedMessage);
 
@@ -55,37 +52,21 @@ export class PaginatedMessage {
         return paginatedMessage;
     }
 
-    private createPaginationData() {
-        const playListString: string[] = [];
-
-        this.pagination.rawDataToPaginate.forEach((e: SongData, i: number) => {
-            playListString.push(this.mapPagesData(e, i));
-        });
-        return playListString;
-    }
-
-    private mapPagesData(songData: SongData, index: number) {
-        const songsString = `${index + 1} - ${songData.songName} '${songData.duration.string}'\n`;
-
-        return songsString;
-    }
-
-    private paginateData() {
+    private paginateData(): string[] {
         const paginatedData: string[][] = [];
 
         while (this.pagination.dataToPaginate.length > 0) {
             paginatedData.push(this.pagination.dataToPaginate.splice(0, this.pagination.dataPerPage));
         }
 
-        const paginatedStringData: string[] = [];
-        paginatedData.forEach((songPage: string[]) => {
-            paginatedStringData.push(this.convertPageToString(songPage));
-        });
+        const paginatedStringData: string[] = paginatedData.map((songPage: string[]) =>
+            this.convertPageToString(songPage),
+        );
 
         return paginatedStringData;
     }
 
-    private convertPageToString(songPage: string[]) {
+    private convertPageToString(songPage: string[]): string {
         let pageStringData: string;
         if (this.pagination.jsFormat) {
             pageStringData = '```js\n';
@@ -102,68 +83,73 @@ export class PaginatedMessage {
         return pageStringData;
     }
 
-    private createPageEmbed() {
+    private createPageEmbed(): MessageOptions {
+        let description: string | undefined;
+        if (this.paginatedStringData.length === 1 && this.embed.description) {
+            description = this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`;
+        } else if (this.paginatedStringData.length === 1) {
+            description = this.paginatedStringData[this.page - 1];
+        } else {
+            description = this.embed.description ?? undefined;
+        }
+
         const output = new MessageCreator({
             message: {
-                content: this.message ? this.message.content : null,
+                content: this.message?.content ?? ' ',
             },
             embed: {
-                color: this.embed.color ? this.embed.color : null,
-                title: this.embed.title ? this.embed.title : null,
-                URL: this.embed.URL ? this.embed.URL : null,
-                author: this.embed.author ? this.embed.author : null,
-                description:
-                    this.paginatedStringData.length === 1 && this.embed.description
-                        ? this.embed.description + '\n' + `${this.paginatedStringData[this.page - 1]}`
-                        : this.paginatedStringData.length === 1
-                            ? this.paginatedStringData[this.page - 1]
-                            : this.embed.description
-                                ? this.embed.description
-                                : null,
-                thumbnailUrl: this.embed.thumbnailUrl ? this.embed.thumbnailUrl : null,
-                fields: this.embed.fields ? this.embed.fields : null,
+                color: this.embed.color ?? undefined,
+                title: this.embed.title ?? undefined,
+                URL: this.embed.URL ?? undefined,
+                author: this.embed.author ?? undefined,
+                description,
+                fields: this.embed.fields ?? undefined,
                 field:
                     this.paginatedStringData.length > 1
                         ? {
-                            name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                            value: `${this.paginatedStringData[this.page - 1]}`,
-                            inline: false,
-                        }
-                        : null,
-                imageUrl: this.embed.imageUrl ? this.embed.imageUrl : null,
-                timeStamp: this.embed.timeStamp ? this.embed.timeStamp : null,
-                footer: this.embed.footer ? this.embed.footer : null,
+                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                              value: `${this.paginatedStringData[this.page - 1]}`,
+                              inline: false,
+                          }
+                        : undefined,
+                imageUrl: this.embed.imageUrl ?? undefined,
+                timeStamp: this.embed.timeStamp ?? undefined,
+                footer: this.embed.footer ?? undefined,
             },
         }).call();
         return output;
     }
 
-    private addButtonsReactions(paginatedMessage: Message) {
-        const buttons: ButtonRowList = [
-            [
-                {
-                    style: ButtonsStyle.BLUE,
-                    label: discordEmojis['<-'],
-                    custom_id: PaginationButtonsIdEnum.PREV,
-                },
-                {
-                    style: ButtonsStyle.BLUE,
-                    label: discordEmojis['->'],
-                    custom_id: PaginationButtonsIdEnum.NEXT,
-                },
-                {
-                    style: ButtonsStyle.RED,
-                    label: discordEmojis.x,
-                    custom_id: PaginationButtonsIdEnum.X,
-                },
-            ],
+    private addButtonsReactions(paginatedMessage: Message): void {
+        const buttons: ButtonRow = [
+            {
+                style: ButtonsStyleEnum.BLUE,
+                label: discordEmojis['<-'],
+                custom_id: PaginationButtonsIdEnum.PREV,
+            },
+            {
+                style: ButtonsStyleEnum.BLUE,
+                label: discordEmojis['->'],
+                custom_id: PaginationButtonsIdEnum.NEXT,
+            },
         ];
-        paginatedMessage.edit({ components: new MessageButtonsCreator(buttons).call() });
 
-        return;
+        if (this.pagination.closeButton) {
+            buttons.push({
+                style: ButtonsStyleEnum.RED,
+                label: discordEmojis.x,
+                custom_id: PaginationButtonsIdEnum.X,
+            });
+        }
+
+        paginatedMessage
+            .edit({ components: new MessageButtonsCreator([buttons]).call() })
+            .catch((err) => {
+                console.log('Error adding buttons to paginated embed: ', err);
+            });
     }
 
-    private reactionListener(message: Message, maxPage: number) {
+    private reactionListener(message: Message, maxPage: number): void {
         const collector = message.createMessageComponentCollector({
             componentType: 'BUTTON',
             time: this.pagination.timeOut,
@@ -185,16 +171,29 @@ export class PaginatedMessage {
                     content: discordEmojis.x,
                 },
             }).call();
-            await message.edit(output).catch((err) => {
-                console.log({ err });
+
+            // if deleteWhenTimeOut, delete message
+            if (this.pagination.deleteWhenTimeOut) {
+                message.delete().catch((err) => {
+                    console.log('Pagination deleting error: ', err);
+                });
+                return;
+            }
+
+            // else delete message's buttons
+            await message.edit({ content: output.content, components: [] }).catch((err) => {
+                console.log('Pagination editing error: ', err);
             });
-            console.log(`Pagination collector time Out`);
             return;
         });
     }
 
-    private reactionHandler(message: Message, collected, maxPage: number) {
-        let pageChanged: boolean;
+    private reactionHandler(
+        message: Message,
+        collected: ButtonInteraction<CacheType>,
+        maxPage: number,
+    ): void {
+        let pageChanged = false;
 
         const collectedId = collected.customId;
 
@@ -210,8 +209,9 @@ export class PaginatedMessage {
 
         if (pageChanged) {
             const output = this.createPageEmbed();
-
-            return message.edit(output);
+            message.edit({ embeds: output.embeds }).catch((err) => {
+                console.log('Error changing page: ', err);
+            });
         }
         return;
     }
