@@ -63,7 +63,7 @@ export class FindMusicByName extends PlayCommand {
                 Number(reaction.content) > 0 &&
                 Number(reaction.content) < numberChoices;
             // si el autor es el mismo, y el mensaje contiene X, 0 o un numero entre 0 y las numero de opciones
-            return Boolean((authorCondition && letterCondition) || numberCondition);
+            return Boolean(authorCondition || (letterCondition && numberCondition));
         };
 
         try {
