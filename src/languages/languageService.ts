@@ -4,50 +4,66 @@ export type Languages = 'es' | 'en';
 
 export const languagesArray: UnionToArray<Languages> = ['es', 'en'];
 
-class LanguageService {
-    private languageDictionary: { [key in Languages]: any };
+export type JsonObject = {
+    [key: string]: JsonObject | string;
+};
 
-    public async init() {
-        // create object with all languages
-        const jsonDictionary = await this.createJsonDictionary();
+export class LanguageService {
+    private jsonDictionary: { [key in Languages]: JsonObject };
 
-        this.languageDictionary = jsonDictionary;
+    constructor() {
+        this.jsonDictionary = this.createJsonDictionary();
     }
 
-    private async createJsonDictionary(): Promise<any> {
-        const jsonDictionary: { [key in Languages]?: any } = {};
+    private createJsonDictionary(): any {
+        // create object with all languages
+        const jsonDictionary: { [key in Languages]?: JsonObject } = {};
 
-        for (const language of languagesArray) {
-            jsonDictionary[language] = JSON.parse(
-                JSON.stringify(await import(`./locals/${language}.json`)),
-            );
-        }
+        languagesArray.forEach((lengauge: Languages) => {
+            jsonDictionary[lengauge] = require(`./locals/${lengauge}.json`);
+        });
 
         return jsonDictionary;
     }
 
     public t(language: Languages, route: string, variables?: { [key: string]: string }) {
-        const languageObject = this.languageDictionary[language];
+        const json = this.jsonDictionary[language];
 
-        // route ex: 'schemas.clearPlaylist.name'
-        const routeKeys = route.split('.');
+        if (!json) {
+            return route;
+        }
 
-        let step = languageObject;
-        routeKeys.forEach((key: string) => {
-            step = step[key];
-        });
+        const routeSteps = route.split('.');
 
-        let response = `${step}`;
+        let response = this.getValueFromPath(routeSteps, json);
+
+        // if wront route, return it
+        if (!response) {
+            return route;
+        }
 
         if (!variables) {
             return response;
         }
 
         Object.entries(variables).forEach(([key, value]) => {
-            response = response.replace(`{{${key}}}`, value);
+            response = response!.replace(`{{${key}}}`, value);
         });
 
         return response;
+    }
+
+    private getValueFromPath(path: string[], obj: any): string | undefined {
+        let step = obj;
+        for (const key of path) {
+            if (step.hasOwnProperty(key)) {
+                step = step[key];
+            } else {
+                return undefined;
+            }
+        }
+
+        return step;
     }
 }
 
