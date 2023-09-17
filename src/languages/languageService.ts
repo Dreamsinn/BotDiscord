@@ -56,6 +56,7 @@ export class LanguageService {
     private getValueFromPath(path: string[], obj: any): string | undefined {
         let step = obj;
         for (const key of path) {
+            // eslint-disable-next-line no-prototype-builtins
             if (step.hasOwnProperty(key)) {
                 step = step[key];
             } else {

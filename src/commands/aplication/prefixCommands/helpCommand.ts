@@ -13,6 +13,7 @@ import {
 import { SchemaDictionary } from '../../domain/interfaces/schemaDictionary';
 import { MessageCreator } from '../utils/messageCreator';
 import { UsersUsingACommand } from '../utils/usersUsingACommand';
+import messageToEditMissage from '../utils/messageToEditMissage';
 
 export class HelpCommand extends Command {
     private commandList: HelpCommandList;
@@ -254,7 +255,7 @@ export class HelpCommand extends Command {
         }
 
         await helpEmbed
-            .edit(response.output)
+            .edit(messageToEditMissage(response.output))
             .then((previousEmbedMessage) =>
                 this.messageResponseListener(previousEmbedMessage, event, response.type),
             )
@@ -338,7 +339,7 @@ export class HelpCommand extends Command {
             };
         }
         await helpEmbed
-            .edit(response.output)
+            .edit(messageToEditMissage(response.output))
             .then((nextEmbedMessage) =>
                 this.messageResponseListener(nextEmbedMessage, event, response.type),
             )

@@ -2,6 +2,7 @@ import { Message } from 'discord.js';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { MessageCreator } from '../../../utils/messageCreator';
 import { PaginatedMessage } from '../../../utils/paginatedMessage';
+import messageToEditMissage from '../../../utils/messageToEditMissage';
 
 interface Response {
     newCoolDown: number;
@@ -27,7 +28,7 @@ export class ChangeCoolDown {
 
             let changeCoolDownMessage: Message;
             try {
-                changeCoolDownMessage = await selectSchemaMessage.edit(changeCoolDownEmbed);
+                changeCoolDownMessage = await selectSchemaMessage.edit(messageToEditMissage(changeCoolDownEmbed));
             } catch (error) {
                 changeCoolDownMessage = await event.channel.send(changeCoolDownEmbed);
             }

@@ -22,6 +22,7 @@ import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 import { AddSongsToPlaylist } from './utils/addSongToPlaylist';
 import { ChangePlaylistName } from './utils/changePlaylistName';
 import { RemoveSongsFromPlayList } from './utils/removeSongsFromPlaylist';
+import messageToEditMissage from '../../../utils/messageToEditMissage';
 
 type SongDictionary = Map<string, SongData>;
 
@@ -248,7 +249,7 @@ export class UpdatePlaylistCommand extends Command {
         let playlistOptionsMessage: Message<boolean> | void;
         if (playlistMessage) {
             // if is called with a message, edit it to update it
-            playlistOptionsMessage = await playlistMessage.edit(playlistOptionsEmbed).catch(async () => {
+            playlistOptionsMessage = await playlistMessage.edit(messageToEditMissage(playlistOptionsEmbed)).catch(async () => {
                 await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
             });
         } else {

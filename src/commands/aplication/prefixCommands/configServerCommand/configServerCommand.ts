@@ -16,6 +16,7 @@ import { ChangeAdminRole } from './utils/changeAdminRole';
 import { ChangeLanguage } from './utils/changeLanguage';
 import { ChangePrefix } from './utils/changePrefix';
 import { RemoveUserFromBlacklist } from './utils/removeUserFromBlacklist';
+import messageToEditMissage from '../../utils/messageToEditMissage';
 
 interface BlackListUser {
     id: string;
@@ -130,7 +131,7 @@ export class ConfigServerCommand extends Command {
         let configOptionsMessage: Message<boolean> | void;
         if (changeConfigMessage) {
             // if is called with a message, edit it to update it
-            configOptionsMessage = await changeConfigMessage.edit(configOptionEmbed).catch(async () => {
+            configOptionsMessage = await changeConfigMessage.edit(messageToEditMissage(configOptionEmbed)).catch(async () => {
                 await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
                 await this.saveChanges(event);
             });
