@@ -12,6 +12,7 @@ import { MessageCreator } from '../../utils/messageCreator';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 import { ChangeAdminOnly } from './utils/changeAdminOnly';
 import { ChangeCoolDown } from './utils/changeCoolDown';
+import messageToEditMissage from '../../utils/messageToEditMissage';
 
 interface CooldownModifiedSchema {
     command: CommandsNameEnum;
@@ -60,7 +61,7 @@ export class ConfigSchemaCommand extends Command {
         if (configSchemaListMessage) {
             // if is called with a message, edit it to update it
             configSchemaListMessage = await configSchemaListMessage
-                .edit(configSchemaListEmbed)
+                .edit(messageToEditMissage(configSchemaListEmbed))
                 .catch(async () => {
                     await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
                     // await this.saveChanges(event);
