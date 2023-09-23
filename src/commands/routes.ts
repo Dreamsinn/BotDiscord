@@ -1,5 +1,3 @@
-import { ConnectionHandler } from '../database/connectionHandler';
-import { PlayListHandler } from './aplication/playListHandler';
 import { ConfigSchemaCommand } from './aplication/prefixCommands/configSchemaCommand/configSchemaCommand';
 import { ConfigServerCommand } from './aplication/prefixCommands/configServerCommand/configServerCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
@@ -23,175 +21,154 @@ import { RemoveSongsFromPlayListCommand } from './aplication/prefixCommands/musi
 import { ShufflePlayListCommand } from './aplication/prefixCommands/musicCommands/shufflePlayListCommand';
 import { SkipMusicCommand } from './aplication/prefixCommands/musicCommands/skipMusicCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
-import { DisplayEmbedBuilder } from './aplication/utils/displayEmbedBuilder';
-import { FindMusicByName } from './aplication/utils/findMusic/findMusicByName';
-import { FindMusicBySpotifySongURL } from './aplication/utils/findMusic/findMusicBySpotifySongURL';
-import { FindMusicByYouTubeMobileURL } from './aplication/utils/findMusic/findMusicByYouTubeMobileURL';
-import { FindMusicByYouTubeURL } from './aplication/utils/findMusic/findMusicByYouTubeURL';
-import { FindPlaylistBySpotifyURL } from './aplication/utils/findMusic/findPlaylistBySpotifyURL';
-import { FindPlayListByYoutubeURL } from './aplication/utils/findMusic/findPlayListByYoutubeURL';
-import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
+import { CommandsDependencies } from './commandsDependencies';
+import { CommandsServerDependencies } from './commandsServerDependencies';
 import { Command } from './domain/interfaces/Command';
 import { CommandSchema } from './domain/interfaces/commandSchema';
-import { MusicAPIs } from './domain/interfaces/musicAPIs';
 import { SchemaDictionary } from './domain/interfaces/schemaDictionary';
-import { PlayDlService } from './infrastructure/playDlService';
-import { SpotifyAPIService } from './infrastructure/spotifyAPIService';
-import { YouTubeAPIService } from './infrastructure/youTubeAPIService';
+
+interface RawRoute {
+    schema: CommandSchema;
+    command: new (...args: any[]) => Command;
+}
 
 interface Route {
     schema: CommandSchema;
-    command: Command;
+    command: new (...args: any[]) => Command;
+    dependencies: any[];
 }
 
-export class Routes {
-    private musicAPIs: MusicAPIs = {
-        youtubeAPI: new YouTubeAPIService(),
-        playDlAPI: new PlayDlService(),
-        spotifyAPI: new SpotifyAPIService(),
-    };
-    private displayEmbedBuilder = new DisplayEmbedBuilder();
-    private playListHandler = new PlayListHandler(this.musicAPIs.playDlAPI, this.displayEmbedBuilder);
-    private findMusicByName = new FindMusicByName(this.musicAPIs, this.usersUsingACommand);
-    private findMusicByYouTubeMobileURL = new FindMusicByYouTubeMobileURL(this.musicAPIs);
-    private findPlayListByYoutubeURL = new FindPlayListByYoutubeURL(
-        this.musicAPIs,
-        this.usersUsingACommand,
-    );
-    private findMusicByYouTubeURL = new FindMusicByYouTubeURL(this.musicAPIs);
-    private findMusicBySpotifySongURL = new FindMusicBySpotifySongURL(this.musicAPIs);
-    private findMusicBySpotifyPlaylistURL = new FindPlaylistBySpotifyURL(this.musicAPIs);
+export class Routes extends CommandsServerDependencies {
+    constructor(schemaDictionary: SchemaDictionary, commandsDependencies: CommandsDependencies) {
+        super(schemaDictionary, commandsDependencies);
+        this.routeList = this.finalRoutes();
+    }
 
-    constructor(
-        private usersUsingACommand: UsersUsingACommand,
-        private schemaDictionary: SchemaDictionary,
-        private databaseConnection: ConnectionHandler,
-    ) {}
+    private finalRoutes(): Route[] {
+        const routes = this.rawRouteList.map((route) => {
+            const dependencies = [];
 
-    public routeList: Route[] = [
+            if (route.command && route.command.prototype && route.command.prototype.constructor) {
+                const constructorParams = route.command.prototype.constructor.toString();
+                const constructorParamsMatch = constructorParams.match(/\((.*?)\)/);
+
+                if (constructorParamsMatch && constructorParamsMatch[1]) {
+                    const constructorParamNames = constructorParamsMatch[1]
+                        .split(',')
+                        .map((param: any) => param.trim());
+
+                    for (const paramName of constructorParamNames) {
+                        const dependency = this[paramName as keyof typeof this];
+                        if (dependency) {
+                            dependencies.push(dependency);
+                        }
+                    }
+                }
+            }
+
+            return {
+                ...route,
+                dependencies,
+            };
+        });
+
+        return routes;
+    }
+
+    public routeList: Route[];
+
+    private rawRouteList: RawRoute[] = [
         {
             schema: this.schemaDictionary['Play Command'],
-            command: new PlayCommand(
-                this.playListHandler,
-                this.findMusicByName,
-                this.findMusicByYouTubeMobileURL,
-                this.findPlayListByYoutubeURL,
-                this.findMusicByYouTubeURL,
-                this.findMusicBySpotifySongURL,
-                this.findMusicBySpotifyPlaylistURL,
-            ),
+            command: PlayCommand,
         },
         {
             schema: this.schemaDictionary['Playlist Command'],
-            command: new PlayListCommand(this.playListHandler),
+            command: PlayListCommand,
         },
         {
             schema: this.schemaDictionary['Help Command'],
-            command: new HelpCommand(this.usersUsingACommand),
+            command: HelpCommand,
         },
         {
             schema: this.schemaDictionary['Pause Command'],
-            command: new PauseCommand(this.playListHandler),
+            command: PauseCommand,
         },
         {
             schema: this.schemaDictionary['Skip Music Command'],
-            command: new SkipMusicCommand(this.playListHandler),
+            command: SkipMusicCommand,
         },
         {
             schema: this.schemaDictionary['Disconnect Command'],
-            command: new DisconnectCommand(this.playListHandler),
+            command: DisconnectCommand,
         },
         {
             schema: this.schemaDictionary['Join Channel Command'],
-            command: new JoinChannelCommand(this.playListHandler),
+            command: JoinChannelCommand,
         },
         {
             schema: this.schemaDictionary['Clear Playlist Command'],
-            command: new ClearPlayListCommand(this.playListHandler),
+            command: ClearPlayListCommand,
         },
         {
             schema: this.schemaDictionary['Remove Songs From Playlist Command'],
-            command: new RemoveSongsFromPlayListCommand(this.playListHandler, this.usersUsingACommand),
+            command: RemoveSongsFromPlayListCommand,
         },
         {
             schema: this.schemaDictionary['Shuffle Playlist Command'],
-            command: new ShufflePlayListCommand(this.playListHandler),
+            command: ShufflePlayListCommand,
         },
         {
             schema: this.schemaDictionary['Loop Playlist Mode Command'],
-            command: new LoopPlayListModeCommand(this.playListHandler),
+            command: LoopPlayListModeCommand,
         },
         {
             schema: this.schemaDictionary['Display Playlist Command'],
-            command: new DisplayPlayListCommand(this.playListHandler),
+            command: DisplayPlayListCommand,
         },
         {
             schema: this.schemaDictionary['Dice Command Toggler'],
-            command: new DiceCommandToggler(),
+            command: DiceCommandToggler,
         },
         {
             schema: this.schemaDictionary['Reply Command Toggler'],
-            command: new ReplyCommandToggler(),
+            command: ReplyCommandToggler,
         },
         {
             schema: this.schemaDictionary['Log Playlist Status Command'],
-            command: new LogPlaylistStatusCommand(this.playListHandler),
+            command: LogPlaylistStatusCommand,
         },
         {
             schema: this.schemaDictionary['Play Now Command'],
-            command: new PlayNowCommand(this.playListHandler, this.usersUsingACommand),
+            command: PlayNowCommand,
         },
         {
             schema: this.schemaDictionary['Config Server Command'],
-            command: new ConfigServerCommand(this.databaseConnection, this.usersUsingACommand),
+            command: ConfigServerCommand,
         },
         {
             schema: this.schemaDictionary['Config Schema Command'],
-            command: new ConfigSchemaCommand(this.databaseConnection, this.usersUsingACommand),
+            command: ConfigSchemaCommand,
         },
         {
             schema: this.schemaDictionary['Create Playlist Command'],
-            command: new CreatePlaylistCommand(
-                this.playListHandler,
-                this.databaseConnection,
-                this.usersUsingACommand,
-                this.findMusicByName,
-                this.findMusicByYouTubeMobileURL,
-                this.findPlayListByYoutubeURL,
-                this.findMusicByYouTubeURL,
-                this.findMusicBySpotifySongURL,
-                this.findMusicBySpotifyPlaylistURL,
-            ),
+            command: CreatePlaylistCommand,
         },
         {
             schema: this.schemaDictionary['Show Playlist Command'],
-            command: new ShowPlaylistCommand(this.databaseConnection, this.usersUsingACommand),
+            command: ShowPlaylistCommand,
         },
         {
             schema: this.schemaDictionary['Delete Playlist Command'],
-            command: new DeletePlaylistCommand(this.databaseConnection, this.usersUsingACommand),
+            command: DeletePlaylistCommand,
         },
         {
             schema: this.schemaDictionary['Update Playlist Command'],
-            command: new UpdatePlaylistCommand(
-                this.playListHandler,
-                this.databaseConnection,
-                this.usersUsingACommand,
-                this.findMusicByName,
-                this.findMusicByYouTubeMobileURL,
-                this.findPlayListByYoutubeURL,
-                this.findMusicByYouTubeURL,
-                this.findMusicBySpotifySongURL,
-                this.findMusicBySpotifyPlaylistURL,
-            ),
+            command: UpdatePlaylistCommand,
         },
         {
             schema: this.schemaDictionary['Play Playlist Command'],
-            command: new PlayPlaylistCommand(
-                this.playListHandler,
-                this.databaseConnection,
-                this.usersUsingACommand,
-            ),
+            command: PlayPlaylistCommand,
         },
     ];
 }

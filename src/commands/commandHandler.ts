@@ -87,33 +87,36 @@ export class CommandHandler {
                 // we cant take route.schema directly becouse this dont get update when schemas are updated
                 const schema = this.schemaDictionary[`${route.schema.command}`];
 
-                if (route.command instanceof DiceCommandToggler) {
-                    return route.command.call(event, adminRole, schema, {
+                // before use the command instance it
+                const command = new route.command([...route.dependencies]);
+
+                if (command instanceof DiceCommandToggler) {
+                    return command.call(event, adminRole, schema, {
                         diceCommand: this.diceCommand,
                     });
                 }
 
-                if (route.command instanceof ReplyCommandToggler) {
-                    return route.command.call(event, adminRole, schema, {
+                if (command instanceof ReplyCommandToggler) {
+                    return command.call(event, adminRole, schema, {
                         replyCommand: this.replyCommand,
                     });
                 }
 
-                if (route.command instanceof HelpCommand) {
-                    return route.command.call(event, adminRole, schema, {
+                if (command instanceof HelpCommand) {
+                    return command.call(event, adminRole, schema, {
                         prefix: this.prefix,
                         schemaList: this.schemaDictionary,
                         language: this.language,
                     });
                 }
 
-                if (route.command instanceof ConfigSchemaCommand) {
-                    return route.command.call(event, adminRole, schema, {
+                if (command instanceof ConfigSchemaCommand) {
+                    return command.call(event, adminRole, schema, {
                         schemaList: this.schemaDictionary,
                     });
                 }
 
-                return route.command.call(event, adminRole, schema);
+                return command.call(event, adminRole, schema);
             }
         }
     }
