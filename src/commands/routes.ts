@@ -41,10 +41,10 @@ interface Route {
 export class Routes extends CommandsServerDependencies {
     constructor(schemaDictionary: SchemaDictionary, commandsDependencies: CommandsDependencies) {
         super(schemaDictionary, commandsDependencies);
-        this.routeList = this.finalRoutes();
+        this.routeList = this.findDependenciesOfCommands();
     }
 
-    private finalRoutes(): Route[] {
+    private findDependenciesOfCommands(): Route[] {
         const routes = this.rawRouteList.map((route) => {
             const dependencies = [];
 
