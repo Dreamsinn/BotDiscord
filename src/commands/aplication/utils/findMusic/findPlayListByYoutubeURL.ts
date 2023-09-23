@@ -9,12 +9,19 @@ import { UsersUsingACommand } from '../usersUsingACommand';
 export class FindPlayListByYoutubeURL extends PlayCommand {
     private usersUsingACommand: UsersUsingACommand;
 
-    constructor(musicAPIs: MusicAPIs, usersUsingACommand: UsersUsingACommand) {
+    constructor(musicAPIs: MusicAPIs) {
         super(musicAPIs);
-        this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, url: string): Promise<SongData | SongData[] | void> {
+    async call(
+        event: Message,
+        argument: string,
+        usersUsingACommand: UsersUsingACommand,
+    ): Promise<SongData | SongData[] | void> {
+        const url = argument;
+
+        this.usersUsingACommand = usersUsingACommand;
+
         if (!url.includes('&list=')) {
             // sino se esta rerpoduciendo un video
             return this.notStartedPlayListUrl(event, url);

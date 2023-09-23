@@ -8,6 +8,7 @@ import { HelpCommand } from './aplication/prefixCommands/helpCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
+import { PlayCommand } from './domain/interfaces/playCommand';
 import { SchemaDictionary } from './domain/interfaces/schemaDictionary';
 import { Routes } from './routes';
 
@@ -88,7 +89,7 @@ export class CommandHandler {
                 const schema = this.schemaDictionary[`${route.schema.command}`];
 
                 // before use the command instance it
-                const command = new route.command([...route.dependencies]);
+                const command = new route.command(...route.dependencies);
 
                 if (command instanceof DiceCommandToggler) {
                     return command.call(event, adminRole, schema, {
@@ -113,6 +114,12 @@ export class CommandHandler {
                 if (command instanceof ConfigSchemaCommand) {
                     return command.call(event, adminRole, schema, {
                         schemaList: this.schemaDictionary,
+                    });
+                }
+
+                if (command instanceof PlayCommand) {
+                    return command.call(event, adminRole, schema, {
+                        usersUsingACommand: this.usersUsingACommand,
                     });
                 }
 

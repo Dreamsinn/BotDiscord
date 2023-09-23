@@ -16,12 +16,12 @@ import { FindMusicByYouTubeURL } from '../../../utils/findMusic/findMusicByYouTu
 import { FindPlaylistBySpotifyURL } from '../../../utils/findMusic/findPlaylistBySpotifyURL';
 import { FindPlayListByYoutubeURL } from '../../../utils/findMusic/findPlayListByYoutubeURL';
 import { MessageCreator } from '../../../utils/messageCreator';
+import messageToEditMissage from '../../../utils/messageToEditMissage';
 import { PaginatedMessage } from '../../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 import { AddSongsToPlaylist } from './utils/addSongToPlaylist';
 import { ChangePlaylistName } from './utils/changePlaylistName';
 import { RemoveSongsFromPlayList } from './utils/removeSongsFromPlaylist';
-import messageToEditMissage from '../../../utils/messageToEditMissage';
 
 export class CreatePlaylistCommand extends Command {
     private playlistData: NewPlaylist;
@@ -77,9 +77,11 @@ export class CreatePlaylistCommand extends Command {
         let playlistOptionsMessage: Message<boolean> | void;
         if (playlistMessage) {
             // if is called with a message, edit it to update it
-            playlistOptionsMessage = await playlistMessage.edit(messageToEditMissage(playlistOptionsEmbed)).catch(async () => {
-                await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
-            });
+            playlistOptionsMessage = await playlistMessage
+                .edit(messageToEditMissage(playlistOptionsEmbed))
+                .catch(async () => {
+                    await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
+                });
         } else {
             // if first time this method is called, create the message
             playlistOptionsMessage = await event.channel.send(playlistOptionsEmbed);
@@ -250,7 +252,7 @@ export class CreatePlaylistCommand extends Command {
             this.findMusicByYouTubeURL,
             this.findMusicBySpotifySongURL,
             this.findMusicBySpotifyPlaylistURL,
-        ).call(event);
+        ).call(event, this.usersUsingACommand);
 
         this.usersUsingACommand.removeUserList(event.author.id);
 

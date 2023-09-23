@@ -7,6 +7,7 @@ import { FindMusicByYouTubeURL } from '../../../../utils/findMusic/findMusicByYo
 import { FindPlaylistBySpotifyURL } from '../../../../utils/findMusic/findPlaylistBySpotifyURL';
 import { FindPlayListByYoutubeURL } from '../../../../utils/findMusic/findPlayListByYoutubeURL';
 import { MessageCreator } from '../../../../utils/messageCreator';
+import { UsersUsingACommand } from '../../../../utils/usersUsingACommand';
 
 export class AddSongsToPlaylist {
     constructor(
@@ -18,7 +19,10 @@ export class AddSongsToPlaylist {
         private findMusicBySpotifyPlaylistURL: FindPlaylistBySpotifyURL,
     ) {}
 
-    async call(event: Message): Promise<SongData | SongData[] | void | Error> {
+    async call(
+        event: Message,
+        usersUsingACommand: UsersUsingACommand,
+    ): Promise<SongData | SongData[] | void | Error> {
         const addSongToPlaylistEmbed = this.createDddSongToPlaylistEmbed(event);
 
         const addSongToPlaylistMessage = await event.channel.send(addSongToPlaylistEmbed);
@@ -42,7 +46,11 @@ export class AddSongsToPlaylist {
                     return;
                 }
 
-                return this.findSongByArgumentType(collectedMessage[0].content, event);
+                return this.findSongByArgumentType(
+                    collectedMessage[0].content,
+                    event,
+                    usersUsingACommand,
+                );
             })
             .catch(async (err) => {
                 if (err instanceof Error) {
@@ -81,6 +89,7 @@ export class AddSongsToPlaylist {
     private async findSongByArgumentType(
         argument: string,
         event: Message,
+        usersUsingACommand: UsersUsingACommand,
     ): Promise<void | SongData | SongData[]> {
         const argumentTypeDictionary = {
             mobil: {
@@ -115,6 +124,6 @@ export class AddSongsToPlaylist {
 
         const argumentType = Object.values(argumentTypeDictionary).find((value) => value.condition);
 
-        return await argumentType?.route.call(event, argument);
+        return await argumentType?.route.call(event, argument, usersUsingACommand);
     }
 }

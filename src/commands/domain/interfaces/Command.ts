@@ -4,10 +4,12 @@ import { DiceCommand } from '../../aplication/non-prefixCommands/diceCommand';
 import { ReplyCommand } from '../../aplication/non-prefixCommands/replyCommand';
 import { CheckAdminRole } from '../../aplication/utils/checkAdminRole';
 import { CoolDown } from '../../aplication/utils/coolDown';
+import { UsersUsingACommand } from '../../aplication/utils/usersUsingACommand';
 import { CommandSchema } from './commandSchema';
 import { SchemaDictionary } from './schemaDictionary';
 
-interface CommandProps {
+export interface CommandProps {
+    usersUsingACommand?: UsersUsingACommand;
     diceCommand?: DiceCommand;
     replyCommand?: ReplyCommand;
     schemaList?: SchemaDictionary;

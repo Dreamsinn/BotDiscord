@@ -3,6 +3,7 @@ import { DiceCommand } from './commands/aplication/non-prefixCommands/diceComman
 import { ReplyCommand } from './commands/aplication/non-prefixCommands/replyCommand';
 import { UsersUsingACommand } from './commands/aplication/utils/usersUsingACommand';
 import { CommandHandler } from './commands/commandHandler';
+import { CommandsDependencies } from './commands/commandsDependencies';
 import { CommandSchema } from './commands/domain/interfaces/commandSchema';
 import { SchemaDictionary } from './commands/domain/interfaces/schemaDictionary';
 import { Server } from './commands/domain/interfaces/server';
@@ -14,13 +15,12 @@ import { Languages } from './languages/languageService';
 
 export class ServerRouting {
     private serverList: Server[] = [];
-    private databaseConnection: ConnectionHandler;
-    private commandSchemaList: CommandSchema[];
 
-    constructor(databaseConnection: ConnectionHandler, commandSchemaList: CommandSchema[]) {
-        this.databaseConnection = databaseConnection;
-        this.commandSchemaList = commandSchemaList;
-    }
+    constructor(
+        private databaseConnection: ConnectionHandler,
+        private commandSchemaList: CommandSchema[],
+        private commandsDependencies: CommandsDependencies,
+    ) {}
 
     public async createServerList() {
         // take servers from db and put in memory
@@ -56,7 +56,7 @@ export class ServerRouting {
         const diceCommand = new DiceCommand();
         const replyCommand = new ReplyCommand();
         const usersUsingACommand = new UsersUsingACommand();
-        const routes = new Routes(usersUsingACommand, schemaDictionary, this.databaseConnection);
+        const routes = new Routes(schemaDictionary, this.commandsDependencies);
 
         return new CommandHandler(
             diceCommand,

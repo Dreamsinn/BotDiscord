@@ -7,7 +7,6 @@ import { FindMusicByYouTubeMobileURL } from './aplication/utils/findMusic/findMu
 import { FindMusicByYouTubeURL } from './aplication/utils/findMusic/findMusicByYouTubeURL';
 import { FindPlaylistBySpotifyURL } from './aplication/utils/findMusic/findPlaylistBySpotifyURL';
 import { FindPlayListByYoutubeURL } from './aplication/utils/findMusic/findPlayListByYoutubeURL';
-import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { CommandsDependencies } from './commandsDependencies';
 import { MusicAPIs } from './domain/interfaces/musicAPIs';
 import { SchemaDictionary } from './domain/interfaces/schemaDictionary';
@@ -17,7 +16,6 @@ export abstract class CommandsServerDependencies {
     protected databaseConnection: ConnectionHandler;
     protected musicAPIs: MusicAPIs;
     protected findMusicByName: FindMusicByName;
-    protected usersUsingACommand: UsersUsingACommand;
     protected findMusicByYouTubeMobileURL: FindMusicByYouTubeMobileURL;
     protected findPlayListByYoutubeURL: FindPlayListByYoutubeURL;
     protected findMusicByYouTubeURL: FindMusicByYouTubeURL;
@@ -33,7 +31,6 @@ export abstract class CommandsServerDependencies {
         // dependencies instancied once
         this.musicAPIs = commandsDependencies.musicAPIs;
         this.databaseConnection = commandsDependencies.databaseConnection;
-        this.usersUsingACommand = commandsDependencies.usersUsingACommand;
         this.findMusicByName = commandsDependencies.findMusicByName;
         this.findMusicByYouTubeMobileURL = commandsDependencies.findMusicByYouTubeMobileURL;
         this.findPlayListByYoutubeURL = commandsDependencies.findPlayListByYoutubeURL;

@@ -7,6 +7,12 @@ import { APIResponse } from './APIResponse';
 import { MusicAPIs } from './musicAPIs';
 import { RawSong, SongData, SpotifyRawSong } from './song';
 
+export interface PlayCommandProps {
+    event: Message;
+    argument: string;
+    usersUsingACommand: UsersUsingACommand;
+}
+
 export abstract class PlayCommand {
     protected youtubeAPIService: YouTubeAPIService;
     protected playDlService: PlayDlService;
@@ -21,7 +27,7 @@ export abstract class PlayCommand {
     abstract call(
         event: Message,
         argument: string,
-        usersUsingACommand?: UsersUsingACommand,
+        usersUsingACommand: UsersUsingACommand,
     ): Promise<SongData | SongData[] | void>;
 
     protected async findSongIdFromYoutubeURL(event: Message, url: string): Promise<SongData | void> {

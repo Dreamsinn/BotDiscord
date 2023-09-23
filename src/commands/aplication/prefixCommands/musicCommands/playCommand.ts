@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { Command } from '../../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { SongData, SongsToPlaylist } from '../../../domain/interfaces/song';
 import { PlayListHandler } from '../../playListHandler';
@@ -9,6 +9,7 @@ import { FindMusicByYouTubeMobileURL } from '../../utils/findMusic/findMusicByYo
 import { FindMusicByYouTubeURL } from '../../utils/findMusic/findMusicByYouTubeURL';
 import { FindPlaylistBySpotifyURL } from '../../utils/findMusic/findPlaylistBySpotifyURL';
 import { FindPlayListByYoutubeURL } from '../../utils/findMusic/findPlayListByYoutubeURL';
+import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 
 export class PlayCommand extends Command {
     constructor(
@@ -23,7 +24,12 @@ export class PlayCommand extends Command {
         super();
     }
 
-    public async call(event: Message, adminRole: string, playSchema: CommandSchema): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        playSchema: CommandSchema,
+        { usersUsingACommand }: CommandProps,
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, playSchema, adminRole)) {
             return;
         }
@@ -43,7 +49,7 @@ export class PlayCommand extends Command {
         const argument = event.content.substring(emptySpacePosition);
         console.log({ argument });
 
-        const songs = await this.findSongByArgumentType(argument, event);
+        const songs = await this.findSongByArgumentType(argument, event, usersUsingACommand!);
 
         if (!songs || (Array.isArray(songs) && !songs.length)) {
             return;
@@ -55,6 +61,7 @@ export class PlayCommand extends Command {
     private async findSongByArgumentType(
         argument: string,
         event: Message,
+        usersUsingACommand: UsersUsingACommand,
     ): Promise<void | SongData | SongData[]> {
         const argumentTypeDictionary = {
             mobil: {
@@ -89,7 +96,12 @@ export class PlayCommand extends Command {
 
         const argumentType = Object.values(argumentTypeDictionary).find((value) => value.condition);
 
-        return await argumentType?.route.call(event, argument);
+        if (!argumentType) {
+            // never should go this way
+            return;
+        }
+
+        return await argumentType.route.call(event, argument, usersUsingACommand);
     }
 
     private async updatePlayList(event: Message, songsData: SongData | SongData[]): Promise<void> {

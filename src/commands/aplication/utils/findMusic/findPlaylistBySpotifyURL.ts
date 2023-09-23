@@ -4,7 +4,9 @@ import { PlayCommand } from '../../../domain/interfaces/playCommand';
 import { SongData, SpotifyRawSong } from '../../../domain/interfaces/song';
 
 export class FindPlaylistBySpotifyURL extends PlayCommand {
-    public async call(event: Message, url: string): Promise<SongData[] | void> {
+    public async call(event: Message, argument: string): Promise<SongData[] | void> {
+        const url = argument;
+
         const idPosition = url.indexOf('playlist/');
         const pathParameterPosition = url.indexOf('?si');
 

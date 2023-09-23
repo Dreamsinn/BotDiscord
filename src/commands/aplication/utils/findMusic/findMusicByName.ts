@@ -10,12 +10,17 @@ import { UsersUsingACommand } from '../usersUsingACommand';
 export class FindMusicByName extends PlayCommand {
     private usersUsingACommand: UsersUsingACommand;
 
-    constructor(musicAPIs: MusicAPIs, usersUsingACommand: UsersUsingACommand) {
+    constructor(musicAPIs: MusicAPIs) {
         super(musicAPIs);
-        this.usersUsingACommand = usersUsingACommand;
     }
 
-    async call(event: Message, argument: string): Promise<SongData | void> {
+    async call(
+        event: Message,
+        argument: string,
+        usersUsingACommand: UsersUsingACommand,
+    ): Promise<SongData | void> {
+        this.usersUsingACommand = usersUsingACommand;
+
         let unchosenMusic: RawSong[];
         // llamamos primero a Play-Dl y si falla a Youtube API, para ahorrar gasto de la key
 
