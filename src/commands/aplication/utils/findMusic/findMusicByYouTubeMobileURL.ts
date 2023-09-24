@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
-import { PlayCommand } from '../../../domain/interfaces/playCommand';
+import { SearchSong } from '../../../domain/interfaces/searchSong';
 import { SongData } from '../../../domain/interfaces/song';
 
-export class FindMusicByYouTubeMobileURL extends PlayCommand {
+export class FindMusicByYouTubeMobileURL extends SearchSong {
     async call(event: Message, argument: string): Promise<SongData | void> {
         const url = argument;
 

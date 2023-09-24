@@ -13,7 +13,7 @@ export interface PlayCommandProps {
     usersUsingACommand: UsersUsingACommand;
 }
 
-export abstract class PlayCommand {
+export abstract class SearchSong {
     protected youtubeAPIService: YouTubeAPIService;
     protected playDlService: PlayDlService;
     protected spotifyService: SpotifyAPIService;

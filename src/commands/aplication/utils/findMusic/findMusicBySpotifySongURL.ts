@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
 import { APIResponse } from '../../../domain/interfaces/APIResponse';
-import { PlayCommand } from '../../../domain/interfaces/playCommand';
+import { SearchSong } from '../../../domain/interfaces/searchSong';
 import { SongData, SpotifyRawSong } from '../../../domain/interfaces/song';
 
-export class FindMusicBySpotifySongURL extends PlayCommand {
+export class FindMusicBySpotifySongURL extends SearchSong {
     public async call(event: Message, argument: string): Promise<SongData | void> {
         const url = argument;
 

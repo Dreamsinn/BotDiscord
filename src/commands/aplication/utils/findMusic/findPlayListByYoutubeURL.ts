@@ -1,12 +1,12 @@
 import { Message } from 'discord.js';
 import { APIResponse } from '../../../domain/interfaces/APIResponse';
 import { MusicAPIs } from '../../../domain/interfaces/musicAPIs';
-import { PlayCommand } from '../../../domain/interfaces/playCommand';
+import { SearchSong } from '../../../domain/interfaces/searchSong';
 import { RawSong, SongData } from '../../../domain/interfaces/song';
 import { MessageCreator } from '../messageCreator';
 import { UsersUsingACommand } from '../usersUsingACommand';
 
-export class FindPlayListByYoutubeURL extends PlayCommand {
+export class FindPlayListByYoutubeURL extends SearchSong {
     private usersUsingACommand: UsersUsingACommand;
 
     constructor(musicAPIs: MusicAPIs) {
