@@ -1,25 +1,30 @@
 import { Message } from 'discord.js';
 import { ConnectionHandler } from '../../../../../database/connectionHandler';
 import { PlaylistDTO } from '../../../../../database/playlist/domain/playlistDTO';
-import { Command } from '../../../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { PaginatedMessage } from '../../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
 export class DeletePlaylistCommand extends Command {
     private privatePlaylist: boolean;
+    private usersUsingACommand: UsersUsingACommand;
 
-    constructor(
-        private databaseConnection: ConnectionHandler,
-        private usersUsingACommand: UsersUsingACommand,
-    ) {
+    constructor(private databaseConnection: ConnectionHandler) {
         super();
     }
 
-    public async call(event: Message, adminRole: string, deletePlSchema: CommandSchema): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        deletePlSchema: CommandSchema,
+        { usersUsingACommand }: CommandProps,
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, deletePlSchema, adminRole)) {
             return;
         }
+
+        this.usersUsingACommand = usersUsingACommand!;
 
         // reset privatePlaylist
         this.privatePlaylist = true;

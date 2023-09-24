@@ -2,7 +2,7 @@ import { EmbedFieldData, Message, MessageOptions } from 'discord.js';
 import ls, { Languages } from '../../../languages/languageService';
 import { CommandsCategoryEnum } from '../../domain/enums/commandsCategoryEnum';
 import { HelpEmbedsTitlesEnum } from '../../domain/enums/helpEmbedsTitlesEnum';
-import { Command } from '../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
 import { EmbedOptions } from '../../domain/interfaces/createEmbedOptions';
 import {
@@ -10,34 +10,31 @@ import {
     HelpCommandList,
     SubTypeCommandData,
 } from '../../domain/interfaces/helpCommandData';
-import { SchemaDictionary } from '../../domain/interfaces/schemaDictionary';
 import { MessageCreator } from '../utils/messageCreator';
-import { UsersUsingACommand } from '../utils/usersUsingACommand';
 import messageToEditMissage from '../utils/messageToEditMissage';
+import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class HelpCommand extends Command {
     private commandList: HelpCommandList;
     private prefix: string;
     private language: Languages;
     private commandSchemaList: CommandSchema[];
-
-    constructor(private usersUsingACommand: UsersUsingACommand) {
-        super();
-    }
+    private usersUsingACommand: UsersUsingACommand;
 
     public async call(
         event: Message,
         adminRole: string,
         helpSchema: CommandSchema,
-        props: { prefix: string; schemaList: SchemaDictionary; language: Languages },
+        { prefix, schemaList, language, usersUsingACommand }: CommandProps,
     ): Promise<void> {
         if (this.roleAndCooldownValidation(event, helpSchema, adminRole)) {
             return;
         }
 
-        this.commandSchemaList = Object.values(props.schemaList);
-        this.prefix = props.prefix;
-        this.language = props.language;
+        this.commandSchemaList = Object.values(schemaList!);
+        this.prefix = prefix!;
+        this.language = language!;
+        this.usersUsingACommand = usersUsingACommand!;
 
         // creamos embed para elejir entre comandos de prfijo o no prefijo, y lo enviamos
         const output = this.createTypeOfCommandsEmbed();

@@ -1,22 +1,28 @@
 import { Message } from 'discord.js';
-import { Command } from '../../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 import { PaginatedMessage } from '../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 
 export class RemoveSongsFromPlayListCommand extends Command {
-    constructor(
-        private playListHandler: PlayListHandler,
-        private usersUsingACommand: UsersUsingACommand,
-    ) {
+    private usersUsingACommand: UsersUsingACommand;
+
+    constructor(private playListHandler: PlayListHandler) {
         super();
     }
 
-    public async call(event: Message, adminRole: string, removeSchema: CommandSchema): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        removeSchema: CommandSchema,
+        { usersUsingACommand }: CommandProps,
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, removeSchema, adminRole)) {
             return;
         }
+
+        this.usersUsingACommand = usersUsingACommand!;
 
         const playList: string[] = this.playListHandler.readPlayList();
 

@@ -5,7 +5,7 @@ import { ErrorEnum } from '../../../../../database/shared/domain/enums/ErrorEnum
 import { discordEmojis } from '../../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../../domain/enums/buttonStyleEnum';
 import { CreatePlaylistButtonsEnum } from '../../../../domain/enums/createPlaylistButtonsEnum';
-import { Command } from '../../../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { SongData } from '../../../../domain/interfaces/song';
 import { PlayListHandler } from '../../../playListHandler';
@@ -26,11 +26,11 @@ import { RemoveSongsFromPlayList } from './utils/removeSongsFromPlaylist';
 export class CreatePlaylistCommand extends Command {
     private playlistData: NewPlaylist;
     private playlistSongs: SongData[];
+    private usersUsingACommand: UsersUsingACommand;
 
     constructor(
         private playListHandler: PlayListHandler,
         private databaseConnection: ConnectionHandler,
-        private usersUsingACommand: UsersUsingACommand,
         private findMusicByName: FindMusicByName,
         private findMusicByYouTubeMobileURL: FindMusicByYouTubeMobileURL,
         private findPlayListByYoutubeURL: FindPlayListByYoutubeURL,
@@ -41,10 +41,17 @@ export class CreatePlaylistCommand extends Command {
         super();
     }
 
-    public async call(event: Message, adminRole: string, createPlSchema: CommandSchema): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        createPlSchema: CommandSchema,
+        { usersUsingACommand }: CommandProps,
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, createPlSchema, adminRole)) {
             return;
         }
+
+        this.usersUsingACommand = usersUsingACommand!;
 
         // reset playlistData and playlistSongs
         this.playlistData = {

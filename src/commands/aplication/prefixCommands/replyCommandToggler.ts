@@ -1,14 +1,13 @@
 import { Message } from 'discord.js';
-import { Command } from '../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../domain/interfaces/Command';
 import { CommandSchema } from '../../domain/interfaces/commandSchema';
-import { ReplyCommand } from '../non-prefixCommands/replyCommand';
 
 export class ReplyCommandToggler extends Command {
     public async call(
         event: Message,
         adminRole: string,
         toggleDiceSchema: CommandSchema,
-        props: { replyCommand: ReplyCommand },
+        { replyCommand }: CommandProps,
     ): Promise<void> {
         if (this.roleAndCooldownValidation(event, toggleDiceSchema, adminRole)) {
             return;
@@ -17,7 +16,7 @@ export class ReplyCommandToggler extends Command {
         // si on activa la respuestas de dados, si off la desactiva
         if (event.content.includes('on')) {
             console.log({ argument: 'on' });
-            const hasBeenActived = props.replyCommand.toggleReplyCommand(true);
+            const hasBeenActived = replyCommand!.toggleReplyCommand(true);
             if (hasBeenActived) {
                 event.channel.send('Respuestas activados');
             }
@@ -26,7 +25,7 @@ export class ReplyCommandToggler extends Command {
 
         if (event.content.includes('off')) {
             console.log({ argument: 'off' });
-            const hasBeenDeactivate = props.replyCommand.toggleReplyCommand(false);
+            const hasBeenDeactivate = replyCommand!.toggleReplyCommand(false);
             if (hasBeenDeactivate) {
                 event.channel.send('Respuestas desactivados');
             }

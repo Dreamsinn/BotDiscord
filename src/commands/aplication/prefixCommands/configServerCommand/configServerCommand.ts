@@ -7,16 +7,16 @@ import { Languages, languagesArray } from '../../../../languages/languageService
 import { discordEmojis } from '../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../domain/enums/buttonStyleEnum';
 import { ConfigServerButtonsEnum } from '../../../domain/enums/configServerButtonsEnum';
-import { Command } from '../../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { MessageCreator } from '../../utils/messageCreator';
+import messageToEditMissage from '../../utils/messageToEditMissage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 import { AddUserToBlacklist } from './utils/addUserToBlacklist';
 import { ChangeAdminRole } from './utils/changeAdminRole';
 import { ChangeLanguage } from './utils/changeLanguage';
 import { ChangePrefix } from './utils/changePrefix';
 import { RemoveUserFromBlacklist } from './utils/removeUserFromBlacklist';
-import messageToEditMissage from '../../utils/messageToEditMissage';
 
 interface BlackListUser {
     id: string;
@@ -25,6 +25,8 @@ interface BlackListUser {
 
 export class ConfigServerCommand extends Command {
     private configChanges: ServerConfig = {};
+    private usersUsingACommand: UsersUsingACommand;
+
     // in config change have to be adminRole Id
     private configAdminRoleName: string;
     private serverConfig: {
@@ -45,17 +47,21 @@ export class ConfigServerCommand extends Command {
         };
     };
 
-    constructor(
-        private databaseConnection: ConnectionHandler,
-        private usersUsingACommand: UsersUsingACommand,
-    ) {
+    constructor(private databaseConnection: ConnectionHandler) {
         super();
     }
 
-    async call(event: Message, adminRole: string, configSchema: CommandSchema): Promise<void> {
+    async call(
+        event: Message,
+        adminRole: string,
+        configSchema: CommandSchema,
+        { usersUsingACommand }: CommandProps,
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, configSchema, adminRole)) {
             return;
         }
+
+        this.usersUsingACommand = usersUsingACommand!;
 
         this.usersUsingACommand.updateUserList(event.author.id);
 
@@ -131,10 +137,12 @@ export class ConfigServerCommand extends Command {
         let configOptionsMessage: Message<boolean> | void;
         if (changeConfigMessage) {
             // if is called with a message, edit it to update it
-            configOptionsMessage = await changeConfigMessage.edit(messageToEditMissage(configOptionEmbed)).catch(async () => {
-                await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
-                await this.saveChanges(event);
-            });
+            configOptionsMessage = await changeConfigMessage
+                .edit(messageToEditMissage(configOptionEmbed))
+                .catch(async () => {
+                    await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
+                    await this.saveChanges(event);
+                });
         } else {
             // if first tame this method is called, create the message
             configOptionsMessage = await event.channel.send(configOptionEmbed);

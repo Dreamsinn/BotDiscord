@@ -2,7 +2,7 @@ import { Message } from 'discord.js';
 import { ConnectionHandler } from '../../../../../database/connectionHandler';
 import { PlaylistDTO } from '../../../../../database/playlist/domain/playlistDTO';
 import { SongDTO } from '../../../../../database/song/domain/SongDTO';
-import { Command } from '../../../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { SongData, SongsToPlaylist } from '../../../../domain/interfaces/song';
 import { PlayListHandler } from '../../../playListHandler';
@@ -11,19 +11,26 @@ import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 
 export class PlayPlaylistCommand extends Command {
     private privatePlaylist: boolean;
+    private usersUsingACommand: UsersUsingACommand;
 
     constructor(
         private playListHandler: PlayListHandler,
         private databaseConnection: ConnectionHandler,
-        private usersUsingACommand: UsersUsingACommand,
     ) {
         super();
     }
 
-    public async call(event: Message, adminRole: string, playPlSchema: CommandSchema): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        playPlSchema: CommandSchema,
+        { usersUsingACommand }: CommandProps,
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, playPlSchema, adminRole)) {
             return;
         }
+
+        this.usersUsingACommand = usersUsingACommand!;
 
         // reset parameters
         this.privatePlaylist = true;

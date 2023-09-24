@@ -5,7 +5,6 @@ import { ReplyCommand, replyCommandOptions } from './aplication/non-prefixComman
 import { ConfigSchemaCommand } from './aplication/prefixCommands/configSchemaCommand/configSchemaCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
-import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
@@ -69,7 +68,6 @@ export class CommandHandler {
     }
 
     private async isPrefixCommand(event: Message, adminRole: string) {
-        console.log('lenguage =', this.language);
         let command: string;
         if (event.content.includes(' ')) {
             // si el mensaje tiene ' ', mirar command antes del ' '
@@ -108,22 +106,20 @@ export class CommandHandler {
                         prefix: this.prefix,
                         schemaList: this.schemaDictionary,
                         language: this.language,
+                        usersUsingACommand: this.usersUsingACommand,
                     });
                 }
 
                 if (command instanceof ConfigSchemaCommand) {
                     return command.call(event, adminRole, schema, {
                         schemaList: this.schemaDictionary,
-                    });
-                }
-
-                if (command instanceof PlayCommand) {
-                    return command.call(event, adminRole, schema, {
                         usersUsingACommand: this.usersUsingACommand,
                     });
                 }
 
-                return command.call(event, adminRole, schema);
+                return command.call(event, adminRole, schema, {
+                    usersUsingACommand: this.usersUsingACommand,
+                });
             }
         }
     }

@@ -6,7 +6,7 @@ import { SongDTO } from '../../../../../database/song/domain/SongDTO';
 import { discordEmojis } from '../../../../domain/discordEmojis';
 import { ButtonsStyleEnum } from '../../../../domain/enums/buttonStyleEnum';
 import { UpdatePlaylistButtonsEnum } from '../../../../domain/enums/updatePlaylistButtonsEnum';
-import { Command } from '../../../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../../domain/interfaces/commandSchema';
 import { SongData } from '../../../../domain/interfaces/song';
 import { PlayListHandler } from '../../../playListHandler';
@@ -40,6 +40,9 @@ export class UpdatePlaylistCommand extends Command {
             removed: SongDictionary;
         };
     };
+
+    private usersUsingACommand: UsersUsingACommand;
+
     // a song in 'added' cant be in 'current'
     // a song to be added into 'removed' first must be in 'current' or 'added'
     // when a song is added into 'added', will be removed from 'removed' if posible
@@ -51,7 +54,6 @@ export class UpdatePlaylistCommand extends Command {
     constructor(
         private playListHandler: PlayListHandler,
         private databaseConnection: ConnectionHandler,
-        private usersUsingACommand: UsersUsingACommand,
         private findMusicByName: FindMusicByName,
         private findMusicByYouTubeMobileURL: FindMusicByYouTubeMobileURL,
         private findPlayListByYoutubeURL: FindPlayListByYoutubeURL,
@@ -62,10 +64,17 @@ export class UpdatePlaylistCommand extends Command {
         super();
     }
 
-    public async call(event: Message, adminRole: string, deletePlSchema: CommandSchema): Promise<void> {
+    public async call(
+        event: Message,
+        adminRole: string,
+        deletePlSchema: CommandSchema,
+        { usersUsingACommand }: CommandProps,
+    ): Promise<void> {
         if (this.roleAndCooldownValidation(event, deletePlSchema, adminRole)) {
             return;
         }
+
+        this.usersUsingACommand = usersUsingACommand!;
 
         // reset values
         this.privatePlaylist = true;

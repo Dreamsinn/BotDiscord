@@ -5,14 +5,14 @@ import { ButtonsStyleEnum } from '../../../domain/enums/buttonStyleEnum';
 import { CommandsNameEnum } from '../../../domain/enums/commandNamesEnum';
 import { CommandsCategoryEnum } from '../../../domain/enums/commandsCategoryEnum';
 import { ConfigSchemaCommandButtonsEnum } from '../../../domain/enums/configSchemaButtonsEnum';
-import { Command } from '../../../domain/interfaces/Command';
+import { Command, CommandProps } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { SchemaDictionary } from '../../../domain/interfaces/schemaDictionary';
 import { MessageCreator } from '../../utils/messageCreator';
+import messageToEditMissage from '../../utils/messageToEditMissage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 import { ChangeAdminOnly } from './utils/changeAdminOnly';
 import { ChangeCoolDown } from './utils/changeCoolDown';
-import messageToEditMissage from '../../utils/messageToEditMissage';
 
 interface CooldownModifiedSchema {
     command: CommandsNameEnum;
@@ -26,11 +26,9 @@ export class ConfigSchemaCommand extends Command {
     private schemaList: SchemaDictionary;
     private cooldownModifiedSchemaList: CooldownModifiedSchema[];
     private adminOnlyModifiedSchemaList: CommandsNameEnum[];
+    private usersUsingACommand: UsersUsingACommand;
 
-    constructor(
-        private databaseConnection: ConnectionHandler,
-        private usersUsingACommand: UsersUsingACommand,
-    ) {
+    constructor(private databaseConnection: ConnectionHandler) {
         super();
     }
 
@@ -38,12 +36,13 @@ export class ConfigSchemaCommand extends Command {
         event: Message,
         adminRole: string,
         configSchema: CommandSchema,
-        props: { schemaList: SchemaDictionary },
+        { schemaList, usersUsingACommand }: CommandProps,
     ): Promise<void> {
         if (this.roleAndCooldownValidation(event, configSchema, adminRole)) {
             return;
         }
-        this.schemaList = props.schemaList;
+        this.usersUsingACommand = usersUsingACommand!;
+        this.schemaList = schemaList!;
         this.cooldownModifiedSchemaList = [];
         this.adminOnlyModifiedSchemaList = [];
 
