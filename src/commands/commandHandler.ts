@@ -5,10 +5,10 @@ import { ReplyCommand, replyCommandOptions } from './aplication/non-prefixComman
 import { ConfigSchemaCommand } from './aplication/prefixCommands/configSchemaCommand/configSchemaCommand';
 import { DiceCommandToggler } from './aplication/prefixCommands/diceCommandToggler';
 import { HelpCommand } from './aplication/prefixCommands/helpCommand';
+import { PlayCommand } from './aplication/prefixCommands/musicCommands/playCommand';
 import { ReplyCommandToggler } from './aplication/prefixCommands/replyCommandToggler';
 import { UsersUsingACommand } from './aplication/utils/usersUsingACommand';
 import { DiceCommandSchema } from './domain/commandSchema/diceCommandSchema';
-import { PlayCommand } from './domain/interfaces/playCommand';
 import { SchemaDictionary } from './domain/interfaces/schemaDictionary';
 import { Routes } from './routes';
 
