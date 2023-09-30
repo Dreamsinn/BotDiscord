@@ -49,3 +49,5 @@ VOLUME /data
 EXPOSE 3000
 ENV DATABASE_URL="file:///data/sqlite.db"
 CMD [ "npm", "run", "start"]
+
+# TODO: DATABASE CONFIG NEEDED (LiteFS)
