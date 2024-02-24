@@ -6,9 +6,9 @@ import {
 } from '@discordjs/voice';
 import { GuildMember, Message } from 'discord.js';
 import { TogglePauseOutputEnums } from '../domain/enums/togglePauseOutputEnums';
+import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { DisplayMessage } from '../domain/interfaces/displayMessage';
 import { IsDisplayActive } from '../domain/interfaces/isDisplayActive';
-import { PlayListStatus } from '../domain/interfaces/PlayListStatus';
 import { SongData, SongDuration, SongsToPlaylist } from '../domain/interfaces/song';
 import { PlayDlService } from '../infrastructure/playDlService';
 import { DisplayEmbedBuilder } from './utils/displayEmbedBuilder';
@@ -25,6 +25,7 @@ export class PlayListHandler {
     private isMusicListenerActive = false;
     private loopMode = false;
     private isDisplay: IsDisplayActive = { active: false, event: undefined };
+    private disconnectTimeOut: ReturnType<typeof setTimeout> | undefined;
 
     constructor(playDlService: PlayDlService, displayEmbedBuilder: DisplayEmbedBuilder) {
         this.playDlService = playDlService;
@@ -254,18 +255,17 @@ export class PlayListHandler {
     }
 
     private musicEventListener(): void {
-        // const start = new Date()
-        // this.player.on("debug", (status: any) => {
-        //     console.log('\x1b[32m' + status + '\x1b[37m')
-        //     const secondsFromStart = ((new Date().getTime() - start.getTime()) / 1000).toFixed()
-        //     console.log(secondsFromStart + 's')
-        // })
         this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
             if (this.isDisplay.active) {
                 this.sendPlayListDataToDisplay();
             }
 
-            // cunado el player no esta reproduciendo
+            // buffering do nothing, new music is being prepared
+            if (newState.status === 'buffering') {
+                return;
+            }
+
+            // idle -> not playing, bot prepared to reproduce a song
             if (newState.status === 'idle') {
                 if (this.loopMode) {
                     this.playList.push(this.playList[0]);
@@ -274,9 +274,23 @@ export class PlayListHandler {
                 if (this.playList[0]) {
                     return this.playMusic();
                 }
-                return;
+                // if arrive here, no songs in playlist
+            }
+
+            // playing
+            if (newState.status === 'playing') {
+                clearTimeout(this.disconnectTimeOut);
+            } else {
+                // if arrive here means that bot is not playing neither preparing one, and has no song in playlist
+                this.disconnectByInactivity();
             }
         });
+    }
+
+    private disconnectByInactivity() {
+        this.disconnectTimeOut = setTimeout(() => {
+            this.botDisconnect();
+        }, 10 * 60 * 1000); //10 mins
     }
 
     public readPlayListStatus(): PlayListStatus {
@@ -294,6 +308,7 @@ export class PlayListHandler {
     public botDisconnect(): void {
         if (this.botConnection) {
             this.botConnection.destroy();
+            this.isMusicListenerActive = false; // musicEvents have to be created again with new player ons destroyed
             if (this.isDisplay.active) {
                 this.sendPlayListDataToDisplay();
             }
