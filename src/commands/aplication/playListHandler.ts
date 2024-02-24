@@ -1,4 +1,5 @@
 import {
+    AudioPlayer,
     AudioPlayerState,
     createAudioPlayer,
     createAudioResource,
@@ -22,7 +23,6 @@ export class PlayListHandler {
     private player: any;
     private playDlService: PlayDlService;
     private displayEmbedBuilder: DisplayEmbedBuilder;
-    private isMusicListenerActive = false;
     private loopMode = false;
     private isDisplay: IsDisplayActive = { active: false, event: undefined };
     private disconnectTimeOut: ReturnType<typeof setTimeout> | undefined;
@@ -215,6 +215,8 @@ export class PlayListHandler {
 
         this.player = createAudioPlayer();
 
+        this.playerEventListener(this.player);
+
         this.botConnection.subscribe(this.player);
 
         if (this.isDisplay.active) {
@@ -222,40 +224,8 @@ export class PlayListHandler {
         }
     }
 
-    private async playMusic(): Promise<void> {
-        try {
-            // descarga cancion
-            const song = await this.playDlService.getSongStream(this.playList[0].songId);
-
-            // craa recurso
-            const resources = createAudioResource(song.stream, {
-                inputType: song.type,
-            });
-
-            // pasa recurso al player
-            this.player.play(resources);
-        } catch (err) {
-            console.log('Play ERROR: ', err);
-            this.playList.shift();
-            if (this.playList[0]) {
-                return this.playMusic();
-            }
-            return;
-        }
-
-        if (!this.isMusicListenerActive) {
-            this.isMusicListenerActive = true;
-            this.musicEventListener();
-        }
-
-        if (this.isDisplay.active) {
-            this.sendPlayListDataToDisplay();
-        }
-        return;
-    }
-
-    private musicEventListener(): void {
-        this.player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
+    private playerEventListener(player: AudioPlayer): void {
+        player.on('stateChange', (oldState: AudioPlayerState, newState: AudioPlayerState) => {
             if (this.isDisplay.active) {
                 this.sendPlayListDataToDisplay();
             }
@@ -293,6 +263,33 @@ export class PlayListHandler {
         }, 10 * 60 * 1000); //10 mins
     }
 
+    private async playMusic(): Promise<void> {
+        try {
+            // descarga cancion
+            const song = await this.playDlService.getSongStream(this.playList[0].songId);
+
+            // craa recurso
+            const resources = createAudioResource(song.stream, {
+                inputType: song.type,
+            });
+
+            // pasa recurso al player
+            this.player.play(resources);
+        } catch (err) {
+            console.log('Play ERROR: ', err);
+            this.playList.shift();
+            if (this.playList[0]) {
+                return this.playMusic();
+            }
+            return;
+        }
+
+        if (this.isDisplay.active) {
+            this.sendPlayListDataToDisplay();
+        }
+        return;
+    }
+
     public readPlayListStatus(): PlayListStatus {
         const playListData: PlayListStatus = {
             playList: this.playList,
@@ -308,7 +305,6 @@ export class PlayListHandler {
     public botDisconnect(): void {
         if (this.botConnection) {
             this.botConnection.destroy();
-            this.isMusicListenerActive = false; // musicEvents have to be created again with new player ons destroyed
             if (this.isDisplay.active) {
                 this.sendPlayListDataToDisplay();
             }
