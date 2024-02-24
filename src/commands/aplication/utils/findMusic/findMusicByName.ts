@@ -133,11 +133,13 @@ export class FindMusicByName extends PlayCommand {
             embed: {
                 color: '#40b3ff',
                 description: 'Escriba el **número de la canción** que quiera seleccionar',
-                field: {
-                    name: ' ',
-                    value: embedContent,
-                    inline: false,
-                },
+                fields: [
+                    {
+                        name: ' ',
+                        value: embedContent,
+                        inline: false,
+                    },
+                ],
             },
         }).call();
 

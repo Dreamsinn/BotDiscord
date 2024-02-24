@@ -9,10 +9,10 @@ import { Command } from '../../../domain/interfaces/Command';
 import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { SchemaDictionary } from '../../../domain/interfaces/schemaDictionary';
 import { MessageCreator } from '../../utils/messageCreator';
+import messageToEditMissage from '../../utils/messageToEditMissage';
 import { UsersUsingACommand } from '../../utils/usersUsingACommand';
 import { ChangeAdminOnly } from './utils/changeAdminOnly';
 import { ChangeCoolDown } from './utils/changeCoolDown';
-import messageToEditMissage from '../../utils/messageToEditMissage';
 
 interface CooldownModifiedSchema {
     command: CommandsNameEnum;
@@ -98,13 +98,15 @@ export class ConfigSchemaCommand extends Command {
                     '**Solo** podrá interactuar la **persona** que haya **activado el comando**.\n' +
                     'Mientras este **comando** este **en uso no podrá usar otro comando**.\n\n' +
                     'Cuando apreté el botón de cerrar se guardan todos los cambios realizados.\n',
-                field: {
-                    name: 'Schemas modificados: ',
-                    value:
-                        `> **Cooldown:** ${coolDownModfiedNameListString}\n` +
-                        `> **AdminRole:** ${adminOnlyNames}\n`,
-                    inline: false,
-                },
+                fields: [
+                    {
+                        name: 'Schemas modificados: ',
+                        value:
+                            `> **Cooldown:** ${coolDownModfiedNameListString}\n` +
+                            `> **AdminRole:** ${adminOnlyNames}\n`,
+                        inline: false,
+                    },
+                ],
             },
             buttons: [
                 [

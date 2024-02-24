@@ -94,6 +94,15 @@ export class PaginatedMessage {
             description = this.embed.description ?? undefined;
         }
 
+        const paginatedData =
+            this.paginatedStringData.length > 1
+                ? {
+                      name: `Page [${this.page}/${this.paginatedStringData.length}]`,
+                      value: `${this.paginatedStringData[this.page - 1]}`,
+                      inline: false,
+                  }
+                : undefined;
+
         const output = new MessageCreator({
             message: {
                 content: this.message?.content ?? ' ',
@@ -104,14 +113,13 @@ export class PaginatedMessage {
                 URL: this.embed.URL ?? undefined,
                 author: this.embed.author ?? undefined,
                 description,
-                fields: this.embed.fields ?? undefined,
-                field:
-                    this.paginatedStringData.length > 1
-                        ? {
-                              name: `Page [${this.page}/${this.paginatedStringData.length}]`,
-                              value: `${this.paginatedStringData[this.page - 1]}`,
-                              inline: false,
-                          }
+                fields:
+                    this.embed.fields && paginatedData
+                        ? [...this.embed.fields, paginatedData]
+                        : this.embed.fields
+                        ? this.embed.fields
+                        : paginatedData
+                        ? [paginatedData]
                         : undefined,
                 imageUrl: this.embed.imageUrl ?? undefined,
                 timeStamp: this.embed.timeStamp ?? undefined,

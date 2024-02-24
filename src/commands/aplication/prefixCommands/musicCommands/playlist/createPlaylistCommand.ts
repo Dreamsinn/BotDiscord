@@ -13,15 +13,15 @@ import { FindMusicByName } from '../../../utils/findMusic/findMusicByName';
 import { FindMusicBySpotifySongURL } from '../../../utils/findMusic/findMusicBySpotifySongURL';
 import { FindMusicByYouTubeMobileURL } from '../../../utils/findMusic/findMusicByYouTubeMobileURL';
 import { FindMusicByYouTubeURL } from '../../../utils/findMusic/findMusicByYouTubeURL';
-import { FindPlaylistBySpotifyURL } from '../../../utils/findMusic/findPlaylistBySpotifyURL';
 import { FindPlayListByYoutubeURL } from '../../../utils/findMusic/findPlayListByYoutubeURL';
+import { FindPlaylistBySpotifyURL } from '../../../utils/findMusic/findPlaylistBySpotifyURL';
 import { MessageCreator } from '../../../utils/messageCreator';
+import messageToEditMissage from '../../../utils/messageToEditMissage';
 import { PaginatedMessage } from '../../../utils/paginatedMessage';
 import { UsersUsingACommand } from '../../../utils/usersUsingACommand';
 import { AddSongsToPlaylist } from './utils/addSongToPlaylist';
 import { ChangePlaylistName } from './utils/changePlaylistName';
 import { RemoveSongsFromPlayList } from './utils/removeSongsFromPlaylist';
-import messageToEditMissage from '../../../utils/messageToEditMissage';
 
 export class CreatePlaylistCommand extends Command {
     private playlistData: NewPlaylist;
@@ -77,9 +77,11 @@ export class CreatePlaylistCommand extends Command {
         let playlistOptionsMessage: Message<boolean> | void;
         if (playlistMessage) {
             // if is called with a message, edit it to update it
-            playlistOptionsMessage = await playlistMessage.edit(messageToEditMissage(playlistOptionsEmbed)).catch(async () => {
-                await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
-            });
+            playlistOptionsMessage = await playlistMessage
+                .edit(messageToEditMissage(playlistOptionsEmbed))
+                .catch(async () => {
+                    await event.channel.send('Ha habido un error, se guardarán los cambios efectuados');
+                });
         } else {
             // if first time this method is called, create the message
             playlistOptionsMessage = await event.channel.send(playlistOptionsEmbed);
@@ -111,14 +113,20 @@ export class CreatePlaylistCommand extends Command {
                     '**Solo** podrá interactuar la **persona** que haya **activado el comando**.\n' +
                     'Mientras este **comando** este **en uso no podrá usar otro comando**.\n\n' +
                     '**__ No se pueden tener 2 playlist con el mismo nombre por autor __**',
-                field: {
-                    name: this.playlistData.privatePl ? 'Playlist privada:' : 'Playlist del servidor:',
-                    value:
-                        `> **Autor:** ${this.playlistData.privatePl ? userName : event.guild?.name}\n` +
-                        `> **Nombre playlist:** ${this.playlistData.name}\n` +
-                        `> **Nº canciones:** ${this.playlistSongs.length}\n`,
-                    inline: false,
-                },
+                fields: [
+                    {
+                        name: this.playlistData.privatePl
+                            ? 'Playlist privada:'
+                            : 'Playlist del servidor:',
+                        value:
+                            `> **Autor:** ${
+                                this.playlistData.privatePl ? userName : event.guild?.name
+                            }\n` +
+                            `> **Nombre playlist:** ${this.playlistData.name}\n` +
+                            `> **Nº canciones:** ${this.playlistSongs.length}\n`,
+                        inline: false,
+                    },
+                ],
             },
             buttons: [
                 [

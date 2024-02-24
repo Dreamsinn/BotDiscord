@@ -12,8 +12,8 @@ import {
 } from '../../domain/interfaces/helpCommandData';
 import { SchemaDictionary } from '../../domain/interfaces/schemaDictionary';
 import { MessageCreator } from '../utils/messageCreator';
-import { UsersUsingACommand } from '../utils/usersUsingACommand';
 import messageToEditMissage from '../utils/messageToEditMissage';
+import { UsersUsingACommand } from '../utils/usersUsingACommand';
 
 export class HelpCommand extends Command {
     private commandList: HelpCommandList;
@@ -105,15 +105,15 @@ export class HelpCommand extends Command {
                         value: `**2 - ${HelpEmbedsTitlesEnum.NONPREFIX}**`,
                         inline: false,
                     },
+                    {
+                        name: '\u200b',
+                        value:
+                            'Escriba:\n' +
+                            '- El **número** del tipo de comando que desee consultar.\n' +
+                            `- **X** para cancelar el comando.`,
+                        inline: false,
+                    },
                 ],
-                field: {
-                    name: '\u200b',
-                    value:
-                        'Escriba:\n' +
-                        '- El **número** del tipo de comando que desee consultar.\n' +
-                        `- **X** para cancelar el comando.`,
-                    inline: false,
-                },
             },
         }).call();
 
@@ -380,16 +380,18 @@ export class HelpCommand extends Command {
                 color: '#BFFF00',
                 description: '__Mientras help este activo no podra usar otro comando.__',
                 title: commandCategory.title,
-                fields: embedFileds,
-                field: {
-                    name: '\u200b',
-                    value:
-                        'Escriba:\n' +
-                        '- El **número** del tipo de comando que desee consultar.\n' +
-                        '- **b** o **back** para ir hacia atras.\n' +
-                        `- **X** para cancelar el comando.`,
-                    inline: false,
-                },
+                fields: [
+                    ...embedFileds,
+                    {
+                        name: '\u200b',
+                        value:
+                            'Escriba:\n' +
+                            '- El **número** del tipo de comando que desee consultar.\n' +
+                            '- **b** o **back** para ir hacia atras.\n' +
+                            `- **X** para cancelar el comando.`,
+                        inline: false,
+                    },
+                ],
             },
         }).call();
 
@@ -453,16 +455,16 @@ export class HelpCommand extends Command {
                 },
                 { name: 'Cooldown', value: `${selectedCommand.coolDown} ms`, inline: false },
                 { name: 'Rol requerido', value: rol, inline: false },
+                {
+                    name: '\u200b',
+                    value:
+                        'Escriba:\n' +
+                        '- El **número** del tipo de comando que desee consultar.\n' +
+                        '- **b** o **back** para ir hacia atras.\n' +
+                        `- **X** para cancelar el comando.`,
+                    inline: false,
+                },
             ],
-            field: {
-                name: '\u200b',
-                value:
-                    'Escriba:\n' +
-                    '- El **número** del tipo de comando que desee consultar.\n' +
-                    '- **b** o **back** para ir hacia atras.\n' +
-                    `- **X** para cancelar el comando.`,
-                inline: false,
-            },
         };
 
         const output = new MessageCreator({

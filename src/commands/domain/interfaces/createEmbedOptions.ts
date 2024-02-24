@@ -32,11 +32,6 @@ export interface EmbedOptions {
     description?: string;
     thumbnailUrl?: string;
     fields?: EmbedFieldData[];
-    field?: {
-        name: string;
-        value: string;
-        inline: boolean;
-    };
     imageUrl?: string;
     timeStamp?: Date | number | null;
     footer?: EmbedFooterData;

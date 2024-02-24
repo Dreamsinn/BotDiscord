@@ -24,9 +24,6 @@ export class MessageCreator {
             this.embed.description ? embed.setDescription(this.embed.description) : null;
             this.embed.thumbnailUrl ? embed.setThumbnail(this.embed.thumbnailUrl) : null;
             this.embed.fields ? embed.setFields(this.embed.fields) : null;
-            this.embed.field
-                ? embed.addField(this.embed.field.name, this.embed.field.value, this.embed.field.inline)
-                : null;
             this.embed.imageUrl ? embed.setImage(this.embed.imageUrl) : null;
             this.embed.timeStamp ? embed.setTimestamp(this.embed.timeStamp) : null;
             this.embed.footer ? embed.setFooter(this.embed.footer) : null;
