@@ -28,7 +28,8 @@
     "dev": "ts-node-dev --respawn ./src/main.ts",
     "build": "npx tsc ",
     "start": "node ./build/main.js",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "typecheck": "tsc"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.2",
