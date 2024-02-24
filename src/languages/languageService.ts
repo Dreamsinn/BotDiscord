@@ -5,67 +5,67 @@ export type Languages = 'es' | 'en';
 export const languagesArray: UnionToArray<Languages> = ['es', 'en'];
 
 export type JsonObject = {
-    [key: string]: JsonObject | string;
+  [key: string]: JsonObject | string;
 };
 
 export class LanguageService {
-    private jsonDictionary: { [key in Languages]: JsonObject };
+  private jsonDictionary: { [key in Languages]: JsonObject };
 
-    constructor() {
-        this.jsonDictionary = this.createJsonDictionary();
+  constructor() {
+    this.jsonDictionary = this.createJsonDictionary();
+  }
+
+  private createJsonDictionary(): any {
+    // create object with all languages
+    const jsonDictionary: { [key in Languages]?: JsonObject } = {};
+
+    languagesArray.forEach((lengauge: Languages) => {
+      jsonDictionary[lengauge] = require(`./locals/${lengauge}.json`);
+    });
+
+    return jsonDictionary;
+  }
+
+  public t(language: Languages, route: string, variables?: { [key: string]: string }) {
+    const json = this.jsonDictionary[language];
+
+    if (!json) {
+      return route;
     }
 
-    private createJsonDictionary(): any {
-        // create object with all languages
-        const jsonDictionary: { [key in Languages]?: JsonObject } = {};
+    const routeSteps = route.split('.');
 
-        languagesArray.forEach((lengauge: Languages) => {
-            jsonDictionary[lengauge] = require(`./locals/${lengauge}.json`);
-        });
+    let response = this.getValueFromPath(routeSteps, json);
 
-        return jsonDictionary;
+    // if wront route, return it
+    if (!response) {
+      return route;
     }
 
-    public t(language: Languages, route: string, variables?: { [key: string]: string }) {
-        const json = this.jsonDictionary[language];
-
-        if (!json) {
-            return route;
-        }
-
-        const routeSteps = route.split('.');
-
-        let response = this.getValueFromPath(routeSteps, json);
-
-        // if wront route, return it
-        if (!response) {
-            return route;
-        }
-
-        if (!variables) {
-            return response;
-        }
-
-        Object.entries(variables).forEach(([key, value]) => {
-            response = response!.replace(`{{${key}}}`, value);
-        });
-
-        return response;
+    if (!variables) {
+      return response;
     }
 
-    private getValueFromPath(path: string[], obj: any): string | undefined {
-        let step = obj;
-        for (const key of path) {
-            // eslint-disable-next-line no-prototype-builtins
-            if (step.hasOwnProperty(key)) {
-                step = step[key];
-            } else {
-                return undefined;
-            }
-        }
+    Object.entries(variables).forEach(([key, value]) => {
+      response = response!.replace(`{{${key}}}`, value);
+    });
 
-        return step;
+    return response;
+  }
+
+  private getValueFromPath(path: string[], obj: any): string | undefined {
+    let step = obj;
+    for (const key of path) {
+      // eslint-disable-next-line no-prototype-builtins
+      if (step.hasOwnProperty(key)) {
+        step = step[key];
+      } else {
+        return undefined;
+      }
     }
+
+    return step;
+  }
 }
 
 const ls = new LanguageService();

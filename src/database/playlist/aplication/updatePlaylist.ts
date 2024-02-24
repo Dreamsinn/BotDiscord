@@ -4,51 +4,51 @@ import { PlaylistDTO } from '../domain/playlistDTO';
 import { PlaylistService } from '../infrastructure/playlistService';
 
 export class UpdatePlaylist {
-    private playlistService: PlaylistService;
-    constructor(playlistService: PlaylistService) {
-        this.playlistService = playlistService;
+  private playlistService: PlaylistService;
+  constructor(playlistService: PlaylistService) {
+    this.playlistService = playlistService;
+  }
+
+  public async call({
+    id,
+    name,
+    songsId,
+    updatedBy,
+  }: UpdatePlaylistProps): Promise<PlaylistDTO | ErrorEnum> {
+    if (!name && !songsId) {
+      return ErrorEnum.BadRequest;
     }
 
-    public async call({
-        id,
+    const playlist = await this.playlistService.getById(id);
+
+    if (!playlist) {
+      return ErrorEnum.NotFound;
+    }
+
+    if (name) {
+      const playlistWithSameName = await this.playlistService.getByNameAndAuthor(
         name,
-        songsId,
-        updatedBy,
-    }: UpdatePlaylistProps): Promise<PlaylistDTO | ErrorEnum> {
-        if (!name && !songsId) {
-            return ErrorEnum.BadRequest;
-        }
+        playlist.author,
+      );
 
-        const playlist = await this.playlistService.getById(id);
+      if (playlistWithSameName) {
+        return ErrorEnum.BadRequest;
+      }
 
-        if (!playlist) {
-            return ErrorEnum.NotFound;
-        }
-
-        if (name) {
-            const playlistWithSameName = await this.playlistService.getByNameAndAuthor(
-                name,
-                playlist.author,
-            );
-
-            if (playlistWithSameName) {
-                return ErrorEnum.BadRequest;
-            }
-
-            playlist.name = name;
-        }
-
-        if (songsId) {
-            playlist.songsId = String(songsId);
-        }
-
-        playlist.updatedBy = updatedBy;
-
-        const updatedAt = new Date();
-        playlist.updatedAt = updatedAt;
-
-        const updatedPlaylist = await this.playlistService.update(playlist);
-
-        return new PlaylistDTO(updatedPlaylist);
+      playlist.name = name;
     }
+
+    if (songsId) {
+      playlist.songsId = String(songsId);
+    }
+
+    playlist.updatedBy = updatedBy;
+
+    const updatedAt = new Date();
+    playlist.updatedAt = updatedAt;
+
+    const updatedPlaylist = await this.playlistService.update(playlist);
+
+    return new PlaylistDTO(updatedPlaylist);
+  }
 }

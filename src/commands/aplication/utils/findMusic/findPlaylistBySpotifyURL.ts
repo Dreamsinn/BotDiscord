@@ -4,45 +4,45 @@ import { PlayCommand } from '../../../domain/interfaces/playCommand';
 import { SongData, SpotifyRawSong } from '../../../domain/interfaces/song';
 
 export class FindPlaylistBySpotifyURL extends PlayCommand {
-    public async call(event: Message, url: string): Promise<SongData[] | void> {
-        const idPosition = url.indexOf('playlist/');
-        const pathParameterPosition = url.indexOf('?si');
+  public async call(event: Message, url: string): Promise<SongData[] | void> {
+    const idPosition = url.indexOf('playlist/');
+    const pathParameterPosition = url.indexOf('?si');
 
-        const playListId =
-            pathParameterPosition !== -1
-                ? url.substring(idPosition + 9, pathParameterPosition)
-                : url.substring(idPosition + 9);
+    const playListId =
+      pathParameterPosition !== -1
+        ? url.substring(idPosition + 9, pathParameterPosition)
+        : url.substring(idPosition + 9);
 
-        const playListData = await this.mapPlaylistDataFromSpotify(event, playListId);
-        if (playListData) {
-            return playListData;
-        }
-
-        return;
+    const playListData = await this.mapPlaylistDataFromSpotify(event, playListId);
+    if (playListData) {
+      return playListData;
     }
 
-    private async mapPlaylistDataFromSpotify(
-        event: Message,
-        playListId: string,
-    ): Promise<SongData[] | void> {
-        const spotifyResponse: APIResponse<SpotifyRawSong[]> =
-            await this.spotifyService.getSongsDataFromSpotifyPlaylistId(playListId);
+    return;
+  }
 
-        if (!spotifyResponse.isError) {
-            const playlist: SongData[] = [];
+  private async mapPlaylistDataFromSpotify(
+    event: Message,
+    playListId: string,
+  ): Promise<SongData[] | void> {
+    const spotifyResponse: APIResponse<SpotifyRawSong[]> =
+      await this.spotifyService.getSongsDataFromSpotifyPlaylistId(playListId);
 
-            for (const rawSong of spotifyResponse.data) {
-                const song = await this.mapSpotifySongData(rawSong);
-                if (song) {
-                    playlist.push(song);
-                }
-            }
+    if (!spotifyResponse.isError) {
+      const playlist: SongData[] = [];
 
-            return playlist;
+      for (const rawSong of spotifyResponse.data) {
+        const song = await this.mapSpotifySongData(rawSong);
+        if (song) {
+          playlist.push(song);
         }
+      }
 
-        event.channel.send(`It has not been possible to get playlisy information`);
-        console.log(`Spotify get playlisy info Error: ${spotifyResponse.errorData}`);
-        return;
+      return playlist;
     }
+
+    event.channel.send(`It has not been possible to get playlisy information`);
+    console.log(`Spotify get playlisy info Error: ${spotifyResponse.errorData}`);
+    return;
+  }
 }

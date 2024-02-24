@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
 
 export abstract class AppDataSource {
-    protected dataSource: DataSource;
+  protected dataSource: DataSource;
 
-    public getDataSource() {
-        return this.dataSource;
-    }
+  public getDataSource() {
+    return this.dataSource;
+  }
 }

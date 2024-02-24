@@ -4,24 +4,28 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class ShufflePlayListCommand extends Command {
-    private playListHandler: PlayListHandler;
+  private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
-        super();
-        this.playListHandler = playListHandler;
+  constructor(playListHandler: PlayListHandler) {
+    super();
+    this.playListHandler = playListHandler;
+  }
+
+  public async call(
+    event: Message,
+    adminRole: string,
+    shuffleSchema: CommandSchema,
+  ): Promise<void> {
+    if (this.roleAndCooldownValidation(event, shuffleSchema, adminRole)) {
+      return;
     }
 
-    public async call(event: Message, adminRole: string, shuffleSchema: CommandSchema): Promise<void> {
-        if (this.roleAndCooldownValidation(event, shuffleSchema, adminRole)) {
-            return;
-        }
-
-        if (this.playListHandler.shufflePlayList()) {
-            event.channel.send('PlayList have been randomized');
-            return;
-        }
-
-        event.reply('There is no playList');
-        return;
+    if (this.playListHandler.shufflePlayList()) {
+      event.channel.send('PlayList have been randomized');
+      return;
     }
+
+    event.reply('There is no playList');
+    return;
+  }
 }

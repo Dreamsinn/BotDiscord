@@ -3,7 +3,7 @@ import { SpotifyAPIService } from '../../infrastructure/spotifyAPIService';
 import { YouTubeAPIService } from '../../infrastructure/youTubeAPIService';
 
 export interface MusicAPIs {
-    youtubeAPI: YouTubeAPIService;
-    playDlAPI: PlayDlService;
-    spotifyAPI: SpotifyAPIService;
+  youtubeAPI: YouTubeAPIService;
+  playDlAPI: PlayDlService;
+  spotifyAPI: SpotifyAPIService;
 }

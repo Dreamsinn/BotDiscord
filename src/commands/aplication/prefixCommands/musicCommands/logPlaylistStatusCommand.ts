@@ -4,20 +4,24 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class LogPlaylistStatusCommand extends Command {
-    private playListHandler: PlayListHandler;
+  private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
-        super();
-        this.playListHandler = playListHandler;
+  constructor(playListHandler: PlayListHandler) {
+    super();
+    this.playListHandler = playListHandler;
+  }
+
+  public async call(
+    event: Message,
+    adminRole: string,
+    logSchema: CommandSchema,
+  ): Promise<void> {
+    event.delete();
+
+    if (this.roleAndCooldownValidation(event, logSchema, adminRole)) {
+      return;
     }
 
-    public async call(event: Message, adminRole: string, logSchema: CommandSchema): Promise<void> {
-        event.delete();
-
-        if (this.roleAndCooldownValidation(event, logSchema, adminRole)) {
-            return;
-        }
-
-        return this.playListHandler.logPlaylistStatus();
-    }
+    return this.playListHandler.logPlaylistStatus();
+  }
 }

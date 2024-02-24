@@ -2,26 +2,26 @@ import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Song extends BaseEntity {
-    @PrimaryColumn()
-    id: string; //youtube id
+  @PrimaryColumn()
+  id: string; //youtube id
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    durationHours: number;
+  @Column()
+  durationHours: number;
 
-    @Column()
-    durationMinutes: number;
+  @Column()
+  durationMinutes: number;
 
-    @Column()
-    durationSeconds: number;
+  @Column()
+  durationSeconds: number;
 
-    @Column()
-    durationString: string;
+  @Column()
+  durationString: string;
 
-    @Column({
-        nullable: true,
-    })
-    thumbnail: string;
+  @Column({
+    nullable: true,
+  })
+  thumbnail: string;
 }

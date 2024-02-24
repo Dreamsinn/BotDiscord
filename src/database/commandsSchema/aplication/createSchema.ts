@@ -5,42 +5,50 @@ import { Schema } from '../domain/schemaEntity';
 import { SchemaService } from '../infrastructure/schemaService';
 
 export class CreateSchema {
-    private schemaService: SchemaService;
-    constructor(schemaService: SchemaService) {
-        this.schemaService = schemaService;
+  private schemaService: SchemaService;
+  constructor(schemaService: SchemaService) {
+    this.schemaService = schemaService;
+  }
+
+  async call(
+    commandSchema: CommandSchema | CommandSchema[],
+    guildId: string,
+  ): Promise<SchemaDTO[]> {
+    let schemaList: NewSchema[];
+
+    if (commandSchema instanceof Array) {
+      schemaList = this.mapCommandSchemaArray(commandSchema, guildId);
+    } else {
+      schemaList = this.mapCommandSchemaArray([commandSchema], guildId);
     }
 
-    async call(commandSchema: CommandSchema | CommandSchema[], guildId: string): Promise<SchemaDTO[]> {
-        let schemaList: NewSchema[];
+    const createdSchemaArray = await this.schemaService.create(schemaList);
 
-        if (commandSchema instanceof Array) {
-            schemaList = this.mapCommandSchemaArray(commandSchema, guildId);
-        } else {
-            schemaList = this.mapCommandSchemaArray([commandSchema], guildId);
-        }
+    return createdSchemaArray.map((schema: Schema) => {
+      return new SchemaDTO(schema);
+    });
+  }
 
-        const createdSchemaArray = await this.schemaService.create(schemaList);
+  private mapCommandSchemaArray(
+    commandSchemaList: CommandSchema[],
+    guildId: string,
+  ): NewSchema[] {
+    const schemaList: NewSchema[] = commandSchemaList.map(
+      (commandSchema: CommandSchema) => {
+        const schema: NewSchema = {
+          guildId,
+          name: commandSchema.name,
+          aliases: String(commandSchema.aliases),
+          coolDown: commandSchema.coolDown,
+          adminOnly: commandSchema.adminOnly,
+          description: commandSchema.description,
+          command: commandSchema.command,
+          category: commandSchema.category,
+        };
+        return schema;
+      },
+    );
 
-        return createdSchemaArray.map((schema: Schema) => {
-            return new SchemaDTO(schema);
-        });
-    }
-
-    private mapCommandSchemaArray(commandSchemaList: CommandSchema[], guildId: string): NewSchema[] {
-        const schemaList: NewSchema[] = commandSchemaList.map((commandSchema: CommandSchema) => {
-            const schema: NewSchema = {
-                guildId,
-                name: commandSchema.name,
-                aliases: String(commandSchema.aliases),
-                coolDown: commandSchema.coolDown,
-                adminOnly: commandSchema.adminOnly,
-                description: commandSchema.description,
-                command: commandSchema.command,
-                category: commandSchema.category,
-            };
-            return schema;
-        });
-
-        return schemaList;
-    }
+    return schemaList;
+  }
 }

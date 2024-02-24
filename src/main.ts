@@ -8,28 +8,28 @@ import { ServerRouting } from './serverRouting';
 dotenv.config();
 
 async function server() {
-    console.log('start');
+  console.log('start');
 
-    // connection to discord
-    const bot = new Bot();
-    await bot.createClient();
-    console.log('client created');
+  // connection to discord
+  const bot = new Bot();
+  await bot.createClient();
+  console.log('client created');
 
-    const serverRouting = new ServerRouting(Database, commandsSchemasList);
-    serverRouting.createServerList();
+  const serverRouting = new ServerRouting(Database, commandsSchemasList);
+  serverRouting.createServerList();
 
-    bot.client.on('messageCreate', async (event: Message): Promise<void> => {
-        if (event.author.bot) {
-            // if it is a message created by the bot, target: update a server
-            if (event.content.includes('Update')) {
-                serverRouting.updateServer(event);
-            }
-            return;
-        }
+  bot.client.on('messageCreate', async (event: Message): Promise<void> => {
+    if (event.author.bot) {
+      // if it is a message created by the bot, target: update a server
+      if (event.content.includes('Update')) {
+        serverRouting.updateServer(event);
+      }
+      return;
+    }
 
-        // if event is not created by a bot
-        return await serverRouting.call(event);
-    });
+    // if event is not created by a bot
+    return await serverRouting.call(event);
+  });
 }
 
 server();

@@ -1,45 +1,45 @@
 import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    Entity,
-    PrimaryGeneratedColumn,
-    Unique,
-    UpdateDateColumn,
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
 @Unique(['name', 'author'])
 export class Playlist extends BaseEntity {
-    @PrimaryGeneratedColumn()
-    id: string;
+  @PrimaryGeneratedColumn()
+  id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    songsId: string;
+  @Column()
+  songsId: string;
 
-    @Column()
-    privatePl: boolean;
+  @Column()
+  privatePl: boolean;
 
-    // privatePl true => author = userId, privatePl false => author = guildId
-    @Column()
-    author: string;
+  // privatePl true => author = userId, privatePl false => author = guildId
+  @Column()
+  author: string;
 
-    // userId
-    @Column()
-    createdBy: string;
+  // userId
+  @Column()
+  createdBy: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    // userId
-    @Column({
-        nullable: true,
-    })
-    updatedBy: string;
+  // userId
+  @Column({
+    nullable: true,
+  })
+  updatedBy: string;
 }

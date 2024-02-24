@@ -5,46 +5,46 @@ import { UpdateServer } from '../domain/interfaces/updateServer';
 import { ServerService } from '../infrastructure/serverService';
 
 export class UpdateServerConfig {
-    private serverService: ServerService;
-    constructor(serverService: ServerService) {
-        this.serverService = serverService;
+  private serverService: ServerService;
+  constructor(serverService: ServerService) {
+    this.serverService = serverService;
+  }
+
+  public async call(
+    serverId: string,
+    userId: string,
+    config: ServerConfig,
+  ): Promise<UpdateResult | ErrorEnum> {
+    if (!config.adminRole && !config.blackList && !config.prefix && !config.language) {
+      return ErrorEnum.BadRequest;
     }
 
-    public async call(
-        serverId: string,
-        userId: string,
-        config: ServerConfig,
-    ): Promise<UpdateResult | ErrorEnum> {
-        if (!config.adminRole && !config.blackList && !config.prefix && !config.language) {
-            return ErrorEnum.BadRequest;
-        }
-
-        const server = await this.serverService.getById(serverId);
-        if (!server) {
-            return ErrorEnum.NotFound;
-        }
-
-        const update: UpdateServer = {
-            updatedBy: userId,
-            updatedAt: new Date(),
-        };
-
-        if (config.blackList) {
-            update.blackList = String(config.blackList);
-        }
-
-        if (config.prefix) {
-            update.prefix = config.prefix;
-        }
-
-        if (config.adminRole) {
-            update.adminRole = config.adminRole;
-        }
-
-        if (config.language) {
-            update.language = config.language;
-        }
-
-        return this.serverService.update(serverId, update);
+    const server = await this.serverService.getById(serverId);
+    if (!server) {
+      return ErrorEnum.NotFound;
     }
+
+    const update: UpdateServer = {
+      updatedBy: userId,
+      updatedAt: new Date(),
+    };
+
+    if (config.blackList) {
+      update.blackList = String(config.blackList);
+    }
+
+    if (config.prefix) {
+      update.prefix = config.prefix;
+    }
+
+    if (config.adminRole) {
+      update.adminRole = config.adminRole;
+    }
+
+    if (config.language) {
+      update.language = config.language;
+    }
+
+    return this.serverService.update(serverId, update);
+  }
 }

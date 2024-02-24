@@ -1,4 +1,4 @@
 export enum ErrorEnum {
-    NotFound = 'Not Found',
-    BadRequest = 'Bad Request',
+  NotFound = 'Not Found',
+  BadRequest = 'Bad Request',
 }

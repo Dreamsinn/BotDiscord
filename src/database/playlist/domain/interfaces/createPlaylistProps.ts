@@ -1,7 +1,7 @@
 export type CreatePlaylistProps = {
-    songsId: string[];
-    name: string;
-    privatePl: boolean;
-    author: string;
-    createdBy: string;
+  songsId: string[];
+  name: string;
+  privatePl: boolean;
+  author: string;
+  createdBy: string;
 };

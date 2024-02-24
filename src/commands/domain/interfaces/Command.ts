@@ -8,43 +8,43 @@ import { CommandSchema } from './commandSchema';
 import { SchemaDictionary } from './schemaDictionary';
 
 interface CommandProps {
-    diceCommand?: DiceCommand;
-    replyCommand?: ReplyCommand;
-    schemaList?: SchemaDictionary;
-    prefix?: string;
-    language?: Languages;
+  diceCommand?: DiceCommand;
+  replyCommand?: ReplyCommand;
+  schemaList?: SchemaDictionary;
+  prefix?: string;
+  language?: Languages;
 }
 
 export abstract class Command {
-    private coolDown = new CoolDown();
-    protected checkAdminRole = new CheckAdminRole();
+  private coolDown = new CoolDown();
+  protected checkAdminRole = new CheckAdminRole();
 
-    abstract call(
-        event: Message,
-        adminRole: string,
-        schema: CommandSchema,
-        props?: CommandProps,
-    ): Promise<void>;
+  abstract call(
+    event: Message,
+    adminRole: string,
+    schema: CommandSchema,
+    props?: CommandProps,
+  ): Promise<void>;
 
-    protected roleAndCooldownValidation(
-        event: Message,
-        schema: CommandSchema,
-        adminRole: string,
-    ): boolean {
-        let interrupt = false;
+  protected roleAndCooldownValidation(
+    event: Message,
+    schema: CommandSchema,
+    adminRole: string,
+  ): boolean {
+    let interrupt = false;
 
-        //role check
-        if (schema.adminOnly) {
-            if (!this.checkAdminRole.call(event, adminRole)) {
-                interrupt = true;
-            }
-        }
-
-        //comprobar coolDown
-        if (this.coolDown.call(schema.coolDown, event)) {
-            interrupt = true;
-        }
-
-        return interrupt;
+    //role check
+    if (schema.adminOnly) {
+      if (!this.checkAdminRole.call(event, adminRole)) {
+        interrupt = true;
+      }
     }
+
+    //comprobar coolDown
+    if (this.coolDown.call(schema.coolDown, event)) {
+      interrupt = true;
+    }
+
+    return interrupt;
+  }
 }

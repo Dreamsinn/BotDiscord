@@ -4,24 +4,28 @@ import { CommandSchema } from '../../../domain/interfaces/commandSchema';
 import { PlayListHandler } from '../../playListHandler';
 
 export class LoopPlayListModeCommand extends Command {
-    private playListHandler: PlayListHandler;
+  private playListHandler: PlayListHandler;
 
-    constructor(playListHandler: PlayListHandler) {
-        super();
-        this.playListHandler = playListHandler;
+  constructor(playListHandler: PlayListHandler) {
+    super();
+    this.playListHandler = playListHandler;
+  }
+
+  public async call(
+    event: Message,
+    adminRole: string,
+    loopSchema: CommandSchema,
+  ): Promise<void> {
+    if (this.roleAndCooldownValidation(event, loopSchema, adminRole)) {
+      return;
     }
 
-    public async call(event: Message, adminRole: string, loopSchema: CommandSchema): Promise<void> {
-        if (this.roleAndCooldownValidation(event, loopSchema, adminRole)) {
-            return;
-        }
-
-        const hasBeenActived = this.playListHandler.toggleLoopMode();
-        if (hasBeenActived) {
-            event.channel.send('Loop mode active');
-            return;
-        }
-
-        event.channel.send('Loop mode deactive');
+    const hasBeenActived = this.playListHandler.toggleLoopMode();
+    if (hasBeenActived) {
+      event.channel.send('Loop mode active');
+      return;
     }
+
+    event.channel.send('Loop mode deactive');
+  }
 }

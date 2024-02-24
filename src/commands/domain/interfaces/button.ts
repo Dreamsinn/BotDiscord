@@ -5,9 +5,9 @@ export type ButtonRowList = [ButtonRow?, ButtonRow?, ButtonRow?, ButtonRow?, But
 export type ButtonRow = [Button?, Button?, Button?, Button?, Button?];
 
 export interface Button {
-    style: ButtonsStyleEnum;
-    label: string;
-    custom_id: string;
-    url?: string;
-    disabled?: boolean;
+  style: ButtonsStyleEnum;
+  label: string;
+  custom_id: string;
+  url?: string;
+  disabled?: boolean;
 }

@@ -3,12 +3,14 @@ import { SchemaDictionary } from '../../../../commands/domain/interfaces/schemaD
 import { commandsSchemasListMock } from './commandsSchemasListMock';
 
 function makeSchemaDictionaryMock(schemasList: CommandSchema[]) {
-    const schemaDictionary: any = {};
-    schemasList.map((commandSchema: CommandSchema) => {
-        schemaDictionary[commandSchema.command] = commandSchema;
-    });
+  const schemaDictionary: any = {};
+  schemasList.map((commandSchema: CommandSchema) => {
+    schemaDictionary[commandSchema.command] = commandSchema;
+  });
 
-    return schemaDictionary;
+  return schemaDictionary;
 }
 
-export const commandDictionaryMock: SchemaDictionary = makeSchemaDictionaryMock(commandsSchemasListMock);
+export const commandDictionaryMock: SchemaDictionary = makeSchemaDictionaryMock(
+  commandsSchemasListMock,
+);
